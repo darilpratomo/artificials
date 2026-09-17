@@ -37,7 +37,7 @@ Native Cloudflare Workers Builds must be connected once in the dashboard. Open W
 - Deploy command: `npx wrangler deploy --env production`
 - Node.js version: 24
 
-This native connection does not require a GitHub personal access token or Cloudflare credentials stored in GitHub Actions. Until the connection succeeds, pushing code alone does not activate automatic deployment. Keep runtime secrets in Cloudflare rather than build-time environment variables. The detailed guide remains local in `admin.md`.
+This native connection was verified with a successful deployment of commit `c28240d` on 17 September 2026. It does not require a GitHub personal access token or Cloudflare credentials stored in GitHub Actions. Keep runtime secrets in Cloudflare rather than build-time environment variables. The detailed guide remains local in `admin.md`.
 
 ## Data updates
 
