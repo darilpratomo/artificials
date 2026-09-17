@@ -1,6 +1,6 @@
 # Artificials
 
-Independent AI model directory, transparent specification/price rankings, side-by-side comparison, editorial guides and a metered full-stack AI app builder for **artificials.net**. English interface; black/silver design, responsive SVG visuals, horizontal scroll storytelling, reduced-motion support.
+Independent AI model directory, sourced capability benchmarks, separate specification/price rankings, side-by-side comparison, illustrated editorial guides and a metered full-stack AI app builder for **artificials.net**. English interface; black/silver design, responsive visuals, horizontal scroll storytelling, reduced-motion support.
 
 ## Run locally
 

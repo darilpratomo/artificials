@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight, BookOpen, Search } from 'lucide-react';
 import { ARTICLES, ARTICLE_CATEGORIES, type Article } from '../../shared/content';
 import { api } from '../lib/api';
 import { EmptyState, PageHeading } from '../components/Layout';
+import { ArticleCover } from '../components/ArticleCover';
 export default function Learn() {
   const { slug } = useParams();
   const [articles, setArticles] = useState(ARTICLES);
@@ -40,6 +41,10 @@ export default function Learn() {
             </small>
           </div>
         </div>
+        <figure className="article-hero-image">
+          <ArticleCover article={article} priority />
+          <figcaption>AI-generated concept illustration · Artificials Editorial</figcaption>
+        </figure>
         <div className="prose">
           {article.body
             .replace(/^(## [^\n]+)\n/gm, '$1\n\n')
@@ -107,12 +112,9 @@ export default function Learn() {
         </label>
       </div>
       <div className="learn-grid">
-        {filtered.map((a, i) => (
+        {filtered.map((a) => (
           <Link className="learn-card" to={'/news/' + a.slug} key={a.id}>
-            <span className={`learn-number shade-${i % 3}`}>
-              {String(i + 1).padStart(2, '0')}
-              <BookOpen size={28} />
-            </span>
+            <ArticleCover article={a} decorative />
             <span className="eyebrow">{a.category} · Editorial guide</span>
             <h2>{a.title}</h2>
             <p>{a.excerpt}</p>

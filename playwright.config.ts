@@ -9,6 +9,11 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 1000 } },
     },
     { name: 'mobile', use: { ...devices['iPhone 13'], defaultBrowserType: 'chromium' } },
+    {
+      name: 'mobile-safari',
+      testMatch: 'responsive.spec.ts',
+      use: { ...devices['iPhone 13'], defaultBrowserType: 'webkit' },
+    },
   ],
   webServer: {
     command: 'npm run dev -- --port 5173 --strictPort',

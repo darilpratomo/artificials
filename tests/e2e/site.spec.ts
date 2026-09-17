@@ -134,7 +134,14 @@ async function expectFitsViewport(page: Page, context = '') {
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/config', (route) =>
     route.fulfill({
-      json: { auth: false, google: false, billing: false, ai: false, legalReady: false },
+      json: {
+        auth: false,
+        google: false,
+        billing: false,
+        ai: false,
+        legalReady: false,
+        supportEmail: 'support@artificials.net',
+      },
     }),
   );
   await page.route('**/api/session', (route) => route.fulfill({ json: { user: null } }));
@@ -231,7 +238,7 @@ test('corrupted saved comparison recovers without crashing', async ({ page }) =>
 });
 
 test('rankings distinguish context capacity, price, and missing data', async ({ page }) => {
-  await page.goto('/leaderboard');
+  await page.goto('/leaderboard?view=specs');
   await expect(page.getByRole('heading', { name: 'A metric. A clear comparison.' })).toBeVisible();
   const rows = page.locator('tbody tr');
   await expect(rows.first()).toContainText('Fixture Delta');
@@ -375,7 +382,8 @@ test('main pages are accessible and fit desktop and mobile', async ({ page }, te
     await page.goto(route);
     await expect(page.locator('main h1')).toBeVisible();
     if (route === '/models') await expect(page.locator('.model-card')).toHaveCount(24);
-    if (route === '/leaderboard') await expect(page.locator('tbody tr').first()).toBeVisible();
+    if (route === '/leaderboard')
+      await expect(page.locator('.benchmark-row').first()).toBeVisible();
     await expectFitsViewport(page, route);
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])

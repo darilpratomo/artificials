@@ -75,9 +75,35 @@ access to internal use and forbids redistribution. Its free scores are therefore
 or republished. A paid key alone is not proof of redistribution permission. Before adding a
 benchmark feed, obtain the necessary rights for this public commercial site, verify the model
 and exact metric, and preserve its methodology, measurement date and source attribution.
-`validateBenchmark` defines the required metadata for a future licensed import; there is no
-active benchmark ingestion endpoint or automatic licensed feed in this version. Do not mix
-scores from different benchmark methods into a single overall ranking.
+Do not mix scores from different benchmark methods into a single overall ranking.
+
+Capability rankings now live separately in `public/data/benchmarks.json` and appear by default
+on `/leaderboard`. `scripts/sync-benchmarks.mjs` ingests published LiveBench task scores and
+T2I-CoReBench image-generation results. The six-hour catalog workflow refreshes both sources,
+validates them, runs checks, and commits the complete snapshots for native Cloudflare deploy.
+Failed source retrieval/schema checks leave the last successful published deployment intact.
+Requests have time and size limits; unexpected category changes or loss of over 25% of a
+category's rows require review. `--accept-shrink` is an explicit operator override, never automatic.
+
+LiveBench files are pinned to one upstream Git commit; the newest published release is selected
+from its file listing. Category scores are arithmetic means of complete task results. Overall
+is an equal-weight mean of category means, not of all individual tasks. Missing results are
+excluded from the affected view; zero remains a valid score. Exact model/effort identifiers
+are preserved. Ties at two-decimal display precision receive competition ranks (1, 1, 3).
+
+Image rankings use the primary Gemini 2.5 Flash evaluator table from T2I-CoReBench and its
+published overall values. These assess composition/reasoning, not universal image quality or
+human aesthetic preferences. Prompt-rewriting variants and other evaluator tables are excluded.
+Only models evaluated by that source appear. This source updates less often than model releases.
+
+Both views show source-check time, benchmark edition/evaluator, source revision time and
+methodology. A check timestamp is not an evaluation date. Checks older than 48 hours show an
+update-delay notice; no claim of instantaneous real-time coverage is made.
+
+Attribution, licenses and normalization changes are recorded in `/data/benchmark-NOTICE.txt`.
+LiveBench's datasheet licenses the benchmark suite under Apache-2.0, with a bundled license
+copy. The T2I-CoReBench website is CC BY-SA 4.0; the adapted image-result portion of the JSON
+retains that license. Artificials' original UI does not copy the source site's implementation.
 
 ## Logos
 

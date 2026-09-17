@@ -39,7 +39,7 @@ const fallback: Config = {
   ai: false,
   turnstileSiteKey: '',
   legalReady: false,
-  supportEmail: '',
+  supportEmail: 'support@artificials.net',
   privacyEmail: '',
   operatorName: '',
   operatorAddress: '',

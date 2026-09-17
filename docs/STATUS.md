@@ -4,7 +4,7 @@ Updated: 17 September 2026.
 
 ## Implemented
 
-Black/silver responsive English UI with SVG icons, orbital illustration, horizontal scroll sequence on desktop, and reduced-motion fallback. Model directory, metadata rankings, comparison, original AI guides, Studio, account dashboard, login, pricing, about/privacy/terms/contact and hidden CMS. Source-backed model snapshots include every offering in the upstream catalog, with pagination, filters, source links and retrieval timestamps.
+Black/silver responsive English UI with SVG icons, orbital illustration, horizontal scroll sequence on desktop, and reduced-motion fallback. Model directory, capability benchmarks, separate metadata rankings, comparison, illustrated original AI guides, Studio, account dashboard, login, pricing, about/privacy/terms/contact and hidden CMS. Source-backed model snapshots include every offering in the upstream catalog, with pagination, filters, source links and retrieval timestamps.
 
 Backend includes Supabase Auth/RLS/MFA, Paddle webhook/payment handling, atomic generation quotas and spend reservations, server-only OpenAI API access, isolated static previews and downloadable full-stack source with database schema. AI and billing are disabled by default.
 
@@ -17,8 +17,8 @@ Browser fixtures test interface behavior; real provider model data is checked se
 Verified locally in this implementation:
 
 - TypeScript, production build, private-file guard and Worker dry-run pass.
-- 37 code/database tests pass, including catalog source normalization, quota transactions and security behavior.
-- 21 desktop/mobile browser tests pass; one desktop-specific horizontal-scroll case is intentionally skipped on mobile.
+- 42 code/database tests pass, including benchmark score normalization, ties, missing results, source-schema rejection, catalog normalization, quota transactions and security behavior.
+- 36 browser tests pass across desktop Chrome, mobile Chrome and mobile Safari/WebKit; one desktop-specific horizontal-scroll case is intentionally skipped on mobile. Regression checks cover widths 320, 375, 430 and 768 px throughout scrolling and reveal animations, benchmark category/search/error recovery, loaded article images and the support mail link.
 - Automated axe checks pass across 11 routes on both viewport profiles.
 - A separate production-build smoke test reads the actual source snapshot (7,842 offerings / 220 providers), renders desktop/mobile, and checks private route and cross-origin write rejection.
 - Initial Cloudflare production deploy succeeded at https://artificials.artificials.workers.dev; the public catalog endpoint returned HTTP 200 with actual source data.
@@ -30,6 +30,8 @@ Verified locally in this implementation:
 - The six-hour catalog workflow is installed and a manual refresh succeeded. Publishing future changes uses the native Workers Builds connection.
 
 ## Required provider activation
+
+The public support contact is support@artificials.net, as supplied by the owner. Website configuration does not provision or verify the mailbox. Editorial illustrations are locally hosted responsive WebP files; asset prompts and provenance are in EDITORIAL-ASSETS.md. Capability benchmarks have nine views, initially 58 LiveBench model configurations and 40 image-model results. These are sourced, scheduled snapshots, not invented scores or guaranteed real-time measurements.
 
 Supabase database/auth/SMTP and admin MFA; OpenAI key and staging usage checks; approved Paddle merchant account, sandbox webhook verification, production prices and legal operator details; optional Google OAuth; Turnstile. The operator must test full generation within Cloudflare Free CPU limits before enabling paid traffic. Hosting and data refresh are subject to provider quotas. There is no guarantee of net profit or complete real-time AI coverage.
 

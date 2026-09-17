@@ -96,11 +96,12 @@ export default function Info() {
           </p>
           <h2>How to read the rankings</h2>
           <p>
-            Each ranking states the metric used, such as listed price or context capacity. Those
-            measurements describe different things; a larger context window does not establish
-            higher intelligence. We do not invent benchmark scores or present a composite score
-            without a documented source and method. See the{' '}
-            <Link to="/leaderboard">leaderboard</Link> for the current metric and coverage.
+            Capability rankings use published LiveBench and T2I-CoReBench results, refreshed on a
+            six-hour schedule. Each view identifies its dataset, evaluation scope, aggregation
+            method and source-check time. Missing evaluations are not scored zero. Benchmark results
+            remain separate from specification and price rankings; a larger context window does not
+            establish higher intelligence. See the <Link to="/leaderboard">leaderboard</Link> for
+            the current metric and coverage.
           </p>
         </section>
         <div className="closing-banner">

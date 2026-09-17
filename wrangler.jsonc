@@ -21,6 +21,7 @@
   },
   "vars": {
     "APP_URL": "http://localhost:8787",
+    "SUPPORT_EMAIL": "support@artificials.net",
     "ENVIRONMENT": "development",
     "AI_ENABLED": "false",
     "BILLING_ENABLED": "false",
@@ -34,6 +35,7 @@
       "routes": [{ "pattern": "artificials.net/*", "zone_name": "artificials.net" }],
       "vars": {
         "APP_URL": "https://artificials.net",
+        "SUPPORT_EMAIL": "support@artificials.net",
         "ENVIRONMENT": "production",
         "AI_ENABLED": "false",
         "BILLING_ENABLED": "false",

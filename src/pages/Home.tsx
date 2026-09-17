@@ -11,13 +11,13 @@ import {
   ShieldCheck,
   Code2,
   Database,
-  MoveUpRight,
   ChevronRight,
 } from 'lucide-react';
 import { NeuralOrb, Reveal, ScrollJourney } from '../components/Motion';
 import { useCatalogSummary, compactNumber, updatedDate, providerLogo } from '../lib/catalog';
 import ModelCard from '../components/ModelCard';
 import { ARTICLES } from '../../shared/content';
+import { ArticleCover } from '../components/ArticleCover';
 export default function Home() {
   const { data, error } = useCatalogSummary();
   const [prompt, setPrompt] = useState('');
@@ -334,30 +334,7 @@ export default function Home() {
           {ARTICLES.slice(0, 3).map((a, i) => (
             <Reveal key={a.id} from={i % 2 ? 'right' : 'left'}>
               <Link to={'/news/' + a.slug} className="editorial-card">
-                <div className={`editorial-art editorial-${i}`} aria-hidden="true">
-                  {i === 0 ? (
-                    <>
-                      <div className="editorial-sphere" />
-                      <div className="editorial-axis" />
-                    </>
-                  ) : i === 1 ? (
-                    <div className="editorial-bars">
-                      {Array.from({ length: 7 }, (_, j) => (
-                        <i key={j} style={{ height: 30 + ((j * 23) % 100) }} />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="editorial-nodes">
-                      <i />
-                      <i />
-                      <i />
-                      <i />
-                      <Command size={40} />
-                    </div>
-                  )}
-                  <span className="mono">ARTIFICIALS / FIELD NOTES</span>
-                  <MoveUpRight size={21} />
-                </div>
+                <ArticleCover article={a} decorative />
                 <div className="editorial-meta mono">
                   <span>{a.category}</span>
                   <span>EDITORIAL GUIDE</span>

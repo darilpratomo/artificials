@@ -41,7 +41,7 @@ This native connection was verified with a successful deployment of commit `c282
 
 ## Data updates
 
-`.github/workflows/sync-catalog.yml` runs at minute 17 every six hours in UTC and can also be triggered manually. It fetches a sourced snapshot with `scripts/sync-catalog.mjs`, validates it, runs `npm run check`, and commits only verified `public/data/` changes to `main`. The native Cloudflare connection then deploys those commits. GitHub's built-in workflow token is used for the snapshot commit; no personal token is required.
+`.github/workflows/sync-catalog.yml` runs at minute 17 every six hours in UTC and can also be triggered manually. It fetches the catalog with `scripts/sync-catalog.mjs` and published capability results with `scripts/sync-benchmarks.mjs`, validates both, runs `npm run check`, and commits only verified `public/data/` changes to `main`. The native Cloudflare connection then deploys those commits. GitHub's built-in workflow token is used for the snapshot commit; no personal token is required.
 
 Scheduled runs and upstream publication can lag, so this is periodic updating, not an instantaneous feed. The UI shows retrieval time and source. Catalog metric rankings are not independent intelligence benchmark scores. On refresh failure, investigate the failed workflow while retaining the last valid snapshot.
 

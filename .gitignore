@@ -21,3 +21,4 @@ playwright-report/
 [aA][dD][mM][iI][nN].[mM][dD]
 
 .catalog-staging/
+.benchmark-snapshot.tmp

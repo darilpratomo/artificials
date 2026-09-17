@@ -1,0 +1,28 @@
+Artificials benchmark snapshots
+
+LiveBench: published per-task scores, from the LiveBench team.
+Source: https://livebench.ai/ and https://github.com/LiveBench/new-livebench
+The LiveBench datasheet specifies Apache License 2.0 for its benchmark suite:
+https://github.com/LiveBench/LiveBench/blob/main/docs/DATASHEET.md#dataset-distribution
+License copy: /data/livebench-APACHE-LICENSE.txt
+Artificials modifications: equal-weight task/category aggregation for complete
+results only, rounding to two decimals, competition ranking, JSON normalization,
+provider-family labels. Model configurations and source scores are preserved.
+The source's evaluation release date and its revision/check timestamps are distinct.
+
+T2I-CoReBench: Ouxiang Li, Yuan Wang, Xinting Hu, Huijuan Huang, Rui Chen,
+Jiarong Ou, Xin Tao, Pengfei Wan, Xiaojuan Qi, and Fuli Feng.
+Source: https://t2i-corebench.github.io/
+Paper: https://arxiv.org/abs/2509.03516
+The source website is licensed under CC BY-SA 4.0:
+https://creativecommons.org/licenses/by-sa/4.0/
+The image benchmark portion of benchmarks.json is adapted under that same license.
+Artificials modifications: extracted primary Gemini 2.5 Flash evaluator rows,
+excluded prompt-rewriting variants, sorted published overall scores, normalized
+as JSON with provider-family labels. No website design or code is copied.
+
+Scores measure performance only within their stated benchmark, not universal
+model quality. Artificials does not conduct these evaluations. Model releases,
+benchmark edition, source modification time, and retrieval time are not equivalent.
+An unreported result is absent, never assigned zero. All retained scores are public
+published results, not generated or demo scores.
