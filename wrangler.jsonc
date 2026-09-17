@@ -31,7 +31,7 @@
     "production": {
       "name": "artificials",
       "vars": {
-        "APP_URL": "https://artificials.net",
+        "APP_URL": "https://artificials.artificials.workers.dev",
         "ENVIRONMENT": "production",
         "AI_ENABLED": "false",
         "BILLING_ENABLED": "false",

@@ -21,7 +21,9 @@ Verified locally in this implementation:
 - 21 desktop/mobile browser tests pass; one desktop-specific horizontal-scroll case is intentionally skipped on mobile.
 - Automated axe checks pass across 11 routes on both viewport profiles.
 - A separate production-build smoke test reads the actual source snapshot (7,842 offerings / 220 providers), renders desktop/mobile, and checks private route and cross-origin write rejection.
-- Cloudflare deployment and GitHub automation are documented separately after their actual activation.
+- Initial Cloudflare production deploy succeeded at https://artificials.artificials.workers.dev; the public catalog endpoint returned HTTP 200 with actual source data.
+- Source code is in the private repository https://github.com/darilpratomo/artificials. The local admin guide is not tracked.
+- Native GitHub-to-Cloudflare auto-deploy and artificials.net DNS still require the owner account steps described in LAUNCH.md. The six-hour catalog workflow is installed in GitHub; publishing its future changes depends on the deployment connection.
 
 ## Required provider activation
 
