@@ -1,0 +1,54 @@
+{
+  "slug": "nearest-neighbor-classification",
+  "module": "machine-learning",
+  "title": "Classify by finding neighbors",
+  "summary": "Build an interpretable classifier and understand its sensitivity to scale.",
+  "minutes": 35,
+  "level": "Intermediate",
+  "objectives": [
+    "Compute Euclidean distance",
+    "Predict with nearby labeled examples",
+    "Choose k using validation data"
+  ],
+  "sections": [
+    {
+      "title": "Learning can mean remembering",
+      "paragraphs": [
+        "A nearest-neighbor classifier stores labeled examples and predicts from the closest ones. With k = 1 it copies the nearest label. With a larger k, a majority vote smooths isolated noisy examples but may blur small local patterns.",
+        "Distance is a modeling choice. If one coordinate is measured in meters and another in millimeters, the second can dominate. Scale numeric features using training statistics and avoid treating arbitrary category IDs as meaningful distances."
+      ]
+    },
+    {
+      "title": "Make tie behavior explicit",
+      "paragraphs": [
+        "Equal vote counts and equal distances can occur. A deterministic tie rule makes repeated runs easier to compare. The example uses label ordering after the vote count; other applications might use distance-weighted voting or send ties for review.",
+        "Select k on validation data, then evaluate once on a final test set. Retrieval cost grows with the number of stored examples, so a simple implementation is useful for learning but may require indexing at larger scale."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "nearest-neighbor-classification.py",
+    "source": "from collections import Counter\nfrom math import dist\ntrain = [((0., 0.), \"a\"), ((0., 1.), \"a\"), ((1., 0.), \"a\"),\n         ((4., 4.), \"b\"), ((4., 5.), \"b\"), ((5., 4.), \"b\")]\ndef predict(point, k=3):\n    if not 1 <= k <= len(train):\n        raise ValueError(\"k is outside the training range\")\n    nearest = sorted(train, key=lambda row: dist(point, row[0]))[:k]\n    votes = Counter(label for _, label in nearest)\n    return sorted(votes, key=lambda label: (-votes[label], label))[0]\nprint(predict((0.2, 0.3)), predict((4.2, 4.1)))\n",
+    "explanation": "These two synthetic clusters are deliberately easy to separate. The vote rule and distance calculation are visible instead of hidden behind a library."
+  },
+  "practice": {
+    "goal": "Test sensitivity to units.",
+    "steps": [
+      "Multiply the second coordinate of all points and queries by 100.",
+      "Find a query whose nearest neighbors change.",
+      "Explain how standardization could restore a balanced comparison."
+    ],
+    "solution": "Changing units alters distances unless the feature scaling is adjusted. Fit a mean and standard deviation on each training coordinate, then reuse them for every query. Scale can encode an intentional importance weight, but should not change accidentally.",
+    "expected": "The initial predictions are a and b."
+  },
+  "quiz": {
+    "question": "Which value should choose k?",
+    "options": [
+      "Final test accuracy after many repeated attempts",
+      "Validation performance before final testing",
+      "The alphabetical order of the labels"
+    ],
+    "answer": 1,
+    "explanation": "Repeatedly optimizing against the final test set leaks information into model selection."
+  }
+}

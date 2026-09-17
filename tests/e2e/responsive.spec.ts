@@ -41,6 +41,8 @@ for (const width of [320, 375, 430, 768]) {
       '/news',
       '/news/read-an-ai-benchmark',
       '/contact',
+      '/learn',
+      '/learn/project-local-ai-api-and-database',
     ]) {
       await page.goto(route);
       if (route.startsWith('/leaderboard'))
@@ -56,6 +58,8 @@ for (const width of [320, 375, 430, 768]) {
           )
           .toBeGreaterThan(0);
       }
+      if (route.startsWith('/learn'))
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       if (route === '/contact')
         await expect(page.getByRole('link', { name: 'support@artificials.net' })).toHaveAttribute(
           'href',

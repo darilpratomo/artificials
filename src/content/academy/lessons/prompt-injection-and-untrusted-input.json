@@ -1,0 +1,54 @@
+{
+  "slug": "prompt-injection-and-untrusted-input",
+  "module": "responsible-ai",
+  "title": "Keep untrusted text away from authority",
+  "summary": "Understand why a document must not become an instruction source.",
+  "minutes": 35,
+  "level": "Intermediate",
+  "objectives": [
+    "Identify an instruction/data boundary",
+    "Use independent tool controls",
+    "Test malicious retrieved passages"
+  ],
+  "sections": [
+    {
+      "title": "Text can contain hostile instructions",
+      "paragraphs": [
+        "A retrieved document, website, email, or tool response may contain text that asks the assistant to ignore its task, reveal information, or perform an action. This is prompt injection when the system treats that untrusted content as authority.",
+        "Delimiters and reminders can help organize context, but they are not a complete security boundary. A language model reads all of the text; reliable restrictions must also exist in application code, permissions, and the available tools."
+      ]
+    },
+    {
+      "title": "Limit what an error can do",
+      "paragraphs": [
+        "Separate trusted instructions from source content and preserve provenance. Give tools only the minimum permissions required. Do not let a generated URL become unrestricted network access or let a generated filename select arbitrary local files.",
+        "Test the whole workflow with adversarial documents. Check whether the system follows instructions from the document, invents approval, or exposes unrelated content. A detector score alone is not a substitute for enforced boundaries."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "prompt-injection-and-untrusted-input.py",
+    "source": "allowed_documents = {\"public-lesson\": \"A public lesson about vectors.\"}\ndef read_document(document_id):\n    if document_id not in allowed_documents:\n        raise PermissionError(\"Document is outside the permitted collection\")\n    return allowed_documents[document_id]\nproposals = [\"public-lesson\", \"../../private/secrets.txt\"]\nfor proposal in proposals:\n    try:\n        print(read_document(proposal))\n    except PermissionError:\n        print(\"Blocked by application permissions\")\n",
+    "explanation": "The application accepts only an allowlisted document ID, so the path-shaped string never reaches filesystem access. This protects this capability; it does not solve every injection problem."
+  },
+  "practice": {
+    "goal": "Create an adversarial retrieval test.",
+    "steps": [
+      "Write a synthetic passage that claims an administrator approved access to another document.",
+      "Keep the user request limited to public lesson content.",
+      "Verify that permission checks still reject unrelated document IDs."
+    ],
+    "solution": "Authorization should use trusted session state and a server-owned allowlist. A statement inside a passage cannot change either. Record the blocked action without logging private document contents.",
+    "expected": "The public document is returned and the path-shaped proposal is blocked."
+  },
+  "quiz": {
+    "question": "Can text inside a retrieved page grant tool permissions?",
+    "options": [
+      "Yes, if it says administrator",
+      "No, permission comes from trusted application policy",
+      "Yes, if the model repeats it"
+    ],
+    "answer": 1,
+    "explanation": "Retrieved content is data. It does not gain authority by describing or impersonating an approval."
+  }
+}

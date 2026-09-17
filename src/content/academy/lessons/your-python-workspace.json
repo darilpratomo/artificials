@@ -1,0 +1,54 @@
+{
+  "slug": "your-python-workspace",
+  "module": "foundations",
+  "title": "Set up a reproducible Python workspace",
+  "summary": "Run your first local experiment and record the environment that produced it.",
+  "minutes": 25,
+  "level": "Beginner",
+  "objectives": [
+    "Run a Python file locally",
+    "Create an isolated environment",
+    "Record seeds and environment details"
+  ],
+  "sections": [
+    {
+      "title": "A small local laboratory",
+      "paragraphs": [
+        "Install Python 3.11 or newer from python.org and a text editor. Create a folder for your experiments. In a terminal, use python3 -m venv .venv on macOS or Linux, or py -m venv .venv on Windows. Activate it with source .venv/bin/activate on macOS/Linux or .venv\\Scripts\\activate.bat in Windows Command Prompt.",
+        "The Academy examples use the Python standard library: no API key, GPU, or package install is needed. Save the downloadable file in your project folder and run python followed by its filename inside your activated environment. Before activation, Windows may require py and macOS/Linux may require python3."
+      ]
+    },
+    {
+      "title": "Make experiments repeatable",
+      "paragraphs": [
+        "A seed creates a repeatable pseudorandom sequence for an experiment. Use a separate Random instance so unrelated code does not unexpectedly change the sequence. Record the input data and configuration alongside the result.",
+        "A seed alone does not guarantee identical results across every library, device, and version. For these small standard-library exercises, the environment printout and explicit seed make experiments easy to inspect. When adding third-party packages later, lock their versions and keep training and evaluation data versions too."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "your-python-workspace.py",
+    "source": "import platform\nimport random\nimport sys\nrng = random.Random(17)\nprint(\"Python:\", sys.version.split()[0])\nprint(\"Platform:\", platform.system())\nprint(\"Experiment:\", [rng.randint(1, 20) for _ in range(5)])\nassert random.Random(17).random() == random.Random(17).random()\n",
+    "explanation": "Save this as your-python-workspace.py and run it locally. The website provides code and interactive concept labs; it does not upload or execute arbitrary Python on a server."
+  },
+  "practice": {
+    "goal": "Create an experiment record.",
+    "steps": [
+      "Run the file twice and compare the random sequence.",
+      "Change the seed and run it again.",
+      "Save a short note with your Python version, seed, and results."
+    ],
+    "solution": "The same seed recreates the same sequence in the same environment. The system and Python version may differ on another machine. Record observations rather than claiming that a seed makes all software universally deterministic.",
+    "expected": "Two runs with seed 17 produce the same five integers in your environment."
+  },
+  "quiz": {
+    "question": "Why create a virtual environment?",
+    "options": [
+      "It isolates project dependencies",
+      "It trains a model automatically",
+      "It makes private data anonymous"
+    ],
+    "answer": 0,
+    "explanation": "An environment separates project packages. It is not a security sandbox or an anonymization tool."
+  }
+}

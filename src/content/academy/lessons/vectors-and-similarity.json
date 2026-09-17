@@ -1,0 +1,54 @@
+{
+  "slug": "vectors-and-similarity",
+  "module": "math",
+  "title": "Vectors and similarity",
+  "summary": "Turn a geometric idea into a useful comparison between items.",
+  "minutes": 30,
+  "level": "Beginner",
+  "objectives": [
+    "Compute a dot product",
+    "Interpret cosine similarity",
+    "Handle a zero vector"
+  ],
+  "sections": [
+    {
+      "title": "A vector is an ordered representation",
+      "paragraphs": [
+        "A vector is a sequence of numbers whose positions have consistent meaning. A product vector might describe price, size, and weight. Reordering those coordinates changes the representation. Similarity is only meaningful when vectors share the same feature definitions and scaling.",
+        "The dot product multiplies matching coordinates and adds the results. It becomes large when two vectors point in similar directions and have large magnitudes. Cosine similarity divides by both magnitudes, emphasizing direction rather than size."
+      ]
+    },
+    {
+      "title": "Similarity is not truth",
+      "paragraphs": [
+        "A high similarity score means closeness under a chosen representation. It does not prove that two documents agree, that a passage answers a question, or that an embedding captures every relevant distinction.",
+        "Cosine is undefined for a zero vector. A retrieval system needs an explicit policy, such as returning no match. Negative coordinates can produce negative cosine values; the mathematical range is from -1 to 1, not always 0 to 1."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "vectors-and-similarity.py",
+    "source": "import math\ndef cosine(a, b):\n    if len(a) != len(b):\n        raise ValueError(\"Dimensions must match\")\n    denominator = math.sqrt(sum(x*x for x in a) * sum(y*y for y in b))\n    return sum(x*y for x, y in zip(a, b)) / denominator if denominator else None\nprint(round(cosine([1, 2, 0], [2, 4, 0]), 3))\nprint(round(cosine([1, 0], [0, 1]), 3))\nprint(cosine([0, 0], [1, 2]))\n",
+    "explanation": "Parallel positive vectors have cosine 1 even when their lengths differ. Orthogonal vectors have cosine 0. The function returns None for an undefined comparison."
+  },
+  "practice": {
+    "goal": "Explore the effect of scale.",
+    "steps": [
+      "Multiply every coordinate of one vector by 10.",
+      "Compare the dot product before and after.",
+      "Compare cosine similarity before and after."
+    ],
+    "solution": "The dot product increases by a factor of 10, while cosine stays the same for positive scaling. Scaling just one coordinate changes direction and can change cosine, which is why feature units matter.",
+    "expected": "The script prints 1.0, 0.0, and None."
+  },
+  "quiz": {
+    "question": "What does a cosine similarity of 1 establish?",
+    "options": [
+      "The vectors point in the same direction",
+      "The underlying statements are factually correct",
+      "The vectors must have identical magnitudes"
+    ],
+    "answer": 0,
+    "explanation": "It describes direction in the chosen representation, not factual accuracy or equal magnitude."
+  }
+}

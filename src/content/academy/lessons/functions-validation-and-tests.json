@@ -1,0 +1,54 @@
+{
+  "slug": "functions-validation-and-tests",
+  "module": "python",
+  "title": "Functions, validation, and useful tests",
+  "summary": "Turn a transformation into a small contract you can check.",
+  "minutes": 30,
+  "level": "Beginner",
+  "objectives": [
+    "Write a pure function",
+    "Validate input assumptions",
+    "Test ordinary and edge cases"
+  ],
+  "sections": [
+    {
+      "title": "A function has a contract",
+      "paragraphs": [
+        "A useful function says what it accepts, what it returns, and what it rejects. Pure functions depend only on their inputs and avoid changing outside state. They are especially helpful for preprocessing and metrics because the same inputs should yield the same outputs.",
+        "Validate assumptions where they matter. A normalized score may require a positive denominator; a metric may require equally sized lists. Reject invalid input clearly instead of returning a plausible-looking result. Type hints explain intent but do not enforce runtime validation by themselves."
+      ]
+    },
+    {
+      "title": "Test behavior, not spelling",
+      "paragraphs": [
+        "A meaningful test checks an observable property or known result. For a clipping function, check values below, inside, and above the interval. Include malformed input if your function promises to reject it.",
+        "Assertions are convenient for these local exercises. In application code, use explicit exceptions for user-input validation because Python can disable assertions with optimization flags. A test suite should protect the contract while allowing the implementation to change."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "functions-validation-and-tests.py",
+    "source": "def clip_probability(value: float) -> float:\n    if not isinstance(value, (int, float)) or not 0 <= value <= 1:\n        raise ValueError(\"Expected a finite number between 0 and 1\")\n    return min(0.99, max(0.01, float(value)))\nassert clip_probability(0) == 0.01\nassert clip_probability(0.4) == 0.4\nassert clip_probability(1) == 0.99\ntry:\n    clip_probability(float(\"nan\"))\nexcept ValueError:\n    print(\"Invalid input rejected; all checks passed\")\n",
+    "explanation": "Clipping avoids exact zero or one when a later computation uses logarithms. Input validation remains separate from clipping."
+  },
+  "practice": {
+    "goal": "Test an accuracy function.",
+    "steps": [
+      "Require equal-length, nonempty target and prediction lists.",
+      "Return the fraction of matching pairs.",
+      "Test perfect, completely wrong, and malformed inputs."
+    ],
+    "solution": "Raise ValueError before dividing when lists are empty or unequal. For valid inputs, sum(a == b for a, b in zip(actual, predicted)) / len(actual) gives the fraction correct. Check known answers of 1.0, 0.0, and 0.5.",
+    "expected": "The example rejects NaN and prints that all checks passed."
+  },
+  "quiz": {
+    "question": "Why reject unequal target and prediction lengths?",
+    "options": [
+      "zip would silently ignore unmatched values",
+      "Python cannot store different list lengths",
+      "Accuracy always requires exactly 100 examples"
+    ],
+    "answer": 0,
+    "explanation": "zip stops at the shorter iterable. Without validation, a metric can silently omit failures."
+  }
+}

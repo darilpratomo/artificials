@@ -1,0 +1,54 @@
+{
+  "slug": "fairness-and-error-slices",
+  "module": "responsible-ai",
+  "title": "Inspect who experiences the errors",
+  "summary": "Use subgroup metrics carefully and avoid conclusions from tiny samples.",
+  "minutes": 35,
+  "level": "Intermediate",
+  "objectives": [
+    "Compare error types across slices",
+    "Report denominators",
+    "Recognize competing fairness objectives"
+  ],
+  "sections": [
+    {
+      "title": "An average can hide unequal behavior",
+      "paragraphs": [
+        "A model may have similar overall accuracy while missing many more positive cases in one subgroup. Compare metrics relevant to the application, such as false-negative rates, false-positive rates, and calibration, rather than selecting only the most flattering summary.",
+        "Choose slices for a reason grounded in how the system is used. Data collection and labels may already contain inequities. Model evaluation cannot repair those assumptions by itself, and adding a sensitive attribute requires a legitimate purpose and careful handling."
+      ]
+    },
+    {
+      "title": "Numbers need context",
+      "paragraphs": [
+        "Small subgroup counts produce unstable estimates. Report the numerator and denominator and investigate representative failures. Do not rank groups or claim a systematic disparity from a handful of toy observations.",
+        "Fairness definitions can conflict when base rates differ. There is no single universal metric that settles every application. Document the intended use, affected people, acceptable trade-offs, and a review process."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "fairness-and-error-slices.py",
+    "source": "rows = [(\"a\", 1, 1), (\"a\", 1, 0), (\"a\", 0, 0),\n        (\"b\", 1, 1), (\"b\", 1, 1), (\"b\", 0, 1)]\nfor group in [\"a\", \"b\"]:\n    positives = [(y, p) for g, y, p in rows if g == group and y == 1]\n    missed = sum(p == 0 for _, p in positives)\n    print(group, {\"missed_positives\": missed, \"actual_positives\": len(positives),\n                  \"false_negative_rate\": missed/len(positives) if positives else None})\n",
+    "explanation": "Groups a and b are synthetic placeholders. Two positive examples per group are far too few for a reliable real-world conclusion."
+  },
+  "practice": {
+    "goal": "Add denominators to a report.",
+    "steps": [
+      "Calculate each group’s false-positive count and negative count.",
+      "Compare with its false-negative result.",
+      "Write one sentence explaining the sample-size limitation."
+    ],
+    "solution": "Group a has no false positives among one negative; group b has one among one negative. These rates are extremely unstable. Report the counts and request more representative evidence before making a deployment claim.",
+    "expected": "The toy false-negative rates are 0.5 for a and 0 for b, based on two positives each."
+  },
+  "quiz": {
+    "question": "Why might equal accuracy be insufficient?",
+    "options": [
+      "Different kinds of errors can affect groups differently",
+      "Accuracy can never be calculated",
+      "Every subgroup must have identical examples"
+    ],
+    "answer": 0,
+    "explanation": "The distribution and consequences of errors matter, not only the total number correct."
+  }
+}

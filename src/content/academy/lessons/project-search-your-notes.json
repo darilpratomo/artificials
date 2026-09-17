@@ -1,0 +1,54 @@
+{
+  "slug": "project-search-your-notes",
+  "module": "projects",
+  "title": "Project: search your own study notes",
+  "summary": "Build a local passage retriever with ranking, source IDs, and a no-match state.",
+  "minutes": 75,
+  "level": "Applied",
+  "objectives": [
+    "Index a small original corpus",
+    "Rank passages with TF–IDF",
+    "Test relevant and unsupported questions"
+  ],
+  "sections": [
+    {
+      "title": "Own the retrieval path",
+      "paragraphs": [
+        "A useful note-search tool needs a collection, a stable identifier for each passage, a representation, and a ranking function. This project keeps everything in memory and uses original synthetic notes so it can run immediately.",
+        "The query and documents share one vocabulary and weighting scheme. A zero query vector means the index recognizes none of the terms. Return no match instead of presenting a random document as relevant."
+      ]
+    },
+    {
+      "title": "Build toward grounded assistance",
+      "paragraphs": [
+        "The output includes the actual passage and its ID. That makes the evidence inspectable and provides a foundation for a later RAG application. This project deliberately does not generate an answer: it retrieves text.",
+        "Create a relevance dataset with ordinary questions, synonyms, misleading keyword overlap, and questions outside the collection. Evaluate top-k recall separately from answer correctness. Before indexing private documents, add access filtering before ranking and preserve those permissions in every cache."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "project-search-your-notes.py",
+    "source": "import math, re\nfrom collections import Counter\nnotes = {\n    \"python\": \"A Python function accepts inputs and returns a result.\",\n    \"evaluation\": \"Keep test data separate when selecting a model.\",\n    \"neuron\": \"A neuron applies weights and a bias before an activation.\",\n    \"privacy\": \"Collect only the data required for a stated purpose.\",\n}\ndef tokens(text):\n    return re.findall(r\"[a-z]+\", text.lower())\ncorpus = {key: tokens(text) for key, text in notes.items()}\nvocabulary = sorted(set(word for words in corpus.values() for word in words))\nidf = {w: math.log((1+len(notes))/(1+sum(w in d for d in corpus.values())))+1 for w in vocabulary}\ndef vector(text):\n    counts = Counter(tokens(text))\n    return [counts[w]*idf[w] for w in vocabulary]\ndef cosine(a, b):\n    denominator = math.sqrt(sum(x*x for x in a)*sum(x*x for x in b))\n    return sum(x*y for x, y in zip(a, b))/denominator if denominator else 0.\nindex = {key: vector(text) for key, text in notes.items()}\ndef search(question, limit=2):\n    query = vector(question)\n    ranked = sorted(((cosine(query, v), key) for key, v in index.items()), reverse=True)\n    return [{\"id\": key, \"score\": round(score, 3), \"passage\": notes[key]}\n            for score, key in ranked[:limit] if score > 0]\nfor question in [\"Python function\", \"test data model\", \"galactic weather\"]:\n    print(question, \"->\", search(question) or \"No matching passage\")\n",
+    "explanation": "A positive overlap score is only a basic no-match rule. It is not a validated confidence threshold or proof that the passage answers every part of the question."
+  },
+  "practice": {
+    "goal": "Build a five-question retrieval evaluation.",
+    "steps": [
+      "Write questions before looking at ranked results and assign relevant passage IDs.",
+      "Calculate the fraction with a relevant ID in the first two results.",
+      "Add a synonym query and document how the lexical method fails."
+    ],
+    "solution": "For each supported question, count success if the relevant ID appears in the top two. Report unsupported questions separately because they test abstention. A semantic retriever could be a later comparison, not an assumed improvement.",
+    "expected": "The Python and test-data queries retrieve relevant passages; galactic weather returns no match."
+  },
+  "quiz": {
+    "question": "Is this project a complete generative RAG assistant?",
+    "options": [
+      "Yes, any search is generation",
+      "No, it implements retrieval and preserves evidence without generating answers",
+      "Yes, because it uses numbers"
+    ],
+    "answer": 1,
+    "explanation": "Generation is a separate component. This project is a usable retrieval baseline and a foundation for later RAG work."
+  }
+}

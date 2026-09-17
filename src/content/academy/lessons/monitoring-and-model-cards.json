@@ -1,0 +1,54 @@
+{
+  "slug": "monitoring-and-model-cards",
+  "module": "responsible-ai",
+  "title": "Monitor changes and write a model card",
+  "summary": "Make a system’s intended use and limits inspectable after release.",
+  "minutes": 30,
+  "level": "Intermediate",
+  "objectives": [
+    "Document the evaluation setting",
+    "Distinguish input drift from performance loss",
+    "Plan rollback and review"
+  ],
+  "sections": [
+    {
+      "title": "Document what was actually built",
+      "paragraphs": [
+        "A model card describes purpose, supported inputs, training and evaluation data, metrics, limitations, and inappropriate uses. Include the exact model and data versions, evaluation date, and known failure examples.",
+        "Do not substitute broad claims such as “unbiased” or “safe” for evidence. State what was measured, how many examples were used, and what remains uncertain. A small educational model should be labeled as such."
+      ]
+    },
+    {
+      "title": "Watch the system over time",
+      "paragraphs": [
+        "Input drift means the distribution of inputs changes. It may signal a problem but does not prove the error rate increased. When labels arrive, measure actual outcomes as well as proxy indicators such as input length, unknown vocabulary, latency, and abstention rate.",
+        "Choose alert thresholds based on historical variation and operational needs. Define who investigates an alert and how to roll back a model or disable an action. Keep a previous working version and the configuration that produced it."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "monitoring-and-model-cards.py",
+    "source": "import json\ncard = {\"name\": \"Study-topic demo\", \"version\": \"1.0\", \"purpose\": \"Educational routing experiment\",\n        \"data\": \"Original synthetic examples\", \"evaluation\": {\"correct\": 3, \"total\": 4},\n        \"limitations\": [\"Tiny English-only fixture\", \"No real-user validation\"],\n        \"not_for\": [\"Consequential automated decisions\"], \"fallback\": \"Human review\"}\nprint(json.dumps(card, indent=2))\n",
+    "explanation": "This card reports exact fixture counts and limitations. It is not a certification or evidence that the model is ready for public decision-making."
+  },
+  "practice": {
+    "goal": "Write a model card for your first project.",
+    "steps": [
+      "Record the dataset and split IDs.",
+      "Include two concrete failure examples.",
+      "Describe one rollback trigger and one condition that requires more evaluation."
+    ],
+    "solution": "A useful trigger might be a sustained increase in invalid outputs, while a new supported language requires new evaluation. Distinguish these operational policies from claims about model quality.",
+    "expected": "The output is a structured card containing intended use, evidence, and limitations."
+  },
+  "quiz": {
+    "question": "Does input drift alone prove model accuracy decreased?",
+    "options": [
+      "Yes, every distribution change is harmful",
+      "No, outcome measurements are needed to establish performance change",
+      "No, drift can always be ignored"
+    ],
+    "answer": 1,
+    "explanation": "Drift is a diagnostic signal. Investigate it and measure outcomes when possible."
+  }
+}

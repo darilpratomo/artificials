@@ -1,0 +1,54 @@
+{
+  "slug": "loss-and-gradient-descent",
+  "module": "math",
+  "title": "Loss and gradient descent",
+  "summary": "See how repeated small updates can improve a prediction.",
+  "minutes": 35,
+  "level": "Beginner",
+  "objectives": [
+    "Define squared error",
+    "Calculate a simple derivative",
+    "Observe learning-rate behavior"
+  ],
+  "sections": [
+    {
+      "title": "Turn an error into an objective",
+      "paragraphs": [
+        "For a prediction y_hat and target y, squared error is (y_hat - y) squared. Averaging it over examples gives mean squared error. Squaring penalizes large misses more strongly and makes positive and negative errors contribute positively.",
+        "For the simple model y_hat = weight times x, the derivative of squared error with respect to weight is 2 times x times (weight times x minus y). The derivative describes the local direction and rate of loss change, not the best possible final weight."
+      ]
+    },
+    {
+      "title": "Update carefully",
+      "paragraphs": [
+        "Gradient descent subtracts a learning rate times the derivative from each parameter. Too small a learning rate can make progress slow; too large can overshoot or diverge. A decreasing training loss does not prove good generalization.",
+        "Check a baseline, inspect the loss curve, and evaluate unseen examples. Feature scale affects the gradients, so a learning rate that works for inputs near 1 can fail when inputs are near 10,000."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "loss-and-gradient-descent.py",
+    "source": "xs, ys = [1., 2., 3.], [2., 4., 6.]\nweight, rate = 0., 0.05\nfor step in range(60):\n    gradient = sum(2*x*(weight*x-y) for x, y in zip(xs, ys)) / len(xs)\n    weight -= rate * gradient\nloss = sum((weight*x-y)**2 for x, y in zip(xs, ys)) / len(xs)\nprint(\"Weight:\", round(weight, 4), \"Loss:\", round(loss, 8))\nprint(\"Prediction for 4:\", round(weight * 4, 3))\n",
+    "explanation": "The dataset follows exactly y = 2x, so a weight close to 2 is expected. Real data usually contains noise and may not follow a straight line."
+  },
+  "practice": {
+    "goal": "Find an unstable learning rate.",
+    "steps": [
+      "Run with rates 0.005, 0.05, and 0.3.",
+      "Record the final weight and loss.",
+      "Explain why a larger step can move away from the solution."
+    ],
+    "solution": "With this feature scale, 0.05 converges rapidly, 0.005 moves more slowly, and 0.3 overshoots repeatedly. Compare loss rather than assuming more aggressive updates are better.",
+    "expected": "The original weight approaches 2 and the prediction for 4 approaches 8."
+  },
+  "quiz": {
+    "question": "What does a falling training loss establish?",
+    "options": [
+      "The model is guaranteed to work on new data",
+      "The objective is improving on the training examples",
+      "The labels are necessarily correct"
+    ],
+    "answer": 1,
+    "explanation": "The optimization objective can improve even while the model overfits or learns from flawed labels."
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "slug": "files-json-and-dataset-audits",
+  "module": "python",
+  "title": "Files, JSON, and dataset audits",
+  "summary": "Load structured data and catch invalid rows before training.",
+  "minutes": 30,
+  "level": "Beginner",
+  "objectives": [
+    "Read JSON records",
+    "Audit values and categories",
+    "Keep raw data separate from cleaned data"
+  ],
+  "sections": [
+    {
+      "title": "Input data is a boundary",
+      "paragraphs": [
+        "JSON represents objects, lists, strings, numbers, booleans, and null. A successful parse only proves the syntax is valid. You still need to check the shape, required keys, allowed labels, and types your application expects.",
+        "Keep the original input unchanged and write cleaned records separately. Store reasons for rejected rows so you can investigate systematic problems. Silently removing difficult examples may make evaluation look better while making the product worse."
+      ]
+    },
+    {
+      "title": "Audit before optimizing",
+      "paragraphs": [
+        "Count missing values, duplicates, category frequencies, and unusually long or short inputs. These simple checks often reveal mistakes more quickly than a model does. Deduplication rules should match the task: identical text with conflicting labels needs investigation.",
+        "Do not log private text simply because debugging is convenient. For a real dataset, choose the minimum necessary fields and access controls. The exercise uses invented records so it can be inspected safely without external downloads."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "files-json-and-dataset-audits.py",
+    "source": "import json\nraw = '[{\"text\":\"Reset password\",\"label\":\"account\"},{\"text\":\" \",\"label\":\"billing\"},{\"text\":\"Receipt\",\"label\":\"billing\"}]'\nrows = json.loads(raw)\nvalid, rejected = [], []\nfor index, row in enumerate(rows):\n    if (isinstance(row, dict) and isinstance(row.get(\"text\"), str)\n            and row[\"text\"].strip() and row.get(\"label\") in (\"account\", \"billing\")):\n        valid.append({\"text\": row[\"text\"].strip(), \"label\": row[\"label\"]})\n    else:\n        rejected.append(index)\nprint(json.dumps({\"accepted\": len(valid), \"rejected_indices\": rejected}))\n",
+    "explanation": "For a local file, replace json.loads(raw) with json.load(handle) inside with open(\"data.json\", encoding=\"utf-8\") as handle. The validation still applies."
+  },
+  "practice": {
+    "goal": "Detect contradictory labels.",
+    "steps": [
+      "Add two identical messages with different labels.",
+      "Build a mapping from normalized text to its set of labels.",
+      "Flag entries with more than one label for review."
+    ],
+    "solution": "Use a separate normalized-text key, such as text.casefold().strip(), while preserving the original. A set of two labels for one key is a conflict, not a reason to choose the first label automatically.",
+    "expected": "The initial audit accepts two rows and rejects index 1."
+  },
+  "quiz": {
+    "question": "What does valid JSON guarantee?",
+    "options": [
+      "Correct labels",
+      "Only syntactically valid serialized data",
+      "A representative dataset"
+    ],
+    "answer": 1,
+    "explanation": "Parsing cannot establish label quality, schema correctness, or whether the data represents future users."
+  }
+}

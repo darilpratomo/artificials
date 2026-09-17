@@ -4,7 +4,7 @@ Updated: 17 September 2026.
 
 ## Implemented
 
-Black/silver responsive English UI with SVG icons, orbital illustration, horizontal scroll sequence on desktop, and reduced-motion fallback. Model directory, capability benchmarks, separate metadata rankings, comparison, illustrated original AI guides, Studio, account dashboard, login, pricing, about/privacy/terms/contact and hidden CMS. Source-backed model snapshots include every offering in the upstream catalog, with pagination, filters, source links and retrieval timestamps.
+Black/silver responsive English UI with SVG icons, a replaceable full-width planetary banner, horizontal scroll sequence on desktop, and reduced-motion fallback. Model directory, capability benchmarks, separate metadata rankings, comparison, illustrated original AI guides, a 36-lesson Learn AI Academy with nine modules and four Python projects, Studio, account dashboard, login, pricing, about/privacy/terms/contact and hidden CMS. Instagram and X profiles are linked in the footer. All news uses the official Artificials author badge. Visible illustration captions and catalog branding are removed at the owner’s request; distribution license notices remain. Source-backed model snapshots include every offering in the upstream catalog, with pagination, filters, source links and retrieval timestamps.
 
 Backend includes Supabase Auth/RLS/MFA, Paddle webhook/payment handling, atomic generation quotas and spend reservations, server-only OpenAI API access, isolated static previews and downloadable full-stack source with database schema. AI and billing are disabled by default.
 
@@ -17,9 +17,9 @@ Browser fixtures test interface behavior; real provider model data is checked se
 Verified locally in this implementation:
 
 - TypeScript, production build, private-file guard and Worker dry-run pass.
-- 42 code/database tests pass, including benchmark score normalization, ties, missing results, source-schema rejection, catalog normalization, quota transactions and security behavior.
-- 36 browser tests pass across desktop Chrome, mobile Chrome and mobile Safari/WebKit; one desktop-specific horizontal-scroll case is intentionally skipped on mobile. Regression checks cover widths 320, 375, 430 and 768 px throughout scrolling and reveal animations, benchmark category/search/error recovery, loaded article images and the support mail link.
-- Automated axe checks pass across 11 routes on both viewport profiles.
+- 45 code/database tests pass, including benchmark score normalization, ties, missing results, source-schema rejection, catalog normalization, quota transactions and security behavior.
+- 48 browser tests pass across desktop Chrome, mobile Chrome and mobile Safari/WebKit; one desktop-specific horizontal-scroll case is intentionally skipped on mobile. Regression checks cover widths 320, 375, 430 and 768 px throughout scrolling and reveal animations, benchmark category/search/error recovery, loaded article images and the support mail link.
+- Automated axe checks pass across the existing 11 routes on desktop/mobile and three Academy routes on desktop/mobile Chrome and mobile Safari. All 36 Python examples execute successfully, including an HTTP/SQLite integration check.
 - A separate production-build smoke test reads the actual source snapshot (7,842 offerings / 220 providers), renders desktop/mobile, and checks private route and cross-origin write rejection.
 - Initial Cloudflare production deploy succeeded at https://artificials.artificials.workers.dev; the public catalog endpoint returned HTTP 200 with actual source data.
 - Source code is in the private repository https://github.com/darilpratomo/artificials. The local admin guide is not tracked.

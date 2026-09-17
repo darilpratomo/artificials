@@ -1,0 +1,54 @@
+{
+  "slug": "structured-outputs-and-tool-boundaries",
+  "module": "systems",
+  "title": "Structured outputs and tool boundaries",
+  "summary": "Treat generated instructions as proposals that still need validation.",
+  "minutes": 35,
+  "level": "Intermediate",
+  "objectives": [
+    "Validate a response schema",
+    "Use an explicit tool allowlist",
+    "Keep authorization outside model output"
+  ],
+  "sections": [
+    {
+      "title": "Structure makes errors visible",
+      "paragraphs": [
+        "A structured response gives fields stable names and types. A valid JSON object still needs schema checks: allowed keys, required values, lengths, ranges, and permitted actions. Text that looks like JSON can fail to parse or contain a misleading extra field.",
+        "The application remains responsible for deciding what the user may do. A model cannot grant a user permission by producing a role field or claiming that an administrator approved an action."
+      ]
+    },
+    {
+      "title": "Tools are controlled capabilities",
+      "paragraphs": [
+        "Map allowed action names to functions you wrote. Validate arguments before dispatch, apply authorization, and bound runtime and output size. Avoid passing model-generated strings to eval, a shell, raw SQL, or arbitrary network URLs.",
+        "Start with read-only tools and make irreversible actions require a concrete, reviewable user decision. Separate the model’s proposed action from the code that authorizes and executes it."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "structured-outputs-and-tool-boundaries.py",
+    "source": "import json\nraw = '{\"action\":\"lookup_lesson\",\"slug\":\"vectors-and-similarity\"}'\nproposal = json.loads(raw)\nknown = {\"vectors-and-similarity\": \"Vectors and similarity\"}\ndef dispatch(value):\n    if not isinstance(value, dict) or set(value) != {\"action\", \"slug\"}:\n        raise ValueError(\"Unexpected schema\")\n    if value[\"action\"] != \"lookup_lesson\" or not isinstance(value[\"slug\"], str):\n        raise ValueError(\"Unsupported action\")\n    return known.get(value[\"slug\"], \"Not found\")\nprint(dispatch(proposal))\n",
+    "explanation": "The lookup is a fixed local capability. Neither the action name nor the slug is evaluated as code."
+  },
+  "practice": {
+    "goal": "Reject an unsafe proposal.",
+    "steps": [
+      "Try an action named run_shell.",
+      "Add an unexpected administrator field.",
+      "Check that both fail before any tool executes."
+    ],
+    "solution": "The allowlist rejects run_shell and the exact-key check rejects the extra field. In a real app, authorization must also use server-controlled user identity; schema validation alone is not access control.",
+    "expected": "The valid example returns Vectors and similarity."
+  },
+  "quiz": {
+    "question": "Where should a tool’s permission decision live?",
+    "options": [
+      "In the model’s self-reported role",
+      "In application code using trusted identity and policy",
+      "Inside the user’s prompt text"
+    ],
+    "answer": 1,
+    "explanation": "Model output is untrusted input. Trusted application logic owns authorization."
+  }
+}

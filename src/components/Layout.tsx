@@ -23,6 +23,7 @@ export function Layout() {
     ['/leaderboard', 'Rankings'],
     ['/compare', 'Compare'],
     ['/news', 'Insights'],
+    ['/learn', 'Learn AI'],
     ['/studio', 'Studio'],
   ];
   return (
@@ -89,6 +90,46 @@ export function Layout() {
               Intelligence, in perspective.
               <br />A clearer view of what comes next.
             </p>
+            <div className="social-links" aria-label="Artificials social profiles">
+              <a
+                href="https://www.instagram.com/artificialsnet"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Artificials on Instagram"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="5" />
+                  <circle cx="12" cy="12" r="4" />
+                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                </svg>
+                <span>Instagram</span>
+              </a>
+              <a
+                href="https://x.com/artificialsnet"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Artificials on X"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="17"
+                  height="17"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.4l8.2-9.4L.8 2h6.5l4.5 6.8L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z" />
+                </svg>
+                <span>X</span>
+              </a>
+            </div>
             <span className="mono">
               <Globe2 size={13} /> INDEPENDENT. GLOBAL. CURIOUS.
             </span>
@@ -99,6 +140,7 @@ export function Layout() {
             <Link to="/leaderboard">Model rankings</Link>
             <Link to="/compare">Compare models</Link>
             <Link to="/news">Insights & guides</Link>
+            <Link to="/learn">Learn AI</Link>
           </div>
           <div>
             <h3>Create</h3>

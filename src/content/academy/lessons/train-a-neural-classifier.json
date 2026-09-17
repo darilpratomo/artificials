@@ -1,0 +1,54 @@
+{
+  "slug": "train-a-neural-classifier",
+  "module": "neural-networks",
+  "title": "Train your first neural classifier",
+  "summary": "Optimize a sigmoid neuron using binary cross-entropy.",
+  "minutes": 40,
+  "level": "Intermediate",
+  "objectives": [
+    "Train a one-neuron classifier",
+    "Track cross-entropy loss",
+    "Evaluate inputs beyond the training rows"
+  ],
+  "sections": [
+    {
+      "title": "Match the objective to the output",
+      "paragraphs": [
+        "A sigmoid neuron produces a score between zero and one. Binary cross-entropy penalizes a low score for a positive target and a high score for a negative target. With sigmoid and this loss, the derivative with respect to the pre-activation simplifies to prediction minus target.",
+        "A single neuron describes a linear decision boundary in its input space. It can separate a simple one-dimensional threshold, but cannot solve every pattern. More optimization steps cannot compensate for an unsuitable model family."
+      ]
+    },
+    {
+      "title": "Keep training observable",
+      "paragraphs": [
+        "Use a small learning rate, average gradients over the batch, and inspect the loss. Clip probabilities only for logarithm evaluation to avoid taking log of zero; do not silently alter the gradient formula.",
+        "The toy task here labels negative values as zero and positive values as one. New examples from that same simple rule should behave sensibly, but the result does not establish that the model can solve unrelated classification tasks."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "train-a-neural-classifier.py",
+    "source": "import math\nxs, ys = [-2., -1., 1., 2.], [0., 0., 1., 1.]\nw, b, rate = 0., 0., 0.2\nfor _ in range(300):\n    ps = [1/(1+math.exp(-(w*x+b))) for x in xs]\n    dw = sum((p-y)*x for p, y, x in zip(ps, ys, xs))/len(xs)\n    db = sum(p-y for p, y in zip(ps, ys))/len(xs)\n    w, b = w-rate*dw, b-rate*db\nfor x in [-1.5, 0., 1.5]:\n    print(x, round(1/(1+math.exp(-(w*x+b))), 3))\n",
+    "explanation": "The symmetry keeps the bias near zero. The ambiguous midpoint gets a score near 0.5 instead of a justified confident label."
+  },
+  "practice": {
+    "goal": "Inspect an unlearnable label pattern.",
+    "steps": [
+      "Replace inputs with [-2, -1, 1, 2] and labels with [1, 0, 0, 1].",
+      "Train the same single neuron.",
+      "Explain why one threshold cannot separate both outer points from both inner points."
+    ],
+    "solution": "The required positive region has two separated ends. A one-dimensional linear threshold creates only one boundary. Add suitable nonlinear features or a hidden layer, then evaluate instead of just increasing training steps.",
+    "expected": "The original negative test input gets a low score, the positive input a high score, and zero a score near 0.5."
+  },
+  "quiz": {
+    "question": "Can one linear threshold represent positives at both extremes and negatives in the middle?",
+    "options": [
+      "Yes, with enough training steps",
+      "No, the model family needs a nonlinear boundary",
+      "Only by changing the random seed"
+    ],
+    "answer": 1,
+    "explanation": "Optimization cannot create a decision shape outside the model’s representational capacity."
+  }
+}

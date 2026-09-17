@@ -1,0 +1,54 @@
+{
+  "slug": "a-tiny-language-model",
+  "module": "language",
+  "title": "Train a tiny next-word model",
+  "summary": "Learn what next-token prediction does using a transparent bigram model.",
+  "minutes": 40,
+  "level": "Intermediate",
+  "objectives": [
+    "Count token transitions",
+    "Generate from a learned distribution",
+    "Explain limitations of short context"
+  ],
+  "sections": [
+    {
+      "title": "Predict what follows",
+      "paragraphs": [
+        "A bigram language model estimates the next token using only the current token. Count observed transitions in training text, normalize the counts, and sample a continuation. Start and end markers make sentence boundaries explicit.",
+        "This is a genuine statistical language model, but it has very limited context. It cannot keep track of long-range meaning, verify factual claims, or reason like a modern assistant. Its simplicity makes the learning and sampling mechanics visible."
+      ]
+    },
+    {
+      "title": "Generation follows a distribution",
+      "paragraphs": [
+        "Sampling can produce different outputs from the same initial token. A fixed seed makes a demonstration repeatable. Greedy decoding always chooses the most frequent continuation and can become repetitive.",
+        "An unseen context has no learned transition. Choose a documented fallback, such as stopping. Smoothing can assign some probability to unseen events, but it changes the distribution and can produce less plausible sequences in a tiny dataset."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "a-tiny-language-model.py",
+    "source": "import random\nfrom collections import Counter, defaultdict\nsentences = [\"ai helps people learn\", \"ai helps people build\", \"people learn python\", \"people build tools\"]\ntransitions = defaultdict(Counter)\nfor sentence in sentences:\n    words = [\"<start>\"] + sentence.split() + [\"<end>\"]\n    for left, right in zip(words, words[1:]):\n        transitions[left][right] += 1\nrng, current, output = random.Random(17), \"<start>\", []\nfor _ in range(12):\n    choices = transitions.get(current)\n    if not choices:\n        break\n    current = rng.choices(list(choices), weights=list(choices.values()))[0]\n    if current == \"<end>\":\n        break\n    output.append(current)\nprint(\" \".join(output))\n",
+    "explanation": "The model learns transition counts from four original synthetic sentences. It calls no external AI service and downloads no weights."
+  },
+  "practice": {
+    "goal": "Measure the effect of additional context.",
+    "steps": [
+      "Find two sentences where the same word needs different continuations.",
+      "Change the transition key to a pair of previous tokens.",
+      "Explain why more context also requires more observations."
+    ],
+    "solution": "A trigram model can distinguish two-word contexts, but each context appears less often. Sparse data creates more unseen combinations. Context length is a trade-off between useful conditioning and reliable estimation.",
+    "expected": "The generated sentence uses learned transitions and stops at an end marker or the step limit."
+  },
+  "quiz": {
+    "question": "What context does this bigram model use?",
+    "options": [
+      "The entire conversation",
+      "Only the preceding token",
+      "Every document on the internet"
+    ],
+    "answer": 1,
+    "explanation": "The transition table conditions on one preceding token. It has no hidden access to longer context."
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "slug": "evaluate-ai-systems",
+  "module": "systems",
+  "title": "Build an evaluation harness",
+  "summary": "Measure the whole workflow and turn failures into a development plan.",
+  "minutes": 35,
+  "level": "Intermediate",
+  "objectives": [
+    "Separate component and end-to-end metrics",
+    "Keep a fixed evaluation set",
+    "Report failures alongside averages"
+  ],
+  "sections": [
+    {
+      "title": "Evaluate the contract",
+      "paragraphs": [
+        "An AI system can fail during input handling, retrieval, prediction, formatting, or tool execution. Measure the components separately, then check the final user outcome. A good retrieval score can coexist with poor answer quality.",
+        "Create cases with expected behavior, including ambiguous inputs, unsupported questions, and invalid requests. Keep development examples separate from a final evaluation set. Add newly discovered failures to a regression suite without pretending that repeatedly optimized cases are unseen."
+      ]
+    },
+    {
+      "title": "Look behind the percentage",
+      "paragraphs": [
+        "Report counts, not only percentages. Three correct results out of four provide much less evidence than 3,000 out of 4,000. Slice results by relevant conditions, such as language, input length, or document type, when enough examples exist.",
+        "A model judge can help review subjective outputs but is another fallible measurement tool. Specify the rubric, spot-check disagreements, and avoid giving an evaluator authority to invent ground truth. For deterministic outputs, direct checks are often better."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "evaluate-ai-systems.py",
+    "source": "cases = [(\"reset password\", \"account\"), (\"invoice question\", \"billing\"),\n         (\"unknown request\", \"review\"), (\"receipt missing\", \"billing\")]\ndef route(text):\n    return \"account\" if \"password\" in text else \"billing\" if \"invoice\" in text else \"review\"\nfailures = [(text, expected, route(text)) for text, expected in cases if route(text) != expected]\nprint({\"correct\": len(cases)-len(failures), \"total\": len(cases)})\nfor text, expected, actual in failures:\n    print({\"input\": text, \"expected\": expected, \"actual\": actual})\n",
+    "explanation": "The harness reports the exact missing synonym instead of hiding it behind a 75% score. These four examples are a teaching fixture, not a deployment-quality evaluation."
+  },
+  "practice": {
+    "goal": "Add meaningful evaluation slices.",
+    "steps": [
+      "Tag cases as ordinary, synonym, or ambiguous.",
+      "Calculate counts for each slice.",
+      "Add a no-answer case and define the expected behavior before changing the rule."
+    ],
+    "solution": "Keep a small table with input, expected output, and slice. Report correct/total for each slice and inspect failures. Small slices are diagnostic rather than strong statistical evidence.",
+    "expected": "Three of four cases pass, and receipt missing is the failure."
+  },
+  "quiz": {
+    "question": "Why report the number of evaluated cases?",
+    "options": [
+      "It helps interpret how much evidence the percentage contains",
+      "It makes the model larger",
+      "It removes the need for error analysis"
+    ],
+    "answer": 0,
+    "explanation": "A percentage without its denominator can exaggerate the strength of the evidence."
+  }
+}

@@ -81,13 +81,10 @@ export default function Info() {
         <section className="prose about-methodology" aria-labelledby="source-methodology">
           <h2 id="source-methodology">Where the information comes from</h2>
           <p>
-            Our catalog uses{' '}
-            <a href="https://models.dev/" target="_blank" rel="noopener noreferrer">
-              Models.dev
-            </a>
-            , an open database of AI model metadata. Source updates are refreshed automatically and
-            the directory shows when information was fetched. A fetch time tells you when we checked
-            the source; it does not establish when every underlying fact was verified.
+            Our catalog brings together public model specifications and pricing. Updates are
+            refreshed automatically and the directory shows when information was fetched. A fetch
+            time tells you when we checked the source; it does not establish when every underlying
+            fact was verified.
           </p>
           <p>
             Coverage follows the source and can lag behind provider announcements. Missing prices,
@@ -208,9 +205,11 @@ export default function Info() {
             <h2>5. Cookies and device storage</h2>
             <p>
               Essential HTTP-only cookies maintain your signed-in session. Your selected model
-              comparisons are saved in your browser’s local storage so they remain available as you
-              navigate. No advertising or analytics tracker is included in this version.
-              Authentication, payment, and security providers may use their own essential storage.
+              comparisons and Academy lesson completion are saved in your browser’s local storage so
+              they remain available as you navigate. Academy progress stays on this device and is
+              not synchronized to an account. No advertising or analytics tracker is included in
+              this version. Authentication, payment, and security providers may use their own
+              essential storage.
             </p>
             <h2 id="preferences">6. Your preferences</h2>
             <p>

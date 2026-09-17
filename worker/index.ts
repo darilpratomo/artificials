@@ -1,3 +1,4 @@
+import academyIndex from '../shared/academy-index.json';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { bodyLimit } from 'hono/body-limit';
@@ -299,6 +300,8 @@ app.get('/sitemap.xml', (c) =>
         '/leaderboard',
         '/compare',
         '/news',
+        '/learn',
+        ...academyIndex.lessons.map((lesson) => '/learn/' + lesson.slug),
         '/studio',
         '/pricing',
         '/about',

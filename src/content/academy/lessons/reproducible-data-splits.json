@@ -1,0 +1,54 @@
+{
+  "slug": "reproducible-data-splits",
+  "module": "python",
+  "title": "Create a repeatable train/test split",
+  "summary": "Keep evaluation data separate and make the boundary easy to inspect.",
+  "minutes": 25,
+  "level": "Beginner",
+  "objectives": [
+    "Shuffle without changing the original",
+    "Separate development and final evaluation",
+    "Check that partitions do not overlap"
+  ],
+  "sections": [
+    {
+      "title": "Separate the jobs of your data",
+      "paragraphs": [
+        "Training data fits parameters. Validation data helps choose settings. Test data estimates performance after those choices are complete. If you repeatedly inspect the test score and adapt the model, that set has effectively become validation data.",
+        "A random split can work when examples are independent and identically distributed. Time series and grouped entities need different splits. Small or rare classes may require stratification so that each partition contains enough examples to evaluate."
+      ]
+    },
+    {
+      "title": "Record the boundary",
+      "paragraphs": [
+        "Keep row identifiers as well as values. Saving split IDs makes it possible to compare two models on exactly the same test cases. A fixed seed is helpful, but a later change in the input ordering can still change the split.",
+        "Fit preprocessing only on the training partition. A vocabulary, mean, standard deviation, or feature selection rule can leak information even when the prediction model itself never sees the test labels."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "reproducible-data-splits.py",
+    "source": "import random\nids = list(range(30))\nshuffled = ids.copy()\nrandom.Random(17).shuffle(shuffled)\ntrain, validation, test = shuffled[:18], shuffled[18:24], shuffled[24:]\nassert len(set(train + validation + test)) == len(ids)\nassert set(train).isdisjoint(test)\nprint(\"Train:\", len(train), \"Validation:\", len(validation), \"Test:\", len(test))\nprint(\"Test IDs:\", sorted(test))\n",
+    "explanation": "This example partitions identifiers, which can be saved alongside a dataset version. It does not assume that a random split is appropriate for every problem."
+  },
+  "practice": {
+    "goal": "Compare random and time-based splitting.",
+    "steps": [
+      "Create 30 observations with increasing timestamps.",
+      "Reserve the latest six as a temporal test set.",
+      "Explain which split matches next-month forecasting."
+    ],
+    "solution": "Use chronological order for the temporal split. Random shuffling mixes future and past patterns, which can hide a change in conditions. For forecasting, keep the latest period unseen and avoid features computed from later observations.",
+    "expected": "The random example creates 18 training, 6 validation, and 6 test IDs."
+  },
+  "quiz": {
+    "question": "Where should a normalization mean be fitted?",
+    "options": [
+      "Across every row before splitting",
+      "On the test set",
+      "On the training set only"
+    ],
+    "answer": 2,
+    "explanation": "Statistics learned from held-out observations contaminate the evaluation. Apply the training transformation unchanged to later data."
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "slug": "what-ai-actually-does",
+  "module": "foundations",
+  "title": "What AI actually does",
+  "summary": "Separate rules, learned predictions, and generated content before choosing a tool.",
+  "minutes": 20,
+  "level": "Beginner",
+  "objectives": [
+    "Frame a task as inputs and outputs",
+    "Distinguish training from inference",
+    "Choose a measurable baseline"
+  ],
+  "sections": [
+    {
+      "title": "Start with a decision",
+      "paragraphs": [
+        "An AI system transforms inputs into an output that helps someone decide or act. A classifier assigns a category, a regressor estimates a number, and a generative model produces a sequence such as text. None of these outputs is automatically true merely because a model produced it. Define the decision before choosing a model.",
+        "Consider sorting support messages. A keyword rule is easy to inspect, but misses unfamiliar wording. A learned classifier can use patterns from labeled examples. A language model can write a reply, but needs a separate check that the reply answers the actual question. These are different tasks with different failure costs."
+      ]
+    },
+    {
+      "title": "Learning is not using",
+      "paragraphs": [
+        "Training adjusts model parameters using examples and an objective. Inference uses the resulting parameters on an input. Retrieving a document or adding text to a prompt does not, by itself, update those parameters.",
+        "Start with a simple baseline and a small set of representative examples. Record correct answers and difficult cases. A more elaborate model earns its place by improving the outcome under the same evaluation, including latency and operating cost."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "what-ai-actually-does.py",
+    "source": "messages = [\"I forgot my password\", \"The invoice is incorrect\", \"Hello there\"]\ndef route(message):\n    text = message.casefold()\n    if \"password\" in text:\n        return \"account\"\n    if \"invoice\" in text:\n        return \"billing\"\n    return \"review\"\nfor message in messages:\n    print(route(message), \"<-\", message)\n",
+    "explanation": "This baseline uses explicit rules. There is no training step, probability estimate, or external model call. It creates something concrete to compare against."
+  },
+  "practice": {
+    "goal": "Discover the limits of a rule-based classifier.",
+    "steps": [
+      "Add six messages with known categories.",
+      "Include a synonym and a message mentioning both categories.",
+      "Count correct predictions and document the two hardest failures."
+    ],
+    "solution": "A message about a receipt may require billing but miss the invoice rule. A message with both keywords takes the first branch. Add a review category for ambiguity instead of silently treating the first match as certain.",
+    "expected": "The initial script prints account, billing, then review. Your expanded set should expose at least one limitation."
+  },
+  "quiz": {
+    "question": "Which action changes learned model parameters?",
+    "options": [
+      "Sending a new prediction request",
+      "Optimizing parameters on training examples",
+      "Looking up a source document"
+    ],
+    "answer": 1,
+    "explanation": "Training updates parameters. Inference and retrieval can change the information used for an answer without retraining the model."
+  }
+}

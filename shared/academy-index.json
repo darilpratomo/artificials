@@ -1,0 +1,429 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-17",
+  "modules": [
+    {
+      "id": "foundations",
+      "title": "Start with the right questions",
+      "label": "Foundations",
+      "description": "Build intuition for AI, data, predictions, and responsible experiments.",
+      "level": "Beginner",
+      "references": [
+        {
+          "title": "Python: virtual environments",
+          "url": "https://docs.python.org/3/tutorial/venv.html"
+        }
+      ]
+    },
+    {
+      "id": "python",
+      "title": "Python for thinking in data",
+      "label": "Python",
+      "description": "Write small, reliable programs and turn messy inputs into useful structures.",
+      "level": "Beginner",
+      "references": [
+        {
+          "title": "Python language tutorial",
+          "url": "https://docs.python.org/3/tutorial/"
+        },
+        {
+          "title": "Python JSON module",
+          "url": "https://docs.python.org/3/library/json.html"
+        }
+      ]
+    },
+    {
+      "id": "math",
+      "title": "The mathematics you can see",
+      "label": "Mathematics",
+      "description": "Work with vectors, probability, loss, and gradient descent through tiny experiments.",
+      "level": "Beginner",
+      "references": [
+        {
+          "title": "Python math module",
+          "url": "https://docs.python.org/3/library/math.html"
+        }
+      ]
+    },
+    {
+      "id": "machine-learning",
+      "title": "Teach a machine to predict",
+      "label": "Machine learning",
+      "description": "Train, evaluate, and compare models without hiding what happens underneath.",
+      "level": "Intermediate",
+      "references": [
+        {
+          "title": "scikit-learn: model evaluation",
+          "url": "https://scikit-learn.org/stable/modules/model_evaluation.html"
+        },
+        {
+          "title": "scikit-learn: common pitfalls",
+          "url": "https://scikit-learn.org/stable/common_pitfalls.html"
+        }
+      ]
+    },
+    {
+      "id": "neural-networks",
+      "title": "Inside a neural network",
+      "label": "Deep learning",
+      "description": "Build neurons, calculate gradients, and train a small network from scratch.",
+      "level": "Intermediate",
+      "references": [
+        {
+          "title": "PyTorch: automatic differentiation",
+          "url": "https://docs.pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html"
+        }
+      ]
+    },
+    {
+      "id": "language",
+      "title": "From words to representations",
+      "label": "Language AI",
+      "description": "Explore tokenization, retrieval, language models, and attention.",
+      "level": "Intermediate",
+      "references": [
+        {
+          "title": "scikit-learn: text feature extraction",
+          "url": "https://scikit-learn.org/stable/modules/feature_extraction.html#text-feature-extraction"
+        },
+        {
+          "title": "Attention Is All You Need: original paper",
+          "url": "https://arxiv.org/abs/1706.03762"
+        }
+      ]
+    },
+    {
+      "id": "systems",
+      "title": "Build AI that behaves reliably",
+      "label": "AI engineering",
+      "description": "Design grounded answers, bounded tools, useful evaluations, and efficient systems.",
+      "level": "Intermediate",
+      "references": [
+        {
+          "title": "Python functools module",
+          "url": "https://docs.python.org/3/library/functools.html"
+        }
+      ]
+    },
+    {
+      "id": "responsible-ai",
+      "title": "Trust is part of the product",
+      "label": "Responsible AI",
+      "description": "Examine privacy, fairness, prompt injection, monitoring, and model documentation.",
+      "level": "Intermediate",
+      "references": [
+        {
+          "title": "NIST AI Risk Management Framework",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        }
+      ]
+    },
+    {
+      "id": "projects",
+      "title": "Make something that works",
+      "label": "Projects",
+      "description": "Complete four runnable Python projects with evaluation and extension challenges.",
+      "level": "Applied",
+      "references": [
+        {
+          "title": "Python SQLite module",
+          "url": "https://docs.python.org/3/library/sqlite3.html"
+        },
+        {
+          "title": "Python HTTP server: limitations",
+          "url": "https://docs.python.org/3/library/http.server.html"
+        }
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "slug": "what-ai-actually-does",
+      "module": "foundations",
+      "title": "What AI actually does",
+      "summary": "Separate rules, learned predictions, and generated content before choosing a tool.",
+      "minutes": 20,
+      "level": "Beginner"
+    },
+    {
+      "slug": "define-a-useful-ai-task",
+      "module": "foundations",
+      "title": "Define a useful AI task",
+      "summary": "Turn an ambitious idea into a testable specification with a sensible fallback.",
+      "minutes": 20,
+      "level": "Beginner"
+    },
+    {
+      "slug": "data-and-labels",
+      "module": "foundations",
+      "title": "Data, labels, and the unit of prediction",
+      "summary": "Understand what one example represents and why repeated examples distort evaluation.",
+      "minutes": 25,
+      "level": "Beginner"
+    },
+    {
+      "slug": "your-python-workspace",
+      "module": "foundations",
+      "title": "Set up a reproducible Python workspace",
+      "summary": "Run your first local experiment and record the environment that produced it.",
+      "minutes": 25,
+      "level": "Beginner"
+    },
+    {
+      "slug": "python-values-and-collections",
+      "module": "python",
+      "title": "Values, collections, and clear transformations",
+      "summary": "Represent examples using lists and dictionaries, then calculate a useful summary.",
+      "minutes": 25,
+      "level": "Beginner"
+    },
+    {
+      "slug": "functions-validation-and-tests",
+      "module": "python",
+      "title": "Functions, validation, and useful tests",
+      "summary": "Turn a transformation into a small contract you can check.",
+      "minutes": 30,
+      "level": "Beginner"
+    },
+    {
+      "slug": "files-json-and-dataset-audits",
+      "module": "python",
+      "title": "Files, JSON, and dataset audits",
+      "summary": "Load structured data and catch invalid rows before training.",
+      "minutes": 30,
+      "level": "Beginner"
+    },
+    {
+      "slug": "reproducible-data-splits",
+      "module": "python",
+      "title": "Create a repeatable train/test split",
+      "summary": "Keep evaluation data separate and make the boundary easy to inspect.",
+      "minutes": 25,
+      "level": "Beginner"
+    },
+    {
+      "slug": "vectors-and-similarity",
+      "module": "math",
+      "title": "Vectors and similarity",
+      "summary": "Turn a geometric idea into a useful comparison between items.",
+      "minutes": 30,
+      "level": "Beginner"
+    },
+    {
+      "slug": "probability-and-uncertainty",
+      "module": "math",
+      "title": "Probability, uncertainty, and base rates",
+      "summary": "Interpret model confidence without mistaking it for a guarantee.",
+      "minutes": 30,
+      "level": "Beginner"
+    },
+    {
+      "slug": "loss-and-gradient-descent",
+      "module": "math",
+      "title": "Loss and gradient descent",
+      "summary": "See how repeated small updates can improve a prediction.",
+      "minutes": 35,
+      "level": "Beginner"
+    },
+    {
+      "slug": "scaling-and-numerical-stability",
+      "module": "math",
+      "title": "Scaling and numerical stability",
+      "summary": "Avoid misleading results from incompatible units and unstable arithmetic.",
+      "minutes": 30,
+      "level": "Beginner"
+    },
+    {
+      "slug": "linear-regression-from-scratch",
+      "module": "machine-learning",
+      "title": "Fit a line, then question it",
+      "summary": "Build a regression baseline and inspect errors on unseen examples.",
+      "minutes": 35,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "nearest-neighbor-classification",
+      "module": "machine-learning",
+      "title": "Classify by finding neighbors",
+      "summary": "Build an interpretable classifier and understand its sensitivity to scale.",
+      "minutes": 35,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "precision-recall-and-thresholds",
+      "module": "machine-learning",
+      "title": "Precision, recall, and decision thresholds",
+      "summary": "See the trade-off between catching positives and creating false alerts.",
+      "minutes": 35,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "clustering-with-k-means",
+      "module": "machine-learning",
+      "title": "Discover structure with k-means",
+      "summary": "Group unlabeled points and learn why clusters need interpretation.",
+      "minutes": 35,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "neurons-and-activations",
+      "module": "neural-networks",
+      "title": "A neuron is a small computation",
+      "summary": "Build a weighted sum and see how a nonlinearity changes it.",
+      "minutes": 30,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "gradients-and-backpropagation",
+      "module": "neural-networks",
+      "title": "Backpropagation without the mystery",
+      "summary": "Follow the chain rule through one neuron and check the derivative numerically.",
+      "minutes": 40,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "train-a-neural-classifier",
+      "module": "neural-networks",
+      "title": "Train your first neural classifier",
+      "summary": "Optimize a sigmoid neuron using binary cross-entropy.",
+      "minutes": 40,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "overfitting-and-early-stopping",
+      "module": "neural-networks",
+      "title": "Overfitting, regularization, and early stopping",
+      "summary": "Choose a model checkpoint using validation behavior.",
+      "minutes": 30,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "tokenization-and-vocabularies",
+      "module": "language",
+      "title": "Tokenization and vocabularies",
+      "summary": "Turn text into model inputs while keeping the representation’s limits visible.",
+      "minutes": 30,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "tf-idf-document-search",
+      "module": "language",
+      "title": "Build a TF–IDF document search",
+      "summary": "Retrieve relevant passages using an inspectable lexical baseline.",
+      "minutes": 40,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "a-tiny-language-model",
+      "module": "language",
+      "title": "Train a tiny next-word model",
+      "summary": "Learn what next-token prediction does using a transparent bigram model.",
+      "minutes": 40,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "attention-in-small-numbers",
+      "module": "language",
+      "title": "Attention in small numbers",
+      "summary": "Compute attention weights and see what is being mixed.",
+      "minutes": 40,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "design-a-grounded-answer-pipeline",
+      "module": "systems",
+      "title": "Design a grounded answer pipeline",
+      "summary": "Separate retrieval, answer construction, and evidence checking.",
+      "minutes": 35,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "structured-outputs-and-tool-boundaries",
+      "module": "systems",
+      "title": "Structured outputs and tool boundaries",
+      "summary": "Treat generated instructions as proposals that still need validation.",
+      "minutes": 35,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "evaluate-ai-systems",
+      "module": "systems",
+      "title": "Build an evaluation harness",
+      "summary": "Measure the whole workflow and turn failures into a development plan.",
+      "minutes": 35,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "latency-caching-and-budgets",
+      "module": "systems",
+      "title": "Latency, caching, and bounded work",
+      "summary": "Control the amount of work before optimizing individual operations.",
+      "minutes": 35,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "privacy-and-data-minimization",
+      "module": "responsible-ai",
+      "title": "Privacy starts with the data you do not collect",
+      "summary": "Design an experiment with minimal records and deliberate retention.",
+      "minutes": 30,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "fairness-and-error-slices",
+      "module": "responsible-ai",
+      "title": "Inspect who experiences the errors",
+      "summary": "Use subgroup metrics carefully and avoid conclusions from tiny samples.",
+      "minutes": 35,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "prompt-injection-and-untrusted-input",
+      "module": "responsible-ai",
+      "title": "Keep untrusted text away from authority",
+      "summary": "Understand why a document must not become an instruction source.",
+      "minutes": 35,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "monitoring-and-model-cards",
+      "module": "responsible-ai",
+      "title": "Monitor changes and write a model card",
+      "summary": "Make a system’s intended use and limits inspectable after release.",
+      "minutes": 30,
+      "level": "Intermediate"
+    },
+    {
+      "slug": "project-support-message-classifier",
+      "module": "projects",
+      "title": "Project: a support-message classifier",
+      "summary": "Train a tiny text classifier, evaluate held-out messages, and inspect its errors.",
+      "minutes": 75,
+      "level": "Applied"
+    },
+    {
+      "slug": "project-search-your-notes",
+      "module": "projects",
+      "title": "Project: search your own study notes",
+      "summary": "Build a local passage retriever with ranking, source IDs, and a no-match state.",
+      "minutes": 75,
+      "level": "Applied"
+    },
+    {
+      "slug": "project-neural-network-xor",
+      "module": "projects",
+      "title": "Project: a neural network from scratch",
+      "summary": "Train a hidden layer to solve a pattern that one linear neuron cannot represent.",
+      "minutes": 90,
+      "level": "Applied"
+    },
+    {
+      "slug": "project-local-ai-api-and-database",
+      "module": "projects",
+      "title": "Project: a local AI service with a database",
+      "summary": "Connect a tiny text classifier to a validated HTTP endpoint and SQLite.",
+      "minutes": 90,
+      "level": "Applied"
+    }
+  ]
+}

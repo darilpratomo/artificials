@@ -1,0 +1,54 @@
+{
+  "slug": "attention-in-small-numbers",
+  "module": "language",
+  "title": "Attention in small numbers",
+  "summary": "Compute attention weights and see what is being mixed.",
+  "minutes": 40,
+  "level": "Intermediate",
+  "objectives": [
+    "Compare a query with keys",
+    "Normalize attention scores",
+    "Mix value vectors"
+  ],
+  "sections": [
+    {
+      "title": "Queries ask, keys match, values contribute",
+      "paragraphs": [
+        "In attention, a query is compared with keys to produce scores. Softmax turns those scores into weights, and a weighted sum mixes the corresponding values. Scaled dot-product attention divides scores by the square root of the key dimension.",
+        "In a transformer, learned projections produce queries, keys, and values from representations. Our example provides the vectors directly so each multiplication can be inspected. Attention can be used inside many architectures; one weighted sum is not a full language model."
+      ]
+    },
+    {
+      "title": "Attend within the allowed context",
+      "paragraphs": [
+        "A causal language model masks future positions so a token cannot access the continuation it is supposed to predict. Padding masks prevent artificial padding positions from receiving attention.",
+        "Attention weights describe one internal computation. They are not a complete explanation of a model’s reasoning, nor do they prove a source is factually reliable. Other layers and transformations also contribute to the output."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "attention-in-small-numbers.py",
+    "source": "import math\nquery = [1., 0.]\nkeys = [[1., 0.], [0., 1.], [-1., 0.]]\nvalues = [[2., 0.], [0., 2.], [1., 1.]]\nscores = [sum(q*k for q, k in zip(query, key))/math.sqrt(len(query)) for key in keys]\nexps = [math.exp(score-max(scores)) for score in scores]\nweights = [value/sum(exps) for value in exps]\noutput = [sum(w*v[d] for w, v in zip(weights, values)) for d in range(2)]\nprint(\"Attention weights:\", [round(w, 3) for w in weights])\nprint(\"Mixed value:\", [round(v, 3) for v in output])\n",
+    "explanation": "The most aligned key receives the largest weight. The output mixes values, not keys, which can represent different information."
+  },
+  "practice": {
+    "goal": "Apply a causal-style mask.",
+    "steps": [
+      "Exclude the third key/value position before softmax.",
+      "Recalculate the two remaining weights.",
+      "Explain why masking must happen before normalization."
+    ],
+    "solution": "Remove masked scores or assign negative infinity before softmax. Setting a weight to zero afterward without renormalizing leaves the weights summing to less than one and changes the intended operation.",
+    "expected": "All weights are positive, sum to one, and the first key gets the largest weight."
+  },
+  "quiz": {
+    "question": "Which vectors are combined to form the attention output?",
+    "options": [
+      "The values",
+      "The token IDs directly",
+      "Only the query"
+    ],
+    "answer": 0,
+    "explanation": "Query-key comparisons determine the weights; the weights mix value vectors."
+  }
+}

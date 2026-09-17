@@ -1,0 +1,54 @@
+{
+  "slug": "project-local-ai-api-and-database",
+  "module": "projects",
+  "title": "Project: a local AI service with a database",
+  "summary": "Connect a tiny text classifier to a validated HTTP endpoint and SQLite.",
+  "minutes": 90,
+  "level": "Applied",
+  "objectives": [
+    "Expose a local prediction endpoint",
+    "Validate request size and schema",
+    "Store results with parameterized SQL"
+  ],
+  "sections": [
+    {
+      "title": "Connect the pieces",
+      "paragraphs": [
+        "An AI application is more than a model. It receives input, validates a contract, performs inference, stores a useful record, and returns a clear result. This project fits a tiny nearest-example text classifier, exposes POST /predict, and records the predicted category in SQLite.",
+        "The four training phrases are original fixtures. The classifier uses token-set overlap and returns review when no word matches. It is intentionally modest so the service and data flow stay visible. Replace it with an evaluated model only after the surrounding contract works."
+      ]
+    },
+    {
+      "title": "Run locally, then extend deliberately",
+      "paragraphs": [
+        "Save the downloaded file and run python project-local-ai-api-and-database.py. The default mode performs a self-test without opening a server. Add --serve to bind to 127.0.0.1:8000; stop with Ctrl+C. In another terminal, POST JSON such as {\"text\":\"reset password\"} to /predict. Results are saved in academy_predictions.sqlite3 in the current folder.",
+        "The service restricts request size, checks content type and schema, avoids storing raw text, and uses parameterized SQL. It is a local learning service, not a public deployment template: public use also needs a production server, HTTPS, authentication, authorization, rate limits, and operational monitoring."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "project-local-ai-api-and-database.py",
+    "source": "import json, re, sqlite3, sys\nfrom http.server import BaseHTTPRequestHandler, HTTPServer\ntraining = [(\"reset password login\", \"account\"), (\"sign in account\", \"account\"),\n            (\"invoice payment receipt\", \"billing\"), (\"charge billing\", \"billing\")]\ndef tokens(text):\n    return set(re.findall(r\"[a-z]+\", text.lower()))\ndef predict(text):\n    query = tokens(text)\n    scored = [(len(query & tokens(example)), label) for example, label in training]\n    score, label = max(scored)\n    return label if score else \"review\"\ndef validate(payload):\n    if not isinstance(payload, dict) or set(payload) != {\"text\"}:\n        raise ValueError(\"Expected one text field\")\n    text = payload[\"text\"]\n    if not isinstance(text, str) or not 1 <= len(text.strip()) <= 500:\n        raise ValueError(\"Use 1 to 500 characters\")\n    return text.strip()\nclass Handler(BaseHTTPRequestHandler):\n    def log_message(self, format, *args):\n        pass  # Do not log request content in this learning service.\n    def reply(self, status, data):\n        body = json.dumps(data).encode()\n        self.send_response(status)\n        self.send_header(\"Content-Type\", \"application/json\")\n        self.send_header(\"Content-Length\", str(len(body)))\n        self.send_header(\"Cache-Control\", \"no-store\")\n        self.end_headers()\n        self.wfile.write(body)\n    def do_POST(self):\n        if self.path != \"/predict\":\n            return self.reply(404, {\"error\": \"Not found\"})\n        if self.headers.get_content_type() != \"application/json\":\n            return self.reply(415, {\"error\": \"Use application/json\"})\n        try:\n            size = int(self.headers.get(\"Content-Length\", \"0\"))\n            if not 0 < size <= 4096:\n                return self.reply(413, {\"error\": \"Body must be 1 to 4096 bytes\"})\n            payload = json.loads(self.rfile.read(size))\n            label = predict(validate(payload))\n        except (ValueError, UnicodeError):\n            return self.reply(400, {\"error\": \"Invalid JSON or text\"})\n        with sqlite3.connect(\"academy_predictions.sqlite3\") as db:\n            db.execute(\"CREATE TABLE IF NOT EXISTS predictions (id INTEGER PRIMARY KEY, label TEXT NOT NULL)\")\n            result = db.execute(\"INSERT INTO predictions (label) VALUES (?)\", (label,))\n            prediction_id = result.lastrowid\n        self.reply(200, {\"id\": prediction_id, \"label\": label})\nif __name__ == \"__main__\":\n    if \"--serve\" in sys.argv:\n        print(\"Local learning API: http://127.0.0.1:8000/predict\")\n        HTTPServer((\"127.0.0.1\", 8000), Handler).serve_forever()\n    else:\n        assert predict(validate({\"text\": \"reset password\"})) == \"account\"\n        assert predict(\"galactic weather\") == \"review\"\n        print(\"Self-test passed. Add --serve to run the local API.\")\n",
+    "explanation": "The database stores only a category and ID. The default self-test avoids starting a long-running process; --serve explicitly enables the local server."
+  },
+  "practice": {
+    "goal": "Complete an end-to-end request.",
+    "steps": [
+      "Start the server with --serve and POST a valid JSON request to /predict using your HTTP client.",
+      "Send an empty text field and confirm a 400 response; send text/plain and confirm 415.",
+      "Inspect the SQLite predictions table and verify invalid requests did not insert rows."
+    ],
+    "solution": "A valid request returns an ID and label, such as account. Invalid input returns a structured error before the INSERT. To extend it, add model_version and created_at fields, then test migrations and authorization before any public deployment.",
+    "expected": "The default mode prints Self-test passed. In server mode, a valid prediction creates one SQLite row."
+  },
+  "quiz": {
+    "question": "Why use placeholders in the INSERT statement?",
+    "options": [
+      "They keep values separate from SQL syntax",
+      "They automatically encrypt the database",
+      "They replace authentication"
+    ],
+    "answer": 0,
+    "explanation": "Parameterized SQL treats the category as data rather than executable SQL. Access control and encryption are separate concerns."
+  }
+}

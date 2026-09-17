@@ -1,0 +1,54 @@
+{
+  "slug": "overfitting-and-early-stopping",
+  "module": "neural-networks",
+  "title": "Overfitting, regularization, and early stopping",
+  "summary": "Choose a model checkpoint using validation behavior.",
+  "minutes": 30,
+  "level": "Intermediate",
+  "objectives": [
+    "Recognize diverging loss curves",
+    "Select a validation checkpoint",
+    "Keep final test data untouched"
+  ],
+  "sections": [
+    {
+      "title": "Memorizing is not generalizing",
+      "paragraphs": [
+        "A flexible model can keep reducing training error while becoming worse on unseen examples. This is overfitting. It is especially easy with few examples, noisy labels, or repeated tuning against a familiar evaluation set.",
+        "Regularization limits or discourages overly complex solutions. Examples include weight penalties, smaller models, data augmentation appropriate to the task, and early stopping. Each changes the trade-off and must be validated."
+      ]
+    },
+    {
+      "title": "Save the right checkpoint",
+      "paragraphs": [
+        "Early stopping monitors a validation metric and retains the best observed parameter state. A patience setting allows a few non-improving steps before stopping. Save a copy of the weights, not a mutable reference that later updates will change.",
+        "The selected validation result is influenced by model choice and is therefore not an unbiased final estimate. Use a held-out test set after decisions are complete, and report uncertainty when the sample is small."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "overfitting-and-early-stopping.py",
+    "source": "training = [0.8, 0.6, 0.4, 0.3, 0.2, 0.1]\nvalidation = [0.9, 0.7, 0.5, 0.48, 0.53, 0.6]\nbest_epoch = min(range(len(validation)), key=validation.__getitem__)\nprint(\"Best checkpoint:\", best_epoch + 1)\nprint(\"Training loss:\", training[best_epoch])\nprint(\"Validation loss:\", validation[best_epoch])\n",
+    "explanation": "These are constructed learning curves, not training output from a real model. They isolate the checkpoint-selection decision."
+  },
+  "practice": {
+    "goal": "Implement patience of two.",
+    "steps": [
+      "Read validation losses in order.",
+      "Reset a counter on improvement and increment it otherwise.",
+      "Stop after two consecutive non-improvements while retaining the best epoch."
+    ],
+    "solution": "The best checkpoint is epoch 4. Epochs 5 and 6 fail to improve, so training stops after epoch 6 with epoch 4 retained. The most recent weights are not necessarily the best weights.",
+    "expected": "The selected checkpoint is 4, with training loss 0.3 and validation loss 0.48."
+  },
+  "quiz": {
+    "question": "Which checkpoint should be kept here?",
+    "options": [
+      "The final one because its training loss is lowest",
+      "Epoch 4 because its validation loss is lowest",
+      "Whichever gives the highest test score after repeated attempts"
+    ],
+    "answer": 1,
+    "explanation": "Validation chooses the checkpoint. The final test set remains outside that selection loop."
+  }
+}

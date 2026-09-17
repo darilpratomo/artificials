@@ -1,0 +1,54 @@
+{
+  "slug": "scaling-and-numerical-stability",
+  "module": "math",
+  "title": "Scaling and numerical stability",
+  "summary": "Avoid misleading results from incompatible units and unstable arithmetic.",
+  "minutes": 30,
+  "level": "Beginner",
+  "objectives": [
+    "Standardize with training statistics",
+    "Handle constant features",
+    "Compute a stable softmax"
+  ],
+  "sections": [
+    {
+      "title": "Units change the geometry",
+      "paragraphs": [
+        "If one feature is measured in millions and another in fractions, distance calculations and gradient updates can be dominated by the larger scale. Standardization subtracts a training mean and divides by a training standard deviation.",
+        "A constant feature has zero standard deviation. Handle it explicitly rather than dividing by zero. Save the training statistics and apply the same transformation during validation and inference. Recomputing them on each request changes the meaning of the input."
+      ]
+    },
+    {
+      "title": "Equivalent formulas can behave differently",
+      "paragraphs": [
+        "Softmax converts a vector of logits into positive weights that sum to one. Directly exponentiating very large logits can overflow. Subtracting the largest logit from every logit preserves the mathematical result while keeping exponentials bounded above by one.",
+        "Numerical stability is separate from calibration. A correctly computed softmax can still produce overconfident predictions. Inspect finite values and reasonable ranges, then evaluate whether the resulting scores match observed outcomes."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "scaling-and-numerical-stability.py",
+    "source": "import math\ndef softmax(logits):\n    if not logits or not all(math.isfinite(x) for x in logits):\n        raise ValueError(\"Use nonempty finite logits\")\n    largest = max(logits)\n    exps = [math.exp(x - largest) for x in logits]\n    total = sum(exps)\n    return [x / total for x in exps]\nweights = softmax([1000., 1001., 999.])\nprint([round(x, 4) for x in weights])\nassert abs(sum(weights) - 1) < 1e-12\n",
+    "explanation": "Subtracting the maximum avoids math.exp(1001), which would overflow. It leaves the ratios between exponentials unchanged."
+  },
+  "practice": {
+    "goal": "Test shift invariance.",
+    "steps": [
+      "Run softmax on [0, 1, -1].",
+      "Compare with [1000, 1001, 999].",
+      "Explain why adding the same constant should not change the probabilities."
+    ],
+    "solution": "All exponentials gain the same multiplicative factor, which cancels in the denominator. A stable implementation produces matching results within floating-point tolerance.",
+    "expected": "The weights are approximately 0.2447, 0.6652, and 0.0900."
+  },
+  "quiz": {
+    "question": "Why subtract the maximum before exponentiating?",
+    "options": [
+      "To avoid overflow while preserving softmax ratios",
+      "To guarantee calibrated confidence",
+      "To make the largest probability exactly 1"
+    ],
+    "answer": 0,
+    "explanation": "This is an algebraically equivalent numerical stabilization, not a change to the model’s certainty."
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "slug": "project-support-message-classifier",
+  "module": "projects",
+  "title": "Project: a support-message classifier",
+  "summary": "Train a tiny text classifier, evaluate held-out messages, and inspect its errors.",
+  "minutes": 75,
+  "level": "Applied",
+  "objectives": [
+    "Train multinomial Naive Bayes",
+    "Keep vocabulary inside training",
+    "Evaluate a complete prediction path"
+  ],
+  "sections": [
+    {
+      "title": "Build a complete baseline",
+      "paragraphs": [
+        "This project uses multinomial Naive Bayes. Each class has a prior based on its training frequency and a distribution over vocabulary words. Add-one smoothing keeps observed-vocabulary words from getting zero probability in a class.",
+        "For a query, sum the log prior and word log probabilities, then choose the highest score. Summing logs avoids underflow from multiplying many small numbers. The conditional-independence assumption is a simplification; correlated words are treated as separate evidence."
+      ]
+    },
+    {
+      "title": "Evaluate honestly",
+      "paragraphs": [
+        "The dataset is deliberately small and invented. It demonstrates a full training-to-inference path, not a production support classifier. Unknown words are ignored, so a query with no known terms falls back to review.",
+        "The selected class score is not a calibrated probability. Inspect missed synonyms, mixed-topic messages, negation, and unknown language. Expand the labeling guide and evaluation set before adding complexity. Keep any final test examples out of vocabulary construction and tuning."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "project-support-message-classifier.py",
+    "source": "import math, re\nfrom collections import Counter, defaultdict\ntrain = [(\"reset password login\", \"account\"), (\"account sign in password\", \"account\"),\n         (\"invoice payment billing\", \"billing\"), (\"receipt charge payment\", \"billing\")]\ndef tokens(text):\n    return re.findall(r\"[a-z]+\", text.lower())\ncounts, classes = defaultdict(Counter), Counter()\nfor text, label in train:\n    counts[label].update(tokens(text))\n    classes[label] += 1\nvocab = set().union(*(set(c) for c in counts.values()))\ndef predict(text):\n    words = [w for w in tokens(text) if w in vocab]\n    if not words:\n        return \"review\"\n    scores = {}\n    for label in classes:\n        total = sum(counts[label].values()) + len(vocab)\n        scores[label] = math.log(classes[label]/len(train)) + sum(\n            math.log((counts[label][word]+1)/total) for word in words)\n    return max(sorted(scores), key=scores.get)\ntest = [(\"forgot login password\", \"account\"), (\"payment invoice question\", \"billing\"),\n        (\"galactic weather\", \"review\"), (\"refund request\", \"billing\")]\ncorrect = 0\nfor text, expected in test:\n    actual = predict(text)\n    correct += actual == expected\n    print({\"text\": text, \"expected\": expected, \"prediction\": actual})\nprint(\"Correct:\", correct, \"of\", len(test))\n",
+    "explanation": "The script learns word counts only from the four training messages. The refund example intentionally reveals a missing concept in the vocabulary."
+  },
+  "practice": {
+    "goal": "Extend the classifier without contaminating its evaluation.",
+    "steps": [
+      "Create a separate development set with mixed topics and unfamiliar wording.",
+      "Add original training messages for missing concepts, then freeze the vocabulary.",
+      "Evaluate once on a new held-out set and write a short model card with counts and failures."
+    ],
+    "solution": "Use development errors to improve training coverage. Do not report the repeatedly inspected four-case fixture as an unbiased final score. Keep no-known-word queries in review and consider an ambiguity rule validated on separate examples.",
+    "expected": "The initial script gets 3 of 4 held-out fixture cases correct; refund request is sent to review."
+  },
+  "quiz": {
+    "question": "Why build the vocabulary only from training text?",
+    "options": [
+      "To preserve an independent evaluation boundary",
+      "To make unknown words impossible",
+      "Because test text is never useful for error analysis"
+    ],
+    "answer": 0,
+    "explanation": "Evaluation inputs should not influence the learned representation before the final evaluation. Error analysis comes after the measured run."
+  }
+}

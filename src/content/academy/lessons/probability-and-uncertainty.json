@@ -1,0 +1,54 @@
+{
+  "slug": "probability-and-uncertainty",
+  "module": "math",
+  "title": "Probability, uncertainty, and base rates",
+  "summary": "Interpret model confidence without mistaking it for a guarantee.",
+  "minutes": 30,
+  "level": "Beginner",
+  "objectives": [
+    "Distinguish frequency and confidence",
+    "Use a base rate in a calculation",
+    "Recognize the need for calibration"
+  ],
+  "sections": [
+    {
+      "title": "Start with a population",
+      "paragraphs": [
+        "A probability statement needs an event and a population. If a detector finds 90% of rare events, that says nothing by itself about how many alerts are correct. The frequency of the event and the false-positive rate also matter.",
+        "Imagine 1,000 messages, of which 10 truly need escalation. A system finding nine of those but incorrectly flagging 50 ordinary messages produces 59 alerts, only nine correct. Excellent recall can coexist with poor alert precision."
+      ]
+    },
+    {
+      "title": "Confidence needs checking",
+      "paragraphs": [
+        "A model score is not automatically a calibrated probability. Calibration asks whether events assigned roughly 0.8 confidence actually occur about 80% of the time across comparable examples. This requires held-out observations and enough data.",
+        "Uncertainty can also come from unfamiliar inputs, missing information, or a changing environment. A numeric score cannot capture all of these by itself. Use uncertainty to guide review and evidence gathering instead of disguising it with extra decimal places."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "probability-and-uncertainty.py",
+    "source": "population = 1000\nactual_positive = 10\ntrue_positive = 9\nfalse_positive = 50\nprecision = true_positive / (true_positive + false_positive)\nrecall = true_positive / actual_positive\nprint(\"Prevalence:\", actual_positive / population)\nprint(\"Precision:\", round(precision, 3))\nprint(\"Recall:\", round(recall, 3))\n",
+    "explanation": "The numbers describe a constructed scenario, not a benchmark result. They show why a rare target changes the interpretation of an alert."
+  },
+  "practice": {
+    "goal": "Calculate a precision target.",
+    "steps": [
+      "Keep nine true positives.",
+      "Find the largest integer number of false positives that still gives at least 75% precision.",
+      "Explain the practical cost of reviewing the resulting alerts."
+    ],
+    "solution": "At most three false positives are allowed: 9 / (9 + 3) = 0.75. A fourth drops precision below the target. Whether that trade-off is acceptable depends on the cost of missed events and unnecessary reviews.",
+    "expected": "The initial precision is approximately 0.153 while recall is 0.9."
+  },
+  "quiz": {
+    "question": "What else is needed to interpret a high detection rate?",
+    "options": [
+      "Only a larger model",
+      "The event base rate and false-positive behavior",
+      "A longer prompt"
+    ],
+    "answer": 1,
+    "explanation": "How often the event occurs and how many ordinary cases are incorrectly flagged determine the usefulness of positive alerts."
+  }
+}

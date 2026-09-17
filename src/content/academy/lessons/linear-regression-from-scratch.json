@@ -1,0 +1,54 @@
+{
+  "slug": "linear-regression-from-scratch",
+  "module": "machine-learning",
+  "title": "Fit a line, then question it",
+  "summary": "Build a regression baseline and inspect errors on unseen examples.",
+  "minutes": 35,
+  "level": "Intermediate",
+  "objectives": [
+    "Fit slope and intercept",
+    "Measure mean absolute error",
+    "Recognize extrapolation risk"
+  ],
+  "sections": [
+    {
+      "title": "Fit the relationship",
+      "paragraphs": [
+        "Linear regression models a target as an intercept plus a weighted sum of features. With one feature, the least-squares slope is the covariance numerator divided by the feature’s squared-deviation sum. The intercept places the line through the means.",
+        "This relationship describes the examples you supplied. A good fit does not establish causation. A feature associated with a target might be a proxy, a consequence, or a coincidence. Look at individual errors and the measurement process."
+      ]
+    },
+    {
+      "title": "Evaluate outside the fitting step",
+      "paragraphs": [
+        "Mean absolute error averages absolute misses in the target’s units. It is easy to interpret: an MAE of two minutes means the average absolute timing error was two minutes on that evaluation set.",
+        "Predictions far outside the training range are extrapolation. A straight line may produce physically impossible values. Define a supported input range and compare against a simple baseline such as the training-target mean."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "linear-regression-from-scratch.py",
+    "source": "xs, ys = [1, 2, 3, 4], [3, 5, 7, 9]\nx_mean, y_mean = sum(xs)/len(xs), sum(ys)/len(ys)\ndenominator = sum((x-x_mean)**2 for x in xs)\nif not denominator:\n    raise ValueError(\"The feature must vary\")\nslope = sum((x-x_mean)*(y-y_mean) for x, y in zip(xs, ys)) / denominator\nintercept = y_mean - slope*x_mean\ntest_x, test_y = [5, 6], [11, 13]\npredictions = [intercept+slope*x for x in test_x]\nmae = sum(abs(a-b) for a, b in zip(predictions, test_y))/len(test_y)\nprint(\"Slope:\", slope, \"Intercept:\", intercept, \"Test MAE:\", mae)\n",
+    "explanation": "The invented data follows a perfect line so the test error is zero. This is a demonstration of mechanics, not evidence of real-world predictive quality."
+  },
+  "practice": {
+    "goal": "Introduce a noisy observation.",
+    "steps": [
+      "Change the last training target from 9 to 12.",
+      "Recalculate the slope, intercept, and test MAE.",
+      "Compare with a predictor that always returns the training mean."
+    ],
+    "solution": "The fitted line tilts toward the unusually high target. Record whether test error improved, rather than treating closer fit to a noisy point as automatic progress. A baseline must also be evaluated on the same test rows.",
+    "expected": "The original slope is 2, intercept is 1, and test MAE is 0."
+  },
+  "quiz": {
+    "question": "What does a perfect fit prove?",
+    "options": [
+      "The feature causes the target",
+      "Only that the model fits the observed examples",
+      "Future predictions are guaranteed"
+    ],
+    "answer": 1,
+    "explanation": "A fitted relationship does not prove causation or that future data follows the same pattern."
+  }
+}

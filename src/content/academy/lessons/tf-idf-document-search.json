@@ -1,0 +1,54 @@
+{
+  "slug": "tf-idf-document-search",
+  "module": "language",
+  "title": "Build a TF–IDF document search",
+  "summary": "Retrieve relevant passages using an inspectable lexical baseline.",
+  "minutes": 40,
+  "level": "Intermediate",
+  "objectives": [
+    "Weight common and rare terms",
+    "Compare query and document vectors",
+    "Recognize lexical retrieval limitations"
+  ],
+  "sections": [
+    {
+      "title": "Not every word is equally useful",
+      "paragraphs": [
+        "Term frequency measures how often a term appears in a document. Inverse document frequency gives more weight to terms appearing in fewer documents. Multiplying the two produces a lexical representation that can highlight distinctive words.",
+        "Different implementations use different smoothing and normalization conventions. The exercise uses raw counts and log((1+N)/(1+document_frequency))+1, then compares vectors with cosine similarity. Keep the convention fixed when comparing results."
+      ]
+    },
+    {
+      "title": "Retrieve evidence, not an answer",
+      "paragraphs": [
+        "Retrieval finds candidates. It does not establish that a passage contains a correct answer or that an answer generated from it is grounded. Exact-word retrieval can miss synonyms and find misleading keyword matches.",
+        "Start with a lexical baseline because it is cheap and inspectable. Evaluate relevant passage retrieval on questions written separately from the indexed documents. Later you can compare dense representations or combine both approaches."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "tf-idf-document-search.py",
+    "source": "import math\nfrom collections import Counter\ndocs = [\"python functions organize code\", \"neural networks learn patterns\", \"python code trains models\"]\ntokens = [doc.split() for doc in docs]\nvocab = sorted(set(sum(tokens, [])))\nidf = {w: math.log((1+len(docs))/(1+sum(w in d for d in tokens)))+1 for w in vocab}\ndef vector(text):\n    counts = Counter(text.lower().split())\n    return [counts[w]*idf[w] for w in vocab]\ndef cosine(a, b):\n    denom = math.sqrt(sum(x*x for x in a)*sum(x*x for x in b))\n    return sum(x*y for x, y in zip(a, b))/denom if denom else 0.\nquery = vector(\"python code\")\nranked = sorted(enumerate(docs), key=lambda row: -cosine(query, vector(row[1])))\nfor index, doc in ranked:\n    print(index, round(cosine(query, vector(doc)), 3), doc)\n",
+    "explanation": "All corpus documents are indexed for retrieval. This is different from fitting a supervised model on evaluation labels; keep evaluation questions and relevance judgments separate."
+  },
+  "practice": {
+    "goal": "Test a synonym failure.",
+    "steps": [
+      "Search for programming instead of python code.",
+      "Observe the query vector when all terms are unknown.",
+      "Add an explicit no-match result rather than returning the first document as a confident answer."
+    ],
+    "solution": "The query becomes a zero vector and all scores are zero. Require a positive score for lexical overlap, and use a validation set to choose any stronger confidence threshold. Adding synonyms can help but must be evaluated.",
+    "expected": "Python-related documents rank ahead of the neural-network-only document."
+  },
+  "quiz": {
+    "question": "What does TF–IDF primarily match?",
+    "options": [
+      "Shared lexical terms with corpus-based weights",
+      "Guaranteed semantic truth",
+      "The user’s intent perfectly"
+    ],
+    "answer": 0,
+    "explanation": "It is a lexical method and can miss semantic relationships without shared terms."
+  }
+}

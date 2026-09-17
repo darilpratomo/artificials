@@ -1,0 +1,54 @@
+{
+  "slug": "tokenization-and-vocabularies",
+  "module": "language",
+  "title": "Tokenization and vocabularies",
+  "summary": "Turn text into model inputs while keeping the representation’s limits visible.",
+  "minutes": 30,
+  "level": "Intermediate",
+  "objectives": [
+    "Build a training vocabulary",
+    "Handle unknown words",
+    "Distinguish toy word splitting from production tokenizers"
+  ],
+  "sections": [
+    {
+      "title": "Tokens are representation units",
+      "paragraphs": [
+        "A tokenizer maps text into units a model can process. Those units may be words, subwords, characters, or bytes. Token counts therefore depend on the tokenizer, language, and input; character count is not a reliable universal conversion.",
+        "Our learning tokenizer lowercases and extracts basic Latin words with a regular expression. It deliberately simplifies punctuation and multilingual text. Real applications need a tokenizer that matches the exact model and handles the intended languages."
+      ]
+    },
+    {
+      "title": "Fit the vocabulary at the right time",
+      "paragraphs": [
+        "Build a learned vocabulary from training text only. Reserve an unknown token for inputs absent from the vocabulary. If you rebuild the mapping on each request, the same ID can change meaning.",
+        "Save the vocabulary with the model. Decide how case, punctuation, whitespace, and empty text are handled. Some normalization can erase information the task needs, such as case in code or punctuation in sentiment."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "tokenization-and-vocabularies.py",
+    "source": "import re\ntraining = [\"Learn AI with Python\", \"Build useful AI tools\"]\ndef tokenize(text):\n    return re.findall(r\"[a-z]+\", text.casefold())\nwords = sorted({word for text in training for word in tokenize(text)})\nvocabulary = {word: i+1 for i, word in enumerate(words)}\nencoded = [vocabulary.get(word, 0) for word in tokenize(\"Learn new tools\")]\nprint(\"Vocabulary:\", vocabulary)\nprint(\"Token IDs:\", encoded)\n",
+    "explanation": "Zero is reserved for unknown words. The word new is absent from training and therefore maps to zero."
+  },
+  "practice": {
+    "goal": "Expose the tokenizer’s limitations.",
+    "steps": [
+      "Try a phrase containing accented characters.",
+      "Try source code with punctuation.",
+      "Document which distinctions the regular expression discards."
+    ],
+    "solution": "The pattern only includes a-z, so it can split or discard other scripts and accented letters. Code punctuation also disappears. Keep this tokenizer labeled as a teaching simplification rather than using it uncritically in a multilingual product.",
+    "expected": "The encoded sequence contains zero for new."
+  },
+  "quiz": {
+    "question": "Should two models always receive identical token IDs for the same text?",
+    "options": [
+      "Yes, token IDs are universal",
+      "No, token IDs belong to a specific tokenizer and vocabulary",
+      "Only if the text is English"
+    ],
+    "answer": 1,
+    "explanation": "An ID only has meaning inside the tokenizer/model pair that defines it."
+  }
+}

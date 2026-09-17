@@ -1,0 +1,54 @@
+{
+  "slug": "project-neural-network-xor",
+  "module": "projects",
+  "title": "Project: a neural network from scratch",
+  "summary": "Train a hidden layer to solve a pattern that one linear neuron cannot represent.",
+  "minutes": 90,
+  "level": "Applied",
+  "objectives": [
+    "Implement a two-layer forward pass",
+    "Backpropagate through hidden units",
+    "Verify a learned nonlinear boundary"
+  ],
+  "sections": [
+    {
+      "title": "A small nonlinear challenge",
+      "paragraphs": [
+        "XOR is positive when exactly one of two binary inputs is one. The positive points lie on opposite corners of a square, so a single straight boundary cannot separate them from the negative points. A hidden layer with nonlinear activations can represent the pattern.",
+        "This project uses four tanh hidden units and one sigmoid output. Binary cross-entropy gives an output-logit gradient of prediction minus target. The hidden derivative multiplies the upstream gradient by one minus the squared tanh output."
+      ]
+    },
+    {
+      "title": "Check the mechanics and the claim",
+      "paragraphs": [
+        "Accumulate all gradients for a batch before updating weights. Each backward pass must use the same weights as its forward pass. A seeded initialization makes this educational experiment repeatable.",
+        "The four possible XOR inputs are all used for training and verification. This checks learning the truth table; it is not a held-out generalization experiment. Do not report its success as evidence of broader reasoning ability. To study generalization, define a larger task with separate examples."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "project-neural-network-xor.py",
+    "source": "import math, random\nrng = random.Random(17)\ndata = [([0., 0.], 0.), ([0., 1.], 1.), ([1., 0.], 1.), ([1., 1.], 0.)]\nw1 = [[rng.uniform(-1, 1) for _ in range(2)] for _ in range(4)]\nb1 = [0.] * 4\nw2 = [rng.uniform(-1, 1) for _ in range(4)]\nb2 = 0.\ndef forward(x):\n    h = [math.tanh(sum(w*t for w, t in zip(row, x))+b) for row, b in zip(w1, b1)]\n    p = 1/(1+math.exp(-(sum(w*v for w, v in zip(w2, h))+b2)))\n    return h, p\nfor epoch in range(5000):\n    gw1, gb1, gw2, gb2 = [[0., 0.] for _ in range(4)], [0.]*4, [0.]*4, 0.\n    for x, y in data:\n        h, p = forward(x)\n        dz = p-y\n        gb2 += dz\n        for j in range(4):\n            gw2[j] += dz*h[j]\n            dh = dz*w2[j]*(1-h[j]*h[j])\n            gb1[j] += dh\n            for k in range(2):\n                gw1[j][k] += dh*x[k]\n    rate = 0.3/len(data)\n    b2 -= rate*gb2\n    for j in range(4):\n        w2[j] -= rate*gw2[j]\n        b1[j] -= rate*gb1[j]\n        for k in range(2):\n            w1[j][k] -= rate*gw1[j][k]\nfor x, y in data:\n    p = forward(x)[1]\n    print(x, \"target\", int(y), \"score\", round(p, 3))\n    assert int(p >= 0.5) == int(y)\n",
+    "explanation": "The final assertions verify all four truth-table outputs. The hidden layer gives the network a nonlinear decision surface; the training loop optimizes it."
+  },
+  "practice": {
+    "goal": "Inspect the hidden representation.",
+    "steps": [
+      "Print the four hidden activations for every input after training.",
+      "Reduce the hidden layer to one unit and adapt all loop sizes.",
+      "Compare convergence and describe what the hidden layer contributes."
+    ],
+    "solution": "Hidden units produce different nonlinear responses to the input corners. Changing width changes representational capacity and optimization. Keep the same evaluation claim: learning four known cases is not evidence about an unrelated task.",
+    "expected": "With the supplied seed and settings, all four XOR predictions pass the assertions."
+  },
+  "quiz": {
+    "question": "Why is the final XOR check not a held-out evaluation?",
+    "options": [
+      "The same four cases were used in training",
+      "Neural networks cannot be evaluated",
+      "A fixed seed always invalidates testing"
+    ],
+    "answer": 0,
+    "explanation": "The check verifies fitting the truth table. It does not measure performance on examples excluded from training."
+  }
+}

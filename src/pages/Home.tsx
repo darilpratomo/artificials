@@ -13,54 +13,67 @@ import {
   Database,
   ChevronRight,
 } from 'lucide-react';
-import { NeuralOrb, Reveal, ScrollJourney } from '../components/Motion';
+import { Reveal, ScrollJourney } from '../components/Motion';
 import { useCatalogSummary, compactNumber, updatedDate, providerLogo } from '../lib/catalog';
 import ModelCard from '../components/ModelCard';
 import { ARTICLES } from '../../shared/content';
+import { AuthorBadge } from '../components/AuthorBadge';
 import { ArticleCover } from '../components/ArticleCover';
 export default function Home() {
   const { data, error } = useCatalogSummary();
   const [prompt, setPrompt] = useState('');
   return (
     <>
-      <section className="signal-hero container">
-        <div className="hero-grid" aria-hidden="true" />
-        <div className="hero-label mono">
-          <span className="signal-light" /> THE NEXT ERA IS ALREADY HERE
-          <span className="hero-edition">ARTIFICIALS / INTELLIGENCE INDEX</span>
+      <div className="hero-banner-shell">
+        <div className="hero-banner-art" aria-hidden="true">
+          <img
+            src="/editorial/hero-banner.webp"
+            srcSet="/editorial/hero-banner-small.webp 960w, /editorial/hero-banner.webp 1920w"
+            sizes="100vw"
+            width="1920"
+            height="819"
+            alt=""
+            fetchPriority="high"
+          />
         </div>
-        <div className="signal-copy">
-          <h1>
-            Intelligence.
-            <br />
-            <span>In perspective.</span>
-          </h1>
-          <p>
-            Make sense of a world moving at machine speed.
-            <br className="desktop-break" /> Explore the models. Understand the possibilities.
-            <br className="desktop-break" /> Build what comes next.
-          </p>
-          <div className="hero-actions">
-            <Link className="btn" to="/models">
-              Explore AI models <ArrowUpRight size={16} />
-            </Link>
-            <Link className="btn btn-outline" to="/studio">
-              <Command size={15} /> Open Studio
-            </Link>
+        <section className="signal-hero container">
+          <div className="hero-grid" aria-hidden="true" />
+          <div className="hero-label mono">
+            <span className="signal-light" /> THE NEXT ERA IS ALREADY HERE
+            <span className="hero-edition">ARTIFICIALS / INTELLIGENCE INDEX</span>
           </div>
-          <div className="hero-trust mono">
-            <ShieldCheck size={14} /> SOURCE-ATTRIBUTED DATA <span /> FREE TO EXPLORE
+          <div className="signal-copy">
+            <h1>
+              Intelligence.
+              <br />
+              <span>In perspective.</span>
+            </h1>
+            <p>
+              Make sense of a world moving at machine speed.
+              <br className="desktop-break" /> Explore the models. Understand the possibilities.
+              <br className="desktop-break" /> Build what comes next.
+            </p>
+            <div className="hero-actions">
+              <Link className="btn" to="/models">
+                Explore AI models <ArrowUpRight size={16} />
+              </Link>
+              <Link className="btn btn-outline" to="/studio">
+                <Command size={15} /> Open Studio
+              </Link>
+            </div>
+            <div className="hero-trust mono">
+              <ShieldCheck size={14} /> EXPLORE. LEARN. BUILD. <span /> FREE TO EXPLORE
+            </div>
           </div>
-        </div>
-        <NeuralOrb />
-        <div className="hero-bottom mono">
-          <a href="#intelligence">
-            SCROLL TO DISCOVER <ArrowDown size={14} />
-          </a>
-          <span>HUMAN CURIOSITY. ARTIFICIAL INTELLIGENCE.</span>
-          <span>[ 01 — 05 ]</span>
-        </div>
-      </section>
+          <div className="hero-bottom mono">
+            <a href="#intelligence">
+              SCROLL TO DISCOVER <ArrowDown size={14} />
+            </a>
+            <span>HUMAN CURIOSITY. ARTIFICIAL INTELLIGENCE.</span>
+            <span>[ 01 — 05 ]</span>
+          </div>
+        </section>
+      </div>
       <section className="provider-band" aria-label="Explore leading AI providers">
         <div className="container">
           <span className="mono">
@@ -139,11 +152,7 @@ export default function Home() {
           </div>
         )}
         <p className="data-footnote">
-          Catalog:{' '}
-          <a href="https://models.dev" target="_blank" rel="noopener noreferrer">
-            models.dev <ArrowUpRight size={10} />
-          </a>
-          . Offerings include the same model at different hosts. Scheduled updates; coverage depends
+          Offerings include the same model at different hosts. Scheduled updates; coverage depends
           on the source.
         </p>
       </section>
@@ -341,6 +350,7 @@ export default function Home() {
                 </div>
                 <h3>{a.title}</h3>
                 <p>{a.excerpt}</p>
+                <AuthorBadge />
                 <span className="text-link">
                   Read the perspective <ArrowUpRight size={14} />
                 </span>

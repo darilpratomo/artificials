@@ -1,0 +1,54 @@
+{
+  "slug": "define-a-useful-ai-task",
+  "module": "foundations",
+  "title": "Define a useful AI task",
+  "summary": "Turn an ambitious idea into a testable specification with a sensible fallback.",
+  "minutes": 20,
+  "level": "Beginner",
+  "objectives": [
+    "Specify a target and constraints",
+    "Identify the cost of a wrong answer",
+    "Write acceptance criteria"
+  ],
+  "sections": [
+    {
+      "title": "Write the contract",
+      "paragraphs": [
+        "“Make a smart assistant” is too broad to evaluate. “Given a public help article and a question, return a relevant passage or ask for clarification” specifies inputs, outputs, and an allowed fallback. Add language, input size, response time, and data boundaries.",
+        "Choose a metric that reflects the actual decision. A routing tool may need high recall for urgent messages, while an automatic action may need high precision. A model can score well on a convenient benchmark and still fail your product requirements."
+      ]
+    },
+    {
+      "title": "Define failure before success",
+      "paragraphs": [
+        "A fallback is part of the design. Missing input, unsupported language, uncertain predictions, and unavailable services should have explicit outcomes. Returning “needs review” can be more useful than a confident but unsupported answer.",
+        "Acceptance criteria must be checked on examples not used to shape the rules. Track a baseline, a target, and a release threshold. Keep a human review path for consequential decisions and do not present a probability as a guarantee."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "define-a-useful-ai-task.py",
+    "source": "spec = {\"max_characters\": 500, \"allowed_labels\": {\"billing\", \"account\", \"review\"}}\ndef validate(message, prediction):\n    return (isinstance(message, str) and 0 < len(message.strip()) <= spec[\"max_characters\"]\n            and prediction in spec[\"allowed_labels\"])\nchecks = [(\"Invoice question\", \"billing\"), (\"\", \"account\"), (\"Hello\", \"unknown\")]\nfor text, label in checks:\n    print(validate(text, label))\n",
+    "explanation": "A contract can be checked without any AI. Validation catches malformed outputs but cannot prove that a well-formed prediction is correct."
+  },
+  "practice": {
+    "goal": "Write a release contract for a study assistant.",
+    "steps": [
+      "Specify input and output types.",
+      "Choose three measurable acceptance checks.",
+      "Describe what happens when a source does not contain the answer."
+    ],
+    "solution": "Use nonempty questions, bounded document sizes, and a response containing a passage ID or an explicit no-answer status. Check relevance on held-out questions, passage existence, and response time independently.",
+    "expected": "The script prints True, False, False. Your contract should include an uncertainty path."
+  },
+  "quiz": {
+    "question": "Which is a measurable acceptance criterion?",
+    "options": [
+      "The assistant feels intelligent",
+      "At least 18 of 20 held-out questions retrieve a relevant passage",
+      "The interface uses an AI logo"
+    ],
+    "answer": 1,
+    "explanation": "A fixed evaluation set and a numeric threshold make the criterion testable. Also inspect the failed cases rather than relying on the percentage alone."
+  }
+}

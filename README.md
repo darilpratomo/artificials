@@ -1,10 +1,10 @@
 # Artificials
 
-Independent AI model directory, sourced capability benchmarks, separate specification/price rankings, side-by-side comparison, illustrated editorial guides and a metered full-stack AI app builder for **artificials.net**. English interface; black/silver design, responsive visuals, horizontal scroll storytelling, reduced-motion support.
+Independent AI model directory, sourced capability benchmarks, separate specification/price rankings, side-by-side comparison, illustrated editorial guides, a free 36-lesson AI Academy and a metered full-stack AI app builder for **artificials.net**. English interface; black/silver design, responsive visuals, horizontal scroll storytelling, reduced-motion support.
 
 ## Run locally
 
-Use Node.js 24 LTS (`.nvmrc`).
+Use Node.js 24 LTS (`.nvmrc`). Python 3.11+ is also required for the Academy example checks in `npm run check`.
 
 ```sh
 npm ci
@@ -22,10 +22,14 @@ The public catalog works without account credentials. Authentication, CMS, paid 
 - React, TypeScript, Vite, locally hosted fonts and Lucide SVG icons. No animation or 3D runtime dependency.
 - Hono on Cloudflare Workers with static assets; Supabase Auth/Postgres with RLS; Paddle subscriptions; OpenAI Responses on the server.
 - Source-attributed models.dev snapshot; complete paginated provider offerings, precomputed search index and record shards. No artificial 50-model limit. Counts represent offerings, not unique underlying models.
-- `/models`, `/leaderboard`, `/compare`, `/news`, `/studio`, `/pricing`, `/login`, `/dashboard`, `/about`, `/privacy`, `/terms`, `/contact`.
+- `/models`, `/leaderboard`, `/compare`, `/news`, `/learn`, `/learn/:slug`, `/studio`, `/pricing`, `/login`, `/dashboard`, `/about`, `/privacy`, `/terms`, `/contact`.
 - CMS at a server-configured unpredictable path; server admin role + MFA remain mandatory. No public admin link.
 - Studio generates downloadable React + Worker API + D1 schema + Supabase Auth projects. Its isolated design preview has no live customer database. Customers deploy exported applications on their own infrastructure.
 - $12/30, $29/90 and $59/200 generation plans per month. Atomic quotas, token/request/concurrency limits and a global spend guard protect API use. These are cost controls, not a guarantee of net profit.
+
+## Learn AI
+
+The free Academy has nine modules, 36 original lessons, four runnable Python projects, two interactive concept labs, and local learning progress. Each lesson loads separately and includes theory, code download, practice, a suggested solution, and a quiz. See [Academy content and verification](docs/ACADEMY.md).
 
 ## Data and updates
 
@@ -39,7 +43,7 @@ The scheduled GitHub workflow refreshes the snapshot every six hours. Scheduled 
 
 ```sh
 npm run check
-npx playwright install chromium
+npx playwright install chromium webkit
 npm run test:e2e
 npx wrangler deploy --dry-run --env production
 npm run deploy

@@ -1,0 +1,54 @@
+{
+  "slug": "latency-caching-and-budgets",
+  "module": "systems",
+  "title": "Latency, caching, and bounded work",
+  "summary": "Control the amount of work before optimizing individual operations.",
+  "minutes": 35,
+  "level": "Intermediate",
+  "objectives": [
+    "Break latency into stages",
+    "Use correct cache keys",
+    "Set explicit work and cost limits"
+  ],
+  "sections": [
+    {
+      "title": "Bound the work first",
+      "paragraphs": [
+        "Total response time includes validation, network delays, retrieval, inference, and rendering. Instrument the stages before optimizing. A fast average can hide poor tail latency, so record percentiles and timeout rates when you have enough requests.",
+        "Limit input size, retrieved passages, generation length, tool calls, and retries. Retry only failures likely to be transient, with a capped attempt count and backoff. Unbounded retries can multiply both latency and cost."
+      ]
+    },
+    {
+      "title": "Cache only compatible results",
+      "paragraphs": [
+        "A cache key must include the factors that change the result: normalized input, model version, relevant settings, and data version. Private results also need an identity or tenant boundary. A globally shared cache keyed only by question can leak another user’s information.",
+        "A cost estimate is a planning tool, not a billing guarantee. Reserve a worst-case budget before paid work begins, enforce provider output limits, reconcile actual usage, and stop when the allowance is exhausted. This lesson uses symbolic work units and makes no paid requests."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "latency-caching-and-budgets.py",
+    "source": "from functools import lru_cache\ncalls = 0\n@lru_cache(maxsize=32)\ndef retrieve(query, corpus_version):\n    global calls\n    calls += 1\n    return f\"Result for {query!r} in {corpus_version}\"\nprint(retrieve(\"python\", \"v1\"))\nprint(retrieve(\"python\", \"v1\"))\nprint(retrieve(\"python\", \"v2\"))\nprint(\"Actual work:\", calls)\nprint(\"Cache:\", retrieve.cache_info())\n",
+    "explanation": "Changing the corpus version creates a different key. This in-memory cache is only for public deterministic examples and does not implement private multi-user access."
+  },
+  "practice": {
+    "goal": "Design a bounded retrieval request.",
+    "steps": [
+      "Choose a maximum query length and passage count.",
+      "Specify one timeout and a maximum retry count.",
+      "List every factor your cache key must include."
+    ],
+    "solution": "For a public corpus, include query normalization, corpus version, and retrieval settings. For private corpora, add the trusted tenant identity and invalidate on access changes. Keep failed or partial results distinct from successful responses.",
+    "expected": "Three calls produce two computations and one cache hit."
+  },
+  "quiz": {
+    "question": "Why include a corpus version in a retrieval cache key?",
+    "options": [
+      "To prevent an old result from surviving a data change under the same key",
+      "To guarantee a correct answer",
+      "To hide the query from the server"
+    ],
+    "answer": 0,
+    "explanation": "Cache correctness depends on representing the inputs and versions that affect the result."
+  }
+}

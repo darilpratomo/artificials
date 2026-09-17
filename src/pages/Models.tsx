@@ -188,21 +188,13 @@ export default function Models() {
       <div className="catalog-source-note">
         <Database size={18} />
         <div>
-          <strong>Understand the source.</strong>
+          <strong>Reading the directory.</strong>
           <p>
             Each entry represents a model offered by an API provider. Multiple providers may serve
             the same model. Prices are base USD per million tokens; volume tiers and extras can
             differ. Unknown fields stay unreported. Updates are scheduled, and source coverage is
             not exhaustive.
           </p>
-          <a
-            href="https://models.dev"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-link"
-          >
-            Data from models.dev <ArrowUpRight size={13} />
-          </a>
         </div>
       </div>
       {comparison.models.length > 0 && (

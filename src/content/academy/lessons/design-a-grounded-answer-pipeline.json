@@ -1,0 +1,54 @@
+{
+  "slug": "design-a-grounded-answer-pipeline",
+  "module": "systems",
+  "title": "Design a grounded answer pipeline",
+  "summary": "Separate retrieval, answer construction, and evidence checking.",
+  "minutes": 35,
+  "level": "Intermediate",
+  "objectives": [
+    "Describe the stages of retrieval-augmented generation",
+    "Preserve passage identifiers",
+    "Return no answer when evidence is missing"
+  ],
+  "sections": [
+    {
+      "title": "Separate the responsibilities",
+      "paragraphs": [
+        "A retrieval-augmented generation pipeline retrieves relevant context and supplies it to a generator. Indexing, retrieval, generation, and verification are distinct stages. If retrieval misses the right passage, a fluent generator cannot reliably reconstruct it.",
+        "Keep passage identifiers and source metadata through the pipeline. An answer should cite evidence that actually supports its claims, not merely include a plausible-looking link. A citation’s existence and its relevance are separate checks."
+      ]
+    },
+    {
+      "title": "Start with extraction",
+      "paragraphs": [
+        "Before connecting a generative model, build a system that returns a matching passage verbatim from your own knowledge base. This baseline costs no inference API calls and makes retrieval errors obvious. It is retrieval, not a full generative RAG system.",
+        "Define a no-answer path and evaluate it with questions outside the knowledge base. If you later add generation, bound the context size, treat retrieved text as untrusted data, and verify both claim support and cost."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "design-a-grounded-answer-pipeline.py",
+    "source": "documents = {\"setup\": \"Create a virtual environment before installing packages.\",\n             \"splits\": \"Keep the final test set separate from model selection.\"}\ndef retrieve(question):\n    query = set(question.lower().strip(\"?.!\").split())\n    ranked = sorted(documents, key=lambda key: -len(query & set(documents[key].lower().split())))\n    best = ranked[0]\n    overlap = len(query & set(documents[best].lower().split()))\n    return {\"source_id\": best, \"passage\": documents[best]} if overlap else {\"status\": \"no_match\"}\nprint(retrieve(\"Why keep a test set separate?\"))\nprint(retrieve(\"Galactic weather tomorrow?\"))\n",
+    "explanation": "This intentionally simple retriever returns stored text and its ID. It does not generate a new answer or claim that keyword overlap proves relevance."
+  },
+  "practice": {
+    "goal": "Design a grounded response contract.",
+    "steps": [
+      "Require source IDs for supported answers.",
+      "Allow an explicit no-answer status.",
+      "Write an evaluation question that shares keywords but asks for an unsupported fact."
+    ],
+    "solution": "Use a response with status, answer, and source_ids. Validate that IDs exist, then separately assess whether the passages entail the answer. A question can mention test sets while asking about a specific experiment absent from the documents.",
+    "expected": "The first query returns the splits passage; the second returns no_match."
+  },
+  "quiz": {
+    "question": "Does an existing citation prove that an answer is supported?",
+    "options": [
+      "Yes, any real source is enough",
+      "No, the cited passage must support the actual claim",
+      "Only when the answer is long"
+    ],
+    "answer": 1,
+    "explanation": "Source existence is necessary but not sufficient. Relevance and claim support need evaluation."
+  }
+}

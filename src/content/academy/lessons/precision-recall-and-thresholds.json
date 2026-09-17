@@ -1,0 +1,54 @@
+{
+  "slug": "precision-recall-and-thresholds",
+  "module": "machine-learning",
+  "title": "Precision, recall, and decision thresholds",
+  "summary": "See the trade-off between catching positives and creating false alerts.",
+  "minutes": 35,
+  "level": "Intermediate",
+  "objectives": [
+    "Build a confusion matrix",
+    "Calculate precision and recall",
+    "Select a threshold for a use case"
+  ],
+  "sections": [
+    {
+      "title": "Count the different mistakes",
+      "paragraphs": [
+        "A true positive is a correctly flagged positive. A false positive is an ordinary case incorrectly flagged. A false negative is a positive the system missed. Precision is true positives divided by all predicted positives; recall is true positives divided by all actual positives.",
+        "Accuracy can conceal failure when one class dominates. A system that always predicts “ordinary” on a dataset with 99% ordinary cases has 99% accuracy but zero recall for the cases that may matter most."
+      ]
+    },
+    {
+      "title": "A score is not a decision",
+      "paragraphs": [
+        "A classifier often produces a score before making a binary decision. Raising the threshold usually reduces the number of positive predictions; lowering it usually increases them. The resulting precision and recall depend on the observed score distribution.",
+        "Choose the threshold on validation data using error costs, review capacity, and minimum requirements. When a denominator is zero, represent the metric as unavailable or follow an explicit convention. Do not silently turn an undefined result into a perfect score."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "precision-recall-and-thresholds.py",
+    "source": "actual = [1, 0, 1, 0, 1, 0]\nscores = [0.95, 0.8, 0.65, 0.4, 0.3, 0.1]\nfor threshold in [0.3, 0.5, 0.9]:\n    predicted = [int(score >= threshold) for score in scores]\n    tp = sum(a == 1 and p == 1 for a, p in zip(actual, predicted))\n    fp = sum(a == 0 and p == 1 for a, p in zip(actual, predicted))\n    fn = sum(a == 1 and p == 0 for a, p in zip(actual, predicted))\n    precision = tp/(tp+fp) if tp+fp else None\n    recall = tp/(tp+fn) if tp+fn else None\n    print(threshold, {\"precision\": precision, \"recall\": recall})\n",
+    "explanation": "Use the interactive threshold lab to move the decision boundary on this same invented dataset. None of these scores is a live model benchmark."
+  },
+  "practice": {
+    "goal": "Choose a review threshold.",
+    "steps": [
+      "Assume reviewers can inspect at most three flagged examples.",
+      "Calculate how many cases each threshold flags.",
+      "Choose a feasible threshold and report what it misses."
+    ],
+    "solution": "At 0.5, three cases are flagged and two are correct; one actual positive is missed. At 0.9, only one case is flagged and two positives are missed. At 0.3, five flags exceed capacity. The choice depends on the stated constraints.",
+    "expected": "At threshold 0.5, precision and recall are both 2/3."
+  },
+  "quiz": {
+    "question": "If no examples are predicted positive, precision is…",
+    "options": [
+      "Always 1",
+      "Undefined unless a convention is explicitly chosen",
+      "The same as accuracy"
+    ],
+    "answer": 1,
+    "explanation": "The precision denominator is zero. Displaying this as an unavailable value avoids a misleading claim."
+  }
+}

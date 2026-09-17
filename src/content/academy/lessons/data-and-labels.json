@@ -1,0 +1,54 @@
+{
+  "slug": "data-and-labels",
+  "module": "foundations",
+  "title": "Data, labels, and the unit of prediction",
+  "summary": "Understand what one example represents and why repeated examples distort evaluation.",
+  "minutes": 25,
+  "level": "Beginner",
+  "objectives": [
+    "Identify features and targets",
+    "Recognize label ambiguity",
+    "Separate entities across splits"
+  ],
+  "sections": [
+    {
+      "title": "One row needs a meaning",
+      "paragraphs": [
+        "A dataset is not just a table: each row represents a specific observation. If a row is a support message, the target might be the team that should answer it. If the target instead records the team that happened to answer, the labels may capture staffing decisions rather than the desired behavior.",
+        "Write a labeling guide with positive examples, borderline cases, and an unknown option. Check disagreement between annotators. More rows with inconsistent targets do not necessarily improve a model. Keep a record of collection permissions and the population represented."
+      ]
+    },
+    {
+      "title": "Independence matters",
+      "paragraphs": [
+        "Two messages from the same conversation are related. Putting one in training and the other in testing can make the task artificially easy. Similar problems arise with duplicate documents, repeated customers, and multiple images of the same object.",
+        "Split by the entity or time boundary that matches deployment. A future-facing forecast needs later observations in its test set. A model intended for new customers should be evaluated on customers absent from training."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "data-and-labels.py",
+    "source": "rows = [\n    {\"conversation\": \"a\", \"text\": \"reset password\", \"label\": \"account\"},\n    {\"conversation\": \"a\", \"text\": \"still cannot sign in\", \"label\": \"account\"},\n    {\"conversation\": \"b\", \"text\": \"invoice missing\", \"label\": \"billing\"},\n    {\"conversation\": \"c\", \"text\": \"download receipt\", \"label\": \"billing\"},\n]\ntrain = [r for r in rows if r[\"conversation\"] != \"c\"]\ntest = [r for r in rows if r[\"conversation\"] == \"c\"]\nassert {r[\"conversation\"] for r in train}.isdisjoint(r[\"conversation\"] for r in test)\nprint(len(train), len(test))\n",
+    "explanation": "The split keeps an entire conversation together. It demonstrates the boundary, not a statistically meaningful evaluation on four examples."
+  },
+  "practice": {
+    "goal": "Design a split for a document collection.",
+    "steps": [
+      "Identify the entity that could create related rows.",
+      "List a grouping key for duplicates or document families.",
+      "Decide whether deployment is about future documents or unseen document families."
+    ],
+    "solution": "Group versions of the same source together. If future performance is the goal, reserve a later collection period and ensure copied passages do not cross the boundary. Preserve the final test set until model choices are complete.",
+    "expected": "The example prints 3 1 and passes the independence assertion."
+  },
+  "quiz": {
+    "question": "Which split best tests performance on new customers?",
+    "options": [
+      "Randomly split every message",
+      "Group all messages from each customer into one split",
+      "Put duplicate messages into both splits"
+    ],
+    "answer": 1,
+    "explanation": "Grouping by customer prevents customer-specific patterns from leaking across the boundary."
+  }
+}

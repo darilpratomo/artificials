@@ -1,0 +1,54 @@
+{
+  "slug": "privacy-and-data-minimization",
+  "module": "responsible-ai",
+  "title": "Privacy starts with the data you do not collect",
+  "summary": "Design an experiment with minimal records and deliberate retention.",
+  "minutes": 30,
+  "level": "Intermediate",
+  "objectives": [
+    "Distinguish redaction from anonymization",
+    "Minimize collected fields",
+    "Separate debugging from raw-content logging"
+  ],
+  "sections": [
+    {
+      "title": "Reduce exposure at collection time",
+      "paragraphs": [
+        "Before collecting a field, explain what decision it supports and how long it is needed. A lesson recommendation experiment may need topic choices and completion counts, but not a learner’s private messages. Reducing fields simplifies both the system and its risk.",
+        "A hash is not automatic anonymization. Predictable identifiers such as email addresses can be guessed and hashed again. Combining several harmless-looking attributes may also identify someone. Use precise terms such as pseudonymized when re-identification remains possible."
+      ]
+    },
+    {
+      "title": "Redaction is one layer",
+      "paragraphs": [
+        "Pattern matching can remove obvious identifiers from logs, but misses unusual formatting and context-dependent personal information. Treat it as a convenience layer, not proof that text is safe to publish.",
+        "Prefer structured diagnostic events: operation name, duration, status, and a request ID. Restrict log access and choose a retention window. Apply the same care to prompts, retrieved passages, generated outputs, and evaluation datasets."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "privacy-and-data-minimization.py",
+    "source": "import re\ntext = \"Contact learner@example.test about lesson 3.\"\nredacted = re.sub(r\"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\", \"[email removed]\", text)\nevent = {\"operation\": \"lesson_search\", \"status\": \"ok\", \"duration_ms\": 12}\nprint(redacted)\nprint(event)\n",
+    "explanation": "The email is invented. The regular expression demonstrates a narrow pattern and should not be presented as comprehensive anonymization."
+  },
+  "practice": {
+    "goal": "Create a minimal analytics event.",
+    "steps": [
+      "List five fields you might collect.",
+      "Remove fields that are not required to answer a concrete product question.",
+      "Choose a retention period and explain who needs access."
+    ],
+    "solution": "For a completion counter, lesson ID and a coarse date may be sufficient. A raw prompt, email address, and full IP address are not automatically necessary. Requirements vary, so document the purpose rather than collecting everything by default.",
+    "expected": "The example email is replaced, while the structured event contains no message text."
+  },
+  "quiz": {
+    "question": "Does replacing email addresses make arbitrary text anonymous?",
+    "options": [
+      "Yes, email is the only identifier",
+      "No, other identifiers and contextual clues can remain",
+      "Only if the replacement string is long"
+    ],
+    "answer": 1,
+    "explanation": "Anonymity is a property of the remaining information and re-identification risk, not one regex substitution."
+  }
+}

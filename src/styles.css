@@ -6952,3 +6952,103 @@ textarea::placeholder {
     transform: none;
   }
 }
+
+/* Brand profiles and the replaceable homepage artwork. */
+.social-links {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0 24px;
+  flex-wrap: wrap;
+}
+.site-footer .social-links a {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid #ffffff20;
+  border-radius: 6px;
+  margin: 0;
+  color: #d9dce4;
+  font-size: 11px;
+}
+.social-links a:hover {
+  background: #ffffff0b;
+}
+.author-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 600;
+  color: #dfe3ed;
+}
+.author-verified {
+  fill: #1685ed;
+  color: #fff;
+  stroke-width: 2.2;
+  flex-shrink: 0;
+}
+.editorial-card > .author-badge,
+.learn-card > .author-badge {
+  display: flex;
+  margin: 14px 0;
+}
+.hero-banner-shell {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background: #090b0e;
+}
+.hero-banner-art {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.hero-banner-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 65% 50%;
+  opacity: 0.66;
+}
+.hero-banner-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #090b0eed 0%, #090b0e98 35%, #090b0e05 77%),
+    linear-gradient(0deg, #0a0b0f 0%, transparent 35%, #090b0e25 100%);
+}
+.hero-banner-shell .signal-copy h1 > span {
+  background-image: linear-gradient(105deg, #e0e2e9, #a0a4b0);
+}
+.hero-banner-shell .signal-copy > p {
+  color: #bbc0cc;
+}
+.hero-banner-shell .hero-label,
+.hero-banner-shell .hero-bottom {
+  color: #aeb5c4;
+}
+.hero-banner-shell .hero-edition {
+  color: #a5acba;
+}
+.hero-banner-shell .hero-trust {
+  color: #b3bac8;
+}
+@media (min-width: 1000px) and (max-width: 1180px) {
+  .site-links {
+    gap: 14px;
+  }
+  .site-actions {
+    gap: 12px;
+  }
+  .site-nav {
+    gap: 16px;
+  }
+  .site-actions .btn-small {
+    padding-inline: 10px;
+  }
+}

@@ -8,6 +8,8 @@ import Home from './pages/Home';
 const Models = lazy(() => import('./pages/Models'));
 const Compare = lazy(() => import('./pages/Compare'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
+const Academy = lazy(() => import('./pages/Academy'));
+const AcademyLesson = lazy(() => import('./pages/AcademyLesson'));
 const Learn = lazy(() => import('./pages/Learn'));
 const Studio = lazy(() => import('./pages/Studio'));
 const Pricing = lazy(() => import('./pages/Pricing'));
@@ -44,6 +46,7 @@ function Metadata() {
       '/leaderboard': 'Model rankings',
       '/compare': 'Compare models',
       '/news': 'AI insights and guides',
+      '/learn': 'Learn AI — Artificials Academy',
       '/studio': 'AI Studio',
       '/pricing': 'Plans & pricing',
       '/login': 'Welcome back',
@@ -78,6 +81,8 @@ createRoot(document.getElementById('root')!).render(
               <Route path="models" element={<Models />} />
               <Route path="leaderboard" element={<Leaderboard />} />
               <Route path="compare" element={<Compare />} />
+              <Route path="learn" element={<Academy />} />
+              <Route path="learn/:slug" element={<AcademyLesson />} />
               <Route path="news" element={<Learn />} />
               <Route path="news/:slug" element={<Learn />} />
               <Route path="studio" element={<Studio />} />

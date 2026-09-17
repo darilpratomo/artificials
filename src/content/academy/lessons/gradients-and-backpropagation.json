@@ -1,0 +1,54 @@
+{
+  "slug": "gradients-and-backpropagation",
+  "module": "neural-networks",
+  "title": "Backpropagation without the mystery",
+  "summary": "Follow the chain rule through one neuron and check the derivative numerically.",
+  "minutes": 40,
+  "level": "Intermediate",
+  "objectives": [
+    "Apply the chain rule",
+    "Compare analytic and numerical gradients",
+    "Update parameters using old values"
+  ],
+  "sections": [
+    {
+      "title": "Work backward from the loss",
+      "paragraphs": [
+        "Backpropagation is an efficient application of the chain rule. For a sigmoid neuron with squared error, the derivative of loss with respect to its weight combines the loss derivative, the sigmoid derivative, and the input.",
+        "Compute the forward pass first and keep the intermediate values. During the backward pass, calculate all gradients from those same parameter values before updating any of them. Updating halfway through can accidentally mix two different versions of the network."
+      ]
+    },
+    {
+      "title": "Check a tiny case first",
+      "paragraphs": [
+        "A finite-difference check estimates a derivative by comparing the loss at weight plus epsilon and weight minus epsilon. Dividing the difference by twice epsilon approximates the slope.",
+        "Numerical gradients are expensive for large models and depend on the choice of epsilon. They are excellent for checking a small implementation, especially before adding batches, multiple layers, or performance optimizations."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "gradients-and-backpropagation.py",
+    "source": "import math\nx, target, weight, bias = 0.7, 1., 0.3, -0.2\ndef prediction(w):\n    return 1/(1+math.exp(-(w*x+bias)))\ndef loss(w):\n    return (prediction(w)-target)**2\np = prediction(weight)\nanalytic = 2*(p-target)*p*(1-p)*x\nepsilon = 1e-5\nnumeric = (loss(weight+epsilon)-loss(weight-epsilon))/(2*epsilon)\nprint(\"Analytic:\", analytic, \"Numeric:\", numeric)\nassert abs(analytic-numeric) < 1e-6\n",
+    "explanation": "The check isolates one weight with the bias held fixed. Agreement is evidence that this derivative is implemented correctly, not that an entire network is correct."
+  },
+  "practice": {
+    "goal": "Check the bias derivative.",
+    "steps": [
+      "Write a prediction function that varies the bias.",
+      "Remove the final x factor from the analytic derivative.",
+      "Compare with a central finite difference."
+    ],
+    "solution": "The derivative of weight*x+bias with respect to bias is 1, while its derivative with respect to weight is x. All other chain-rule terms stay the same.",
+    "expected": "The original analytic and numerical gradients agree within 0.000001."
+  },
+  "quiz": {
+    "question": "When should parameters be updated?",
+    "options": [
+      "Before calculating the forward pass",
+      "After calculating gradients from the same parameter state",
+      "After each multiplication inside a derivative"
+    ],
+    "answer": 1,
+    "explanation": "Compute a consistent gradient before changing the state it describes."
+  }
+}

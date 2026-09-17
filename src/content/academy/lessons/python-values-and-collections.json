@@ -1,0 +1,54 @@
+{
+  "slug": "python-values-and-collections",
+  "module": "python",
+  "title": "Values, collections, and clear transformations",
+  "summary": "Represent examples using lists and dictionaries, then calculate a useful summary.",
+  "minutes": 25,
+  "level": "Beginner",
+  "objectives": [
+    "Choose lists and dictionaries",
+    "Transform values without hidden state",
+    "Handle an empty collection"
+  ],
+  "sections": [
+    {
+      "title": "Represent the problem directly",
+      "paragraphs": [
+        "A list preserves a sequence of examples. A dictionary names the attributes of an example. A set represents unique values, while a tuple is useful for a fixed grouping. Choosing a structure that mirrors the problem makes the code easier to reason about.",
+        "Keep types consistent. The text \"12\" is not the integer 12. Convert and validate values at the input boundary, rather than letting silent coercion spread through a training pipeline. Give intermediate results names that explain their meaning."
+      ]
+    },
+    {
+      "title": "Make transformations inspectable",
+      "paragraphs": [
+        "A list comprehension describes a transformation or filter in one place. Keep it short enough to read. When several decisions are involved, a regular loop with named steps is clearer.",
+        "Edge cases belong in the design: an empty list has no mean, a missing dictionary key is not automatically zero, and a category can be absent from a small batch. Represent an unavailable statistic explicitly instead of manufacturing a value."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "python-values-and-collections.py",
+    "source": "examples = [{\"text\": \"learn python\", \"label\": \"coding\"},\n            {\"text\": \"train a model\", \"label\": \"ml\"},\n            {\"text\": \"write a function\", \"label\": \"coding\"}]\nlengths = [len(row[\"text\"].split()) for row in examples]\nlabels = sorted({row[\"label\"] for row in examples})\nmean_length = sum(lengths) / len(lengths) if lengths else None\nprint(\"Labels:\", labels)\nprint(\"Mean words:\", mean_length)\n",
+    "explanation": "The rows stay unchanged. Separate summaries make it easy to inspect the label set and text-length distribution before modeling."
+  },
+  "practice": {
+    "goal": "Build a small dataset summary.",
+    "steps": [
+      "Add a fourth example with a new label.",
+      "Count examples per label using a dictionary.",
+      "Repeat with an empty list and return an explicit unavailable mean."
+    ],
+    "solution": "Initialize counts as an empty dictionary and increment counts[label] using counts.get(label, 0) + 1. Preserve None for the empty mean. Zero would misleadingly describe a measured average.",
+    "expected": "The original labels are coding and ml, and the average length is 8 / 3 words."
+  },
+  "quiz": {
+    "question": "What is a sensible mean for an empty dataset?",
+    "options": [
+      "Zero, because no rows exist",
+      "None, because the statistic is unavailable",
+      "The last observed value"
+    ],
+    "answer": 1,
+    "explanation": "An unavailable statistic is different from a measured zero."
+  }
+}

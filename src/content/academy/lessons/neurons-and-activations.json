@@ -1,0 +1,54 @@
+{
+  "slug": "neurons-and-activations",
+  "module": "neural-networks",
+  "title": "A neuron is a small computation",
+  "summary": "Build a weighted sum and see how a nonlinearity changes it.",
+  "minutes": 30,
+  "level": "Intermediate",
+  "objectives": [
+    "Compute a weighted sum plus bias",
+    "Compare ReLU and sigmoid",
+    "Understand why nonlinearity matters"
+  ],
+  "sections": [
+    {
+      "title": "Weights describe influence",
+      "paragraphs": [
+        "A basic neuron multiplies each input by a weight, adds the products, and adds a bias. A positive weight increases the pre-activation as its input increases; a negative weight decreases it. The bias shifts the response even when inputs are zero.",
+        "This is a mathematical building block, not a complete simulation of a biological neuron. A network connects many such blocks and learns weights by optimizing an objective."
+      ]
+    },
+    {
+      "title": "Nonlinearity adds expressive power",
+      "paragraphs": [
+        "A stack of purely linear transformations is still a linear transformation. Nonlinear activations allow a network to represent more complex patterns. ReLU returns zero for negative inputs and the input itself for positive ones. Sigmoid maps real numbers into the interval between zero and one.",
+        "Sigmoid can saturate near zero or one, producing small gradients. ReLU can have zero gradient on negative inputs. Activation choice affects optimization, but no activation alone makes a network accurate or its output calibrated."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "neurons-and-activations.py",
+    "source": "import math\ninputs, weights, bias = [0.5, 0.8], [1.2, -0.7], 0.1\nz = sum(x*w for x, w in zip(inputs, weights)) + bias\nrelu = max(0., z)\nsigmoid = 1/(1+math.exp(-z))\nprint(\"Weighted sum:\", round(z, 3))\nprint(\"ReLU:\", round(relu, 3), \"Sigmoid:\", round(sigmoid, 3))\n",
+    "explanation": "The inputs and weights are fixed for inspection. The interactive neuron lab lets you vary them before the training lesson introduces parameter updates."
+  },
+  "practice": {
+    "goal": "Change one influence at a time.",
+    "steps": [
+      "Set the second weight to +0.7.",
+      "Increase the second input from 0.8 to 1.0.",
+      "Predict the direction of change before running the code."
+    ],
+    "solution": "With a positive second weight, increasing the second input increases z. With the original negative weight it decreases z. Both activations are monotone, although ReLU stays at zero while z remains negative.",
+    "expected": "The original weighted sum is 0.14 and sigmoid is approximately 0.535."
+  },
+  "quiz": {
+    "question": "Why add a nonlinear activation between layers?",
+    "options": [
+      "Without it, stacked linear layers remain linear",
+      "It eliminates the need for training data",
+      "It guarantees that outputs are probabilities"
+    ],
+    "answer": 0,
+    "explanation": "Nonlinearity changes the family of functions the network can represent."
+  }
+}

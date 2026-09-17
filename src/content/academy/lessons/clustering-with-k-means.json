@@ -1,0 +1,54 @@
+{
+  "slug": "clustering-with-k-means",
+  "module": "machine-learning",
+  "title": "Discover structure with k-means",
+  "summary": "Group unlabeled points and learn why clusters need interpretation.",
+  "minutes": 35,
+  "level": "Intermediate",
+  "objectives": [
+    "Alternate assignment and centroid updates",
+    "Handle an empty cluster",
+    "Separate geometric structure from meaning"
+  ],
+  "sections": [
+    {
+      "title": "Group by a chosen geometry",
+      "paragraphs": [
+        "K-means seeks k centers that reduce squared distances between points and their assigned center. It alternates between assigning each point to its nearest center and moving each center to the mean of its assigned points.",
+        "The method does not discover authoritative categories. The number of centers, initialization, scaling, and distance assumptions shape the result. Two clusters may simply reflect the units or collection process rather than a useful difference."
+      ]
+    },
+    {
+      "title": "Inspect more than the centers",
+      "paragraphs": [
+        "Some initializations leave a cluster empty. Keep its previous center or use a documented reinitialization strategy. Multiple initializations can find different local solutions; record how you selected a run.",
+        "Look at actual members of each cluster and compare sizes. K-means favors compact groups and struggles with curved shapes, unequal densities, and outliers. Unsupervised does not mean free of assumptions."
+      ]
+    }
+  ],
+  "code": {
+    "filename": "clustering-with-k-means.py",
+    "source": "from math import dist\npoints = [(0., 0.), (0., 2.), (2., 0.), (8., 8.), (8., 10.), (10., 8.)]\ncenters = [points[0], points[-1]]\nfor _ in range(10):\n    groups = [[], []]\n    for point in points:\n        nearest = min(range(2), key=lambda i: dist(point, centers[i]))\n        groups[nearest].append(point)\n    centers = [tuple(sum(p[d] for p in group)/len(group) for d in range(2))\n               if group else centers[i] for i, group in enumerate(groups)]\nprint(\"Centers:\", centers)\nprint(\"Group sizes:\", [len(group) for group in groups])\n",
+    "explanation": "The centers summarize two obvious synthetic groups. The implementation preserves an old center if its assigned group is empty."
+  },
+  "practice": {
+    "goal": "Observe an outlier.",
+    "steps": [
+      "Add the point (100, 100).",
+      "Run with the same initial centers.",
+      "Compare the new centers and group sizes with the original result."
+    ],
+    "solution": "The distant point can pull a center away from the ordinary group. Squared-distance objectives penalize long distances strongly. Investigate outliers before deleting them: they may be errors or important rare examples.",
+    "expected": "The original groups contain three points each."
+  },
+  "quiz": {
+    "question": "What does a k-means cluster establish?",
+    "options": [
+      "A natural category exists with certainty",
+      "Points are grouped under chosen distance and initialization assumptions",
+      "Every point in the group shares the same label"
+    ],
+    "answer": 1,
+    "explanation": "Clustering supplies a geometric grouping. Domain interpretation requires additional evidence."
+  }
+}
