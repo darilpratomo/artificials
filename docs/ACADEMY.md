@@ -25,6 +25,6 @@ The blue author badge identifies the official Artificials editorial account on t
 
 ## Verification
 
-`npm run check:academy` requires Python 3 and executes all 36 standalone examples in temporary folders, then sends valid/invalid requests to the local API project and verifies SQLite inserts. It creates no repository database, makes no external model call, and leaves no server running. It is part of `npm run check`, including CI and Cloudflare builds.
+`npm run check:academy` requires Python 3 and executes all 36 standalone examples in temporary folders, then sends valid/invalid requests to the local API project and verifies SQLite inserts. It creates no repository database, makes no external model call, and leaves no server running. GitHub CI runs it as a separate required step after `npm run check`; run both commands locally when modifying course content. Cloudflare builds use the Node-only `npm run check` so Python example execution does not add a build-runtime dependency to the website.
 
 Browser coverage checks curriculum filtering, incorrect/correct quiz attempts, completion gating and persistence, code download content, next-lesson navigation, lab boundary behavior, accessibility, and mobile layouts. Existing public-route regression coverage remains in place.

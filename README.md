@@ -4,7 +4,7 @@ Independent AI model directory, sourced capability benchmarks, separate specific
 
 ## Run locally
 
-Use Node.js 24 LTS (`.nvmrc`). Python 3.11+ is also required for the Academy example checks in `npm run check`.
+Use Node.js 24 LTS (`.nvmrc`). Python 3.11+ is also required for `npm run check:academy`, which verifies the downloadable educational examples. Cloudflare builds only need Node.js.
 
 ```sh
 npm ci
@@ -43,6 +43,7 @@ The scheduled GitHub workflow refreshes the snapshot every six hours. Scheduled 
 
 ```sh
 npm run check
+npm run check:academy
 npx playwright install chromium webkit
 npm run test:e2e
 npx wrangler deploy --dry-run --env production
