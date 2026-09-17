@@ -19,11 +19,11 @@ Never put API keys or service-role credentials in `VITE_` variables. Configure e
 
 `wrangler.jsonc` separates local defaults from `env.production`. Both target the Worker name `artificials`; production deploys must explicitly select the production environment. Run `npm run check` and `npm run test:e2e`, review the diff, then run `npm run deploy`. This script builds the site and executes `wrangler deploy --env production`. If the build already passed, the direct deploy command is `npx wrangler deploy --env production`. Do not use bare `wrangler deploy` for the live site: the top-level variables are for local development.
 
-Set `env.production.vars.APP_URL` to the origin actually serving the site and keep `ENVIRONMENT=production`. The intended final origin is `https://artificials.net`; until custom-domain setup is complete, use the exact HTTPS `workers.dev` URL assigned by Cloudflare. The same origin must be configured in Supabase callbacks, Turnstile and Paddle before enabling those integrations. Secure cookies, CSRF checks, authentication callbacks and sitemap links depend on this value. Use `--env production` for all production secret commands.
+The production `APP_URL` is `https://artificials.net`; keep `ENVIRONMENT=production`. Configure that same origin in Supabase callbacks, Turnstile and Paddle before enabling those integrations. Secure cookies, CSRF checks, authentication callbacks and sitemap links depend on this value. The workers.dev address remains available for public browsing; account writes use the canonical production origin. Use `--env production` for all production secret commands.
 
 ## Domain connection
 
-At the initial account audit, `artificials.net` was absent from the Cloudflare account and used Spaceship nameservers. This document does not claim that DNS has been connected. The owner needs to add the domain to Cloudflare on the Free plan, review imported DNS records, and set the assigned Cloudflare nameservers in Spaceship. Once the zone is active, add `artificials.net` under the Worker's Settings → Domains & Routes, update the production `APP_URL`, and redeploy. Verify HTTPS and provider callbacks after the change.
+The Cloudflare Free zone for `artificials.net` was verified Active on 17 September 2026, with nameservers `karina.ns.cloudflare.com` and `peter.ns.cloudflare.com`. Its Worker custom domain is declared in `env.production.routes` in `wrangler.jsonc`, so production deploys preserve the binding. Cloudflare provisions its DNS record and certificate. Keep unrelated mail and verification DNS records intact. Verify HTTPS and provider callbacks after any origin change.
 
 ## GitHub deployment connection
 

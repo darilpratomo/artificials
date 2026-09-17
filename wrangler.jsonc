@@ -30,8 +30,10 @@
   "env": {
     "production": {
       "name": "artificials",
+      "workers_dev": true,
+      "routes": [{ "pattern": "artificials.net", "custom_domain": true }],
       "vars": {
-        "APP_URL": "https://artificials.artificials.workers.dev",
+        "APP_URL": "https://artificials.net",
         "ENVIRONMENT": "production",
         "AI_ENABLED": "false",
         "BILLING_ENABLED": "false",
