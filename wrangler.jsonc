@@ -31,7 +31,7 @@
     "production": {
       "name": "artificials",
       "workers_dev": true,
-      "routes": [{ "pattern": "artificials.net", "custom_domain": true }],
+      "routes": [{ "pattern": "artificials.net/*", "zone_name": "artificials.net" }],
       "vars": {
         "APP_URL": "https://artificials.net",
         "ENVIRONMENT": "production",

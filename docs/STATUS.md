@@ -23,7 +23,9 @@ Verified locally in this implementation:
 - A separate production-build smoke test reads the actual source snapshot (7,842 offerings / 220 providers), renders desktop/mobile, and checks private route and cross-origin write rejection.
 - Initial Cloudflare production deploy succeeded at https://artificials.artificials.workers.dev; the public catalog endpoint returned HTTP 200 with actual source data.
 - Source code is in the private repository https://github.com/darilpratomo/artificials. The local admin guide is not tracked.
-- Native GitHub-to-Cloudflare auto-deploy and artificials.net DNS still require the owner account steps described in LAUNCH.md. The six-hour catalog workflow is installed in GitHub; publishing its future changes depends on the deployment connection.
+- The Cloudflare Free zone for artificials.net is Active with the assigned Cloudflare nameservers. Production APP_URL targets https://artificials.net.
+- GitHub commit 87d5f75 triggered native Cloudflare Workers Builds, and GitHub verification passed. Initial Custom Domain attachment failed with error 100117 because existing apex DNS records conflict. The production configuration now uses a Worker route over the existing proxied DNS record; deployment and HTTPS verification are pending.
+- The six-hour catalog workflow is installed and a manual refresh succeeded. Publishing future changes uses the native Workers Builds connection.
 
 ## Required provider activation
 

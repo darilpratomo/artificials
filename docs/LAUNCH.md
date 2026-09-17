@@ -23,7 +23,9 @@ The production `APP_URL` is `https://artificials.net`; keep `ENVIRONMENT=product
 
 ## Domain connection
 
-The Cloudflare Free zone for `artificials.net` was verified Active on 17 September 2026, with nameservers `karina.ns.cloudflare.com` and `peter.ns.cloudflare.com`. Its Worker custom domain is declared in `env.production.routes` in `wrangler.jsonc`, so production deploys preserve the binding. Cloudflare provisions its DNS record and certificate. Keep unrelated mail and verification DNS records intact. Verify HTTPS and provider callbacks after any origin change.
+The Cloudflare Free zone for `artificials.net` was verified Active on 17 September 2026, with nameservers `karina.ns.cloudflare.com` and `peter.ns.cloudflare.com`. The production configuration routes `artificials.net/*` to the Worker through the existing proxied apex DNS record. Keep that record proxied (orange cloud): the route requires it. The Worker serves every path from its API or the ASSETS binding; it does not forward requests to the legacy DNS origin. Keep unrelated mail and verification DNS records intact. Verify HTTPS and provider callbacks after any origin change.
+
+The initial Custom Domain attachment failed with error 100117 because existing apex web records conflict. The Worker route avoids deleting those records. If migrating to a Worker-managed Custom Domain later, first inspect and replace only the confirmed conflicting apex web records, change `env.production.routes` to `custom_domain: true` with the exact hostname, and verify HTTPS after deployment. Never delete MX, TXT or unrelated subdomain records. Wrangler login may have Worker deployment permission without DNS-edit permission.
 
 ## GitHub deployment connection
 
