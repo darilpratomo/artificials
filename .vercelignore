@@ -1,0 +1,7 @@
+admin.md
+**/admin.md
+.dev.vars*
+.env*
+.git/
+test-results/
+playwright-report/

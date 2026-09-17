@@ -1,0 +1,44 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "artificials",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*",
+      "/_private/*",
+      "/admin",
+      "/admin/*",
+      "/admin.md",
+      "/Admin.md",
+      "/robots.txt",
+      "/sitemap.xml",
+    ],
+  },
+  "vars": {
+    "APP_URL": "http://localhost:8787",
+    "ENVIRONMENT": "development",
+    "AI_ENABLED": "false",
+    "BILLING_ENABLED": "false",
+    "PADDLE_ENVIRONMENT": "sandbox",
+    "GLOBAL_DAILY_AI_BUDGET_MICROS": "10000000",
+  },
+  "env": {
+    "production": {
+      "name": "artificials",
+      "vars": {
+        "APP_URL": "https://artificials.net",
+        "ENVIRONMENT": "production",
+        "AI_ENABLED": "false",
+        "BILLING_ENABLED": "false",
+        "PADDLE_ENVIRONMENT": "sandbox",
+        "GLOBAL_DAILY_AI_BUDGET_MICROS": "10000000",
+      },
+    },
+  },
+  "observability": { "enabled": false },
+}

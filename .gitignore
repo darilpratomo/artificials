@@ -1,0 +1,23 @@
+node_modules/
+dist/
+.wrangler/
+.vercel/
+.output/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+test-results/
+playwright-report/
+.DS_Store
+*.log
+*.pem
+*.key
+
+# Private local developer and admin guide
+[aA][dD][mM][iI][nN].[mM][dD]
+
+.catalog-staging/
