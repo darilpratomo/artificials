@@ -26,7 +26,7 @@ Verified locally in this implementation:
 - The Cloudflare Free zone for artificials.net is Active with the assigned Cloudflare nameservers. Production APP_URL targets https://artificials.net.
 - Native GitHub-to-Cloudflare deployment succeeded for commit c28240d (Workers Builds run 00b0cd9c-0499-4bdf-9dda-ede41e795663). The production route artificials.net/* serves the Worker using the existing proxied DNS; request-limit fail-open is disabled. No DNS records were deleted.
 - https://artificials.net returns HTTP 200 with HSTS and CSP. The sitemap uses the production domain. Live-source smoke tests pass on that domain: 7,842 offerings / 220 providers, desktop/mobile rendering without browser errors or horizontal overflow, private routes returning 404, and foreign-origin writes returning 403.
-- At this verification, plain HTTP still serves content. Enable SSL/TLS → Edge Certificates → Always Use HTTPS in the zone dashboard and verify the redirect. Current CLI OAuth cannot edit zone settings.
+- HTTP now redirects to HTTPS with status 301, preserving path and query parameters. Keep the zone's Always Use HTTPS setting enabled.
 - The six-hour catalog workflow is installed and a manual refresh succeeded. Publishing future changes uses the native Workers Builds connection.
 
 ## Required provider activation
