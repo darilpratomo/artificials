@@ -1,6 +1,6 @@
 # Artificials
 
-Independent AI model directory, sourced capability benchmarks, separate specification/price rankings, side-by-side comparison, illustrated editorial guides, a free 36-lesson AI Academy and a metered full-stack AI app builder for **artificials.net**. English interface; black/silver design, responsive visuals, horizontal scroll storytelling on desktop and mobile, a floating scroll-responsive header, and reduced-motion support.
+Independent AI model directory, sourced capability benchmarks, separate specification/price rankings, side-by-side comparison, illustrated editorial guides, a free 36-lesson AI Academy and a metered full-stack AI app builder for **artificials.net**. English interface; black/silver design, responsive visuals, horizontal scroll storytelling on desktop and mobile, a smoothly morphing floating header, and reduced-motion support. Branding uses the supplied metallic A and a locally hosted Sora wordmark.
 
 ## Run locally
 

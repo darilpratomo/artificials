@@ -1,0 +1,51 @@
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('@fontsource-variable/sora/files/sora-latin-wght-normal.woff2') format('woff2');
+}
+
+.brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+  height: 34px;
+  color: #f4f4f6;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.brand-lockup .brand-mark {
+  display: block;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.brand-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 23px;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  white-space: nowrap;
+}
+
+@media (max-width: 639px) {
+  .site-header .brand-lockup {
+    gap: 6px;
+  }
+  .site-header .brand-name {
+    font-size: 19px;
+  }
+  .site-header .brand-mark {
+    width: 30px;
+    height: 28px;
+    flex-basis: 30px;
+  }
+}

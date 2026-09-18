@@ -7049,8 +7049,11 @@ input[type='radio'] {
   cursor: pointer;
 }
 
-/* A stable header slot prevents layout jumps while the surface becomes an island. */
+/* One shared progress value keeps the entire island morph synchronized. */
 .site-header {
+  --header-progress: 0;
+  --island-inset: max(24px, calc((100vw - 1150px) / 2));
+  --nav-gutter: calc(56px - 36px * var(--header-progress));
   height: 78px;
   border: 0;
   background: transparent;
@@ -7060,57 +7063,35 @@ input[type='radio'] {
 .header-surface {
   position: absolute;
   inset: 0 0 auto;
-  width: 100%;
-  max-width: 100%;
+  width: calc(100% - 2 * var(--island-inset) * var(--header-progress));
+  max-width: none;
   margin-inline: auto;
   pointer-events: auto;
-  background: #08090be8;
-  border: 1px solid #ffffff10;
-  border-top-color: transparent;
+  background: #0c0e12f2;
+  border: 1px solid rgb(255 255 255 / calc(0.06 + 0.08 * var(--header-progress)));
   backdrop-filter: blur(22px);
-  border-radius: 0;
-  transition:
-    width 0.48s cubic-bezier(0.22, 1, 0.36, 1),
-    border-radius 0.48s,
-    transform 0.48s,
-    box-shadow 0.48s,
-    background 0.3s;
-}
-.site-header.is-island .header-surface {
-  width: calc(100% - 48px);
-  max-width: 1150px;
-  transform: translateY(10px);
-  border-color: #ffffff25;
-  border-radius: 40px;
-  background: #101217eb;
-  box-shadow:
-    0 12px 45px #0006,
-    inset 0 1px #ffffff09;
+  -webkit-backdrop-filter: blur(22px);
+  border-radius: calc(40px * var(--header-progress));
+  transform: translate3d(0, calc(10px * var(--header-progress)), 0);
+  box-shadow: 0 12px 45px rgb(0 0 0 / calc(0.4 * var(--header-progress)));
 }
 .site-header .site-nav {
-  height: 76px;
-  transition:
-    height 0.4s,
-    width 0.4s;
-}
-.site-header.is-island .site-nav {
-  width: calc(100% - 40px);
-  height: 60px;
-  gap: 20px;
-}
-.site-header.is-island .brand-logo {
-  width: 144px;
-}
-.site-header.is-island .site-links {
+  width: calc(100% - 2 * var(--nav-gutter));
+  height: calc(76px - 16px * var(--header-progress));
   gap: 22px;
 }
-.brand-logo {
-  transition: width 0.4s;
+.site-header .brand-home {
+  flex: 0 0 auto;
+  transform: scale(calc(1 - 0.065 * var(--header-progress)));
+  transform-origin: left center;
 }
-.site-header.is-island .site-actions {
+.site-header .site-links {
+  gap: 22px;
+}
+.site-header .site-actions {
   gap: 16px;
 }
-.site-header.is-island .site-actions > .btn {
+.site-header .site-actions > .btn {
   border-radius: 24px;
 }
 .menu-scrim {
@@ -7280,10 +7261,12 @@ input[type='radio'] {
 }
 @media (max-width: 1100px) {
   .site-header {
+    --island-inset: max(14px, calc((100vw - 780px) / 2));
+    --nav-gutter: calc(35px - 21px * var(--header-progress));
     height: 70px;
   }
   .site-header .site-nav {
-    height: 68px;
+    height: calc(68px - 10px * var(--header-progress));
   }
   .site-header .site-links {
     display: none;
@@ -7291,22 +7274,8 @@ input[type='radio'] {
   .site-header .menu-trigger {
     display: grid;
   }
-  .site-header.is-island .header-surface {
-    width: calc(100% - 28px);
-    max-width: 780px;
-  }
-  .site-header.is-island .site-nav {
-    width: calc(100% - 28px);
-    height: 58px;
-  }
   .site-header.menu-open .header-surface {
-    border-radius: 24px;
-    width: calc(100% - 28px);
-    max-width: 780px;
-    transform: translateY(10px);
-  }
-  .site-header.menu-open .site-nav {
-    width: calc(100% - 28px);
+    border-radius: calc(24px * var(--header-progress));
   }
   .menu-open .site-mobile {
     max-height: calc(100dvh - 95px);
@@ -7316,19 +7285,14 @@ input[type='radio'] {
 }
 @media (max-width: 639px) {
   .site-header {
+    --nav-gutter: calc(20px - 6px * var(--header-progress));
     height: 66px;
   }
   .site-header .site-nav {
-    height: 64px;
-  }
-  .site-header.is-island .site-nav {
-    height: 54px;
+    height: calc(64px - 10px * var(--header-progress));
     gap: 8px;
   }
-  .site-header.is-island .brand-logo {
-    width: 122px;
-  }
-  .site-header.is-island .site-actions {
+  .site-header .site-actions {
     gap: 4px;
   }
   .site-header .nav-login {
@@ -7361,20 +7325,25 @@ input[type='radio'] {
   }
 }
 
-/* Compact, centered footer lettering and authentic brand glyphs. */
+/* A compact, quiet brand signature replaces the oversized footer lettering. */
 .site-footer .footer-wordmark {
   display: flex;
   justify-content: center;
   align-items: center;
   width: calc(100% - 40px);
-  max-width: 1150px;
-  font-size: clamp(64px, 15.8vw, 228px);
-  line-height: 1.08;
-  letter-spacing: -0.065em;
-  font-weight: 500;
-  margin: 15px auto 0;
-  padding: 0 0 18px;
+  height: clamp(104px, 13vw, 166px);
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 0 20px;
   gap: 0;
+}
+.footer-wordmark .footer-brand-echo {
+  display: block;
+  width: clamp(100px, 14vw, 170px);
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.24;
+  pointer-events: none;
 }
 .site-footer .social-links a {
   width: 44px;
@@ -7608,16 +7577,22 @@ input[type='radio'] {
   }
 }
 
-/* A portrait composition keeps the whole planet in view on small screens. */
+/* Full-bleed portrait art has no capped-width strip or side mask. */
 @media (max-width: 760px) {
   .hero-banner-shell .signal-hero {
-    min-height: 650px;
+    min-height: clamp(600px, calc(120px + 115vw), 840px);
     padding-top: 22px;
     padding-bottom: 64px;
   }
+  .hero-banner-art picture {
+    position: absolute;
+    inset: 96px 0 -96px;
+    width: 100%;
+    height: auto;
+  }
   .hero-banner-art img {
-    object-fit: contain;
-    object-position: 50% 100%;
+    object-fit: cover;
+    object-position: 50% 65%;
     opacity: 0.85;
   }
   .hero-banner-art::after {
@@ -7644,27 +7619,7 @@ input[type='radio'] {
     padding-top: 14px;
   }
 }
-@media (max-width: 639px) {
-  .hero-banner-art picture {
-    position: absolute;
-    inset: auto 0 -100px;
-    width: min(100%, 400px);
-    height: auto;
-    margin-inline: auto;
-  }
-  .hero-banner-art img {
-    height: auto;
-  }
-}
-@media (min-width: 431px) and (max-width: 639px) {
-  .hero-banner-art picture {
-    mask-image: linear-gradient(90deg, transparent, black 5%, black 95%, transparent);
-  }
-}
 @media (max-width: 430px) {
-  .hero-banner-shell .signal-hero {
-    min-height: 600px;
-  }
   .hero-banner-shell .hero-actions {
     margin-top: 22px;
   }

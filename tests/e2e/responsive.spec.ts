@@ -110,7 +110,7 @@ test('hero uses portrait artwork on mobile and footer branding stays centered', 
     .poll(() => artwork.evaluate((img) => (img as HTMLImageElement).naturalWidth))
     .toBeGreaterThan(0);
   expect(await artwork.evaluate((img) => (img as HTMLImageElement).currentSrc)).toContain(
-    width <= 760 ? 'hero-mobile' : 'hero-engraved',
+    width <= 760 ? 'hero-brand-mobile' : 'hero-brand',
   );
   if (width <= 430) {
     const hero = await page.locator('.signal-hero').boundingBox();
@@ -123,9 +123,22 @@ test('hero uses portrait artwork on mobile and footer branding stays centered', 
       .poll(() => profile.locator('img').evaluate((img) => (img as HTMLImageElement).naturalWidth))
       .toBeGreaterThan(0);
   }
-  const wordmark = await page.locator('.footer-wordmark span').boundingBox();
+  const wordmark = await page.locator('.footer-brand-echo').boundingBox();
   expect(Math.abs(wordmark!.x + wordmark!.width / 2 - width / 2)).toBeLessThan(2);
-  expect(wordmark!.width).toBeLessThan(width * 0.92);
+  expect(wordmark!.width).toBeLessThanOrEqual(170);
+  expect((await page.locator('.footer-wordmark').boundingBox())!.height).toBeLessThanOrEqual(166);
+  await expect(page.locator('.footer-wordmark')).toHaveText('');
+  await expect(page.locator('.brand-name')).toHaveText(['Artificials', 'Artificials']);
+  await expect(page.locator('.brand-name').first()).toHaveCSS('font-family', 'Sora, sans-serif');
+  await expect(page.locator('img[src="/logo.svg"]')).toHaveCount(0);
+  await expect
+    .poll(() =>
+      page
+        .locator('.brand-mark')
+        .first()
+        .evaluate((img) => (img as HTMLImageElement).naturalWidth),
+    )
+    .toBeGreaterThan(0);
 });
 
 test('scroll morphs the header and mobile navigation manages focus and closes on navigation', async ({
@@ -205,4 +218,97 @@ test('vertical scrolling moves story panels sideways on desktop and mobile', asy
   await expect(journey).toHaveAttribute('data-motion', 'static');
   await expect(page.locator('.journey-track')).toHaveCSS('transform', 'none');
   await expect(page.locator('.journey-sticky')).not.toHaveCSS('position', 'sticky');
+});
+
+test('portrait art fills the entire hero width at phone and tablet breakpoints', async ({
+  page,
+}) => {
+  await page.goto('/');
+  for (const width of [320, 375, 430, 500, 639, 640, 760]) {
+    await page.setViewportSize({ width, height: 900 });
+    const artwork = page.locator('.hero-banner-art img');
+    await expect(artwork).toHaveCSS('object-fit', 'cover');
+    const picture = await page.locator('.hero-banner-art picture').boundingBox();
+    expect(picture!.x, `${width}px left edge`).toBeCloseTo(0, 0);
+    expect(picture!.width, `${width}px full width`).toBeGreaterThanOrEqual(width);
+    await expect(page.locator('.hero-banner-art picture')).toHaveCSS('mask-image', 'none');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      width,
+    );
+  }
+});
+
+test('island and horizontal motion pass through intermediate positions and settle', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  await page.evaluate(() => scrollTo({ top: 60, behavior: 'instant' }));
+  await expect
+    .poll(() =>
+      page
+        .locator('.site-header')
+        .evaluate((el) => Number((el as HTMLElement).style.getPropertyValue('--header-progress'))),
+    )
+    .toBeGreaterThan(0.49);
+  const partial = await page.locator('.header-surface').boundingBox();
+  expect(partial!.width).toBeLessThan(page.viewportSize()!.width);
+  const headerFrames = await page.evaluate(async () => {
+    scrollTo({ top: 180, behavior: 'instant' });
+    const values: number[] = [];
+    for (let i = 0; i < 12; i++) {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      values.push(
+        Number(
+          (document.querySelector('.site-header') as HTMLElement).style.getPropertyValue(
+            '--header-progress',
+          ),
+        ),
+      );
+    }
+    return values;
+  });
+  expect(headerFrames.some((p) => p > 0.52 && p < 0.97)).toBe(true);
+  await expect
+    .poll(() =>
+      page
+        .locator('.site-header')
+        .evaluate((el) => Number((el as HTMLElement).style.getPropertyValue('--header-progress'))),
+    )
+    .toBe(1);
+  expect((await page.locator('.header-surface').boundingBox())!.width).toBeLessThan(partial!.width);
+
+  await page
+    .locator('.journey')
+    .evaluate((el) =>
+      scrollTo({
+        top:
+          scrollY +
+          el.getBoundingClientRect().top +
+          (el.clientHeight - (el.querySelector('.journey-sticky') as HTMLElement).clientHeight) *
+            0.4,
+        behavior: 'instant',
+      }),
+    );
+  const track = page.locator('.journey-track');
+  await expect
+    .poll(() => track.evaluate((el) => -new DOMMatrix(getComputedStyle(el).transform).m41))
+    .toBeGreaterThan(100);
+  const motion = await page.evaluate(async () => {
+    const rail = document.querySelector('.journey-track')!;
+    const start = -new DOMMatrix(getComputedStyle(rail).transform).m41;
+    scrollTo({ top: scrollY + 64, behavior: 'instant' });
+    const samples: number[] = [];
+    for (let i = 0; i < 10; i++) {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      samples.push(-new DOMMatrix(getComputedStyle(rail).transform).m41 - start);
+    }
+    return { start, samples };
+  });
+  expect(motion.samples.some((x) => x > 1 && x < 60)).toBe(true);
+  for (let i = 1; i < motion.samples.length; i++)
+    expect(motion.samples[i]).toBeGreaterThanOrEqual(motion.samples[i - 1] - 0.1);
+  await expect
+    .poll(() => track.evaluate((el) => -new DOMMatrix(getComputedStyle(el).transform).m41))
+    .toBeCloseTo(motion.start + 64, 0);
 });

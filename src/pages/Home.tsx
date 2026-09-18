@@ -28,12 +28,12 @@ export default function Home() {
           <picture>
             <source
               media="(max-width: 760px)"
-              srcSet="/editorial/hero-mobile-small.webp 480w, /editorial/hero-mobile.webp 768w"
+              srcSet="/editorial/hero-brand-mobile-small.webp 640w, /editorial/hero-brand-mobile.webp 1024w"
               sizes="100vw"
             />
             <img
-              src="/editorial/hero-engraved.webp"
-              srcSet="/editorial/hero-engraved-small.webp 960w, /editorial/hero-engraved.webp 1920w"
+              src="/editorial/hero-brand.webp"
+              srcSet="/editorial/hero-brand-small.webp 960w, /editorial/hero-brand.webp 1920w"
               sizes="100vw"
               width="1920"
               height="819"

@@ -2,9 +2,11 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { ArrowUpRight, ArrowRight, Globe2, Command } from 'lucide-react';
 import { useApp } from '../lib/context';
+import { Brand } from './Brand';
 export function Layout() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const header = useRef<HTMLElement>(null);
   const surface = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const { session } = useApp();
@@ -14,27 +16,62 @@ export function Layout() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.pathname]);
   useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      setScrolled(window.scrollY > 48);
+    const el = header.current;
+    if (!el) return;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    const wide = matchMedia('(min-width: 1101px)');
+    let frame = 0,
+      previousTime = 0,
+      progress = 0;
+    const target = () => {
+      if (open) return 1;
+      const linear = Math.min(1, Math.max(0, (window.scrollY - 8) / 104));
+      return linear * linear * (3 - 2 * linear);
     };
-    const onScroll = () => {
+    const paint = () => el.style.setProperty('--header-progress', progress.toFixed(5));
+    const update = (time: number) => {
+      frame = 0;
+      const goal = target();
+      const elapsed = previousTime ? Math.min(time - previousTime, 64) : 1000 / 60;
+      previousTime = time;
+      progress = reduced.matches
+        ? goal
+        : progress + (goal - progress) * (1 - Math.exp(-elapsed / 95));
+      if (Math.abs(goal - progress) < 0.0001) progress = goal;
+      paint();
+      setScrolled(window.scrollY > 48);
+      if (progress !== goal) frame = requestAnimationFrame(update);
+      else previousTime = 0;
+    };
+    const request = () => {
       if (!frame) frame = requestAnimationFrame(update);
     };
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    const wide = matchMedia('(min-width: 1101px)');
     const onResize = () => {
       if (wide.matches) setOpen(false);
     };
+    const onVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+        previousTime = 0;
+      } else request();
+    };
+    const savedProgress = el.style.getPropertyValue('--header-progress');
+    progress = savedProgress ? Number(savedProgress) : target();
+    paint();
+    request();
+    window.addEventListener('scroll', request, { passive: true });
+    reduced.addEventListener('change', request);
     wide.addEventListener('change', onResize);
+    document.addEventListener('visibilitychange', onVisibility);
     return () => {
       cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', request);
+      reduced.removeEventListener('change', request);
       wide.removeEventListener('change', onResize);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, []);
+  }, [open]);
   useEffect(() => {
     if (!open) return;
     const oldOverflow = document.body.style.overflow;
@@ -81,7 +118,10 @@ export function Layout() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <header className={`site-header${scrolled ? ' is-island' : ''}${open ? ' menu-open' : ''}`}>
+      <header
+        ref={header}
+        className={`site-header${scrolled ? ' is-island' : ''}${open ? ' menu-open' : ''}`}
+      >
         <div className="menu-scrim" aria-hidden="true" onClick={closeMenu} />
         <div
           ref={surface}
@@ -91,14 +131,13 @@ export function Layout() {
           aria-label={open ? 'Site navigation' : undefined}
         >
           <div className="site-nav container">
-            <Link to="/" aria-label="Artificials home">
-              <img
-                className="brand-logo"
-                src="/logo.svg"
-                alt="Artificials"
-                width="183"
-                height="34"
-              />
+            <Link
+              to="/"
+              className="brand-home"
+              aria-label="Artificials home"
+              onClick={() => setOpen(false)}
+            >
+              <Brand />
             </Link>
             <nav className="site-links" aria-label="Main navigation">
               {links.map(([url, label]) => (
@@ -172,8 +211,8 @@ export function Layout() {
       <footer className="site-footer" inert={open}>
         <div className="container footer-top">
           <div className="footer-identity">
-            <Link to="/">
-              <img src="/logo.svg" width="183" height="34" alt="Artificials" />
+            <Link to="/" aria-label="Artificials home">
+              <Brand />
             </Link>
             <p>
               Intelligence, in perspective.
@@ -234,7 +273,14 @@ export function Layout() {
           </span>
         </div>
         <div className="footer-wordmark" aria-hidden="true">
-          <span>artificials</span>
+          <img
+            className="footer-brand-echo"
+            src="/brand/artificials-mark.webp"
+            width="260"
+            height="226"
+            alt=""
+            loading="lazy"
+          />
         </div>
       </footer>
     </>
