@@ -4,7 +4,6 @@ import { ArrowLeft, ArrowUpRight, Search } from 'lucide-react';
 import { ARTICLES, ARTICLE_CATEGORIES, type Article } from '../../shared/content';
 import { api } from '../lib/api';
 import { EmptyState, PageHeading } from '../components/Layout';
-import { AuthorBadge } from '../components/AuthorBadge';
 import { ArticleCover } from '../components/ArticleCover';
 export default function Learn() {
   const { slug } = useParams();
@@ -28,7 +27,6 @@ export default function Learn() {
         <p className="article-deck">{article.excerpt}</p>
         <div className="author-line">
           <div>
-            <AuthorBadge />
             <small>
               Editorial guide · Updated{' '}
               {new Date(article.updated_at).toLocaleDateString('en-US', {
@@ -115,7 +113,6 @@ export default function Learn() {
             <span className="eyebrow">{a.category} · Editorial guide</span>
             <h2>{a.title}</h2>
             <p>{a.excerpt}</p>
-            <AuthorBadge />
             <span className="text-link">
               Read the guide <ArrowUpRight size={16} />
             </span>

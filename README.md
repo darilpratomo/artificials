@@ -1,6 +1,6 @@
 # Artificials
 
-Independent AI model directory, sourced capability benchmarks, separate specification/price rankings, side-by-side comparison, illustrated editorial guides, a free 36-lesson AI Academy and a metered full-stack AI app builder for **artificials.net**. English interface; black/silver design, responsive visuals, horizontal scroll storytelling, reduced-motion support.
+Independent AI model directory, sourced capability benchmarks, separate specification/price rankings, side-by-side comparison, illustrated editorial guides, a free 36-lesson AI Academy and a metered full-stack AI app builder for **artificials.net**. English interface; black/silver design, responsive visuals, horizontal scroll storytelling on desktop and mobile, a floating scroll-responsive header, and reduced-motion support.
 
 ## Run locally
 
@@ -45,7 +45,7 @@ The scheduled GitHub workflow refreshes the snapshot every six hours. Scheduled 
 npm run check
 npm run check:academy
 npx playwright install chromium webkit
-npm run test:e2e
+E2E_PRODUCTION=1 npm run test:e2e
 npx wrangler deploy --dry-run --env production
 npm run deploy
 ```

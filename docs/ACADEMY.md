@@ -17,14 +17,14 @@ All examples use the Python standard library and were executed in verification. 
 
 To add a lesson, add a JSON content file and a matching summary in the index. Keep its slug stable and ensure its module exists. The integrity test catches missing files, metadata mismatches, incomplete sections, and invalid quiz answers. Adjust the intentionally fixed example-count guard in `scripts/check-academy.py` when adding lessons. Curriculum count labels are calculated from the index.
 
-## Progress and author identity
+## Progress
 
 Completion requires the user to check that they practiced and answer the quiz correctly. This is self-reported learning progress, not proctored assessment. Completed lesson slugs are stored in `artificials-academy-progress-v1` in localStorage. They are validated against the current curriculum; corrupt, duplicate, and removed entries are ignored. There is no account sync or server write. Clearing site storage clears progress. With storage blocked, only current-page memory remains.
 
-The blue author badge identifies the official Artificials editorial account on this website. It is not a claim of external social-platform verification. All news cards and article pages use the same component.
+Public lessons and editorial articles omit author names and verification badges, as requested by the owner.
 
 ## Verification
 
 `npm run check:academy` requires Python 3 and executes all 36 standalone examples in temporary folders, then sends valid/invalid requests to the local API project and verifies SQLite inserts. It creates no repository database, makes no external model call, and leaves no server running. GitHub CI runs it as a separate required step after `npm run check`; run both commands locally when modifying course content. Cloudflare builds use the Node-only `npm run check` so Python example execution does not add a build-runtime dependency to the website.
 
-Browser coverage checks curriculum filtering, incorrect/correct quiz attempts, completion gating and persistence, code download content, next-lesson navigation, lab boundary behavior, accessibility, and mobile layouts. Existing public-route regression coverage remains in place.
+Production-build browser coverage checks radio/checkbox label geometry at 320, 375, 768, and 1440px, curriculum filtering, incorrect/correct quiz attempts, completion gating and persistence, code download content, next-lesson navigation, lab boundary behavior, accessibility, and mobile layouts. Existing public-route regression coverage remains in place.

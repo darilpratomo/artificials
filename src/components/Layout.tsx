@@ -1,9 +1,12 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { ArrowUpRight, Menu, X, ArrowRight, Globe2, Command } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, Globe2, Command } from 'lucide-react';
 import { useApp } from '../lib/context';
 export function Layout() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const surface = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
   const { session } = useApp();
   const location = useLocation();
   useEffect(() => {
@@ -11,13 +14,60 @@ export function Layout() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.pathname]);
   useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      setScrolled(window.scrollY > 48);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    const wide = matchMedia('(min-width: 1101px)');
+    const onResize = () => {
+      if (wide.matches) setOpen(false);
+    };
+    wide.addEventListener('change', onResize);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      wide.removeEventListener('change', onResize);
+    };
+  }, []);
+  useEffect(() => {
     if (!open) return;
+    const oldOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') {
+        setOpen(false);
+        trigger.current?.focus();
+      }
+      if (e.key !== 'Tab') return;
+      const items = Array.from(
+        surface.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])') || [],
+      ).filter((el) => el.getClientRects().length && !el.closest('[inert]'));
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last?.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first?.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = oldOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
   }, [open]);
+  const closeMenu = () => {
+    setOpen(false);
+    trigger.current?.focus();
+  };
   const links = [
     ['/models', 'Models'],
     ['/leaderboard', 'Rankings'],
@@ -31,56 +81,95 @@ export function Layout() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <header className="site-header">
-        <div className="site-nav container">
-          <Link to="/" aria-label="Artificials home">
-            <img className="brand-logo" src="/logo.svg" alt="Artificials" width="183" height="34" />
-          </Link>
-          <nav className="site-links" aria-label="Main navigation">
-            {links.map(([url, label]) => (
-              <NavLink key={url} to={url}>
-                {label}
-                {label === 'Studio' && <span className="nav-tag">AI</span>}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="site-actions">
-            <Link className="nav-login" to={session.user ? '/dashboard' : '/login'}>
-              {session.user ? 'Workspace' : 'Log in'}
+      <header className={`site-header${scrolled ? ' is-island' : ''}${open ? ' menu-open' : ''}`}>
+        <div className="menu-scrim" aria-hidden="true" onClick={closeMenu} />
+        <div
+          ref={surface}
+          className="header-surface"
+          role={open ? 'dialog' : undefined}
+          aria-modal={open ? true : undefined}
+          aria-label={open ? 'Site navigation' : undefined}
+        >
+          <div className="site-nav container">
+            <Link to="/" aria-label="Artificials home">
+              <img
+                className="brand-logo"
+                src="/logo.svg"
+                alt="Artificials"
+                width="183"
+                height="34"
+              />
             </Link>
-            <Link className="btn btn-small" to="/studio">
-              Start building <ArrowUpRight size={14} />
-            </Link>
-            <button
-              className="icon-btn menu-trigger"
-              aria-label={open ? 'Close menu' : 'Open menu'}
-              aria-expanded={open}
-              aria-controls="mobile-navigation"
-              onClick={() => setOpen(!open)}
-            >
-              {open ? <X size={21} /> : <Menu size={21} />}
-            </button>
+            <nav className="site-links" aria-label="Main navigation">
+              {links.map(([url, label]) => (
+                <NavLink key={url} to={url}>
+                  {label}
+                  {label === 'Studio' && <span className="nav-tag">AI</span>}
+                </NavLink>
+              ))}
+            </nav>
+            <div className="site-actions">
+              <Link className="nav-login" to={session.user ? '/dashboard' : '/login'}>
+                {session.user ? 'Workspace' : 'Log in'}
+              </Link>
+              <Link className="btn btn-small" to="/studio">
+                Start building <ArrowUpRight size={14} />
+              </Link>
+              <button
+                ref={trigger}
+                className="icon-btn menu-trigger"
+                aria-label={open ? 'Close menu' : 'Open menu'}
+                aria-expanded={open}
+                aria-controls="mobile-navigation"
+                onClick={() => setOpen(!open)}
+              >
+                <span className="hamburger-lines" aria-hidden="true">
+                  <i />
+                  <i />
+                </span>
+              </button>
+            </div>
+          </div>
+          <div className="navigation-drawer" inert={!open} aria-hidden={!open}>
+            <nav id="mobile-navigation" className="site-mobile" aria-label="Mobile navigation">
+              <div className="mobile-menu-heading">
+                <span className="mono">EXPLORE ARTIFICIALS</span>
+                <span className="signal-light" />
+              </div>
+              <div className="mobile-menu-links">
+                {[
+                  ...links,
+                  ['/pricing', 'Pricing'],
+                  [session.user ? '/dashboard' : '/login', session.user ? 'Workspace' : 'Log in'],
+                ].map(([url, label], i) => (
+                  <NavLink
+                    key={url}
+                    to={url}
+                    style={{ '--menu-order': i } as import('react').CSSProperties}
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="menu-link-number" aria-hidden="true">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span>{label}</span>
+                    <ArrowUpRight size={16} />
+                  </NavLink>
+                ))}
+              </div>
+              <div className="mobile-menu-bottom">
+                <span>Intelligence, in perspective.</span>
+                <Link to="/contact" onClick={() => setOpen(false)}>
+                  Get in touch <ArrowUpRight size={13} />
+                </Link>
+              </div>
+            </nav>
           </div>
         </div>
-        {open && (
-          <nav id="mobile-navigation" className="site-mobile" aria-label="Mobile navigation">
-            {[
-              ...links,
-              ['/pricing', 'Pricing'],
-              [session.user ? '/dashboard' : '/login', session.user ? 'Workspace' : 'Log in'],
-            ].map(([url, label]) => (
-              <Link key={url} to={url}>
-                {label}
-                <ArrowUpRight size={16} />
-              </Link>
-            ))}
-          </nav>
-        )}
       </header>
-      <main id="main" tabIndex={-1}>
+      <main id="main" tabIndex={-1} inert={open}>
         <Outlet />
       </main>
-      <footer className="site-footer">
+      <footer className="site-footer" inert={open}>
         <div className="container footer-top">
           <div className="footer-identity">
             <Link to="/">
@@ -97,20 +186,7 @@ export function Layout() {
                 rel="noopener noreferrer"
                 aria-label="Artificials on Instagram"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  aria-hidden="true"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="5" />
-                  <circle cx="12" cy="12" r="4" />
-                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-                </svg>
-                <span>Instagram</span>
+                <img src="/social/instagram.svg" width="20" height="20" alt="" />
               </a>
               <a
                 href="https://x.com/artificialsnet"
@@ -118,16 +194,7 @@ export function Layout() {
                 rel="noopener noreferrer"
                 aria-label="Artificials on X"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  width="17"
-                  height="17"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.4l8.2-9.4L.8 2h6.5l4.5 6.8L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z" />
-                </svg>
-                <span>X</span>
+                <img src="/social/x.svg" width="19" height="20" alt="" />
               </a>
             </div>
             <span className="mono">
@@ -167,8 +234,7 @@ export function Layout() {
           </span>
         </div>
         <div className="footer-wordmark" aria-hidden="true">
-          artificials
-          <ArrowUpRight />
+          <span>artificials</span>
         </div>
       </footer>
     </>

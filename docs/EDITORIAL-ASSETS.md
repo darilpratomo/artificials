@@ -25,3 +25,21 @@ Mode: built-in image_gen, new image, 17 September 2026. Final files: `public/edi
 Final prompt:
 
 Use case: stylized-concept. Asset type: ultra-wide homepage hero background for Artificials, an elegant black and silver AI technology publication. Create a cinematic photorealistic 3D scene of a vast dark silver celestial sphere with fine etched computational topology, an illuminated thin orbital ring, and sparse fine stars in a deep charcoal space. Wide 2.4:1 composition, sphere occupies the right half with its lower edge softly disappearing in mist. Left half is very dark atmospheric negative space designed for large white heading text layered on top in HTML. Quiet, restrained, high-end scientific art direction, brushed silver surface, subtle white rim light, depth, a faint horizontal light horizon, no bright blue or purple. Keep some sculptural texture behind the left area but readable as an understated background. No text, letters, logos, labels, watermark, charts, or UI. Landscape 2400x1024.
+
+## Engraved planet and mobile composition
+
+Mode: built-in image_gen, edit/reframe of the original homepage hero, 17 September 2026. The displayed replacements are `public/editorial/hero-engraved.webp` (1920px, 67,354 bytes), `public/editorial/hero-engraved-small.webp` (960px, 26,674 bytes), `public/editorial/hero-mobile.webp` (768px, 65,702 bytes), and `public/editorial/hero-mobile-small.webp` (480px, 29,046 bytes). The original unlettered assets above remain as source references. Both edited scenes embed the ARTIFICIALS.NET inscription into the silver planet. The HTML heading, buttons, and navigation remain real accessible text.
+
+`Home.tsx` selects portrait artwork below 761px. CSS frames small phones separately so the sphere is visible below the copy without extending the hero to its former 795px minimum. To replace the artwork, update both desktop and portrait srcsets; keep the portrait planet low and the upper area dark.
+
+Final desktop edit prompt:
+
+Use case: text-localization. Edit the supplied Artificials homepage banner. Preserve its dark silver celestial sphere, computational engraving, thin orbital ring, lighting, stars, atmosphere, landscape framing and empty left half exactly. Add the exact uppercase inscription "ARTIFICIALS.NET" engraved into the planet's metal surface, on the upper-front facing hemisphere above the diagonal ring. It should look physically carved, recessed metallic lettering following the spherical curvature with subtle silver highlights and shadow, understated yet clearly legible at desktop website size. One line, moderately large but tasteful, not bright white flat overlay, no extra words or logos. Spell exactly A R T I F I C I A L S . N E T. Keep the original wide aspect ratio and all other visual content.
+
+Final portrait edit prompt:
+
+Use case: compositing. Adapt the supplied silver planet banner into a dedicated portrait mobile hero background, 1024x1536. Preserve the same cinematic charcoal and silver material, fine computational engravings, single thin orbital ring, sparse stars and mist. Reframe and zoom OUT: show the entire planet with comfortable margins, planet diameter approximately 72 percent of image width, centered horizontally, centered around 72 percent of the image height. Upper 42 percent should be deep dark nearly black atmospheric negative space for real HTML heading text, no text there. Add exact uppercase inscription "ARTIFICIALS.NET" physically engraved in a single curved line on the upper-facing portion of the sphere, subtle but readable silver recessed lettering, not overlay text. Spell exactly A R T I F I C I A L S . N E T. Fade lower edge to black, retain orbital ring within portrait bounds. No additional objects, logos, UI, or extra text.
+
+## Social profile icons
+
+`public/social/x.svg` and `public/social/instagram.svg` are official white glyphs from the [X brand toolkit](https://about.x.com/en/who-we-are/brand-toolkit) and [Instagram brand resources](https://about.meta.com/brand/resources/instagram/instagram-brand/). They replace the hand-drawn X mark and visible social labels. Screen-reader link names remain. `public/social/NOTICE.txt` records archive provenance.

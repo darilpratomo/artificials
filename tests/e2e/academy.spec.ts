@@ -72,12 +72,12 @@ test('interactive labs calculate real outcomes and reset', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Lesson not found.' })).toBeVisible();
 });
 
-test('brand profiles, verified byline, and caption removal appear on public pages', async ({
+test('brand profiles use icons and public articles omit the byline and captions', async ({
   page,
 }) => {
   await page.goto('/news/read-an-ai-benchmark');
-  await expect(page.locator('.author-badge')).toHaveText('Artificials');
-  await expect(page.getByRole('img', { name: 'Official Artificials author' })).toBeVisible();
+  await expect(page.locator('.author-badge')).toHaveCount(0);
+  await expect(page.getByRole('img', { name: 'Official Artificials author' })).toHaveCount(0);
   await expect(page.locator('figcaption')).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Artificials on Instagram' })).toHaveAttribute(
     'href',
@@ -126,4 +126,39 @@ test('academy, lesson reader, and labs are accessible without horizontal page ov
       route,
     ).toBeLessThanOrEqual(await page.evaluate(() => innerWidth));
   }
+});
+
+test('selection controls keep readable labels inside their cards at every screen size', async ({
+  page,
+}) => {
+  await page.goto('/learn/define-a-useful-ai-task');
+  for (const width of [320, 375, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(page.locator('.quiz-option')).toHaveCount(3);
+    for (const label of await page.locator('.quiz-option, .practice-confirm').all()) {
+      const geometry = await label.evaluate((el) => {
+        const box = el.getBoundingClientRect();
+        const input = el.querySelector('input')!.getBoundingClientRect();
+        const text = el.querySelector('span')!.getBoundingClientRect();
+        return {
+          width: box.width,
+          inputWidth: input.width,
+          inputRight: input.right,
+          textWidth: text.width,
+          textLeft: text.left,
+          textRight: text.right,
+          right: box.right,
+        };
+      });
+      expect(geometry.inputWidth, `control at ${width}px`).toBeLessThanOrEqual(20);
+      expect(geometry.textWidth, `label at ${width}px`).toBeGreaterThan(geometry.width * 0.6);
+      expect(geometry.textLeft).toBeGreaterThan(geometry.inputRight);
+      expect(geometry.textRight).toBeLessThanOrEqual(geometry.right);
+    }
+  }
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.locator('.quiz-option').nth(1).locator('span').click();
+  await expect(page.getByRole('radio').nth(1)).toBeChecked();
+  await page.locator('.practice-confirm span').click();
+  await expect(page.getByRole('checkbox')).toBeChecked();
 });

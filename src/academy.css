@@ -922,7 +922,8 @@ progress::-moz-progress-bar {
   color: #abbfdc;
 }
 .practice-confirm {
-  display: flex;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
   align-items: flex-start;
   gap: 10px;
   margin-top: 23px;
@@ -953,7 +954,8 @@ progress::-moz-progress-bar {
   margin-bottom: 18px;
 }
 .quiz-option {
-  display: flex;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
@@ -964,6 +966,10 @@ progress::-moz-progress-bar {
   color: #b5c4db;
   line-height: 1.8;
   cursor: pointer;
+}
+.quiz-option > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .quiz-option input {
   accent-color: #a8ceff;
@@ -1098,14 +1104,6 @@ progress::-moz-progress-bar {
   }
 }
 @media (max-width: 760px) {
-  .hero-banner-art img {
-    object-position: 68% 50%;
-    opacity: 0.48;
-  }
-  .hero-banner-art::after {
-    background:
-      linear-gradient(90deg, #090b0edb, #090b0e40), linear-gradient(0deg, #0a0b0f, transparent 60%);
-  }
   .academy-hero {
     grid-template-columns: minmax(0, 1fr);
     gap: 38px;

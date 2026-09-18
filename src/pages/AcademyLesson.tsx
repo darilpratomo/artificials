@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { academy, loadLesson, useAcademyProgress, type Lesson } from '../lib/academy';
 import { EmptyState } from '../components/Layout';
-import { AuthorBadge } from '../components/AuthorBadge';
 import { ConceptLab } from '../components/ConceptLab';
 
 export default function AcademyLesson() {
@@ -180,7 +179,6 @@ function LessonReader({ lesson }: { lesson: Lesson }) {
             </div>
             <h1>{lesson.title}</h1>
             <p>{lesson.summary}</p>
-            <AuthorBadge />
           </header>
           <nav className="lesson-anchor-nav" aria-label="Lesson sections">
             <a href="#theory">Theory</a>
@@ -283,7 +281,7 @@ function LessonReader({ lesson }: { lesson: Lesson }) {
                 checked={practiced}
                 onChange={(e) => setPracticed(e.target.checked)}
               />
-              I have worked through the practice task.
+              <span>I have worked through the practice task.</span>
             </label>
           </section>
           <section className="lesson-quiz" id="knowledge-check">

@@ -28,5 +28,7 @@ jobs:
         run: npm run check:academy
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e
+        env:
+          E2E_PRODUCTION: 1
       - name: Check Worker bundle without deployment
         run: npx wrangler deploy --dry-run

@@ -17,7 +17,6 @@ import { Reveal, ScrollJourney } from '../components/Motion';
 import { useCatalogSummary, compactNumber, updatedDate, providerLogo } from '../lib/catalog';
 import ModelCard from '../components/ModelCard';
 import { ARTICLES } from '../../shared/content';
-import { AuthorBadge } from '../components/AuthorBadge';
 import { ArticleCover } from '../components/ArticleCover';
 export default function Home() {
   const { data, error } = useCatalogSummary();
@@ -26,15 +25,22 @@ export default function Home() {
     <>
       <div className="hero-banner-shell">
         <div className="hero-banner-art" aria-hidden="true">
-          <img
-            src="/editorial/hero-banner.webp"
-            srcSet="/editorial/hero-banner-small.webp 960w, /editorial/hero-banner.webp 1920w"
-            sizes="100vw"
-            width="1920"
-            height="819"
-            alt=""
-            fetchPriority="high"
-          />
+          <picture>
+            <source
+              media="(max-width: 760px)"
+              srcSet="/editorial/hero-mobile-small.webp 480w, /editorial/hero-mobile.webp 768w"
+              sizes="100vw"
+            />
+            <img
+              src="/editorial/hero-engraved.webp"
+              srcSet="/editorial/hero-engraved-small.webp 960w, /editorial/hero-engraved.webp 1920w"
+              sizes="100vw"
+              width="1920"
+              height="819"
+              alt=""
+              fetchPriority="high"
+            />
+          </picture>
         </div>
         <section className="signal-hero container">
           <div className="hero-grid" aria-hidden="true" />
@@ -145,7 +151,11 @@ export default function Home() {
           </p>
         ) : (
           <div className="home-model-grid">
-            {data?.featured?.slice(0, 6).map((m) => <ModelCard key={m.id} model={m} />) ||
+            {data?.featured?.slice(0, 6).map((m) => (
+              <Reveal key={m.id}>
+                <ModelCard model={m} />
+              </Reveal>
+            )) ||
               Array.from({ length: 6 }, (_, i) => (
                 <div className="model-skeleton" key={i} aria-label="Loading model details" />
               ))}
@@ -350,7 +360,6 @@ export default function Home() {
                 </div>
                 <h3>{a.title}</h3>
                 <p>{a.excerpt}</p>
-                <AuthorBadge />
                 <span className="text-link">
                   Read the perspective <ArrowUpRight size={14} />
                 </span>

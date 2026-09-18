@@ -1,8 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
+const production = process.env.E2E_PRODUCTION === '1';
+const port = production ? 4173 : 5173;
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
-  use: { baseURL: 'http://127.0.0.1:5173', trace: 'retain-on-failure' },
+  use: { baseURL: `http://127.0.0.1:${port}`, trace: 'retain-on-failure' },
   projects: [
     {
       name: 'desktop',
@@ -16,8 +18,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev -- --port 5173 --strictPort',
-    url: 'http://127.0.0.1:5173',
+    command: `npm run ${production ? 'preview' : 'dev'} -- --port ${port} --strictPort`,
+    url: `http://127.0.0.1:${port}`,
     reuseExistingServer: !process.env.CI,
   },
   reporter: 'list',

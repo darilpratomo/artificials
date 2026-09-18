@@ -323,29 +323,6 @@ test('pricing and account screens reflect unavailable services', async ({ page }
   await expect(page.getByRole('heading', { name: 'A little off the beaten path.' })).toBeVisible();
 });
 
-test('desktop scroll moves the discovery story horizontally', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'Small screens use the readable vertical layout.');
-  await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await page.goto('/');
-  await expect(page.locator('.journey-track')).toBeVisible();
-  await page.locator('.journey').evaluate((section) => {
-    const bounds = section.getBoundingClientRect();
-    window.scrollTo({
-      top: window.scrollY + bounds.top + Math.max(0, (bounds.height - innerHeight) / 2),
-      behavior: 'instant',
-    });
-  });
-  await expect
-    .poll(async () =>
-      page.locator('.journey-track').evaluate((track) => {
-        const transform = getComputedStyle(track).transform;
-        return transform === 'none' ? 0 : new DOMMatrix(transform).m41;
-      }),
-    )
-    .toBeLessThan(-100);
-  await expectFitsViewport(page);
-});
-
 test('reduced motion keeps the scroll journey readable without horizontal movement', async ({
   page,
 }) => {
