@@ -375,3 +375,24 @@ test('production HTML exposes article and lesson content before JavaScript', asy
     expect(html).not.toContain('noindex');
   }
 });
+
+test('activating prerendered HTML preserves a visitor’s existing scroll position', async ({
+  page,
+}) => {
+  test.skip(process.env.E2E_PRODUCTION !== '1', 'Prerendered build only');
+  let activate!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    activate = resolve;
+  });
+  await page.route('**/assets/index-*.js', async (route) => {
+    await gate;
+    await route.continue();
+  });
+  await page.goto('/', { waitUntil: 'commit' });
+  await expect(page.locator('.site-header')).toBeVisible();
+  await page.evaluate(() => scrollTo({ top: 500, behavior: 'instant' }));
+  expect(await page.evaluate(() => scrollY)).toBeGreaterThanOrEqual(490);
+  activate();
+  await expect(page.locator('.site-header')).toHaveClass(/is-island/);
+  expect(await page.evaluate(() => scrollY)).toBeGreaterThanOrEqual(490);
+});

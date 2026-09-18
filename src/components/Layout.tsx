@@ -11,9 +11,15 @@ export function Layout() {
   const trigger = useRef<HTMLButtonElement>(null);
   const { session } = useApp();
   const location = useLocation();
+  const previousPath = useRef(location.pathname);
   useEffect(() => {
     setOpen(false);
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    // The visitor can already scroll prerendered HTML before React activates.
+    // Reset only for an actual in-app route change, never the initial mount.
+    if (previousPath.current !== location.pathname) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      previousPath.current = location.pathname;
+    }
   }, [location.pathname]);
   useEffect(() => {
     const el = header.current;
