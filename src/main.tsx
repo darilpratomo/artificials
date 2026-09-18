@@ -1,6 +1,7 @@
-import { Component, lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { Metadata } from './components/Metadata';
+import { Component, lazy, Suspense, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './styles.css';
 import { Provider } from './lib/context';
 import { Layout, EmptyState } from './components/Layout';
@@ -36,38 +37,6 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean
       this.props.children
     );
   }
-}
-function Metadata() {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    const names: Record<string, string> = {
-      '/': 'Intelligence, in perspective',
-      '/models': 'AI model directory',
-      '/leaderboard': 'Model rankings',
-      '/compare': 'Compare models',
-      '/news': 'AI insights and guides',
-      '/learn': 'Learn AI — Artificials Academy',
-      '/studio': 'AI Studio',
-      '/pricing': 'Plans & pricing',
-      '/login': 'Welcome back',
-      '/dashboard': 'Your workspace',
-      '/about': 'Our story',
-      '/privacy': 'Privacy policy',
-      '/terms': 'Terms & conditions',
-      '/contact': 'Get in touch',
-    };
-    document.title = (names[pathname] || 'Explore') + ' — Artificials';
-    let robots = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
-    if (!robots) {
-      robots = document.createElement('meta');
-      robots.name = 'robots';
-      document.head.appendChild(robots);
-    }
-    robots.content = /^\/(dashboard|login|checkout|_private)/.test(pathname)
-      ? 'noindex,nofollow'
-      : 'index,follow';
-  }, [pathname]);
-  return null;
 }
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary>

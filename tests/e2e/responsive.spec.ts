@@ -278,18 +278,15 @@ test('island and horizontal motion pass through intermediate positions and settl
     .toBe(1);
   expect((await page.locator('.header-surface').boundingBox())!.width).toBeLessThan(partial!.width);
 
-  await page
-    .locator('.journey')
-    .evaluate((el) =>
-      scrollTo({
-        top:
-          scrollY +
-          el.getBoundingClientRect().top +
-          (el.clientHeight - (el.querySelector('.journey-sticky') as HTMLElement).clientHeight) *
-            0.4,
-        behavior: 'instant',
-      }),
-    );
+  await page.locator('.journey').evaluate((el) =>
+    scrollTo({
+      top:
+        scrollY +
+        el.getBoundingClientRect().top +
+        (el.clientHeight - (el.querySelector('.journey-sticky') as HTMLElement).clientHeight) * 0.4,
+      behavior: 'instant',
+    }),
+  );
   const track = page.locator('.journey-track');
   await expect
     .poll(() => track.evaluate((el) => -new DOMMatrix(getComputedStyle(el).transform).m41))
@@ -311,4 +308,70 @@ test('island and horizontal motion pass through intermediate positions and settl
   await expect
     .poll(() => track.evaluate((el) => -new DOMMatrix(getComputedStyle(el).transform).m41))
     .toBeCloseTo(motion.start + 64, 0);
+});
+
+test('custom dropdown stays within the viewport and supports keyboard selection', async ({
+  page,
+}) => {
+  await page.goto('/learn');
+  const select = page.getByRole('combobox', { name: 'Filter academy by topic' });
+  await select.focus();
+  await select.press('Enter');
+  const popup = page.getByRole('listbox');
+  await expect(popup).toBeVisible();
+  const bounds = await popup.boundingBox();
+  expect(bounds!.x).toBeGreaterThanOrEqual(0);
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  await select.press('End');
+  await select.press('Enter');
+  await expect(page.locator('.module-lessons li')).toHaveCount(4);
+  await expect(select).toBeFocused();
+  await select.press('Enter');
+  await select.press('Escape');
+  await expect(popup).toHaveCount(0);
+  await select.press('p');
+  await expect(select).toContainText('Python');
+  await select.press('Enter');
+  await page.getByRole('heading', { level: 1 }).click();
+  await expect(popup).toHaveCount(0);
+});
+
+test('search inputs have one border and editorial images stay compact', async ({ page }) => {
+  for (const [path, selector] of [
+    ['/models', '.catalog-search'],
+    ['/leaderboard', '.benchmark-search'],
+    ['/news', '.search-field'],
+    ['/learn', '.search-field'],
+  ]) {
+    await page.goto(path);
+    const input = page.locator(`${selector} input`).first();
+    await expect(input).toBeVisible();
+    const style = await input.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { border: s.borderTopWidth, margin: s.marginTop, background: s.backgroundColor };
+    });
+    expect(style).toEqual({ border: '0px', margin: '0px', background: 'rgba(0, 0, 0, 0)' });
+  }
+  await page.goto('/news');
+  const image = page.locator('.learn-card .article-cover').first();
+  await expect(image).toBeVisible();
+  expect((await image.boundingBox())!.height).toBeLessThanOrEqual(206);
+});
+
+test('production HTML exposes article and lesson content before JavaScript', async ({
+  request,
+}) => {
+  test.skip(process.env.E2E_PRODUCTION !== '1', 'Prerendered build only');
+  for (const [path, title, text] of [
+    ['/news/read-an-ai-benchmark', 'A benchmark is a signal.', 'Read beyond the position'],
+    ['/learn/what-ai-actually-does', 'What AI actually does', 'Learning is not using'],
+  ]) {
+    const response = await request.get(path);
+    const html = await response.text();
+    expect(html).toContain(title);
+    expect(html).toContain(text);
+    expect(html).toContain(`rel="canonical" href="https://artificials.net${path}"`);
+    expect(html).toContain('property="og:title"');
+    expect(html).not.toContain('noindex');
+  }
 });

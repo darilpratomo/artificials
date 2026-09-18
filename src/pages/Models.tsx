@@ -1,3 +1,4 @@
+import { Select } from '../components/Select';
 import { useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
@@ -51,9 +52,10 @@ export default function Models() {
           </span>
           <label>
             <span className="sr-only">Provider</span>
-            <select
+            <Select
+              aria-label="Provider"
               value={params.get('provider') || ''}
-              onChange={(e) => update('provider', e.target.value)}
+              onValueChange={(value) => update('provider', value)}
             >
               <option value="">All providers</option>
               {data?.providers.map((p) => (
@@ -61,13 +63,14 @@ export default function Models() {
                   {p.name} ({p.modelCount})
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <label>
             <span className="sr-only">Modality</span>
-            <select
+            <Select
+              aria-label="Modality"
               value={params.get('modality') || ''}
-              onChange={(e) => update('modality', e.target.value)}
+              onValueChange={(value) => update('modality', value)}
             >
               <option value="">All modalities</option>
               {['text', 'image', 'audio', 'video'].map((s) => (
@@ -75,20 +78,21 @@ export default function Models() {
                   {s.charAt(0).toUpperCase() + s.slice(1)}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <label>
             <span className="sr-only">Sort models</span>
-            <select
+            <Select
+              aria-label="Sort models"
               value={params.get('sort') || 'newest'}
-              onChange={(e) => update('sort', e.target.value)}
+              onValueChange={(value) => update('sort', value)}
             >
               <option value="newest">Newest release</option>
               <option value="name">Name: A to Z</option>
               <option value="context">Largest context</option>
               <option value="input-price">Lowest input price</option>
               <option value="output-price">Lowest output price</option>
-            </select>
+            </Select>
           </label>
           <button
             className={`filter-chip ${params.get('reasoning') === 'true' ? 'active' : ''}`}

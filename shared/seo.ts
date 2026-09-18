@@ -1,0 +1,132 @@
+import { ARTICLES, type Article } from './content';
+import academy from './academy-index.json';
+export const SITE_URL = 'https://artificials.net';
+const pages: Record<string, [string, string]> = {
+  '/': [
+    'AI models, rankings & hands-on learning',
+    'Explore AI models, understand published benchmarks, read original AI guides, and learn to build with Python at Artificials.',
+  ],
+  '/models': [
+    'AI model directory',
+    'Explore AI model capabilities, context windows, modalities, and API pricing. Filter model offerings by provider and compare specifications.',
+  ],
+  '/leaderboard': [
+    'AI model rankings and benchmarks',
+    'Compare published AI benchmarks for coding, reasoning, mathematics, language, and image generation, with source and update information.',
+  ],
+  '/compare': [
+    'Compare AI models',
+    'Compare AI model context windows, input and output pricing, capabilities, and provider specifications side by side.',
+  ],
+  '/news': [
+    'AI insights and original guides',
+    'Read original guides to AI models, benchmark evaluation, context windows, and engineering reliable AI applications.',
+  ],
+  '/learn': [
+    'Learn AI with Python — Artificials Academy',
+    'Learn AI through 36 original lessons: foundations, Python, machine learning, neural networks, language models, and four practical projects.',
+  ],
+  '/studio': [
+    'Artificials Studio',
+    'Explore Artificials Studio, a workspace for building full-stack application projects with AI, including databases and authentication.',
+  ],
+  '/pricing': [
+    'Studio plans and pricing',
+    'Review Artificials Studio subscription plans, included generation credits, and usage limits before choosing a plan.',
+  ],
+  '/about': [
+    'About Artificials',
+    'Learn about Artificials and our approach to AI model information, published benchmark evidence, and practical AI education.',
+  ],
+  '/contact': [
+    'Contact Artificials',
+    'Contact the Artificials team at support@artificials.net for product questions, feedback, and support.',
+  ],
+  '/privacy': [
+    'Privacy policy',
+    'Read how Artificials handles account information, local preferences, service data, and privacy requests.',
+  ],
+  '/terms': [
+    'Terms and conditions',
+    'Read the terms for using Artificials, including educational content, AI information, accounts, and Studio services.',
+  ],
+};
+export function publicPages(articles: Article[] = ARTICLES) {
+  return [
+    ...Object.keys(pages).map((path) => ({ path })),
+    ...articles
+      .filter((a) => a.published)
+      .map((a) => ({ path: '/news/' + a.slug, modified: a.updated_at })),
+    ...academy.lessons.map((l) => ({ path: '/learn/' + l.slug, modified: academy.updatedAt })),
+  ] as { path: string; modified?: string }[];
+}
+export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
+  const path = pathname.replace(/\/$/, '') || '/';
+  const article = articles.find((a) => a.published && path === '/news/' + a.slug);
+  const lesson = academy.lessons.find((l) => path === '/learn/' + l.slug);
+  const known = Boolean(pages[path] || article || lesson);
+  const accountTitles: Record<string, string> = {
+    '/login': 'Welcome back',
+    '/dashboard': 'Your workspace',
+    '/checkout': 'Checkout',
+  };
+  const title =
+    (article?.title ||
+      lesson?.title ||
+      pages[path]?.[0] ||
+      accountTitles[path] ||
+      'Page unavailable') + ' — Artificials';
+  const description =
+    article?.excerpt ||
+    lesson?.summary ||
+    pages[path]?.[1] ||
+    'Return to Artificials to explore AI models, rankings, guides, and lessons.';
+  const canonical = SITE_URL + path;
+  const kind =
+    article?.category === 'Research'
+      ? 'benchmarks'
+      : article?.category === 'AI models'
+        ? 'context'
+        : 'engineering';
+  const image = SITE_URL + (article ? `/editorial/${kind}.webp` : '/editorial/hero-brand.webp');
+  const structured = article
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: article.title,
+        description,
+        image: [image],
+        dateModified: article.updated_at,
+        mainEntityOfPage: canonical,
+        publisher: { '@type': 'Organization', name: 'Artificials', url: SITE_URL },
+      }
+    : path === '/'
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'Artificials',
+          url: SITE_URL + '/',
+          inLanguage: 'en',
+        }
+      : null;
+  return {
+    title,
+    description,
+    canonical,
+    image,
+    known,
+    robots: known ? 'index,follow,max-image-preview:large' : 'noindex,follow',
+    type: article ? 'article' : 'website',
+    structured,
+  };
+}
+export function escapeHtml(value: string) {
+  return value.replace(
+    /[&<>"']/g,
+    (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!,
+  );
+}
+export function metadataHtml(meta: ReturnType<typeof pageMetadata>) {
+  const e = escapeHtml;
+  return `<title>${e(meta.title)}</title><meta name="description" content="${e(meta.description)}"><meta name="robots" content="${meta.robots}"><link rel="canonical" href="${e(meta.canonical)}"><meta property="og:site_name" content="Artificials"><meta property="og:title" content="${e(meta.title)}"><meta property="og:description" content="${e(meta.description)}"><meta property="og:url" content="${e(meta.canonical)}"><meta property="og:type" content="${meta.type}"><meta property="og:image" content="${e(meta.image)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${e(meta.title)}"><meta name="twitter:description" content="${e(meta.description)}"><meta name="twitter:image" content="${e(meta.image)}">${meta.structured ? `<script id="page-schema" type="application/ld+json">${JSON.stringify(meta.structured).replace(/</g, '\\u003c')}</script>` : ''}`;
+}

@@ -1,3 +1,5 @@
+import { applyPageMetadata } from '../components/Metadata';
+import { pageMetadata } from '../../shared/seo';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Search } from 'lucide-react';
@@ -15,6 +17,9 @@ export default function Learn() {
       .then((d) => setArticles(d.articles))
       .catch(() => {});
   }, []);
+  useEffect(() => {
+    if (slug) applyPageMetadata(pageMetadata('/news/' + slug, articles));
+  }, [slug, articles]);
   const article = articles.find((a) => a.slug === slug);
   if (slug)
     return article ? (

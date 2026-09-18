@@ -1,3 +1,4 @@
+import { Select } from '../components/Select';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
   ArrowDownWideNarrow,
@@ -53,26 +54,26 @@ export default function Leaderboard() {
         <div>
           <ArrowDownWideNarrow size={18} />
           <label htmlFor="ranking-metric">Rank by</label>
-          <select
+          <Select
             id="ranking-metric"
             aria-label="Ranking metric"
             value={sort}
-            onChange={(e) => update('sort', e.target.value)}
+            onValueChange={(value) => update('sort', value)}
           >
             <option value="context">Largest context window</option>
             <option value="input-price">Lowest input price</option>
             <option value="output-price">Lowest output price</option>
-          </select>
+          </Select>
         </div>
         <div>
           <ListFilter size={16} />
           <label className="sr-only" htmlFor="rank-provider">
             Provider
           </label>
-          <select
+          <Select
             id="rank-provider"
             value={params.get('provider') || ''}
-            onChange={(e) => update('provider', e.target.value)}
+            onValueChange={(value) => update('provider', value)}
           >
             <option value="">All providers</option>
             {data?.providers.map((p) => (
@@ -80,7 +81,7 @@ export default function Leaderboard() {
                 {p.name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
       <div className="catalog-results-meta">

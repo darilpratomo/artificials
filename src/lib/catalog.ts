@@ -58,6 +58,7 @@ const compareKey = 'artificials-compare';
 let memoryComparison: ModelRecord[] = [];
 let storageUnavailable = false;
 export function readComparison(): ModelRecord[] {
+  if (typeof window === 'undefined') return [];
   if (storageUnavailable) return memoryComparison;
   try {
     const parsed: unknown = JSON.parse(localStorage.getItem(compareKey) || '[]');

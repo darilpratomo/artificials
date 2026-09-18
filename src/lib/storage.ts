@@ -1,5 +1,6 @@
 /** Browser storage may be unavailable in private browsing or embedded contexts. */
 export function readLocal(key: string): string | null {
+  if (typeof window === 'undefined') return null;
   try {
     return localStorage.getItem(key);
   } catch {

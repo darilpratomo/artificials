@@ -19,7 +19,8 @@ test('curriculum filters, lesson practice, quiz, downloads, and saved progress w
 }) => {
   await page.goto('/learn');
   await expect(page.locator('.module-lessons li')).toHaveCount(36);
-  await page.getByRole('combobox', { name: 'Filter academy by topic' }).selectOption('projects');
+  await page.getByRole('combobox', { name: 'Filter academy by topic' }).click();
+  await page.getByRole('option', { name: /^Projects/ }).click();
   await expect(page.locator('.module-lessons li')).toHaveCount(4);
   await page.getByRole('searchbox', { name: 'Search academy lessons' }).fill('impossible-query');
   await expect(page.getByRole('heading', { name: 'No lessons found.' })).toBeVisible();

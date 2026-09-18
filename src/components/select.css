@@ -1,0 +1,107 @@
+.custom-select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid #373d49;
+  border-radius: 10px;
+  background: #171a21;
+  color: #e5e8ee;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.custom-select > span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.custom-select > svg {
+  flex: 0 0 auto;
+  color: #a9b0be;
+  transition: transform 0.2s;
+}
+.custom-select:hover {
+  background: #20242d;
+  border-color: #616b7c;
+}
+.custom-select[aria-expanded='true'] {
+  border-color: #a3afc2;
+  background: #20242d;
+}
+.custom-select[aria-expanded='true'] > svg {
+  transform: rotate(180deg);
+}
+.custom-select:focus-visible {
+  outline: 2px solid #c6d5ee;
+  outline-offset: 3px;
+}
+.select-popover {
+  position: fixed;
+  z-index: 300;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding: 6px;
+  border: 1px solid #414956;
+  border-radius: 12px;
+  background: #161a22;
+  color: #eef0f5;
+  box-shadow: 0 16px 48px #0009;
+  animation: select-enter 0.15s ease-out;
+}
+.select-option {
+  min-height: 42px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.select-option > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.select-option > svg {
+  flex-shrink: 0;
+}
+.select-option.is-active {
+  background: #2c3341;
+}
+.select-option[aria-selected='true'] {
+  color: white;
+  font-weight: 600;
+}
+@keyframes select-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .select-popover {
+    animation: none;
+  }
+  .custom-select,
+  .custom-select > svg {
+    transition: none;
+  }
+}

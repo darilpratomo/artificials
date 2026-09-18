@@ -186,11 +186,14 @@ test('model search, provider and modality filters, and pagination', async ({ pag
   await expect(page.getByRole('heading', { name: 'Fixture Atlas', exact: true })).toBeVisible();
   // Change the next filter immediately: rapid edits must not restore the cleared query.
   await page.getByRole('searchbox', { name: 'Search models', exact: true }).fill('');
-  await page.getByRole('combobox', { name: 'Provider', exact: true }).selectOption('google');
+  await page.getByRole('combobox', { name: 'Provider', exact: true }).click();
+  await page.getByRole('option', { name: /^Google/ }).click();
   await expect(page.locator('.model-card')).toHaveCount(1);
   await expect(page.getByRole('heading', { name: 'Fixture Boreal', exact: true })).toBeVisible();
-  await page.getByRole('combobox', { name: 'Provider', exact: true }).selectOption('');
-  await page.getByRole('combobox', { name: 'Modality', exact: true }).selectOption('image');
+  await page.getByRole('combobox', { name: 'Provider', exact: true }).click();
+  await page.getByRole('option', { name: /^All providers/ }).click();
+  await page.getByRole('combobox', { name: 'Modality', exact: true }).click();
+  await page.getByRole('option', { name: /^Image/ }).click();
   await expect(page.locator('.model-card')).toHaveCount(2);
   await expectFitsViewport(page);
 });
@@ -242,11 +245,14 @@ test('rankings distinguish context capacity, price, and missing data', async ({ 
   await expect(page.getByRole('heading', { name: 'A metric. A clear comparison.' })).toBeVisible();
   const rows = page.locator('tbody tr');
   await expect(rows.first()).toContainText('Fixture Delta');
-  await page.getByLabel('Ranking metric', { exact: true }).selectOption('input-price');
+  await page.getByLabel('Ranking metric', { exact: true }).click();
+  await page.getByRole('option', { name: /^Lowest input price/ }).click();
   await expect(rows.first()).toContainText('Fixture Boreal');
-  await page.getByLabel('Ranking metric', { exact: true }).selectOption('output-price');
+  await page.getByLabel('Ranking metric', { exact: true }).click();
+  await page.getByRole('option', { name: /^Lowest output price/ }).click();
   await expect(rows.first()).toContainText('Fixture Boreal');
-  await page.getByRole('combobox', { name: 'Provider', exact: true }).selectOption('anthropic');
+  await page.getByRole('combobox', { name: 'Provider', exact: true }).click();
+  await page.getByRole('option', { name: /^Anthropic/ }).click();
   await expect(rows).toHaveCount(1);
   await expect(rows.first()).toContainText('Fixture Cipher');
   await expect(rows.first().locator('.rank-number')).toHaveText('—');

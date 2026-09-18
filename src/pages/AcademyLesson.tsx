@@ -74,7 +74,7 @@ export default function AcademyLesson() {
     );
   return <LessonReader key={slug} lesson={state.lesson} />;
 }
-function LessonReader({ lesson }: { lesson: Lesson }) {
+export function LessonReader({ lesson }: { lesson: Lesson }) {
   const { completed, update } = useAcademyProgress();
   const [selected, setSelected] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -86,9 +86,6 @@ function LessonReader({ lesson }: { lesson: Lesson }) {
   const next = academy.lessons[position + 1];
   const done = completed.includes(lesson.slug);
   const correct = submitted && selected === lesson.quiz.answer;
-  useEffect(() => {
-    document.title = `${lesson.title} — Artificials Academy`;
-  }, [lesson.title]);
   async function copyCode() {
     try {
       await navigator.clipboard.writeText(lesson.code.source);

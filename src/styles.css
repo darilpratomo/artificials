@@ -7624,3 +7624,118 @@ input[type='radio'] {
     margin-top: 22px;
   }
 }
+
+/* Composed search fields own their border; their input must not inherit form chrome. */
+:is(.search-field, .catalog-search, .benchmark-search)
+  input:not([type='checkbox']):not([type='radio']):not([type='range']) {
+  flex: 1 1 0%;
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  margin: 0;
+  padding: 10px 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  color: #e3e7ef;
+  font-size: 14px;
+}
+:is(.search-field, .benchmark-search) {
+  min-height: 46px;
+  margin-bottom: 0;
+  border-radius: 10px;
+}
+:is(.search-field, .catalog-search, .benchmark-search) > svg {
+  flex-shrink: 0;
+}
+:is(.search-field, .benchmark-search):focus-within {
+  border-color: #a3afc2;
+  box-shadow: 0 0 0 2px #a3afc220;
+}
+.catalog-search-panel:focus-within {
+  border-color: #737f94;
+}
+.catalog-search {
+  padding-block: 10px;
+}
+.catalog-filters > label {
+  width: 190px;
+  max-width: 100%;
+  margin: 0;
+}
+.catalog-filters .filter-chip {
+  min-height: 44px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.rank-controls .custom-select {
+  width: min(270px, 100%);
+}
+.academy-select .custom-select {
+  width: 210px;
+}
+.learn-controls {
+  align-items: center;
+  margin-bottom: 26px;
+}
+.learn-controls > .search-field {
+  width: 240px;
+}
+.learn-card > .article-cover,
+.editorial-card > .article-cover {
+  height: auto;
+  aspect-ratio: 16 / 9;
+  max-height: 205px;
+  margin-bottom: 20px;
+}
+.article-hero-image {
+  max-width: 680px;
+  margin: 28px auto 36px;
+}
+.article-hero-image .article-cover {
+  height: auto;
+  aspect-ratio: 2 / 1;
+  max-height: 340px;
+}
+@media (min-width: 1000px) {
+  .learn-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+  }
+  .learn-card {
+    padding: 20px;
+  }
+}
+@media (max-width: 639px) {
+  .catalog-filters > label {
+    flex: 1 1 140px;
+    width: auto;
+  }
+  .learn-controls > .search-field {
+    width: 100%;
+  }
+  .article-hero-image .article-cover {
+    aspect-ratio: 16 / 10;
+  }
+}
+.container.article-page {
+  max-width: 900px;
+}
+@media (max-width: 639px) {
+  .catalog-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .catalog-filters > label {
+    width: 100%;
+  }
+  .catalog-filters > label:nth-of-type(3),
+  .catalog-filters > .text-link {
+    grid-column: 1 / -1;
+  }
+  .catalog-filters .filter-label {
+    display: none;
+  }
+}

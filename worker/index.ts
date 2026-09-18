@@ -1,4 +1,5 @@
-import academyIndex from '../shared/academy-index.json';
+import { publicPages, pageMetadata, metadataHtml, escapeHtml, SITE_URL } from '../shared/seo';
+import type { Article } from '../shared/content';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { bodyLimit } from 'hono/body-limit';
@@ -286,40 +287,97 @@ app.delete('/api/cms/:token/articles/:id', async (c) => {
 });
 app.get('/robots.txt', (c) =>
   c.text(
-    'User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /_private/\nDisallow: /dashboard\nDisallow: /checkout\nDisallow: /login\nSitemap: ' +
+    'User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /_private/\nSitemap: ' +
       c.env.APP_URL +
       '/sitemap.xml',
   ),
 );
-app.get('/sitemap.xml', (c) =>
-  c.body(
+async function publishedArticles(env: Env): Promise<Article[]> {
+  if (!configured(env)) return ARTICLES;
+  const { data, error } = await db(env)
+    .from('articles')
+    .select('*')
+    .eq('published', true)
+    .order('updated_at', { ascending: false })
+    .limit(100);
+  if (error) throw new Error('articles');
+  return data || [];
+}
+app.get('/sitemap.xml', async (c) => {
+  const pages = publicPages(await publishedArticles(c.env));
+  return c.body(
     '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
-      [
-        '',
-        '/models',
-        '/leaderboard',
-        '/compare',
-        '/news',
-        '/learn',
-        ...academyIndex.lessons.map((lesson) => '/learn/' + lesson.slug),
-        '/studio',
-        '/pricing',
-        '/about',
-        '/privacy',
-        '/terms',
-      ]
-        .map((path) => '<url><loc>' + c.env.APP_URL + path + '</loc></url>')
+      pages
+        .map(
+          ({ path, modified }) =>
+            '<url><loc>' +
+            SITE_URL +
+            escapeHtml(path) +
+            '</loc>' +
+            (modified && !Number.isNaN(Date.parse(modified))
+              ? '<lastmod>' + new Date(modified).toISOString() + '</lastmod>'
+              : '') +
+            '</url>',
+        )
         .join('') +
       '</urlset>',
     200,
-    { 'Content-Type': 'application/xml' },
-  ),
-);
+    { 'Content-Type': 'application/xml; charset=utf-8' },
+  );
+});
+// Static guides use the free asset path. When CMS is configured, publication state
+// must take precedence over the build snapshot (including deleted/unpublished guides).
+app.on('GET', ['/news', '/news/:slug'], async (c) => {
+  if (!configured(c.env)) return c.env.ASSETS.fetch(c.req.raw);
+  const articles = await publishedArticles(c.env);
+  const article = articles.find((a) => a.slug === c.req.param('slug'));
+  const shell = await c.env.ASSETS.fetch(new Request(new URL('/app-shell', c.req.url)));
+  const meta = pageMetadata(c.req.path, articles);
+  const listing = c.req.path === '/news';
+  const body = listing
+    ? '<main class="container page"><h1>News &amp; insights</h1>' +
+      articles
+        .map(
+          (a) =>
+            '<article><h2><a href="/news/' +
+            escapeHtml(a.slug) +
+            '">' +
+            escapeHtml(a.title) +
+            '</a></h2><p>' +
+            escapeHtml(a.excerpt) +
+            '</p></article>',
+        )
+        .join('') +
+      '</main>'
+    : article
+      ? '<main class="container article-page"><a href="/news">Back to News &amp; insights</a><h1>' +
+        escapeHtml(article.title) +
+        '</h1><p class="article-deck">' +
+        escapeHtml(article.excerpt) +
+        '</p><div class="prose">' +
+        article.body
+          .replace(/^(## [^\n]+)\n/gm, '$1\n\n')
+          .split(/\n\s*\n/)
+          .map((p) =>
+            p.startsWith('## ')
+              ? '<h2>' + escapeHtml(p.slice(3)) + '</h2>'
+              : '<p>' + escapeHtml(p) + '</p>',
+          )
+          .join('') +
+        '</div></main>'
+      : '<main><h1>Article not found</h1><a href="/news">Browse insights</a></main>';
+  const html = (await shell.text())
+    .replace('</head>', metadataHtml(meta) + '</head>')
+    .replace('<div id="root"></div>', '<div id="root">' + body + '</div>');
+  const policy = shell.headers.get('Content-Security-Policy');
+  if (policy) c.header('Content-Security-Policy', policy);
+  return c.html(html, listing || article ? 200 : 404);
+});
 app.get('/_private/:token', async (c) => {
   c.header('X-Robots-Tag', 'noindex, nofollow');
   if (!c.env.CMS_PATH_TOKEN || c.req.param('token') !== c.env.CMS_PATH_TOKEN)
     return c.text('Not found', 404);
-  return c.env.ASSETS.fetch(c.req.raw);
+  return c.env.ASSETS.fetch(new Request(new URL('/app-shell', c.req.url)));
 });
 app.all('/admin', (c) => c.text('Not found', 404));
 app.all('/api/*', (c) => c.json({ error: 'Not found.' }, 404));

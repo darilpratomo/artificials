@@ -1,3 +1,4 @@
+import { Select } from '../components/Select';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Plus, Save, Trash2, LockKeyhole } from 'lucide-react';
@@ -127,14 +128,15 @@ export default function Cms() {
             </label>
             <label>
               Category
-              <select
+              <Select
+                aria-label="Category"
                 value={draft.category}
-                onChange={(e) => setDraft({ ...draft, category: e.target.value })}
+                onValueChange={(value) => setDraft({ ...draft, category: value })}
               >
                 {ARTICLE_CATEGORIES.map((c) => (
                   <option key={c}>{c}</option>
                 ))}
-              </select>
+              </Select>
             </label>
           </div>
           <label>

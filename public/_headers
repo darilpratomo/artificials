@@ -15,3 +15,8 @@
   X-Robots-Tag: noindex, nofollow
 /checkout
   X-Robots-Tag: noindex, nofollow
+
+/app-shell
+  X-Robots-Tag: noindex, nofollow
+/404
+  X-Robots-Tag: noindex, follow

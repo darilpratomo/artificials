@@ -1,3 +1,4 @@
+import { Select } from '../components/Select';
 import '../academy.css';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -161,9 +162,9 @@ export default function Academy() {
           </label>
           <label className="academy-select">
             Topic
-            <select
+            <Select
               value={track}
-              onChange={(e) => setTrack(e.target.value)}
+              onValueChange={(value) => setTrack(value)}
               aria-label="Filter academy by topic"
             >
               <option value="all">All modules</option>
@@ -172,7 +173,7 @@ export default function Academy() {
                   {module.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
         </div>
         <p className="academy-result-count" aria-live="polite">
