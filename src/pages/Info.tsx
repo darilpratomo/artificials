@@ -1,3 +1,4 @@
+import { AnalyticsPreferencesButton } from '../components/Analytics';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowUpRight, Globe2, BookOpen, Sparkles, Mail } from 'lucide-react';
 import { removeLocal } from '../lib/storage';
@@ -207,11 +208,31 @@ export default function Info() {
               Essential HTTP-only cookies maintain your signed-in session. Your selected model
               comparisons and Academy lesson completion are saved in your browser’s local storage so
               they remain available as you navigate. Academy progress stays on this device and is
-              not synchronized to an account. No advertising or analytics tracker is included in
-              this version. Authentication, payment, and security providers may use their own
-              essential storage.
+              not synchronized to an account. Authentication, payment, and security providers may
+              use their own essential storage. With your permission, Google Analytics uses
+              first-party cookies to measure visits to public pages, including device/browser
+              information and approximate location. Google processes this information under its own
+              privacy policy. Analytics is optional and stays off until you accept; advertising
+              features are disabled. We do not include your email, Studio prompts, query strings,
+              account pages or private CMS URLs in our page-view events. Your analytics choice is
+              saved on this device.
+            </p>
+            <p>
+              <a
+                href="https://policies.google.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Google privacy policy
+              </a>
             </p>
             <h2 id="preferences">6. Your preferences</h2>
+            <p>
+              You can allow or decline analytics below. Declining stops further analytics collection
+              and removes Google Analytics cookies from this browser; it does not erase data
+              previously received by Google.
+            </p>
+            <AnalyticsPreferencesButton />
             <p>
               You can clear the model comparison saved on this device below. This does not delete
               your account or saved Studio projects. You can also clear site storage through your

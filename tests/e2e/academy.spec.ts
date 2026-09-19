@@ -2,6 +2,9 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() =>
+    localStorage.setItem('artificials-analytics-consent-v1', 'denied'),
+  );
   await page.route('**/api/catalog/summary', (route) =>
     route.fulfill({ json: JSON.parse(readFileSync('public/data/catalog-summary.json', 'utf8')) }),
   );

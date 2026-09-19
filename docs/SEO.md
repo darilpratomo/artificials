@@ -22,3 +22,15 @@ When Supabase CMS is configured, the published article query controls the news i
 No Search Console/Bing account has been used by this implementation. Submission status, indexed-page counts, actual rankings and field Core Web Vitals remain unverified. A valid sitemap and technical SEO improve discoverability but do not guarantee indexing, ranking or rich results. Continue publishing useful original content and maintaining accurate source-backed data.
 
 Primary guidance: [Google JavaScript SEO](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics), [Google sitemap overview](https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview), [Cloudflare HTML handling](https://developers.cloudflare.com/workers/static-assets/routing/advanced/html-handling/).
+
+## Google Analytics
+
+GA4 measurement ID: `G-YR7B1XDDLM` (public identifier, not a secret). A single deferred, self-hosted `/google-tag.js` bootstrap is included in the head of every generated page. It loads Google's asynchronous tag only after analytics consent and only on the production hostname. Unknown/private/account URLs do not initialize analytics. Public page views are dispatched manually on path changes; query strings, fragments and private referrers are omitted. The initial external referrer is deliberately omitted. Advertising consent remains denied; Google signals and ad personalization are disabled.
+
+**Keep Enhanced measurement disabled** in GA4 → Admin → Data streams → Artificials. The owner confirmed disabling it on 19 September 2026. This avoids duplicate automatic history page views and unrequested form/search tracking. Do not install another GA tag through Tag Manager or Cloudflare.
+
+The footer and privacy page offer Analytics preferences. Declining prevents loading Google; withdrawing disables further measurement and removes first-party `_ga` cookies. Choices persist in local storage. A missing consent choice is treated as denied for collection. This is basic consent mode: no Google network request is made before opt-in. Local development and preview hosts do not send production measurements.
+
+To verify: open https://artificials.net in a fresh browser profile, choose **Allow analytics**, and visit two public pages. In the GA4 property, open **Reports → Realtime** to check the visit. Browser blockers or declined consent intentionally prevent collection. Tag detection tools may report no tag until consent is granted. Code/browser tests intercept analytics requests to avoid generating artificial production traffic; acceptance into the GA property must be checked in its dashboard.
+
+CSP permits the Google tag and Google Analytics collection endpoints without allowing arbitrary inline scripts or eval. The privacy page discloses optional Google Analytics. No GA account retention settings or property permissions are changed by the website deployment.

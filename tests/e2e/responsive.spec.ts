@@ -3,6 +3,9 @@ import { readFileSync } from 'node:fs';
 
 const summary = JSON.parse(readFileSync('public/data/catalog-summary.json', 'utf8'));
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() =>
+    localStorage.setItem('artificials-analytics-consent-v1', 'denied'),
+  );
   await page.route('**/api/config', (route) =>
     route.fulfill({
       json: { auth: false, billing: false, ai: false, supportEmail: 'support@artificials.net' },

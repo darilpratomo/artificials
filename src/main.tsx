@@ -1,3 +1,4 @@
+import { Analytics } from './components/Analytics';
 import { Metadata } from './components/Metadata';
 import { Component, lazy, Suspense, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -43,6 +44,7 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <Provider>
         <Metadata />
+        <Analytics />
         <Suspense fallback={<div className="loading-panel">Loading Artificials…</div>}>
           <Routes>
             <Route element={<Layout />}>

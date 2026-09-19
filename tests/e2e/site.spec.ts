@@ -132,6 +132,9 @@ async function expectFitsViewport(page: Page, context = '') {
 }
 
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() =>
+    localStorage.setItem('artificials-analytics-consent-v1', 'denied'),
+  );
   await page.route('**/api/config', (route) =>
     route.fulfill({
       json: {

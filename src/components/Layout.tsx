@@ -1,3 +1,4 @@
+import { AnalyticsPreferencesButton } from './Analytics';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { ArrowUpRight, ArrowRight, Globe2, Command } from 'lucide-react';
@@ -265,6 +266,7 @@ export function Layout() {
             <h3>Information</h3>
             <Link to="/about#source-methodology">Data & methodology</Link>
             <Link to="/privacy">Privacy policy</Link>
+            <AnalyticsPreferencesButton />
             <Link to="/terms">Terms & conditions</Link>
             <Link to="/contact">
               Contact <ArrowUpRight size={12} />
