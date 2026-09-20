@@ -1,3 +1,5 @@
+import { EDITORIAL_COLLECTION } from './editorial-collection';
+
 export interface Article {
   id: string;
   slug: string;
@@ -19,6 +21,7 @@ export const ARTICLE_CATEGORIES = [
 
 // Original editorial guides. Dates describe editorial updates, never model release dates.
 export const ARTICLES: Article[] = [
+  ...EDITORIAL_COLLECTION,
   {
     id: 'seed-1',
     slug: 'read-an-ai-benchmark',

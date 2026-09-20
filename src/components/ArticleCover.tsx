@@ -30,7 +30,7 @@ export function ArticleCover({
       srcSet={`/editorial/${kind}-small.webp 640w, /editorial/${kind}.webp 1200w`}
       sizes={
         priority
-          ? '(max-width: 760px) calc(100vw - 40px), 680px'
+          ? '(max-width: 940px) calc(100vw - 40px), 900px'
           : '(max-width: 639px) 100vw, (max-width: 999px) 50vw, 400px'
       }
       width="1200"

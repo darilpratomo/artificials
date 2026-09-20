@@ -21,6 +21,16 @@ export default function Learn() {
     if (slug) applyPageMetadata(pageMetadata('/news/' + slug, articles));
   }, [slug, articles]);
   const article = articles.find((a) => a.slug === slug);
+  const paragraphs = article?.body.replace(/^(## [^\n]+)\n/gm, '$1\n\n').split(/\n\s*\n/) || [];
+  const sections = paragraphs.flatMap((paragraph, index) =>
+    paragraph.startsWith('## ') ? [{ title: paragraph.slice(3), id: `section-${index}` }] : [],
+  );
+  const related = articles
+    .filter((a) => a.published && a.slug !== slug)
+    .sort(
+      (a, b) => Number(b.category === article?.category) - Number(a.category === article?.category),
+    )
+    .slice(0, 3);
   if (slug)
     return article ? (
       <article className="container article-page">
@@ -38,35 +48,64 @@ export default function Learn() {
                 month: 'long',
                 day: 'numeric',
                 year: 'numeric',
-              })}
+                timeZone: 'UTC',
+              })}{' '}
+              · {readingMinutes(article.body)} min read
             </small>
           </div>
         </div>
         <figure className="article-hero-image">
           <ArticleCover article={article} priority />
         </figure>
+        {sections.length > 3 && (
+          <nav className="article-contents" aria-label="Article contents">
+            <span className="eyebrow">IN THIS GUIDE</span>
+            <ol>
+              {sections.map((section) => (
+                <li key={section.id}>
+                  <a href={`#${section.id}`}>{section.title}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )}
         <div className="prose">
-          {article.body
-            .replace(/^(## [^\n]+)\n/gm, '$1\n\n')
-            .split(/\n\s*\n/)
-            .map((p, i) =>
-              p.startsWith('## ') ? (
-                <h2 key={i}>{p.slice(3)}</h2>
-              ) : isSourceUrl(p.trim()) ? (
-                <p key={i}>
-                  <a href={p.trim()} target="_blank" rel="noopener noreferrer">
-                    {sourceLabel(p.trim())} <ArrowUpRight size={14} aria-hidden="true" />
-                  </a>
-                </p>
-              ) : (
-                <p key={i}>{p}</p>
-              ),
-            )}
+          {paragraphs.map((p, i) =>
+            p.startsWith('## ') ? (
+              <h2 id={`section-${i}`} key={i}>
+                {p.slice(3)}
+              </h2>
+            ) : isSourceUrl(p.trim()) ? (
+              <p key={i}>
+                <a href={p.trim()} target="_blank" rel="noopener noreferrer">
+                  {sourceLabel(p.trim())} <ArrowUpRight size={14} aria-hidden="true" />
+                </a>
+              </p>
+            ) : (
+              <p key={i}>{p}</p>
+            ),
+          )}
         </div>
         <div className="risk-note">
           An original editorial guide. Provider capabilities and documentation can change. Follow
           the linked sources and test the exact model or service before relying on it.
         </div>
+        {related.length > 0 && (
+          <aside className="article-related" aria-label="Related reading">
+            <h2>Keep exploring</h2>
+            {related.map((a) => (
+              <Link key={a.slug} to={'/news/' + a.slug}>
+                <span>
+                  <small>
+                    {a.category} · {readingMinutes(a.body)} min read
+                  </small>
+                  {a.title}
+                </span>
+                <ArrowUpRight size={18} aria-hidden="true" />
+              </Link>
+            ))}
+          </aside>
+        )}
       </article>
     ) : (
       <EmptyState
@@ -115,7 +154,9 @@ export default function Learn() {
         {filtered.map((a) => (
           <Link className="learn-card" to={'/news/' + a.slug} key={a.id}>
             <ArticleCover article={a} decorative />
-            <span className="eyebrow">{a.category} · Editorial guide</span>
+            <span className="eyebrow">
+              {a.category} · {readingMinutes(a.body)} min read
+            </span>
             <h2>{a.title}</h2>
             <p>{a.excerpt}</p>
             <span className="text-link">
@@ -134,6 +175,10 @@ export default function Learn() {
   );
 }
 
+function readingMinutes(body: string) {
+  return Math.max(1, Math.ceil(body.trim().split(/\s+/).length / 220));
+}
+
 function isSourceUrl(value: string) {
   if (!/^https:\/\/[^\s]+$/.test(value)) return false;
   try {
@@ -149,9 +194,16 @@ function sourceLabel(url: string) {
   const labels: Record<string, string> = {
     'crfm.stanford.edu': 'Stanford CRFM: Holistic evaluation of language models',
     'ai.google.dev': 'Google AI for Developers: Technical documentation',
-    'platform.claude.com': 'Anthropic: Streaming messages documentation',
+    'platform.claude.com': 'Anthropic: Technical documentation',
+    'www.anthropic.com': 'Anthropic: Engineering research and guidance',
+    'huggingface.co': 'Hugging Face: Technical documentation',
+    'scikit-learn.org': 'Scikit-learn: Technical documentation',
+    'sbert.net': 'Sentence Transformers: Retrieve and rerank documentation',
+    'www.swebench.com': 'SWE-bench: Software engineering evaluation',
+    'genai.owasp.org': 'OWASP: Prompt injection risks and mitigations',
+    'arxiv.org': 'Read the original research paper on arXiv',
     'supabase.com': 'Supabase: Authentication documentation',
-    'developers.cloudflare.com': 'Cloudflare: Querying a D1 database',
+    'developers.cloudflare.com': 'Cloudflare: Developer documentation',
   };
   return labels[host] || `Read source on ${host}`;
 }
