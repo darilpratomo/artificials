@@ -2,7 +2,7 @@
 
 Public sitemap: https://artificials.net/sitemap.xml. Crawler rules: https://artificials.net/robots.txt.
 
-The build prerenders 69 current public pages (12 main pages, 21 original editorial guides and 36 Academy lessons) using the same React page components as the browser. Titles, descriptions, canonical URLs, Open Graph/Twitter metadata and supported structured data are present in the initial HTML. Article text and complete Academy lesson content do not require JavaScript to be discovered. Interactive model catalog results and benchmark data still load through their APIs; their static page headings and explanatory content are prerendered.
+The build prerenders 75 current public pages (12 main pages, 27 original editorial guides and 36 Academy lessons) using the same React page components as the browser. Titles, descriptions, canonical URLs, Open Graph/Twitter metadata and supported structured data are present in the initial HTML. Article text and complete Academy lesson content do not require JavaScript to be discovered. Interactive model catalog results and benchmark data still load through their APIs; their static page headings and explanatory content are prerendered.
 
 `shared/seo.ts` is the public route/metadata registry. `scripts/prerender.mjs` writes flat HTML files into `dist` after Vite builds; Cloudflare resolves extensionless URLs to these files. Changes to repository content are published by the normal main-branch build. Rendered pages are ordinary static assets: no browser install, Python runtime or per-request React render is needed in Cloudflare Builds/Workers. The React client mounts the interactive application over this initial HTML.
 

@@ -4,6 +4,12 @@ The 20 September 2026 collection adds 16 original English explainers in `shared/
 
 Each guide uses its own structure, applied examples, and decision process. No external article was copied or mechanically paraphrased. Illustrative scenarios and arithmetic are not benchmark results, provider prices, customer case studies, or evidence of product performance. The older diffusion-evaluation documentation is explicitly identified as such in the image-model guide. No claim is made that publication volume guarantees search traffic or rankings.
 
+## Long-form collection
+
+A second collection on 20 September 2026 adds six articles in `shared/editorial-deep-dives.ts`, bringing the total to 27. Each contains approximately 1,650–1,820 words, about three times the preceding collection's 523–577 words per article. Topics cover reasoning and inference budgets, embedding migrations, model releases, voice interaction, compact models and distillation, and synthetic-data quality. Each has a sustained original worked scenario, practical decision criteria, limitations, section navigation, and checked primary references. Research papers are identified as background evidence rather than breaking announcements or proof of an application's performance.
+
+Apply `supabase/004_editorial_deep_dives.sql` when using the database-backed CMS. Like the earlier content migration, it inserts missing slugs only and does not overwrite CMS edits. The public static collection and sitemap include the new articles automatically on deployment while CMS is unconfigured.
+
 ## Publishing and maintaining
 
 - `shared/content.ts` includes the collection in the static public API, sitemap, metadata, homepage cards, and prerendered article pages.

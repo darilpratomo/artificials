@@ -190,6 +190,21 @@ function isSourceUrl(value: string) {
 }
 
 function sourceLabel(url: string) {
+  const titles: Record<string, string> = {
+    'https://arxiv.org/abs/2501.12948': 'DeepSeek-R1: Reasoning through reinforcement learning',
+    'https://arxiv.org/abs/2501.19393': 's1: Simple test-time scaling',
+    'https://arxiv.org/abs/1503.02531': 'Distilling the Knowledge in a Neural Network',
+    'https://arxiv.org/abs/2404.14219': 'Phi-3 Technical Report',
+    'https://arxiv.org/abs/2305.17493':
+      'The Curse of Recursion: Training on Generated Data Makes Models Forget',
+    'https://sbert.net/examples/sentence_transformer/applications/semantic-search/README.html':
+      'Sentence Transformers: Semantic search and query encoding',
+    'https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions':
+      'Google Cloud: Model versions and lifecycle',
+    'https://developers.deepgram.com/docs/understand-endpointing-interim-results':
+      'Deepgram: Endpointing and interim transcript results',
+  };
+  if (titles[url]) return titles[url];
   const host = new URL(url).hostname;
   const labels: Record<string, string> = {
     'crfm.stanford.edu': 'Stanford CRFM: Holistic evaluation of language models',

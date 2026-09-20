@@ -1,4 +1,5 @@
 import { EDITORIAL_COLLECTION } from './editorial-collection';
+import { EDITORIAL_DEEP_DIVES } from './editorial-deep-dives';
 
 export interface Article {
   id: string;
@@ -21,6 +22,7 @@ export const ARTICLE_CATEGORIES = [
 
 // Original editorial guides. Dates describe editorial updates, never model release dates.
 export const ARTICLES: Article[] = [
+  ...EDITORIAL_DEEP_DIVES,
   ...EDITORIAL_COLLECTION,
   {
     id: 'seed-1',
