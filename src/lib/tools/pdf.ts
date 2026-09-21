@@ -253,6 +253,77 @@ async function savePdf(document: PDFDocument, signal: AbortSignal) {
   return asBlob(bytes);
 }
 
+/** Pages to keep after removing a selection, refusing to empty the document. */
+export function remainingPages(remove: string, pageCount: number): number[] {
+  if (!remove.trim()) throw new Error('Enter the pages to delete, such as 2, 5-7.');
+  const dropped = new Set(parsePdfPages(remove, pageCount));
+  const kept = Array.from({ length: pageCount }, (_, index) => index).filter(
+    (index) => !dropped.has(index),
+  );
+  if (!kept.length)
+    throw new Error('This would delete every page. Keep at least one page in the document.');
+  return kept;
+}
+
+/**
+ * The requested order first, then any unlisted pages in their original order,
+ * so a partial list never silently discards the rest of the document.
+ */
+export function reorderedPages(order: string, pageCount: number): number[] {
+  if (!order.trim()) throw new Error('Enter the page order, such as 3, 1, 2.');
+  const requested = parsePdfPages(order, pageCount);
+  const seen = new Set(requested);
+  const remainder = Array.from({ length: pageCount }, (_, index) => index).filter(
+    (index) => !seen.has(index),
+  );
+  return [...requested, ...remainder];
+}
+
+/** Contiguous page groups for splitting, each group becoming one output PDF. */
+export function splitGroups(
+  mode: UtilityOptions['splitMode'],
+  value: string,
+  pageCount: number,
+): number[][] {
+  if (!Number.isInteger(pageCount) || pageCount < 1) throw new Error('Use a valid PDF.');
+  if (mode === 'each-page') return Array.from({ length: pageCount }, (_, index) => [index]);
+  if (mode === 'every-n') {
+    const size = Number(value.trim());
+    if (!Number.isSafeInteger(size) || size < 1 || size >= pageCount)
+      throw new Error(
+        `Enter a group size between 1 and ${pageCount - 1} pages. A larger size would produce one unchanged file.`,
+      );
+    const groups: number[][] = [];
+    for (let start = 0; start < pageCount; start += size)
+      groups.push(
+        Array.from({ length: Math.min(size, pageCount - start) }, (_, index) => start + index),
+      );
+    return groups;
+  }
+  // 'at-pages': each listed page starts a new document.
+  if (!value.trim())
+    throw new Error('Enter the page numbers where a new document should start, such as 4, 9.');
+  if (value.length > 1000) throw new Error('The split selection is too long.');
+  const starts = new Set<number>([0]);
+  for (const part of value.split(',')) {
+    const trimmed = part.trim();
+    if (!/^\d+$/.test(trimmed)) throw new Error('Enter single page numbers, such as 4, 9.');
+    const page = Number(trimmed);
+    if (!Number.isSafeInteger(page) || page < 2 || page > pageCount)
+      throw new Error(`Choose split points between 2 and ${pageCount}.`);
+    starts.add(page - 1);
+  }
+  const boundaries = [...starts].sort((a, b) => a - b);
+  if (boundaries.length < 2)
+    throw new Error('Add at least one split point after page 1 to divide the document.');
+  return boundaries.map((start, index) =>
+    Array.from(
+      { length: (boundaries[index + 1] ?? pageCount) - start },
+      (_, offset) => start + offset,
+    ),
+  );
+}
+
 async function structuralPdf(
   id: UtilityId,
   files: File[],
@@ -296,7 +367,10 @@ async function structuralPdf(
       },
     ];
   }
-  const pages = parsePdfPages(options.pages, input.getPageCount());
+  const pages =
+    id === 'remove-pdf-pages' || id === 'reorder-pdf' || id === 'split-pdf'
+      ? []
+      : parsePdfPages(options.pages, input.getPageCount());
   if (id === 'rotate-pdf') {
     if (![90, 180, 270].includes(options.rotation))
       throw new Error('Choose a rotation of 90°, 180° or 270°.');
@@ -312,14 +386,57 @@ async function structuralPdf(
       },
     ];
   }
+  if (id === 'split-pdf') {
+    const groups = splitGroups(options.splitMode, options.splitValue, input.getPageCount());
+    if (groups.length < 2)
+      throw new Error('These settings produce a single document. Choose a smaller group size.');
+    if (groups.length > MAX_FILES * 4)
+      throw new Error(`Splitting would create ${groups.length} files. Use larger groups.`);
+    const results: UtilityResult[] = [];
+    for (const [index, group] of groups.entries()) {
+      report(
+        35 + (index / groups.length) * 55,
+        `Building document ${index + 1} of ${groups.length}…`,
+      );
+      const part = await PDFDocument.create();
+      for (const page of await part.copyPages(input, group)) part.addPage(page);
+      const first = group[0] + 1;
+      const last = group.at(-1)! + 1;
+      results.push({
+        name: outputName(
+          file.name,
+          `part-${String(index + 1).padStart(2, '0')}-pages-${first}${last === first ? '' : `-to-${last}`}`,
+          'pdf',
+        ),
+        blob: await savePdf(part, signal),
+        detail: `${group.length} ${group.length === 1 ? 'page' : 'pages'} (source ${last === first ? `page ${first}` : `pages ${first}–${last}`}). Text stays selectable; bookmarks and forms may not carry over.`,
+      });
+      await yieldToBrowser(signal);
+    }
+    return results;
+  }
+  const selection =
+    id === 'remove-pdf-pages'
+      ? remainingPages(options.pages, input.getPageCount())
+      : id === 'reorder-pdf'
+        ? reorderedPages(options.pages, input.getPageCount())
+        : pages;
   const output = await PDFDocument.create();
-  const copies = await output.copyPages(input, pages);
+  const copies = await output.copyPages(input, selection);
   for (const page of copies) output.addPage(page);
+  const suffix =
+    id === 'remove-pdf-pages' ? 'pages-removed' : id === 'reorder-pdf' ? 'reordered' : 'extracted';
+  const detail =
+    id === 'remove-pdf-pages'
+      ? `${input.getPageCount() - selection.length} page(s) removed; ${selection.length} kept. Text stays selectable. Bookmarks and interactive forms may not carry over.`
+      : id === 'reorder-pdf'
+        ? `${selection.length} pages in the order you chose. Pages you did not list keep their original order at the end. Text stays selectable.`
+        : `${selection.length} selected pages. Bookmarks and interactive forms may not carry over; review the result.`;
   return [
     {
-      name: outputName(file.name, 'extracted', 'pdf'),
+      name: outputName(file.name, suffix, 'pdf'),
       blob: await savePdf(output, signal),
-      detail: `${pages.length} selected pages. Bookmarks and interactive forms may not carry over; review the result.`,
+      detail,
     },
   ];
 }
@@ -453,6 +570,181 @@ async function imagesToPdf(
   ];
 }
 
+interface StyledSpan {
+  text: string;
+  bold: boolean;
+  italic: boolean;
+  size: number;
+}
+
+interface ExtractedLine {
+  spans: StyledSpan[];
+  size: number;
+  bold: boolean;
+  centered: boolean;
+  indent: number;
+  gapBefore: number;
+}
+
+const BOLD_FONT = /bold|black|heavy|semibold|demibold|extrabold|ultrabold|[-_,]bd\b/i;
+const ITALIC_FONT = /italic|oblique|[-_,]it\b/i;
+const BULLET_LINE = /^\s*[\u2022\u2023\u25aa\u25cf\u25e6\u2043\u2219*\u00b7-]\s+/;
+const NUMBERED_LINE = /^\s*(\d{1,3}|[a-z]|[ivxl]{1,5})\s*[.)]\s+/i;
+
+/** PDF has no semantic styling, so weight and slant come from the embedded font name. */
+export function fontStyleFlags(fontName: string, fontFamily?: string) {
+  const name = `${fontName} ${fontFamily ?? ''}`;
+  return { bold: BOLD_FONT.test(name), italic: ITALIC_FONT.test(name) };
+}
+
+/**
+ * Headings are inferred from type size relative to the document's dominant body
+ * size. Without that comparison a 12pt body would read as a heading in one
+ * document and as body text in another.
+ */
+export function headingLevelForSize(size: number, bodySize: number, bold: boolean) {
+  if (bodySize <= 0) return undefined;
+  const ratio = size / bodySize;
+  if (ratio >= 1.8) return 1 as const;
+  if (ratio >= 1.45) return 2 as const;
+  if (ratio >= 1.2) return 3 as const;
+  if (ratio >= 1.08 && bold) return 4 as const;
+  return undefined;
+}
+
+/** The most common rounded glyph height, weighted by how much text uses it. */
+export function dominantTextSize(sizes: Map<number, number>) {
+  let best = 0;
+  let bestWeight = 0;
+  for (const [size, weight] of sizes) {
+    if (weight > bestWeight || (weight === bestWeight && size < best)) {
+      best = size;
+      bestWeight = weight;
+    }
+  }
+  return best;
+}
+
+function appendSpan(spans: StyledSpan[], span: StyledSpan) {
+  const last = spans.at(-1);
+  if (last && last.bold === span.bold && last.italic === span.italic && last.size === span.size) {
+    last.text += span.text;
+    return;
+  }
+  spans.push({ ...span });
+}
+
+function lineFromSpans(
+  spans: StyledSpan[],
+  left: number,
+  right: number,
+  pageWidth: number,
+  gapBefore: number,
+): ExtractedLine | null {
+  const joined = spans.map((span) => span.text).join('');
+  if (!joined.trim()) return null;
+  const trimmed: StyledSpan[] = [];
+  for (const span of spans) if (span.text) appendSpan(trimmed, span);
+  if (trimmed.length) {
+    trimmed[0] = { ...trimmed[0], text: trimmed[0].text.replace(/^\s+/, '') };
+    const last = trimmed.length - 1;
+    trimmed[last] = { ...trimmed[last], text: trimmed[last].text.replace(/\s+$/, '') };
+  }
+  const visible = trimmed.filter((span) => span.text);
+  if (!visible.length) return null;
+  let weighted = 0;
+  let boldWeight = 0;
+  let characters = 0;
+  for (const span of visible) {
+    const length = span.text.trim().length || span.text.length;
+    weighted += span.size * length;
+    if (span.bold) boldWeight += length;
+    characters += length;
+  }
+  const size = characters ? Math.round((weighted / characters) * 10) / 10 : 0;
+  // A centered line has comparable margins on both sides and does not fill the column.
+  const leftMargin = left;
+  const rightMargin = Math.max(0, pageWidth - right);
+  const centered =
+    pageWidth > 0 &&
+    leftMargin > pageWidth * 0.12 &&
+    rightMargin > pageWidth * 0.12 &&
+    Math.abs(leftMargin - rightMargin) < pageWidth * 0.08;
+  return {
+    spans: visible,
+    size,
+    bold: characters > 0 && boldWeight / characters > 0.6,
+    centered,
+    indent: centered ? 0 : leftMargin,
+    gapBefore,
+  };
+}
+
+/** Group text items into visual lines, keeping per-run weight, slant and size. */
+async function extractPageLines(
+  page: PDFPageProxy,
+  onCharacters: (count: number) => void,
+): Promise<ExtractedLine[]> {
+  const content = await page.getTextContent();
+  const pageWidth = page.getViewport({ scale: 1 }).width;
+  const lines: ExtractedLine[] = [];
+  let spans: StyledSpan[] = [];
+  let baseline: number | undefined;
+  let previousBaseline: number | undefined;
+  let left = Number.POSITIVE_INFINITY;
+  let right = 0;
+  let lineSize = 0;
+  const flush = () => {
+    if (spans.length) {
+      const gap =
+        previousBaseline !== undefined && baseline !== undefined
+          ? Math.max(0, previousBaseline - baseline)
+          : 0;
+      const line = lineFromSpans(spans, left, right, pageWidth, gap);
+      if (line) {
+        lines.push(line);
+        previousBaseline = baseline;
+      }
+    }
+    spans = [];
+    baseline = undefined;
+    left = Number.POSITIVE_INFINITY;
+    right = 0;
+    lineSize = 0;
+  };
+  for (const item of content.items) {
+    if (!('str' in item)) continue;
+    const text = item.str.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
+    const y = item.transform[5];
+    const x = item.transform[4];
+    // Glyph height is the reliable size signal; item.height can be zero for some fonts.
+    const size =
+      Math.abs(item.transform[3]) || Math.abs(item.height) || Math.abs(item.transform[0]) || 0;
+    const threshold = Math.max(2.5, (lineSize || size) * 0.45);
+    if (baseline !== undefined && Math.abs(y - baseline) > threshold) flush();
+    if (text) {
+      const style = content.styles?.[item.fontName];
+      const flags = fontStyleFlags(item.fontName ?? '', style?.fontFamily);
+      // PDF.js already emits whitespace for real gaps. A text-item boundary can be
+      // a font change inside a word, so adding a space here would split "Hello".
+      appendSpan(spans, {
+        text,
+        bold: flags.bold,
+        italic: flags.italic,
+        size: Math.round(size * 10) / 10,
+      });
+      left = Math.min(left, x);
+      right = Math.max(right, x + (Number.isFinite(item.width) ? item.width : 0));
+      lineSize = Math.max(lineSize, size);
+      onCharacters(text.length);
+    }
+    baseline = y;
+    if (item.hasEOL) flush();
+  }
+  flush();
+  return lines;
+}
+
 async function pdfToWord(
   file: File,
   options: UtilityOptions,
@@ -460,70 +752,32 @@ async function pdfToWord(
   signal: AbortSignal,
 ): Promise<UtilityResult[]> {
   return withRenderedPdf(file, signal, async (pdf) => {
-    const { Document, Packer, Paragraph, TextRun } = await import('docx');
+    const { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun } =
+      await import('docx');
     const pages = renderedPages(options, pdf.numPages);
-    const paragraphs: InstanceType<typeof Paragraph>[] = [];
+    const extracted: { page: number; lines: ExtractedLine[] }[] = [];
+    const sizes = new Map<number, number>();
     let characters = 0;
-    let emptyPages = 0;
     for (let position = 0; position < pages.length; position += 1) {
       await yieldToBrowser(signal);
       report(
-        10 + (position / pages.length) * 75,
+        10 + (position / pages.length) * 60,
         `Extracting text from page ${pages[position] + 1}…`,
       );
       const page = await pdf.getPage(pages[position] + 1);
       try {
-        const content = await page.getTextContent();
-        const lines: string[] = [];
-        let line = '';
-        let previousY: number | undefined;
-        for (const item of content.items) {
-          if (!('str' in item)) continue;
-          const text = item.str.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
-          if (
-            previousY !== undefined &&
-            Math.abs(item.transform[5] - previousY) > Math.max(3, Math.abs(item.height) * 0.5) &&
-            line.trim()
-          ) {
-            lines.push(line.trim());
-            line = '';
-          }
-          // PDF.js already emits whitespace for real gaps. A text-item boundary
-          // can be a font/style change inside a word, so inserting a space here
-          // would turn mixed-format "Hello" into "H ello".
-          line += text;
-          previousY = item.transform[5];
-          if (item.hasEOL && line.trim()) {
-            lines.push(line.trim());
-            line = '';
-            previousY = undefined;
-          }
-          characters += text.length;
+        const lines = await extractPageLines(page, (count) => {
+          characters += count;
           if (characters > MAX_TEXT_CHARACTERS)
             throw new Error(
               'This PDF contains too much text for one browser export. Select fewer pages.',
             );
+        });
+        for (const line of lines) {
+          const length = line.spans.reduce((sum, span) => sum + span.text.trim().length, 0);
+          sizes.set(line.size, (sizes.get(line.size) ?? 0) + length);
         }
-        if (line.trim()) lines.push(line.trim());
-        if (!lines.length) {
-          emptyPages += 1;
-          paragraphs.push(
-            new Paragraph({
-              text: '[No extractable text on this page]',
-              pageBreakBefore: position > 0,
-            }),
-          );
-        } else {
-          for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
-            paragraphs.push(
-              new Paragraph({
-                children: [new TextRun({ text: lines[lineIndex], font: 'Arial', size: 22 })],
-                pageBreakBefore: position > 0 && lineIndex === 0,
-                spacing: { after: 100 },
-              }),
-            );
-          }
-        }
+        extracted.push({ page: pages[position] + 1, lines });
       } finally {
         page.cleanup();
       }
@@ -533,22 +787,94 @@ async function pdfToWord(
         'No extractable text was found. This PDF may be scanned or image-only. OCR is not included; try PDF to images instead.',
       );
     checkCancelled(signal);
+    report(75, 'Rebuilding headings and emphasis…');
+    const bodySize = dominantTextSize(sizes);
+    const headings = {
+      1: HeadingLevel.HEADING_1,
+      2: HeadingLevel.HEADING_2,
+      3: HeadingLevel.HEADING_3,
+      4: HeadingLevel.HEADING_4,
+    } as const;
+    const paragraphs: InstanceType<typeof Paragraph>[] = [];
+    let emptyPages = 0;
+    let headingCount = 0;
+    let listCount = 0;
+    for (const [position, entry] of extracted.entries()) {
+      const pageBreak = position > 0;
+      if (!entry.lines.length) {
+        emptyPages += 1;
+        paragraphs.push(
+          new Paragraph({
+            text: '[No extractable text on this page]',
+            pageBreakBefore: pageBreak,
+          }),
+        );
+        continue;
+      }
+      for (const [index, line] of entry.lines.entries()) {
+        const plain = line.spans.map((span) => span.text).join('');
+        const level = headingLevelForSize(line.size, bodySize, line.bold);
+        const bullet = BULLET_LINE.test(plain);
+        const numbered = !bullet && NUMBERED_LINE.test(plain);
+        if (level) headingCount += 1;
+        if (bullet || numbered) listCount += 1;
+        const text = bullet ? plain.replace(BULLET_LINE, '') : plain;
+        const spans = bullet ? [{ ...line.spans[0], text }] : line.spans;
+        const runs = spans
+          .filter((span) => span.text)
+          .map(
+            (span) =>
+              new TextRun({
+                text: span.text,
+                bold: level ? undefined : span.bold,
+                italics: span.italic,
+                font: level ? undefined : 'Arial',
+                size: level ? undefined : Math.max(14, Math.min(48, Math.round(span.size * 2))),
+              }),
+          );
+        paragraphs.push(
+          new Paragraph({
+            children: runs.length ? runs : [new TextRun({ text: plain, font: 'Arial', size: 22 })],
+            heading: level ? headings[level] : undefined,
+            alignment: line.centered ? AlignmentType.CENTER : undefined,
+            bullet: bullet ? { level: 0 } : undefined,
+            pageBreakBefore: pageBreak && index === 0,
+            // A wide vertical gap in the source reads as paragraph separation.
+            spacing: { after: level ? 120 : line.gapBefore > line.size * 1.8 ? 200 : 100 },
+            indent:
+              !bullet && !line.centered && line.indent > 54
+                ? { left: Math.min(1440, Math.round((line.indent - 36) * 20)) }
+                : undefined,
+          }),
+        );
+      }
+    }
+    checkCancelled(signal);
     report(90, 'Creating the editable Word document…');
     const document = new Document({
       title: file.name.replace(/\.pdf$/i, ''),
       creator: 'Artificials Tools',
       description: 'Editable text extracted locally from a PDF. Layout requires review.',
+      styles: {
+        default: {
+          document: { run: { font: 'Arial', size: 22 } },
+        },
+      },
       sections: [{ children: paragraphs }],
     });
     const blob = await Packer.toBlob(document);
     checkCancelled(signal);
     if (blob.size > MAX_OUTPUT_BYTES)
       throw new Error('The Word output exceeds the browser safety limit. Select fewer pages.');
+    const recovered = [
+      headingCount ? `${headingCount} heading${headingCount === 1 ? '' : 's'}` : '',
+      listCount ? `${listCount} list item${listCount === 1 ? '' : 's'}` : '',
+    ].filter(Boolean);
     return [
       {
         name: outputName(file.name, 'editable-text', 'docx'),
         blob,
-        detail: `Editable text with source page breaks. Columns, tables, images, equations and exact formatting are not preserved; review reading order and pagination.${emptyPages ? ` ${emptyPages} page(s) had no extractable text and are marked in the document.` : ''} OCR is not included.`,
+        detail: `Editable text with bold, italic, type sizes and source page breaks.${recovered.length ? ` Detected ${recovered.join(' and ')}.` : ''} Headings are inferred from type size, so review them. Columns, tables, images and equations are not reconstructed.${emptyPages ? ` ${emptyPages} page(s) had no extractable text and are marked in the document.` : ''} OCR is not included.`,
       },
     ];
   });
@@ -566,6 +892,9 @@ export async function runPdfTool(
     'compress-pdf',
     'merge-pdf',
     'extract-pdf',
+    'remove-pdf-pages',
+    'reorder-pdf',
+    'split-pdf',
     'rotate-pdf',
     'pdf-to-images',
     'images-to-pdf',

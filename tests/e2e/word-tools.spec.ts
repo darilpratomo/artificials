@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { PDFDocument } from 'pdf-lib';
 import {
   Document,
   ExternalHyperlink,
@@ -111,7 +112,7 @@ test('DOCX preview preserves selectable content, blocks document links, and prin
   });
   await page.goto('/tools/word-to-pdf');
   await page.locator('input[type="file"]').setInputFiles(await fixture());
-  const print = page.getByRole('button', { name: 'Print / save as PDF', exact: true });
+  const print = page.getByRole('button', { name: 'Print preview', exact: true });
   await expect(print).toBeEnabled({ timeout: 30_000 });
   const preview = page.frameLocator('iframe[title="Converted DOCX preview"]');
   await expect(preview.getByRole('heading', { name: 'Private local document' })).toBeVisible();
@@ -151,11 +152,9 @@ test('damaged DOCX produces a useful error and a replacement document can recove
     buffer: Buffer.from('not a ZIP archive'),
   });
   await expect(page.locator('.word-pdf [role="alert"]')).toContainText(/damaged|unsupported|read/i);
-  await expect(page.getByRole('button', { name: 'Print / save as PDF', exact: true })).toHaveCount(
-    0,
-  );
+  await expect(page.getByRole('button', { name: 'Print preview', exact: true })).toHaveCount(0);
   await page.locator('input[type="file"]').setInputFiles(await fixture('Replacement document'));
-  await expect(page.getByRole('button', { name: 'Print / save as PDF', exact: true })).toBeEnabled({
+  await expect(page.getByRole('button', { name: 'Print preview', exact: true })).toBeEnabled({
     timeout: 30_000,
   });
   await expect(
@@ -214,4 +213,44 @@ test('leaving a running conversion terminates its worker and removes the preview
     )
     .toBe(1);
   await expect(page.locator('iframe[title="Converted DOCX preview"]')).toHaveCount(0);
+});
+
+test('DOCX converts to a downloadable PDF with selectable text and no uploads', async ({
+  page,
+  baseURL,
+}) => {
+  const uploads: string[] = [];
+  const outsideRequests: string[] = [];
+  page.on('request', (request) => {
+    if (!['GET', 'HEAD'].includes(request.method())) uploads.push(request.url());
+    if (new URL(request.url()).origin !== new URL(baseURL!).origin)
+      outsideRequests.push(request.url());
+  });
+  await page.goto('/tools/word-to-pdf');
+  await page.locator('input[type="file"]').setInputFiles(await fixture());
+  const download = page.getByRole('link', { name: 'Download PDF' });
+  await expect(download).toBeVisible({ timeout: 30_000 });
+  // The panel must report real page and size figures, not a placeholder.
+  await expect(page.locator('.word-pdf-download small')).toContainText(/\d+ page/);
+  const started = page.waitForEvent('download');
+  await download.click();
+  const file = await started;
+  expect(file.suggestedFilename()).toMatch(/\.pdf$/);
+  const stream = await file.createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) chunks.push(chunk as Buffer);
+  const bytes = Buffer.concat(chunks);
+  expect(bytes.subarray(0, 5).toString()).toBe('%PDF-');
+  const pdf = await PDFDocument.load(bytes);
+  expect(pdf.getPageCount()).toBeGreaterThanOrEqual(1);
+  // Drawn text requires an embedded font dictionary; a rasterized page would
+  // instead carry only an image XObject. Object streams hide this from a plain
+  // byte scan, so inspect the parsed objects.
+  const objects = pdf.context.enumerateIndirectObjects().map(([, object]) => String(object));
+  expect(objects.some((object) => object.includes('/Font'))).toBe(true);
+  expect(objects.some((object) => object.includes('Helvetica'))).toBe(true);
+  // The fixture embeds a PNG, so the image must be carried into the PDF too.
+  expect(objects.some((object) => object.includes('/Image'))).toBe(true);
+  expect(uploads).toEqual([]);
+  expect(outsideRequests).toEqual([]);
 });

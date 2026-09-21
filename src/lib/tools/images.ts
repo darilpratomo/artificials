@@ -279,6 +279,61 @@ export async function canvasToBlob(
   return blob;
 }
 
+/** Resolve a percentage crop against real pixels, clamped to the image bounds. */
+export function resolveCrop(
+  width: number,
+  height: number,
+  crop: UtilityOptions['crop'],
+): { x: number; y: number; width: number; height: number } {
+  const values = [crop.x, crop.y, crop.width, crop.height];
+  if (values.some((value) => !Number.isFinite(value))) throw new Error('Choose a valid crop area.');
+  const x = Math.min(Math.max(crop.x, 0), 100);
+  const y = Math.min(Math.max(crop.y, 0), 100);
+  const w = Math.min(Math.max(crop.width, 0), 100 - x);
+  const h = Math.min(Math.max(crop.height, 0), 100 - y);
+  // Reject an empty selection before rounding, which would otherwise widen a
+  // zero-width crop to a single pixel and silently produce a useless image.
+  if (w <= 0 || h <= 0) throw new Error('The crop area is too small. Select a larger region.');
+  const pixels = {
+    x: Math.round((x / 100) * width),
+    y: Math.round((y / 100) * height),
+    width: Math.max(1, Math.round((w / 100) * width)),
+    height: Math.max(1, Math.round((h / 100) * height)),
+  };
+  pixels.width = Math.min(pixels.width, width - pixels.x);
+  pixels.height = Math.min(pixels.height, height - pixels.y);
+  if (pixels.width < 1 || pixels.height < 1)
+    throw new Error('The crop area is too small. Select a larger region.');
+  return pixels;
+}
+
+const WATERMARK_INSET = 0.035;
+
+/** Where to draw the watermark, in pixels, given the text box size. */
+export function watermarkPlacement(
+  width: number,
+  height: number,
+  textWidth: number,
+  textHeight: number,
+  position: UtilityOptions['watermarkPosition'],
+) {
+  const inset = Math.round(Math.min(width, height) * WATERMARK_INSET);
+  const right = Math.max(inset, width - textWidth - inset);
+  const bottom = Math.max(inset, height - textHeight - inset);
+  switch (position) {
+    case 'center':
+      return { x: Math.max(0, (width - textWidth) / 2), y: Math.max(0, (height - textHeight) / 2) };
+    case 'top-left':
+      return { x: inset, y: inset };
+    case 'top-right':
+      return { x: right, y: inset };
+    case 'bottom-left':
+      return { x: inset, y: bottom };
+    default:
+      return { x: right, y: bottom };
+  }
+}
+
 export async function runImageTool(
   id: UtilityId,
   files: File[],
@@ -287,7 +342,30 @@ export async function runImageTool(
   signal: AbortSignal,
 ): Promise<UtilityResult[]> {
   checkCancelled(signal);
-  if (id !== 'compress-image' && id !== 'convert-image') throw new Error('Choose an image tool.');
+  const supported: UtilityId[] = [
+    'compress-image',
+    'convert-image',
+    'crop-image',
+    'watermark-image',
+  ];
+  if (!supported.includes(id)) throw new Error('Choose an image tool.');
+  if (id === 'watermark-image') {
+    const text = options.watermarkText.trim();
+    if (!text) throw new Error('Enter the watermark text to place on your images.');
+    if (text.length > 120) throw new Error('Use watermark text of 120 characters or less.');
+    if (
+      !Number.isFinite(options.watermarkOpacity) ||
+      options.watermarkOpacity <= 0 ||
+      options.watermarkOpacity > 1
+    )
+      throw new Error('Choose a watermark opacity between 1 and 100%.');
+    if (
+      !Number.isFinite(options.watermarkSize) ||
+      options.watermarkSize < 1 ||
+      options.watermarkSize > 20
+    )
+      throw new Error('Choose a watermark size between 1 and 20% of the image.');
+  }
   if (!files.length || files.length > MAX_FILES)
     throw new Error(`Choose between 1 and ${MAX_FILES} images.`);
   if (files.reduce((sum, file) => sum + file.size, 0) > MAX_TOTAL_BYTES)
@@ -304,8 +382,18 @@ export async function runImageTool(
     const image = await decodeImage(file, signal);
     let canvas: HTMLCanvasElement | undefined;
     try {
-      const size = fitImageDimensions(image.width, image.height, options.maxDimension);
-      const mime = id === 'compress-image' ? image.mime : options.imageFormat;
+      const region =
+        id === 'crop-image'
+          ? resolveCrop(image.width, image.height, options.crop)
+          : { x: 0, y: 0, width: image.width, height: image.height };
+      const size =
+        id === 'crop-image'
+          ? fitImageDimensions(region.width, region.height, options.maxDimension || 0)
+          : fitImageDimensions(image.width, image.height, options.maxDimension);
+      const mime =
+        id === 'compress-image' || id === 'crop-image' || id === 'watermark-image'
+          ? image.mime
+          : options.imageFormat;
       const extension = mime === 'image/jpeg' ? 'jpg' : mime.split('/')[1];
       canvas = document.createElement('canvas');
       canvas.width = size.width;
@@ -318,26 +406,52 @@ export async function runImageTool(
         context.fillStyle = '#ffffff';
         context.fillRect(0, 0, size.width, size.height);
       }
-      context.drawImage(image.source, 0, 0, size.width, size.height);
+      context.drawImage(
+        image.source,
+        region.x,
+        region.y,
+        region.width,
+        region.height,
+        0,
+        0,
+        size.width,
+        size.height,
+      );
+      if (id === 'watermark-image') drawWatermark(context, size.width, size.height, options);
       checkCancelled(signal);
       report(
         ((index + 0.5) / files.length) * 100,
         `Encoding image ${index + 1} of ${files.length}…`,
       );
       const output = await canvasToBlob(canvas, mime, options.quality, signal);
-      const resized = size.width !== image.width || size.height !== image.height;
+      const resized = size.width !== region.width || size.height !== region.height;
       const keepOriginal = id === 'compress-image' && !resized && output.size >= file.size;
       const dimensionText = `${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels`;
+      const suffixes: Record<string, string> = {
+        'compress-image': 'compressed',
+        'convert-image': 'converted',
+        'crop-image': 'cropped',
+        'watermark-image': 'watermarked',
+      };
+      const transparency =
+        mime === 'image/jpeg'
+          ? 'Transparency uses a white background.'
+          : 'Transparency is preserved.';
+      const details: Record<string, string> = {
+        'crop-image': `${dimensionText}. Cropped from ${image.width.toLocaleString('en-US')} × ${image.height.toLocaleString('en-US')}; the trimmed pixels are not in this file. ${transparency} The original format is kept. Camera metadata is not retained.`,
+        'watermark-image': `${dimensionText}. Watermark drawn into the pixels and not removable. ${transparency} The original format is kept. Camera metadata is not retained.`,
+      };
       results.push({
         name: outputName(
           file.name,
-          keepOriginal ? 'original' : id === 'compress-image' ? 'compressed' : 'converted',
+          keepOriginal ? 'original' : suffixes[id] || 'processed',
           extension,
         ),
         blob: keepOriginal ? file.slice(0, file.size, image.mime) : output,
         detail: keepOriginal
           ? `${dimensionText}. Already efficient at these settings: original kept without size savings. Original metadata is retained.`
-          : `${dimensionText}. ${resized ? 'Resized and re-encoded.' : 'Re-encoded.'} ${mime === 'image/jpeg' ? 'Transparency uses a white background.' : 'Transparency is preserved.'}${mime === 'image/png' ? ' PNG encoding is lossless; the quality slider does not affect PNG.' : ''} Camera metadata is not retained.`,
+          : (details[id] ??
+            `${dimensionText}. ${resized ? 'Resized and re-encoded.' : 'Re-encoded.'} ${transparency}${mime === 'image/png' ? ' PNG encoding is lossless; the quality slider does not affect PNG.' : ''} Camera metadata is not retained.`),
       });
     } finally {
       image.dispose();
@@ -353,4 +467,57 @@ export async function runImageTool(
   }
   checkCancelled(signal);
   return results;
+}
+
+/**
+ * Draws the watermark into the pixels. Size scales with the image so a batch of
+ * mixed dimensions stays visually consistent, and a dark outline keeps light
+ * text readable over both bright and dark areas.
+ */
+function drawWatermark(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  options: UtilityOptions,
+) {
+  const text = options.watermarkText.trim().slice(0, 120);
+  if (!text) return;
+  const fontSize = Math.max(
+    10,
+    Math.round((Math.min(width, height) * options.watermarkSize) / 100),
+  );
+  context.save();
+  context.font = `600 ${fontSize}px system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif`;
+  context.textBaseline = 'top';
+  context.globalAlpha = Math.min(1, Math.max(0.02, options.watermarkOpacity));
+  context.lineWidth = Math.max(1, fontSize * 0.055);
+  context.strokeStyle = 'rgba(0, 0, 0, 0.55)';
+  context.fillStyle = '#ffffff';
+  const measured = context.measureText(text);
+  const textWidth = Math.min(measured.width, width);
+  const textHeight = fontSize * 1.2;
+  if (options.watermarkPosition === 'tile') {
+    const stepX = textWidth + fontSize * 2.5;
+    const stepY = textHeight + fontSize * 2.5;
+    context.translate(width / 2, height / 2);
+    context.rotate(-Math.PI / 9);
+    context.translate(-width / 2, -height / 2);
+    // Overdraw beyond the canvas so the rotated grid still covers the corners.
+    for (let y = -height * 0.4; y < height * 1.4; y += stepY)
+      for (let x = -width * 0.4; x < width * 1.4; x += stepX) {
+        context.strokeText(text, x, y);
+        context.fillText(text, x, y);
+      }
+  } else {
+    const spot = watermarkPlacement(
+      width,
+      height,
+      textWidth,
+      textHeight,
+      options.watermarkPosition,
+    );
+    context.strokeText(text, spot.x, spot.y, width);
+    context.fillText(text, spot.x, spot.y, width);
+  }
+  context.restore();
 }

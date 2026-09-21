@@ -58,6 +58,36 @@
   flex-wrap: wrap;
   margin: 20px 0;
 }
+.word-pdf-download {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 20px 0 4px;
+  padding: 18px 20px;
+  border: 1px solid var(--border, #30333b);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface, #1a1c21) 92%, #fff 8%);
+}
+.word-pdf-download > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.word-pdf-download strong {
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+.word-pdf-download small {
+  color: var(--muted, #a8aab3);
+  font-size: 0.8rem;
+}
+.word-pdf-progress progress {
+  flex: 1 1 140px;
+  min-width: 120px;
+  height: 5px;
+}
 .word-pdf-preview {
   display: block;
   width: 100%;
@@ -87,6 +117,15 @@
   .word-pdf-preview {
     min-height: 400px;
     border-radius: 8px;
+  }
+  .word-pdf-download {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 16px;
+  }
+  .word-pdf-download .btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 @media (prefers-reduced-motion: reduce) {

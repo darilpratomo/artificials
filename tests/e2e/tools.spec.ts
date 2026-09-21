@@ -80,9 +80,9 @@ test('tools directory is accessible, responsive and keeps conversion engines laz
       engines.push(request.url());
   });
   await page.goto('/tools');
-  await expect(page.locator('.tool-card')).toHaveCount(10);
+  await expect(page.locator('.tool-card')).toHaveCount(15);
   await page.getByRole('button', { name: 'Images', exact: true }).click();
-  await expect(page.locator('.tool-card')).toHaveCount(3);
+  await expect(page.locator('.tool-card')).toHaveCount(5);
   await page.getByLabel('Search tools').fill('compress');
   await expect(page.locator('.tool-card')).toHaveCount(1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -234,4 +234,105 @@ test('invalid files fail clearly and multiple local results download as a ZIP', 
   expect(Object.keys(files)).toHaveLength(2);
   for (const bytes of Object.values(files))
     expect(Array.from(bytes.subarray(0, 4))).toEqual([137, 80, 78, 71]);
+});
+
+test('deleting, reordering and splitting PDF pages produces real page changes', async ({
+  page,
+}) => {
+  await page.goto('/tools/remove-pdf-pages');
+  await page.locator('input[type=file]').setInputFiles(await pdfFixture('source.pdf', 4));
+  await page.getByLabel('Pages to delete').fill('2');
+  await page.locator('.tools-run').click();
+  const removed = page.waitForEvent('download');
+  await page.locator('.tools-result-card a').click();
+  const afterRemove = await PDFDocument.load(await downloadBytes(await removed));
+  expect(afterRemove.getPageCount()).toBe(3);
+
+  await page.goto('/tools/split-pdf');
+  await page.locator('input[type=file]').setInputFiles(await pdfFixture('split.pdf', 4));
+  await page.getByRole('combobox', { name: 'How to split' }).click();
+  await page.getByRole('option', { name: 'Fixed number of pages' }).click();
+  await page.getByLabel('Pages per file').fill('2');
+  await page.locator('.tools-run').click();
+  await expect(page.locator('.tools-result-card')).toHaveCount(2);
+  const archive = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download all as ZIP' }).click();
+  const parts = unzipSync(await downloadBytes(await archive));
+  expect(Object.keys(parts)).toHaveLength(2);
+  for (const bytes of Object.values(parts)) {
+    const part = await PDFDocument.load(bytes);
+    expect(part.getPageCount()).toBe(2);
+  }
+});
+
+test('cropping removes pixels and the crop box is keyboard operable', async ({ page }) => {
+  await page.goto('/tools/crop-image');
+  await page.locator('input[type=file]').setInputFiles(await imageFixture(page, 'photo.png'));
+  const box = page.getByRole('group', { name: /Crop area/ });
+  await expect(box).toBeVisible();
+  await page.getByRole('button', { name: 'Square 1:1' }).click();
+  // The crop box must be reachable and movable without a pointer.
+  await box.focus();
+  await expect(box).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await page.locator('.tools-run').click();
+  const download = page.waitForEvent('download');
+  await page.locator('.tools-result-card a').click();
+  const bytes = await downloadBytes(await download);
+  const size = await page.evaluate(async (data: number[]) => {
+    const blob = new Blob([new Uint8Array(data)], { type: 'image/png' });
+    const bitmap = await createImageBitmap(blob);
+    const result = { width: bitmap.width, height: bitmap.height };
+    bitmap.close();
+    return result;
+  }, Array.from(bytes));
+  // The source fixture is 160x100; a square crop cannot keep both dimensions.
+  expect(size.width).toBeLessThan(160);
+  expect(size.width).toBe(size.height);
+});
+
+test('watermarking requires text and draws it into the downloaded pixels', async ({ page }) => {
+  await page.goto('/tools/watermark-image');
+  await page.locator('input[type=file]').setInputFiles(await imageFixture(page, 'photo.png'));
+  await page.locator('.tools-run').click();
+  await expect(page.getByRole('alert')).toContainText(/watermark text/i);
+  await page.getByLabel('Watermark text').fill('Artificials draft');
+  await page.getByRole('combobox', { name: 'Watermark position' }).click();
+  await page.getByRole('option', { name: 'Center' }).click();
+  await page.locator('.tools-run').click();
+  const download = page.waitForEvent('download');
+  await page.locator('.tools-result-card a').click();
+  const bytes = await downloadBytes(await download);
+  // The fixture is a flat blue field, so any near-white pixel is watermark ink.
+  const hasLightPixels = await page.evaluate(async (data: number[]) => {
+    const blob = new Blob([new Uint8Array(data)], { type: 'image/png' });
+    const bitmap = await createImageBitmap(blob);
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const context = canvas.getContext('2d')!;
+    context.drawImage(bitmap, 0, 0);
+    bitmap.close();
+    const { data: pixels } = context.getImageData(0, 0, canvas.width, canvas.height);
+    let light = 0;
+    for (let index = 0; index < pixels.length; index += 4)
+      if (pixels[index] > 225 && pixels[index + 1] > 225 && pixels[index + 2] > 225) light += 1;
+    return light > 20;
+  }, Array.from(bytes));
+  expect(hasLightPixels).toBe(true);
+});
+
+test('image results offer a before and after comparison', async ({ page }) => {
+  await page.goto('/tools/compress-image');
+  await page.locator('input[type=file]').setInputFiles(await imageFixture(page, 'photo.png'));
+  await page.locator('.tools-run').click();
+  const toggle = page.getByRole('button', { name: 'Compare with original' });
+  await expect(toggle).toBeVisible();
+  await toggle.click();
+  await expect(page.locator('.tools-compare-stage img')).toHaveCount(2);
+  const slider = page.getByRole('slider', { name: /Reveal the processed image/ });
+  await slider.fill('20');
+  await expect(page.locator('.tools-compare-after')).toHaveAttribute('style', /width: 20%/);
+  await page.getByRole('button', { name: 'Hide comparison' }).click();
+  await expect(page.locator('.tools-compare-stage')).toHaveCount(0);
 });

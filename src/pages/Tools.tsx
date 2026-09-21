@@ -7,6 +7,8 @@ import {
   ArrowUp,
   ArrowUpRight,
   Check,
+  Columns2,
+  Crop,
   Download,
   FileImage,
   FileText,
@@ -14,6 +16,7 @@ import {
   ImageDown,
   Image as ImageIcon,
   Layers,
+  ListOrdered,
   LockKeyhole,
   Minimize2,
   Monitor,
@@ -22,6 +25,9 @@ import {
   Scissors,
   Settings2,
   ShieldCheck,
+  SplitSquareHorizontal,
+  Stamp,
+  Trash2,
   Upload,
   X,
   Zap,
@@ -32,6 +38,7 @@ import { EmptyState } from '../components/Layout';
 import { Reveal } from '../components/Motion';
 import { Select } from '../components/Select';
 import {
+  DEFAULT_OPTIONS,
   MAX_FILES,
   MAX_FILE_BYTES,
   MAX_TOTAL_BYTES,
@@ -42,26 +49,68 @@ import {
 import './tools.css';
 
 const WordToPdf = lazy(() => import('../components/tools/WordToPdf'));
+const CropEditor = lazy(() => import('../components/tools/CropEditor'));
 const icons: Record<UtilityId, LucideIcon> = {
   'compress-image': ImageDown,
   'convert-image': ImageIcon,
+  'crop-image': Crop,
+  'watermark-image': Stamp,
   'compress-pdf': Minimize2,
   'merge-pdf': Layers,
   'extract-pdf': Scissors,
+  'remove-pdf-pages': Trash2,
+  'reorder-pdf': ListOrdered,
+  'split-pdf': SplitSquareHorizontal,
   'rotate-pdf': RotateCw,
   'pdf-to-images': FileImage,
   'images-to-pdf': Files,
   'pdf-to-word': FileText,
   'word-to-pdf': FileText,
 };
-const defaults: UtilityOptions = {
-  quality: 0.82,
-  maxDimension: 2048,
-  imageFormat: 'image/webp',
-  pdfMode: 'lossless',
-  pages: '',
-  dpi: 144,
-  rotation: 90,
+const defaults = DEFAULT_OPTIONS;
+/** Accepted input kind per tool, stated explicitly rather than guessed from the id. */
+const inputKind: Record<UtilityId, 'image' | 'pdf' | 'docx'> = {
+  'compress-image': 'image',
+  'convert-image': 'image',
+  'crop-image': 'image',
+  'watermark-image': 'image',
+  'images-to-pdf': 'image',
+  'compress-pdf': 'pdf',
+  'merge-pdf': 'pdf',
+  'extract-pdf': 'pdf',
+  'remove-pdf-pages': 'pdf',
+  'reorder-pdf': 'pdf',
+  'split-pdf': 'pdf',
+  'rotate-pdf': 'pdf',
+  'pdf-to-images': 'pdf',
+  'pdf-to-word': 'pdf',
+  'word-to-pdf': 'docx',
+};
+/** Tools whose input and output are both standalone images. */
+const imageTools = new Set<UtilityId>([
+  'compress-image',
+  'convert-image',
+  'crop-image',
+  'watermark-image',
+]);
+const pageFieldLabels: Partial<
+  Record<UtilityId, { label: string; hint: string; placeholder: string }>
+> = {
+  'extract-pdf': {
+    label: 'Pages to keep',
+    hint: 'Choose the pages to keep, or leave empty for all pages.',
+    placeholder: 'e.g. 1-3, 5',
+  },
+  'remove-pdf-pages': {
+    label: 'Pages to delete',
+    hint: 'These pages are removed. At least one page must remain.',
+    placeholder: 'e.g. 2, 5-7',
+  },
+  'reorder-pdf': {
+    label: 'New page order',
+    hint: 'List pages in your preferred order. Pages you leave out are added at the end.',
+    placeholder: 'e.g. 3, 1, 2',
+  },
 };
 
 export default function Tools() {
@@ -96,7 +145,8 @@ export default function Tools() {
             <span>Less friction.</span>
           </h1>
           <p>
-            Compress, convert and organize. Thoughtful tools for the files you work with every day.
+            Compress, convert, crop and organize. Fifteen thoughtful tools for the files you work
+            with every day, all running on your own device.
           </p>
           <div className="tools-promises">
             <span>
@@ -204,9 +254,20 @@ export default function Tools() {
         <details>
           <summary>How accurate are Word and PDF conversions?</summary>
           <p>
-            PDF to Word exports selectable text into an editable DOCX, without recreating complex
-            layouts or images. Word to PDF uses a local preview and your browser’s Save as PDF
-            dialog. Review the result. Scanned PDF text needs OCR, which is not included.
+            PDF to Word exports selectable text into an editable DOCX and rebuilds bold, italic,
+            type sizes and headings from the source fonts. Tables, columns, images and equations are
+            not reconstructed. Word to PDF builds a downloadable PDF with selectable text, keeping
+            headings, lists, tables and embedded images. Original fonts, headers and footers, and
+            exact page breaks can differ. Review the result. Scanned PDF text needs OCR, which is
+            not included.
+          </p>
+        </details>
+        <details>
+          <summary>Do my files leave my device?</summary>
+          <p>
+            No. Every tool runs in your browser, so your files are never uploaded. You can confirm
+            this in your browser’s network panel: you will see the site’s own code loading, and no
+            request carrying your file.
           </p>
         </details>
         <details>
@@ -261,12 +322,9 @@ function UtilityWorkbench({ tool }: { tool: UtilityDefinition }) {
     if (busy || zipping) return;
     const next = tool.multiple ? [...files, ...chosen] : chosen.slice(0, 1);
     if (!chosen.length) return;
-    const image = tool.id.includes('image') && tool.id !== 'pdf-to-images';
-    const extension = image
-      ? /\.(jpe?g|png|webp)$/i
-      : tool.id === 'word-to-pdf'
-        ? /\.docx$/i
-        : /\.pdf$/i;
+    const kind = inputKind[tool.id];
+    const extension =
+      kind === 'image' ? /\.(jpe?g|png|webp)$/i : kind === 'docx' ? /\.docx$/i : /\.pdf$/i;
     if (chosen.some((file) => !extension.test(file.name))) {
       setError(`Choose ${tool.formats} files. Other formats are not supported by this tool.`);
       return;
@@ -328,14 +386,16 @@ function UtilityWorkbench({ tool }: { tool: UtilityDefinition }) {
       }
     };
     try {
-      const output =
-        tool.id === 'compress-image' || tool.id === 'convert-image'
-          ? await (
-              await import('../lib/tools/images')
-            ).runImageTool(tool.id, files, options, report, abort.signal)
-          : await (
-              await import('../lib/tools/pdf')
-            ).runPdfTool(tool.id, files, options, report, abort.signal);
+      // Image-only tools use the canvas engine; anything producing or reading a
+      // PDF goes to the document engine. Driven by imageTools so adding a tool
+      // cannot silently route to the wrong engine.
+      const output = imageTools.has(tool.id)
+        ? await (
+            await import('../lib/tools/images')
+          ).runImageTool(tool.id, files, options, report, abort.signal)
+        : await (
+            await import('../lib/tools/pdf')
+          ).runPdfTool(tool.id, files, options, report, abort.signal);
       if (job.current !== current || abort.signal.aborted) return;
       if (output.reduce((sum, result) => sum + result.blob.size, 0) > 100 * 1024 * 1024)
         throw new Error('The results exceed 100 MB. Try fewer pages or a lower resolution.');
@@ -531,6 +591,23 @@ function UtilityWorkbench({ tool }: { tool: UtilityDefinition }) {
           <h2>
             <Settings2 size={18} /> Your settings
           </h2>
+          {tool.id === 'crop-image' && files[0] && (
+            <Suspense
+              fallback={
+                <div className="loading-panel" role="status">
+                  Loading crop editor…
+                </div>
+              }
+            >
+              <CropEditor
+                file={files[0]}
+                crop={options.crop}
+                aspectRatio={options.aspectRatio}
+                disabled={busy || zipping}
+                onChange={(next) => changed(next)}
+              />
+            </Suspense>
+          )}
           <fieldset disabled={busy || zipping} className="tool-settings">
             <legend className="sr-only">Conversion options</legend>
             {(tool.id === 'convert-image' || tool.id === 'pdf-to-images') && (
@@ -552,7 +629,9 @@ function UtilityWorkbench({ tool }: { tool: UtilityDefinition }) {
                 </Select>
               </div>
             )}
-            {(tool.id === 'compress-image' || tool.id === 'convert-image') && (
+            {(tool.id === 'compress-image' ||
+              tool.id === 'convert-image' ||
+              tool.id === 'crop-image') && (
               <div className="tools-field">
                 <label htmlFor="max-dimension">Longest edge</label>
                 <Select
@@ -586,6 +665,8 @@ function UtilityWorkbench({ tool }: { tool: UtilityDefinition }) {
               </div>
             )}
             {(tool.id === 'compress-image' ||
+              tool.id === 'crop-image' ||
+              tool.id === 'watermark-image' ||
               ((tool.id === 'convert-image' || tool.id === 'pdf-to-images') &&
                 options.imageFormat !== 'image/png') ||
               (tool.id === 'compress-pdf' && options.pdfMode === 'raster')) && (
@@ -603,8 +684,10 @@ function UtilityWorkbench({ tool }: { tool: UtilityDefinition }) {
                   onChange={(event) => changed({ quality: Number(event.target.value) / 100 })}
                 />
                 <small>
-                  {tool.id === 'compress-image'
-                    ? 'Quality applies to JPEG and WebP. PNG keeps lossless pixels after resizing. The original format is preserved.'
+                  {tool.id === 'compress-image' ||
+                  tool.id === 'crop-image' ||
+                  tool.id === 'watermark-image'
+                    ? 'Quality applies to JPEG and WebP. PNG keeps lossless pixels. The original format is preserved.'
                     : 'Higher quality keeps more detail and usually increases file size.'}
                 </small>
               </div>
@@ -625,23 +708,136 @@ function UtilityWorkbench({ tool }: { tool: UtilityDefinition }) {
                 </Select>
               </div>
             )}
-            {['extract-pdf', 'rotate-pdf', 'pdf-to-images', 'pdf-to-word'].includes(tool.id) && (
+            {[
+              'extract-pdf',
+              'remove-pdf-pages',
+              'reorder-pdf',
+              'rotate-pdf',
+              'pdf-to-images',
+              'pdf-to-word',
+            ].includes(tool.id) && (
               <div className="tools-field">
-                <label htmlFor="page-range">Pages</label>
+                <label htmlFor="page-range">{pageFieldLabels[tool.id]?.label ?? 'Pages'}</label>
                 <input
                   id="page-range"
                   value={options.pages}
                   onChange={(event) => changed({ pages: event.target.value })}
-                  placeholder="e.g. 1-3, 5"
+                  placeholder={pageFieldLabels[tool.id]?.placeholder ?? 'e.g. 1-3, 5'}
                   maxLength={200}
                 />
                 <small>
                   Use page numbers and ranges.{' '}
-                  {tool.id === 'extract-pdf'
-                    ? 'Choose the pages to keep, or leave empty for all pages.'
-                    : 'Leave empty for all pages.'}
+                  {pageFieldLabels[tool.id]?.hint ?? 'Leave empty for all pages.'}
                 </small>
               </div>
+            )}
+            {tool.id === 'split-pdf' && (
+              <>
+                <div className="tools-field">
+                  <label htmlFor="split-mode">How to split</label>
+                  <Select
+                    id="split-mode"
+                    aria-label="How to split"
+                    value={options.splitMode}
+                    onValueChange={(value) =>
+                      changed({
+                        splitMode: value as UtilityOptions['splitMode'],
+                        splitValue: '',
+                      })
+                    }
+                  >
+                    <option value="each-page">One file per page</option>
+                    <option value="every-n">Fixed number of pages</option>
+                    <option value="at-pages">Split at chosen pages</option>
+                  </Select>
+                </div>
+                {options.splitMode !== 'each-page' && (
+                  <div className="tools-field">
+                    <label htmlFor="split-value">
+                      {options.splitMode === 'every-n' ? 'Pages per file' : 'Start a new file at'}
+                    </label>
+                    <input
+                      id="split-value"
+                      value={options.splitValue}
+                      onChange={(event) => changed({ splitValue: event.target.value })}
+                      placeholder={options.splitMode === 'every-n' ? 'e.g. 2' : 'e.g. 4, 9'}
+                      maxLength={200}
+                      inputMode="numeric"
+                    />
+                    <small>
+                      {options.splitMode === 'every-n'
+                        ? 'Each file holds this many pages; the last file holds what remains.'
+                        : 'Each page you list begins a new document. Page 1 always starts the first.'}
+                    </small>
+                  </div>
+                )}
+              </>
+            )}
+            {tool.id === 'watermark-image' && (
+              <>
+                <div className="tools-field">
+                  <label htmlFor="watermark-text">Watermark text</label>
+                  <input
+                    id="watermark-text"
+                    value={options.watermarkText}
+                    onChange={(event) => changed({ watermarkText: event.target.value })}
+                    placeholder="e.g. Draft — Artificials"
+                    maxLength={120}
+                  />
+                  <small>Up to 120 characters. Drawn into the pixels and not removable.</small>
+                </div>
+                <div className="tools-field">
+                  <label htmlFor="watermark-position">Position</label>
+                  <Select
+                    id="watermark-position"
+                    aria-label="Watermark position"
+                    value={options.watermarkPosition}
+                    onValueChange={(value) =>
+                      changed({
+                        watermarkPosition: value as UtilityOptions['watermarkPosition'],
+                      })
+                    }
+                  >
+                    <option value="bottom-right">Bottom right</option>
+                    <option value="bottom-left">Bottom left</option>
+                    <option value="top-right">Top right</option>
+                    <option value="top-left">Top left</option>
+                    <option value="center">Center</option>
+                    <option value="tile">Tiled across the image</option>
+                  </Select>
+                </div>
+                <div className="tools-field">
+                  <label htmlFor="watermark-size">
+                    Text size <span>{options.watermarkSize}% of image</span>
+                  </label>
+                  <input
+                    id="watermark-size"
+                    type="range"
+                    min="1"
+                    max="20"
+                    step="1"
+                    value={options.watermarkSize}
+                    onChange={(event) => changed({ watermarkSize: Number(event.target.value) })}
+                  />
+                  <small>Size scales with each image, so a batch stays consistent.</small>
+                </div>
+                <div className="tools-field">
+                  <label htmlFor="watermark-opacity">
+                    Strength <span>{Math.round(options.watermarkOpacity * 100)}%</span>
+                  </label>
+                  <input
+                    id="watermark-opacity"
+                    type="range"
+                    min="5"
+                    max="100"
+                    step="5"
+                    value={Math.round(options.watermarkOpacity * 100)}
+                    onChange={(event) =>
+                      changed({ watermarkOpacity: Number(event.target.value) / 100 })
+                    }
+                  />
+                </div>
+              </>
             )}
             {tool.id === 'rotate-pdf' && (
               <div className="tools-field">
@@ -742,7 +938,17 @@ function UtilityWorkbench({ tool }: { tool: UtilityDefinition }) {
           </div>
           <div className="tools-result-grid">
             {results.map((result, index) => (
-              <ResultCard key={`${index}-${result.name}`} result={result} />
+              <ResultCard
+                key={`${index}-${result.name}`}
+                result={result}
+                // Per-image tools map one output to one input, so a before/after
+                // comparison is meaningful. Merges and page exports do not.
+                source={
+                  results.length === files.length && result.blob.type.startsWith('image/')
+                    ? files[index]
+                    : undefined
+                }
+              />
             ))}
           </div>
         </section>
@@ -758,24 +964,85 @@ function UtilityWorkbench({ tool }: { tool: UtilityDefinition }) {
   );
 }
 
-function ResultCard({ result }: { result: UtilityResult }) {
+function ResultCard({ result, source }: { result: UtilityResult; source?: File }) {
   const [url, setUrl] = useState('');
+  const [sourceUrl, setSourceUrl] = useState('');
+  const [compare, setCompare] = useState(50);
+  const [showCompare, setShowCompare] = useState(false);
+  const isImage = result.blob.type.startsWith('image/');
   useEffect(() => {
     const next = URL.createObjectURL(result.blob);
     setUrl(next);
     return () => URL.revokeObjectURL(next);
   }, [result.blob]);
+  useEffect(() => {
+    if (!source || !source.type.startsWith('image/')) {
+      setSourceUrl('');
+      return;
+    }
+    const next = URL.createObjectURL(source);
+    setSourceUrl(next);
+    return () => URL.revokeObjectURL(next);
+  }, [source]);
+  const comparable = Boolean(isImage && sourceUrl && url);
+  const change =
+    source && source.size > 0 ? Math.round((1 - result.blob.size / source.size) * 100) : null;
   return (
     <article className="tools-result-card">
-      {result.blob.type.startsWith('image/') && url ? (
-        <img src={url} alt={`Converted preview of ${result.name}`} />
+      {isImage && url ? (
+        showCompare && comparable ? (
+          <div className="tools-compare">
+            <div className="tools-compare-stage">
+              <img src={sourceUrl} alt={`Original version of ${result.name}`} />
+              <div className="tools-compare-after" style={{ width: `${compare}%` }}>
+                <img src={url} alt={`Processed version of ${result.name}`} />
+              </div>
+              <span
+                className="tools-compare-divider"
+                style={{ left: `${compare}%` }}
+                aria-hidden="true"
+              />
+              <span className="tools-compare-tag tools-compare-tag-before">Before</span>
+              <span className="tools-compare-tag tools-compare-tag-after">After</span>
+            </div>
+            <label className="sr-only" htmlFor={`compare-${result.name}`}>
+              Reveal the processed image for {result.name}
+            </label>
+            <input
+              id={`compare-${result.name}`}
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={compare}
+              onChange={(event) => setCompare(Number(event.target.value))}
+            />
+          </div>
+        ) : (
+          <img src={url} alt={`Processed preview of ${result.name}`} />
+        )
       ) : (
         <div className="tools-document-icon">
           <FileText size={32} strokeWidth={1.3} />
         </div>
       )}
+      {comparable && (
+        <button
+          type="button"
+          className="tools-compare-toggle"
+          aria-pressed={showCompare}
+          onClick={() => setShowCompare((value) => !value)}
+        >
+          <Columns2 size={14} aria-hidden="true" />
+          {showCompare ? 'Hide comparison' : 'Compare with original'}
+        </button>
+      )}
       <h3>{result.name}</h3>
-      <small>{formatBytes(result.blob.size)}</small>
+      <small>
+        {formatBytes(result.blob.size)}
+        {source && change !== null && change > 0 ? ` · ${change}% smaller` : ''}
+        {source && change !== null && change <= 0 ? ` · from ${formatBytes(source.size)}` : ''}
+      </small>
       {result.detail && <p>{result.detail}</p>}
       <a
         className="btn btn-outline"

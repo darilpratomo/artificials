@@ -609,6 +609,94 @@
   margin-top: auto;
   justify-content: center;
 }
+.tools-compare {
+  display: grid;
+  gap: 10px;
+}
+.tools-compare-stage {
+  position: relative;
+  height: 165px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: repeating-conic-gradient(#e0e0e0 0% 25%, #f6f6f6 0% 50%) 50% / 16px 16px;
+}
+.tools-compare-stage img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.tools-compare-after {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /* The clipped pane keeps the image at full stage width so both halves align. */
+  background: repeating-conic-gradient(#e0e0e0 0% 25%, #f6f6f6 0% 50%) 50% / 16px 16px;
+}
+.tools-compare-after img {
+  width: 100%;
+}
+.tools-compare-stage .tools-compare-after img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+}
+.tools-compare-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(10, 12, 16, 0.5);
+  pointer-events: none;
+}
+.tools-compare-tag {
+  position: absolute;
+  bottom: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(12, 14, 18, 0.72);
+  color: #f2f3f5;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.tools-compare-tag-before {
+  right: 8px;
+}
+.tools-compare-tag-after {
+  left: 8px;
+}
+.tools-compare input[type='range'] {
+  width: 100%;
+}
+.tools-compare-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--tool-border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: transparent;
+  color: #bdc6d7;
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.tools-compare-toggle:hover {
+  border-color: #6e737f;
+  color: #f2f3f5;
+}
+.tools-compare-toggle[aria-pressed='true'] {
+  border-color: #f2f3f5;
+  color: #f2f3f5;
+}
 .tools-document-icon {
   height: 85px;
   display: grid;
@@ -761,6 +849,16 @@
   }
   .tool-card,
   .tools-dropzone {
+    transition: none;
+  }
+}
+@media (max-width: 600px) {
+  .tools-compare-stage {
+    height: 190px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tools-compare-toggle {
     transition: none;
   }
 }

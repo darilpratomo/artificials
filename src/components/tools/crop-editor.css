@@ -1,0 +1,170 @@
+.crop-editor {
+  display: grid;
+  gap: 14px;
+  margin-top: 4px;
+}
+.crop-editor-top {
+  display: grid;
+  gap: 8px;
+}
+.crop-editor-top > label,
+.crop-editor-foot > span {
+  color: var(--muted, #a8aab3);
+  font-size: 0.8rem;
+}
+.crop-ratios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.crop-ratios > button {
+  border: 1px solid var(--border, #30333b);
+  border-radius: 999px;
+  padding: 6px 13px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+.crop-ratios > button:hover:not(:disabled) {
+  border-color: #6e737f;
+}
+.crop-ratios > button.active {
+  border-color: #f2f3f5;
+  background: #f2f3f5;
+  color: #14161a;
+}
+.crop-ratios > button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.crop-stage {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border, #30333b);
+  border-radius: 12px;
+  background: repeating-conic-gradient(#232630 0% 25%, #1a1c22 0% 50%) 50% / 18px 18px;
+  touch-action: none;
+  user-select: none;
+  line-height: 0;
+}
+.crop-stage img {
+  display: block;
+  width: 100%;
+  max-height: 460px;
+  object-fit: contain;
+  pointer-events: none;
+}
+.crop-box {
+  position: absolute;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 9999px rgba(8, 9, 12, 0.58);
+  cursor: move;
+}
+.crop-box:focus-visible {
+  outline: 2px solid #7fb2ff;
+  outline-offset: 2px;
+}
+.crop-box::before,
+.crop-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Thirds guides, drawn with gradients to avoid extra elements. */
+  background:
+    linear-gradient(
+      to right,
+      transparent 33.33%,
+      rgba(255, 255, 255, 0.3) 33.33% 33.5%,
+      transparent 33.5%
+    ),
+    linear-gradient(
+      to right,
+      transparent 66.66%,
+      rgba(255, 255, 255, 0.3) 66.66% 66.83%,
+      transparent 66.83%
+    );
+}
+.crop-box::after {
+  background:
+    linear-gradient(
+      to bottom,
+      transparent 33.33%,
+      rgba(255, 255, 255, 0.3) 33.33% 33.5%,
+      transparent 33.5%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 66.66%,
+      rgba(255, 255, 255, 0.3) 66.66% 66.83%,
+      transparent 66.83%
+    );
+}
+.crop-handle {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #fff;
+  background: rgba(20, 22, 26, 0.75);
+  border-radius: 3px;
+}
+.crop-handle-nw {
+  top: -9px;
+  left: -9px;
+  cursor: nwse-resize;
+}
+.crop-handle-ne {
+  top: -9px;
+  right: -9px;
+  cursor: nesw-resize;
+}
+.crop-handle-sw {
+  bottom: -9px;
+  left: -9px;
+  cursor: nesw-resize;
+}
+.crop-handle-se {
+  bottom: -9px;
+  right: -9px;
+  cursor: nwse-resize;
+}
+.crop-editor-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.crop-editor-help {
+  color: var(--muted, #a8aab3);
+  font-size: 0.78rem;
+  line-height: 1.65;
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .crop-stage img {
+    max-height: 320px;
+  }
+  .crop-handle {
+    width: 22px;
+    height: 22px;
+  }
+  .crop-editor-foot {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .crop-editor-foot .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .crop-ratios > button {
+    transition: none;
+  }
+}

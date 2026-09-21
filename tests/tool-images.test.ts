@@ -4,19 +4,13 @@ import {
   fitImageDimensions,
   imageInfoFromBytes,
   inspectImage,
+  resolveCrop,
   runImageTool,
+  watermarkPlacement,
 } from '../src/lib/tools/images';
-import type { UtilityOptions } from '../src/lib/tools/types';
+import { DEFAULT_OPTIONS, type UtilityOptions } from '../src/lib/tools/types';
 
-const options: UtilityOptions = {
-  quality: 0.82,
-  maxDimension: 0,
-  imageFormat: 'image/webp',
-  pdfMode: 'lossless',
-  pages: '',
-  dpi: 144,
-  rotation: 90,
-};
+const options: UtilityOptions = { ...DEFAULT_OPTIONS, imageFormat: 'image/webp', quality: 0.8 };
 const signal = () => new AbortController().signal;
 
 function png(width = 40, height = 20, animated = false) {
@@ -230,5 +224,90 @@ describe('image resizing and encoding', () => {
     expect(bitmap).toHaveBeenCalledOnce();
     expect(close).toHaveBeenCalledOnce();
     expect(canvas.width).toBe(0);
+  });
+});
+
+describe('crop geometry', () => {
+  it('converts a percentage crop into pixels inside the image bounds', () => {
+    expect(resolveCrop(1000, 500, { x: 10, y: 20, width: 50, height: 40 })).toEqual({
+      x: 100,
+      y: 100,
+      width: 500,
+      height: 200,
+    });
+    expect(resolveCrop(200, 200, { x: 0, y: 0, width: 100, height: 100 })).toEqual({
+      x: 0,
+      y: 0,
+      width: 200,
+      height: 200,
+    });
+  });
+
+  it('clamps a crop that would extend past the right or bottom edge', () => {
+    const crop = resolveCrop(100, 100, { x: 80, y: 90, width: 50, height: 50 });
+    expect(crop.x + crop.width).toBeLessThanOrEqual(100);
+    expect(crop.y + crop.height).toBeLessThanOrEqual(100);
+    const negative = resolveCrop(100, 100, { x: -20, y: -20, width: 60, height: 60 });
+    expect(negative.x).toBe(0);
+    expect(negative.y).toBe(0);
+  });
+
+  it('rejects a crop with no area or invalid numbers', () => {
+    expect(() => resolveCrop(100, 100, { x: 0, y: 0, width: 0, height: 50 })).toThrow(/too small/);
+    expect(() => resolveCrop(100, 100, { x: 0, y: 0, width: Number.NaN, height: 50 })).toThrow(
+      /valid crop/,
+    );
+  });
+
+  it('never upscales a cropped region beyond its own pixels', () => {
+    // A small crop must keep its native size rather than being stretched.
+    expect(fitImageDimensions(120, 80, 0)).toEqual({ width: 120, height: 80 });
+  });
+});
+
+describe('watermark placement', () => {
+  it('positions text inside each corner and centers it on request', () => {
+    const center = watermarkPlacement(1000, 600, 200, 40, 'center');
+    expect(center).toEqual({ x: 400, y: 280 });
+    const topLeft = watermarkPlacement(1000, 600, 200, 40, 'top-left');
+    expect(topLeft.x).toBeGreaterThan(0);
+    expect(topLeft.y).toBeGreaterThan(0);
+    const bottomRight = watermarkPlacement(1000, 600, 200, 40, 'bottom-right');
+    expect(bottomRight.x + 200).toBeLessThanOrEqual(1000);
+    expect(bottomRight.y + 40).toBeLessThanOrEqual(600);
+    const topRight = watermarkPlacement(1000, 600, 200, 40, 'top-right');
+    expect(topRight.x).toBeGreaterThan(topLeft.x);
+    expect(topRight.y).toBe(topLeft.y);
+  });
+
+  it('keeps oversized text on the canvas instead of off the left edge', () => {
+    const wide = watermarkPlacement(300, 200, 900, 60, 'bottom-right');
+    expect(wide.x).toBeGreaterThanOrEqual(0);
+    expect(wide.y).toBeGreaterThanOrEqual(0);
+  });
+
+  it('requires watermark text and valid strength before processing', async () => {
+    const file = new File([png()], 'photo.png', { type: 'image/png' });
+    await expect(
+      runImageTool('watermark-image', [file], options, () => undefined, signal()),
+    ).rejects.toThrow(/watermark text/);
+    await expect(
+      runImageTool(
+        'watermark-image',
+        [file],
+        { ...options, watermarkText: 'Draft', watermarkOpacity: 0 },
+        () => undefined,
+        signal(),
+      ),
+    ).rejects.toThrow(/opacity/);
+    await expect(
+      runImageTool(
+        'watermark-image',
+        [file],
+        { ...options, watermarkText: 'Draft', watermarkSize: 40 },
+        () => undefined,
+        signal(),
+      ),
+    ).rejects.toThrow(/size/);
   });
 });
