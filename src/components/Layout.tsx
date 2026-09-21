@@ -118,6 +118,7 @@ export function Layout() {
     ['/compare', 'Compare'],
     ['/news', 'Insights'],
     ['/learn', 'Learn AI'],
+    ['/tools', 'Tools'],
     ['/studio', 'Studio'],
   ];
   return (
@@ -257,6 +258,7 @@ export function Layout() {
           </div>
           <div>
             <h3>Create</h3>
+            <Link to="/tools">Free file tools</Link>
             <Link to="/studio">Artificials Studio</Link>
             <Link to="/pricing">Plans & pricing</Link>
             <Link to="/dashboard">Your workspace</Link>

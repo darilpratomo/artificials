@@ -7,6 +7,7 @@ import Models from './pages/Models';
 import Leaderboard from './pages/Leaderboard';
 import Compare from './pages/Compare';
 import Learn from './pages/Learn';
+import Tools from './pages/Tools';
 import Academy from './pages/Academy';
 import { LessonReader } from './pages/AcademyLesson';
 import Studio from './pages/Studio';
@@ -25,6 +26,8 @@ export function renderPage(path: string, lesson?: Lesson) {
             <Route path="compare" element={<Compare />} />
             <Route path="news" element={<Learn />} />
             <Route path="news/:slug" element={<Learn />} />
+            <Route path="tools" element={<Tools />} />
+            <Route path="tools/:toolId" element={<Tools />} />
             <Route path="learn" element={<Academy />} />
             {lesson && <Route path="learn/:slug" element={<LessonReader lesson={lesson} />} />}
             <Route path="studio" element={<Studio />} />

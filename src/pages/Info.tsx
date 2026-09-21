@@ -182,6 +182,13 @@ export default function Info() {
             </p>
             <h2>3. Why we process information</h2>
             <p>
+              The free file utilities in Tools process selected files locally in your browser.
+              File contents and file names are not uploaded to Artificials or sent to analytics.
+              They are held temporarily in the active workspace; clearing it or leaving the page
+              releases that workspace. Files you download remain on your device. Normal website
+              delivery and optional page-view analytics still work as described in this policy.
+            </p>
+            <p>
               We use account and project data to provide the service and fulfill our agreement with
               you; billing records for subscription administration and legal obligations; and
               limited technical information for security, abuse prevention, and service reliability.

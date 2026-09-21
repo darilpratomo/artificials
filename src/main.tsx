@@ -13,6 +13,7 @@ const Leaderboard = lazy(() => import('./pages/Leaderboard'));
 const Academy = lazy(() => import('./pages/Academy'));
 const AcademyLesson = lazy(() => import('./pages/AcademyLesson'));
 const Learn = lazy(() => import('./pages/Learn'));
+const Tools = lazy(() => import('./pages/Tools'));
 const Studio = lazy(() => import('./pages/Studio'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 const Login = lazy(() => import('./pages/Login'));
@@ -56,6 +57,8 @@ createRoot(document.getElementById('root')!).render(
               <Route path="learn/:slug" element={<AcademyLesson />} />
               <Route path="news" element={<Learn />} />
               <Route path="news/:slug" element={<Learn />} />
+              <Route path="tools" element={<Tools />} />
+              <Route path="tools/:toolId" element={<Tools />} />
               <Route path="studio" element={<Studio />} />
               <Route path="pricing" element={<Pricing />} />
               <Route path="login" element={<Login />} />

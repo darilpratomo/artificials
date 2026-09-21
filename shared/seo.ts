@@ -1,7 +1,21 @@
 import { ARTICLES, type Article } from './content';
 import academy from './academy-index.json';
+import { UTILITIES } from './utilities';
 export const SITE_URL = 'https://artificials.net';
 const pages: Record<string, [string, string]> = {
+  '/tools': [
+    'Free image, PDF and Word tools',
+    'Compress images and PDFs, merge and extract pages, convert images, and work with Word documents. Free browser tools with no file uploads.',
+  ],
+  ...Object.fromEntries(
+    UTILITIES.map((tool) => [
+      '/tools/' + tool.id,
+      [
+        tool.title + ' — free online tool',
+        tool.description + ' Process files locally in your browser, without uploads or an account.',
+      ],
+    ]),
+  ),
   '/': [
     'AI models, rankings & hands-on learning',
     'Explore AI models, understand published benchmarks, read original AI guides, and learn to build with Python at Artificials.',

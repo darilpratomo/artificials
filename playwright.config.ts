@@ -13,7 +13,14 @@ export default defineConfig({
     { name: 'mobile', use: { ...devices['iPhone 13'], defaultBrowserType: 'chromium' } },
     {
       name: 'mobile-safari',
-      testMatch: ['responsive.spec.ts', 'academy.spec.ts', 'analytics.spec.ts'],
+      testMatch: [
+        'responsive.spec.ts',
+        'academy.spec.ts',
+        'analytics.spec.ts',
+        'tools.spec.ts',
+        'word-tools.spec.ts',
+        'pdf-text.spec.ts',
+      ],
       use: { ...devices['iPhone 13'], defaultBrowserType: 'webkit' },
     },
   ],
