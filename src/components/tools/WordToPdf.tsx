@@ -51,7 +51,7 @@ export default function WordToPdf({ file }: { file: File }) {
         setBuilding(true);
         const { renderDocxPdf } = await import('../../lib/tools/docx-pdf');
         const outcome = await renderDocxPdf(
-          result.html,
+          html,
           { title: file.name.replace(/\.docx$/i, '') },
           (amount, message) => {
             if (generation.current === current) {
@@ -132,7 +132,8 @@ export default function WordToPdf({ file }: { file: File }) {
       </div>
       <p className="word-pdf-help">
         Download a PDF with selectable text, or print the preview. DOCX only; complex page layouts
-        may differ. No uploads.
+        may differ. Direct downloads replace unsupported characters with “?”. For non-Latin text,
+        use Print preview and check the result. No uploads.
       </p>
       {(busy || building) && (
         <div className="word-pdf-progress" role="status">

@@ -12,17 +12,23 @@ import {
   Code2,
   Database,
   ChevronRight,
+  BookOpen,
+  Wrench,
 } from 'lucide-react';
 import { Reveal, ScrollJourney } from '../components/Motion';
 import { useCatalogSummary, compactNumber, updatedDate, providerLogo } from '../lib/catalog';
 import ModelCard from '../components/ModelCard';
 import { ARTICLES } from '../../shared/content';
 import { ArticleCover } from '../components/ArticleCover';
+import { HomeLaunchpad, HomeTools, HomeAcademy } from '../components/HomeResources';
+import { useApp } from '../lib/context';
+import './home.css';
 export default function Home() {
   const { data, error } = useCatalogSummary();
+  const { config } = useApp();
   const [prompt, setPrompt] = useState('');
   return (
-    <>
+    <div className="home-page">
       <div className="hero-banner-shell">
         <div className="hero-banner-art" aria-hidden="true">
           <picture>
@@ -45,8 +51,8 @@ export default function Home() {
         <section className="signal-hero container">
           <div className="hero-grid" aria-hidden="true" />
           <div className="hero-label mono">
-            <span className="signal-light" /> THE NEXT ERA IS ALREADY HERE
-            <span className="hero-edition">ARTIFICIALS / INTELLIGENCE INDEX</span>
+            <span className="signal-light" /> A LITTLE CURIOSITY GOES A LONG WAY
+            <span className="hero-edition">DISCOVER / LEARN / MAKE</span>
           </div>
           <div className="signal-copy">
             <h1>
@@ -55,31 +61,36 @@ export default function Home() {
               <span>In perspective.</span>
             </h1>
             <p>
-              Make sense of a world moving at machine speed.
-              <br className="desktop-break" /> Explore the models. Understand the possibilities.
-              <br className="desktop-break" /> Build what comes next.
+              Explore AI with a clearer perspective. Learn something new, find the right model, and
+              make everyday work a little lighter.
             </p>
             <div className="hero-actions">
-              <Link className="btn" to="/models">
-                Explore AI models <ArrowUpRight size={16} />
+              <Link className="btn" to="/tools">
+                <Wrench size={16} /> Use free tools <ArrowUpRight size={16} />
               </Link>
-              <Link className="btn btn-outline" to="/studio">
-                <Command size={15} /> Open Studio
+              <Link className="btn btn-outline" to="/learn">
+                <BookOpen size={16} /> Learn AI <ArrowUpRight size={16} />
               </Link>
             </div>
+            <Link className="home-hero-model-link" to="/models">
+              Explore AI models <ArrowRight size={15} />
+            </Link>
             <div className="hero-trust mono">
-              <ShieldCheck size={14} /> EXPLORE. LEARN. BUILD. <span /> FREE TO EXPLORE
+              <ShieldCheck size={14} /> FREE TOOLS & LESSONS. NO ACCOUNT NEEDED.
             </div>
           </div>
           <div className="hero-bottom mono">
-            <a href="#intelligence">
+            <a href="#home-tools">
               SCROLL TO DISCOVER <ArrowDown size={14} />
             </a>
             <span>HUMAN CURIOSITY. ARTIFICIAL INTELLIGENCE.</span>
-            <span>[ 01 — 05 ]</span>
+            <span>[ 01 — 07 ]</span>
           </div>
         </section>
       </div>
+      <HomeLaunchpad />
+      <HomeTools />
+      <HomeAcademy />
       <section className="provider-band" aria-label="Explore leading AI providers">
         <div className="container">
           <span className="mono">
@@ -105,7 +116,7 @@ export default function Home() {
       <section id="intelligence" className="section container intelligence-section">
         <Reveal>
           <div className="section-kicker mono">
-            <span>01 / THE INTELLIGENCE INDEX</span>
+            <span>03 / THE INTELLIGENCE INDEX</span>
             <span className="data-stamp">
               <span className="signal-light" />
               {data ? `SYNCED ${updatedDate(data.updatedAt)}` : 'SOURCE-ATTRIBUTED CATALOG'}
@@ -168,7 +179,7 @@ export default function Home() {
       </section>
       <ScrollJourney>
         <div className="journey-panel journey-intro">
-          <span className="section-kicker mono">02 / CONNECT THE DOTS</span>
+          <span className="section-kicker mono">04 / CONNECT THE DOTS</span>
           <h2>
             From a signal.
             <br />
@@ -208,7 +219,9 @@ export default function Home() {
           {
             n: '03',
             title: 'Create.',
-            text: 'Turn a prompt into a working starting point. Build an application with its own interface, API and database schema.',
+            text: config.ai
+              ? 'Turn a prompt into a working starting point. Build an application with its own interface, API and database schema.'
+              : 'Explore a full-stack example with its own interface, API and database schema. AI generation is coming soon.',
             icon: Braces,
             to: '/studio',
             label: 'Enter the studio',
@@ -253,15 +266,16 @@ export default function Home() {
       </ScrollJourney>
       <section className="section container studio-home">
         <Reveal from="left" className="studio-manifesto">
-          <span className="section-kicker mono">03 / ARTIFICIALS STUDIO</span>
+          <span className="section-kicker mono">05 / ARTIFICIALS STUDIO</span>
           <h2>
             Less between
             <br />
             <span>idea and reality.</span>
           </h2>
           <p>
-            Your imagination is the starting point. Describe an app and let AI help you build its
-            first version, with real code you can take with you.
+            {config.ai
+              ? 'Describe an app and let AI help you build its first version, with real code you can take with you.'
+              : 'See how a full-stack idea comes together. Explore the example project and its source code while we prepare AI generation for launch.'}
           </p>
           <div className="studio-features">
             <span>
@@ -274,8 +288,11 @@ export default function Home() {
               <ShieldCheck size={17} /> Clear monthly limits
             </span>
           </div>
-          <Link className="text-link" to="/pricing">
-            Explore Studio plans <ArrowUpRight size={16} />
+          {!config.ai && (
+            <span className="home-studio-status">STUDIO PREVIEW · AI GENERATION COMING SOON</span>
+          )}
+          <Link className="text-link" to="/studio">
+            Explore Studio <ArrowUpRight size={16} />
           </Link>
         </Reveal>
         <Reveal from="right">
@@ -291,7 +308,11 @@ export default function Home() {
                 <Braces size={29} strokeWidth={1} />
               </span>
               <h3>What will you build?</h3>
-              <p>Start with an idea. Make it your own.</p>
+              <p>
+                {config.ai
+                  ? 'Start with an idea. Make it your own.'
+                  : 'Sketch an idea, then explore the Studio preview.'}
+              </p>
               <label className="sr-only" htmlFor="home-prompt">
                 Describe your app idea
               </label>
@@ -309,7 +330,7 @@ export default function Home() {
                 <Link
                   to={'/studio' + (prompt ? '?prompt=' + encodeURIComponent(prompt) : '')}
                   className="prompt-submit"
-                  aria-label="Build this idea"
+                  aria-label={config.ai ? 'Build this idea' : 'Explore this idea in Studio preview'}
                 >
                   <ArrowUpRight size={19} />
                 </Link>
@@ -337,7 +358,7 @@ export default function Home() {
       </section>
       <section className="section container home-insights">
         <Reveal>
-          <div className="section-kicker mono">04 / BEYOND THE HEADLINES</div>
+          <div className="section-kicker mono">06 / BEYOND THE HEADLINES</div>
           <div className="section-heading">
             <h2>
               Stay one thought
@@ -350,42 +371,49 @@ export default function Home() {
           </div>
         </Reveal>
         <div className="editorial-grid">
-          {ARTICLES.slice(0, 3).map((a, i) => (
-            <Reveal key={a.id} from={i % 2 ? 'right' : 'left'}>
-              <Link to={'/news/' + a.slug} className="editorial-card">
-                <ArticleCover article={a} decorative />
-                <div className="editorial-meta mono">
-                  <span>{a.category}</span>
-                  <span>EDITORIAL GUIDE</span>
-                </div>
-                <h3>{a.title}</h3>
-                <p>{a.excerpt}</p>
-                <span className="text-link">
-                  Read the perspective <ArrowUpRight size={14} />
-                </span>
-              </Link>
-            </Reveal>
-          ))}
+          {ARTICLES.filter((article) => article.published)
+            .slice(0, 3)
+            .map((a, i) => (
+              <Reveal key={a.id} from={i % 2 ? 'right' : 'left'}>
+                <Link to={'/news/' + a.slug} className="editorial-card">
+                  <ArticleCover article={a} decorative />
+                  <div className="editorial-meta mono">
+                    <span>{a.category}</span>
+                    <span>EDITORIAL GUIDE</span>
+                  </div>
+                  <h3>{a.title}</h3>
+                  <p>{a.excerpt}</p>
+                  <span className="text-link">
+                    Read the perspective <ArrowUpRight size={14} />
+                  </span>
+                </Link>
+              </Reveal>
+            ))}
         </div>
       </section>
       <Reveal>
         <section className="closing-signal container">
-          <span className="section-kicker mono">05 / THE FUTURE IS AN OPEN QUESTION</span>
+          <span className="section-kicker mono">07 / KEEP YOUR CURIOSITY GOING</span>
           <h2>
             Let your curiosity
             <br />
             <span>lead the way.</span>
           </h2>
-          <Link className="btn" to="/models">
-            Find your next perspective <ArrowUpRight size={16} />
-          </Link>
+          <div className="home-closing-actions">
+            <Link className="btn" to="/learn">
+              Find your next lesson <ArrowUpRight size={16} />
+            </Link>
+            <Link className="btn btn-outline" to="/tools">
+              Make room for better work <ArrowUpRight size={16} />
+            </Link>
+          </div>
           <div className="closing-cross" aria-hidden="true">
             <span />
             <span />
           </div>
         </section>
       </Reveal>
-    </>
+    </div>
   );
 }
 function PlusIcon() {

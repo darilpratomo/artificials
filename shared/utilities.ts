@@ -71,13 +71,13 @@ export const UTILITIES: UtilityDefinition[] = [
   {
     id: 'word-to-pdf',
     title: 'Word to PDF',
-    description: 'Preview a DOCX document and save it as PDF using your browser.',
+    description: 'Turn a DOCX document into a downloadable PDF, right in your browser.',
     category: 'Documents',
-    action: 'Preview document',
+    action: 'Convert document',
     accept: '.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     formats: 'DOCX (not legacy .doc)',
     multiple: false,
-    note: 'Uses your browser’s Print → Save as PDF. Text stays selectable. Headings, lists, tables and supported images are retained; complex page layouts, fonts and headers may differ. Review the preview first.',
+    note: 'Download a PDF with selectable text, or use Print preview. Layout, fonts and page breaks may differ. Direct downloads use Latin-based fonts; use Print preview for scripts such as Chinese, Arabic or Devanagari. Review the result first.',
   },
   {
     id: 'merge-pdf',

@@ -17,8 +17,8 @@ const pages: Record<string, [string, string]> = {
     ]),
   ),
   '/': [
-    'AI models, rankings & hands-on learning',
-    'Explore AI models, understand published benchmarks, read original AI guides, and learn to build with Python at Artificials.',
+    'Explore AI, learn Python & use free file tools',
+    'Explore AI models and rankings, learn through hands-on Python lessons, and use free image, PDF and Word tools. Discover more with Artificials.',
   ],
   '/models': [
     'AI model directory',
