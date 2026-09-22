@@ -1,0 +1,82 @@
+.logo-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #000;
+  opacity: 1;
+  transition: opacity 520ms ease;
+}
+
+.logo-intro.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Fade the mark with the overlay. Without this the logo stays fully opaque
+   while the black backdrop clears, so it briefly floats over the page. */
+.logo-intro.is-leaving .pixel-logo {
+  opacity: 0;
+  transition: opacity 320ms ease;
+}
+
+.logo-intro-skip {
+  position: absolute;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  border: 1px solid #2c2c2c;
+  border-radius: 999px;
+  padding: 8px 18px;
+  background: transparent;
+  color: #8b8b8b;
+  font: inherit;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 200ms ease,
+    border-color 200ms ease;
+}
+
+.logo-intro-skip:hover,
+.logo-intro-skip:focus-visible {
+  color: #f0f0f3;
+  border-color: #6a6a6a;
+}
+
+/* Hold the page still underneath so the reveal is not scrolled away mid-flight. */
+body.intro-locked {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-intro,
+  .logo-intro-skip {
+    transition: none;
+  }
+}
+
+/* Development-only replay control; the production build drops the element. */
+.logo-intro-replay {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 190;
+  border: 1px solid #2c2c2c;
+  border-radius: 999px;
+  padding: 7px 15px;
+  background: #0b0b0d;
+  color: #8b8b8b;
+  font: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+.logo-intro-replay:hover,
+.logo-intro-replay:focus-visible {
+  color: #f0f0f3;
+  border-color: #6a6a6a;
+}

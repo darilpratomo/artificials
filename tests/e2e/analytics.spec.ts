@@ -4,6 +4,9 @@ import { readFileSync } from 'node:fs';
 
 const origin = 'https://artificials.net';
 test.beforeEach(async ({ page, request, baseURL }) => {
+  // Suppress the one-per-session logo intro so it never covers the consent
+  // banner under test. The intro has its own suite.
+  await page.addInitScript(() => sessionStorage.setItem('artificialsIntroPlayed', 'true'));
   // Production hostname with local built assets. Never send test visits to GA.
   await page.route('https://artificials.net/**', async (route) => {
     const url = new URL(route.request().url());

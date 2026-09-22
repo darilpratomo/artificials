@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './styles.css';
 import { Provider } from './lib/context';
 import { Layout, EmptyState } from './components/Layout';
+import LogoIntro from './components/LogoIntro';
 import Home from './pages/Home';
 const Models = lazy(() => import('./pages/Models'));
 const Compare = lazy(() => import('./pages/Compare'));
@@ -46,6 +47,7 @@ createRoot(document.getElementById('root')!).render(
       <Provider>
         <Metadata />
         <Analytics />
+        <LogoIntro />
         <Suspense fallback={<div className="loading-panel">Loading Artificials…</div>}>
           <Routes>
             <Route element={<Layout />}>

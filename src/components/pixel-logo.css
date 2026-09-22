@@ -1,0 +1,104 @@
+.pixel-logo {
+  --pixel-size: 14px;
+  --pixel-gap: 2px;
+  --pixel-columns: 21;
+  --pixel-color: #ffffff;
+  --pixel-travel: 620ms;
+  --pixel-fade: 260ms;
+  --wordmark-delay: 1860ms;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 4vw, 34px);
+  max-width: 90vw;
+  /* The requested size is a ceiling. The mark shrinks to fit narrow screens so
+     it never overflows or swamps the page, which 16px pixels do on a phone. */
+  --pixel-cell: min(var(--pixel-size), calc((90vw - 12px) / var(--pixel-columns)));
+}
+
+@media (max-width: 760px) {
+  .pixel-logo {
+    /* Phones get a 9-12px pixel, so the mark stays a logo rather than filling
+       the screen, and the stacked wordmark still has room underneath. */
+    --pixel-cell: clamp(
+      9px,
+      min(calc((58vw - 12px) / var(--pixel-columns)), calc(30vh / var(--pixel-columns))),
+      12px
+    );
+  }
+}
+
+.pixel-logo-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--pixel-columns), var(--pixel-cell));
+  grid-auto-rows: var(--pixel-cell);
+  gap: var(--pixel-gap);
+  flex: none;
+}
+
+/* A hairline outset closes the sub-pixel seams left by fractional sizes, so the
+   mark reads as solid shapes rather than a lattice of separate squares. */
+.pixel-logo-grid[data-solid='true'] .pixel {
+  box-shadow: 0 0 0 0.5px var(--pixel-color);
+}
+
+.pixel {
+  display: block;
+  width: var(--pixel-cell);
+  height: var(--pixel-cell);
+  background: var(--pixel-color);
+  opacity: 0;
+  transform: translate(var(--tx), var(--ty)) scale(0.2) rotate(var(--rotation));
+  /* Only the animating properties are promoted, and only while they animate. */
+  will-change: transform, opacity;
+}
+
+.pixel-logo.is-assembled .pixel {
+  opacity: 1;
+  transform: translate(0, 0) scale(1) rotate(0deg);
+  transition:
+    opacity var(--pixel-fade) ease var(--delay),
+    transform var(--pixel-travel) cubic-bezier(0.18, 0.82, 0.19, 1) var(--delay);
+}
+
+.pixel-logo-wordmark {
+  font-family: 'Sora', 'Inter Variable', sans-serif;
+  font-size: clamp(1.4rem, 5.2vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--pixel-color);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.pixel-logo.is-assembled .pixel-logo-wordmark {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 520ms ease var(--wordmark-delay),
+    transform 520ms cubic-bezier(0.18, 0.82, 0.19, 1) var(--wordmark-delay);
+}
+
+@media (max-width: 760px) {
+  .pixel-logo {
+    flex-direction: column;
+    gap: clamp(14px, 5vw, 26px);
+  }
+  .pixel-logo-wordmark {
+    letter-spacing: 0.09em;
+  }
+}
+
+/* Reduced motion shows the finished logo with no assembling and no delays. */
+@media (prefers-reduced-motion: reduce) {
+  .pixel,
+  .pixel-logo.is-assembled .pixel,
+  .pixel-logo-wordmark,
+  .pixel-logo.is-assembled .pixel-logo-wordmark {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+}
