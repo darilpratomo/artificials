@@ -48,6 +48,7 @@ interface Placed extends ScatterPoint {
  */
 export function ScatterChart({
   points,
+  legendPoints,
   x,
   y,
   frontier,
@@ -56,8 +57,12 @@ export function ScatterChart({
   label,
   pending = [],
   pendingLabel = 'Not scored yet',
+  selectedMakers = [],
+  onMakerToggle,
 }: {
   points: ScatterPoint[];
+  /** Optional full set for the legend when the visible points are filtered. */
+  legendPoints?: ScatterPoint[];
   /** Shown as hollow rings along the bottom of the plot, placed by x only. */
   pending?: PendingPoint[];
   pendingLabel?: string;
@@ -68,6 +73,8 @@ export function ScatterChart({
   quadrant?: string;
   highlight?: string;
   label: string;
+  selectedMakers?: string[];
+  onMakerToggle?: (makerId: string) => void;
 }) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const [active, setActive] = useState<string | null>(null);
@@ -236,7 +243,7 @@ export function ScatterChart({
 
   const makers = useMemo(() => {
     const counts = new Map<string, { name: string; count: number }>();
-    for (const point of points) {
+    for (const point of legendPoints ?? points) {
       const id = point.makerId;
       const entry = counts.get(id) ?? { name: point.maker || 'Maker not reported', count: 0 };
       entry.count += 1;
@@ -245,16 +252,37 @@ export function ScatterChart({
     return [...counts].sort(
       (a, b) => b[1].count - a[1].count || a[1].name.localeCompare(b[1].name),
     );
-  }, [points]);
+  }, [points, legendPoints]);
 
   return (
     <div className="scatter-chart">
       <ul className="chart-legend" aria-label="Makers">
         {makers.map(([id, entry]) => (
-          <li key={id}>
-            <i style={{ background: makerColor(id) }} aria-hidden="true" />
-            <img src={makerLogo(id)} alt="" width="18" height="18" loading="lazy" />
-            {entry.name}
+          <li
+            key={id}
+            className={
+              selectedMakers.length && !selectedMakers.includes(id) ? 'is-muted' : undefined
+            }
+          >
+            {onMakerToggle ? (
+              <button
+                type="button"
+                aria-pressed={selectedMakers.includes(id)}
+                onClick={() => onMakerToggle(id)}
+                title={`Filter ${entry.name} models`}
+              >
+                <i style={{ background: makerColor(id) }} aria-hidden="true" />
+                <img src={makerLogo(id)} alt="" width="18" height="18" loading="lazy" />
+                <span>{entry.name}</span>
+                <small>{entry.count}</small>
+              </button>
+            ) : (
+              <>
+                <i style={{ background: makerColor(id) }} aria-hidden="true" />
+                <img src={makerLogo(id)} alt="" width="18" height="18" loading="lazy" />
+                {entry.name}
+              </>
+            )}
           </li>
         ))}
         {frontier && (

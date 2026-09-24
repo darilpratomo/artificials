@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart3, Table2 } from 'lucide-react';
-import { makerColor } from '../../../shared/makers';
 import { ScatterChart, type ScatterAxis, type ScatterPoint } from '../charts/ScatterChart';
 import { ShareButton } from '../charts/ShareButton';
 import { compactTokens, compactUsd, monthYear } from '../charts/scale';
@@ -52,7 +51,6 @@ const VIEWS: {
 export function ValueSection({
   index,
   releases = [],
-  detailed = false,
 }: {
   index: IndexPoint[];
   /** Recent releases, so the time view can show models not scored yet. */
@@ -62,7 +60,7 @@ export function ValueSection({
   const [view, setView] = useState<View>('price');
   const [openOnly, setOpenOnly] = useState(false);
   const [table, setTable] = useState(false);
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selectedMakers, setSelectedMakers] = useState<string[]>([]);
   const current = VIEWS.find((entry) => entry.id === view)!;
   const points: ScatterPoint[] = useMemo(
     () =>
@@ -115,24 +113,21 @@ export function ValueSection({
       }));
   }, [view, index, releases, openOnly]);
   useEffect(() => {
-    setSelected((current) =>
-      current.filter((key) => points.some((point) => point.key === key)),
+    setSelectedMakers((current) =>
+      current.filter((id) => points.some((point) => point.makerId === id)),
     );
   }, [points]);
-  const filteredPoints = selected.length
-    ? points.filter((point) => selected.includes(point.key))
+  const filteredPoints = selectedMakers.length
+    ? points.filter((point) => selectedMakers.includes(point.makerId))
     : points;
-  const filteredPending = selected.length ? [] : pending;
-  const filterChoices = useMemo(
-    () =>
-      [...points]
-        .sort((a, b) => b.y - a.y || a.name.localeCompare(b.name))
-        .slice(0, detailed ? 36 : 14),
-    [points, detailed],
-  );
-  const toggleModel = (key: string) =>
-    setSelected((current) =>
-      current.includes(key) ? current.filter((entry) => entry !== key) : [...current, key],
+  const filteredPending = selectedMakers.length
+    ? pending.filter((point) => selectedMakers.includes(point.makerId))
+    : pending;
+  const toggleMaker = (makerId: string) =>
+    setSelectedMakers((current) =>
+      current.includes(makerId)
+        ? current.filter((entry) => entry !== makerId)
+        : [...current, makerId],
     );
   const y = useMemo(
     () => ({ label: 'Capability index', format: (value: number) => value.toFixed(0) }),
@@ -216,38 +211,6 @@ export function ValueSection({
         />
         Open-weights models only
       </label>
-      {filterChoices.length > 0 && (
-        <div className={`model-filter${selected.length ? ' has-selection' : ''}`}>
-          <div className="model-filter-head">
-            <span>
-              {selected.length
-                ? `${filteredPoints.length} selected model${filteredPoints.length === 1 ? '' : 's'}`
-                : 'Tap model labels to focus the chart'}
-            </span>
-            <button
-              type="button"
-              className="text-link"
-              disabled={!selected.length}
-              onClick={() => setSelected([])}
-            >
-              Show all
-            </button>
-          </div>
-          <div className="model-filter-list" role="group" aria-label="Filter models in the chart">
-            {filterChoices.map((point) => (
-              <button
-                key={point.key}
-                type="button"
-                aria-pressed={selected.includes(point.key)}
-                onClick={() => toggleModel(point.key)}
-              >
-                <i style={{ background: makerColor(point.makerId) }} aria-hidden="true" />
-                <span>{point.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
       {table ? (
         <div className="chart-table-wrap">
           <table className="chart-table">
@@ -285,6 +248,7 @@ export function ValueSection({
       ) : (
         <ScatterChart
           points={filteredPoints}
+          legendPoints={points}
           x={current.axis}
           y={y}
           frontier={frontier}
@@ -292,6 +256,8 @@ export function ValueSection({
           pending={filteredPending}
           pendingLabel="Released, not scored yet"
           label={`${current.title}, ${filteredPoints.length} models`}
+          selectedMakers={selectedMakers}
+          onMakerToggle={toggleMaker}
         />
       )}
       <div className="dash-foot">

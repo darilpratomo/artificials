@@ -1,5 +1,5 @@
 import { Select } from '../components/Select';
-import { useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Search,
@@ -20,13 +20,24 @@ export default function Models() {
   latestParams.current = params;
   const { data, error, loading } = useCatalogPage(params.toString());
   const comparison = useComparison();
-  const update = (key: string, value: string) => {
+  const routeQuery = params.get('query') || '';
+  const [draftQuery, setDraftQuery] = useState(routeQuery);
+  const update = useCallback((key: string, value: string) => {
     const next = new URLSearchParams(latestParams.current);
     value ? next.set(key, value) : next.delete(key);
     if (key !== 'page') next.delete('page');
     latestParams.current = next;
     setParams(next, { replace: true });
-  };
+  }, [setParams]);
+  useEffect(() => {
+    setDraftQuery(routeQuery);
+  }, [routeQuery]);
+  useEffect(() => {
+    if (draftQuery === routeQuery) return;
+    const timer = window.setTimeout(() => update('query', draftQuery.trim()), 220);
+    return () => window.clearTimeout(timer);
+  }, [draftQuery, routeQuery, update]);
+  const searching = loading || draftQuery !== routeQuery;
   return (
     <div className="container page catalog-page">
       <PageHeading
@@ -41,8 +52,8 @@ export default function Models() {
             type="search"
             aria-label="Search models"
             placeholder="Search models, labs, or providers…"
-            value={params.get('query') || ''}
-            onChange={(e) => update('query', e.target.value)}
+            value={draftQuery}
+            onChange={(e) => setDraftQuery(e.target.value)}
           />
           <span className="search-hint mono">THE AI DIRECTORY</span>
         </div>
@@ -111,7 +122,13 @@ export default function Models() {
             Open weights
           </button>
           {params.toString() && (
-            <button className="text-link" onClick={() => setParams({}, { replace: true })}>
+            <button
+              className="text-link"
+              onClick={() => {
+                setDraftQuery('');
+                setParams({}, { replace: true });
+              }}
+            >
               Reset
             </button>
           )}
@@ -121,6 +138,8 @@ export default function Models() {
         <span role="status">
           {loading
             ? 'Searching the catalog…'
+            : searching
+              ? 'Preparing search…'
             : data
               ? `${data.total.toLocaleString('en-US')} model offerings`
               : 'Model catalog'}

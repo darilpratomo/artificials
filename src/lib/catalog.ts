@@ -3,6 +3,28 @@ import type { CatalogPage, CatalogSummary, ModelRecord } from '../../shared/cata
 export { providerLogo } from '../../shared/catalog';
 export type { ModelRecord, CatalogSummary, CatalogPage } from '../../shared/catalog';
 const summaryCache: { value?: CatalogSummary } = {};
+const pageCache = new Map<string, CatalogPage>();
+const pageRequests = new Map<string, Promise<CatalogPage>>();
+
+function catalogPage(params: string) {
+  const cached = pageCache.get(params);
+  if (cached) return Promise.resolve(cached);
+  const request =
+    pageRequests.get(params) ??
+    fetch('/api/catalog?' + params)
+      .then(async (r) => {
+        if (!r.ok) throw new Error('The model catalog could not load. Please try again.');
+        return r.json() as Promise<CatalogPage>;
+      })
+      .then((page) => {
+        pageCache.set(params, page);
+        return page;
+      })
+      .finally(() => pageRequests.delete(params));
+  pageRequests.set(params, request);
+  return request;
+}
+
 export function useCatalogSummary() {
   const [data, setData] = useState<CatalogSummary | undefined>(summaryCache.value);
   const [error, setError] = useState('');
@@ -26,30 +48,35 @@ export function useCatalogSummary() {
   return { data, error };
 }
 export function useCatalogPage(params: string) {
-  const [data, setData] = useState<CatalogPage>();
+  const [data, setData] = useState<CatalogPage | undefined>(() => pageCache.get(params));
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !pageCache.has(params));
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
+    const cached = pageCache.get(params);
+    if (cached) {
+      setData(cached);
+      setError('');
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError('');
     const timer = setTimeout(() => {
-      fetch('/api/catalog?' + params, { signal: controller.signal })
-        .then(async (r) => {
-          if (!r.ok) throw new Error('The model catalog could not load. Please try again.');
-          return r.json() as Promise<CatalogPage>;
+      catalogPage(params)
+        .then((page) => {
+          if (active) setData(page);
         })
-        .then(setData)
         .catch((e) => {
-          if (e.name !== 'AbortError') setError(e.message);
+          if (active) setError(e.message);
         })
         .finally(() => {
-          if (!controller.signal.aborted) setLoading(false);
+          if (active) setLoading(false);
         });
     }, 160);
     return () => {
+      active = false;
       clearTimeout(timer);
-      controller.abort();
     };
   }, [params]);
   return { data, error, loading };

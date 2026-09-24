@@ -278,6 +278,42 @@ a.rank-hit:focus-visible {
   align-items: center;
   gap: 7px;
 }
+.chart-legend li.is-muted {
+  opacity: 0.46;
+}
+.chart-legend button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s,
+    opacity 0.2s;
+}
+.chart-legend button:hover {
+  border-color: #3a3d46;
+  background: #ffffff08;
+  color: #f3f4f7;
+}
+.chart-legend button[aria-pressed='true'] {
+  border-color: #eceef2;
+  background: #eceef2;
+  color: #101115;
+}
+.chart-legend button small {
+  color: currentColor;
+  font-size: 11px;
+  opacity: 0.64;
+  font-variant-numeric: tabular-nums;
+}
 .chart-legend i {
   width: 9px;
   height: 9px;

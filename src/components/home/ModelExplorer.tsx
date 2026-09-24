@@ -149,6 +149,11 @@ export function ModelExplorer({ total }: { total: number }) {
     observer.observe(element);
     return () => observer.disconnect();
   }, [wanted]);
+  useEffect(() => {
+    if (wanted) return;
+    const timer = window.setTimeout(() => setWanted(true), 1400);
+    return () => window.clearTimeout(timer);
+  }, [wanted]);
 
   const makers = useMemo(() => {
     const counts = new Map<string, { name: string; count: number }>();
