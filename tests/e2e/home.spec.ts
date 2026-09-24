@@ -99,7 +99,9 @@ test('the price chart supports the keyboard and opens a model', async ({ page })
   await chart.focus();
   await page.keyboard.press('Home');
   for (let step = 0; step < target; step += 1) await page.keyboard.press('ArrowRight');
-  await expect(panel.locator('.scatter-frame [aria-live="polite"]')).toContainText(order[target].name);
+  await expect(panel.locator('.scatter-frame [aria-live="polite"]')).toContainText(
+    order[target].name,
+  );
   await expect(panel.locator('.scatter-tooltip')).toContainText(order[target].name);
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(new RegExp(`/models/${order[target].slug}$`));
@@ -251,9 +253,9 @@ test('charts download as branded images', async ({ page }, testInfo) => {
     expect(download.suggestedFilename()).toMatch(/^artificials-[a-z0-9-]+\.png$/);
     const file = await download.path();
     const bytes = readFileSync(file);
-    // A real PNG, 1600 pixels wide.
+    // A real PNG, drawn on a 1600-pixel layout and exported at a higher resolution.
     expect(String.fromCharCode(...bytes.subarray(1, 4))).toBe('PNG');
-    expect(new DataView(bytes.buffer, bytes.byteOffset).getUint32(16)).toBe(1600);
+    expect(new DataView(bytes.buffer, bytes.byteOffset).getUint32(16)).toBeGreaterThanOrEqual(1600);
   }
 });
 

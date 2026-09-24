@@ -94,6 +94,33 @@ test('a profile lists its full specifications and research record', async ({ pag
   await expect(page.getByRole('button', { name: /specifications" as an image/ })).toBeVisible();
 });
 
+test('a profile compares the model with the whole field and its providers', async ({ page }) => {
+  const [slug, name] = (await directory(page)).find((entry) => entry[4] === 1)!;
+  await page.goto(`/models/${slug}`);
+  await expect(page.locator('.summary-tile')).toHaveCount(4);
+  await expect(page.locator('.summary-tile').first()).toContainText('Capability');
+  await expect(page.getByRole('heading', { name: 'Comparison summary' })).toBeVisible();
+  await expect(page.locator('.summary-text p').first()).toContainText(name);
+  const questions = page.locator('.faq-items details');
+  expect(await questions.count()).toBeGreaterThanOrEqual(10);
+  await questions.first().locator('summary').click();
+  await expect(questions.first().locator('p')).toBeVisible();
+
+  await page.getByRole('tab', { name: 'API providers' }).click();
+  await expect(page.locator('.provider-leader').first()).toContainText('Lowest blended price');
+  const agents = page.getByRole('button', { name: /Agents with caching/ });
+  if (await agents.count()) {
+    await agents.click();
+    await expect(agents).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.provider-leader').first()).toContainText('Agents with caching');
+  }
+  await expect(page.getByRole('heading', { name: 'Choosing a provider' })).toBeVisible();
+
+  await page.getByRole('tab', { name: 'Performance' }).click();
+  await expect(page.locator('.glance-table tbody tr').first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
 test('the profile passes automated accessibility checks', async ({ page }) => {
   const [slug] = (await directory(page)).find((entry) => entry[4] === 1)!;
   await page.goto(`/models/${slug}`);

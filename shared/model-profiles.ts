@@ -34,6 +34,10 @@ export interface ProfileOffering {
   status?: string;
   providerUrl: string | null;
   longContextPricing?: LongContextPrice[];
+  /** What this host reports for its own listing; hosts can differ. */
+  toolCall?: boolean;
+  structuredOutput?: boolean;
+  reasoning?: boolean;
 }
 
 export interface ProfileResult {
@@ -446,6 +450,11 @@ export function buildProfiles(
         ...(offer.status ? { status: offer.status } : {}),
         providerUrl: offer.providerUrl,
         ...(offer.longContextPricing ? { longContextPricing: offer.longContextPricing } : {}),
+        ...(offer.toolCall !== undefined ? { toolCall: offer.toolCall } : {}),
+        ...(offer.structuredOutput !== undefined
+          ? { structuredOutput: offer.structuredOutput }
+          : {}),
+        ...(offer.reasoning ? { reasoning: true } : {}),
       }))
       .sort((a, b) => {
         const group = (offer: ProfileOffering) =>

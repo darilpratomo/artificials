@@ -283,3 +283,19 @@
     transition: none;
   }
 }
+@media (max-width: 420px) {
+  .month-bars li:nth-child(-n + 12) {
+    display: none;
+  }
+  .month-bars {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+@media (max-width: 799px) {
+  .release-title a {
+    justify-self: start;
+    padding-block: 7px;
+    margin-block: -7px;
+  }
+}

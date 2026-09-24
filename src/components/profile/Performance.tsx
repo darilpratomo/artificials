@@ -9,6 +9,7 @@ import type {
 import { DOMAINS, day, rankLabel, score, whole } from './format';
 import { DomainKey, Explainer, Meter, Sources } from './parts';
 import { ShareButton } from '../charts/ShareButton';
+import { useTests } from '../../lib/overview';
 
 function Detail({ result }: { result: ProfileResult }) {
   const parts = [`Setting: ${result.configuration}`];
@@ -81,6 +82,63 @@ function ResultCard({
         </details>
       )}
     </article>
+  );
+}
+
+/** Every test on one table: this model's score and rank beside the leader and the median. */
+function AtAGlance({ profile }: { profile: ModelProfile }) {
+  const { data } = useTests(true);
+  const rows = profile.categories.map((category) => {
+    const best = profile.results.find((result) => result.category === category.id)!;
+    const leader = data?.tests.find((test) => test.id === category.id)?.rows[0];
+    return { category, best, leader };
+  });
+  return (
+    <section className="profile-card" aria-labelledby="glance-heading">
+      <div className="profile-card-head">
+        <h2 id="glance-heading">Benchmarks at a glance</h2>
+        <p>
+          Every test that covers {profile.name}, with the top model and the median of all models
+          tested.
+        </p>
+      </div>
+      <div className="chart-table-wrap glance-table">
+        <table className="chart-table">
+          <caption className="sr-only">{`${profile.name} on every test`}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Test</th>
+              <th scope="col">Score</th>
+              <th scope="col">Rank</th>
+              <th scope="col">Top model</th>
+              <th scope="col">Median</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(({ category, best, leader }) => (
+              <tr key={category.id}>
+                <th scope="row">
+                  <span className={`glance-test domain-${DOMAINS[category.domain].token}`}>
+                    <i aria-hidden="true" />
+                    {category.label}
+                  </span>
+                </th>
+                <td>{score(best.score, category.unit)}</td>
+                <td>
+                  #{whole(best.rank)} of {whole(best.total)}
+                </td>
+                <td>
+                  {leader
+                    ? `${leader.name} (${score(leader.score, category.unit)})`
+                    : score(category.best, category.unit)}
+                </td>
+                <td>{score(category.median, category.unit)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 
@@ -160,6 +218,8 @@ export default function Performance({
           }}
         />
       </div>
+
+      <AtAGlance profile={profile} />
 
       {index.length > 0 && indexInfo && (
         <section className="profile-card index-card" aria-labelledby="index-heading">

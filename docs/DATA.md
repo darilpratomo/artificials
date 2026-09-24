@@ -204,6 +204,25 @@ date and estimated training compute. Where Epoch AI's release date differs from 
 both are shown. The file is optional: profiles build without it, and a missing or much smaller
 file never stops the benchmark refresh.
 
+Model page analysis (`src/components/profile/analysis.ts`), all calculated by Artificials:
+
+- Comparison class: every model on the capability index. A model that is not on it is ranked as
+  one more member, so a rank never exceeds its total.
+- Summary tiles rank capability (higher first), price (cheapest first, by the reference blended
+  price) and context window (largest first), and show the quarter the model falls in as four
+  blocks. For price the blocks measure cost, not quality. Cache discount is one minus the cached
+  input price divided by the input price, from the same listing as the price.
+- The comparison summary and the questions and answers are written from those figures with fixed
+  wording thresholds (top 10% "among the most capable", cheapest quarter "one of the least
+  expensive", and so on). They never state anything the page does not show; speed, latency and
+  parameter counts are said to be unmeasured or unlisted. The questions are also published as
+  schema.org FAQPage data.
+- Highlights compare the model with the nine models closest to it on the capability index.
+- API providers: blended prices for three workloads, chat (3 input : 1 output), agents with
+  caching (7 cached : 2 input : 1 output, using the input price when a listing has no cache
+  price) and long answers (1 input : 3 output); the cheapest listing on each price and the
+  largest context and reply length; and each listing's own tool-calling and JSON support.
+
 The Worker serves `/models/*` first: it reads `directory.json` (cached per isolate for five
 minutes), returns the app shell with the model's title, description and canonical URL, and a
 real 404 with `noindex` for unknown or malformed slugs. The sitemap lists profiles that have
@@ -249,7 +268,8 @@ Definitions, all calculated by Artificials:
   between the best closed and best open-weights model on the index.
 
 Every chart has a "Download image" button. The image is redrawn on a canvas from the same data
-(`src/components/charts/share-image.ts`, loaded on first use), 1600 pixels wide, with the
+(`src/components/charts/share-image.ts`, loaded on first use), laid out 1600 pixels wide and
+exported at 2.5 times that resolution, with the
 Artificials pixel mark and wordmark, a faint watermark, `artificials.net` and a data credit line
 that the sources' licences require. Phones get the share sheet; other devices get a download.
 

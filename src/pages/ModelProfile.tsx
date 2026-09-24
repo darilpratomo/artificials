@@ -30,7 +30,7 @@ const TABS: { id: ProfileTab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'performance', label: 'Performance' },
   { id: 'pricing', label: 'Pricing' },
-  { id: 'providers', label: 'Providers' },
+  { id: 'providers', label: 'API providers' },
   { id: 'tokens', label: 'Tokens & context' },
 ];
 

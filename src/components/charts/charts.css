@@ -310,7 +310,7 @@ a.rank-hit:focus-visible {
 }
 .chart-legend button small {
   color: currentColor;
-  font-size: 11px;
+  font-size: 12px;
   opacity: 0.64;
   font-variant-numeric: tabular-nums;
 }
@@ -480,4 +480,41 @@ a.rank-hit:focus-visible {
   border: 2px solid #c9ccd4;
   border-radius: 50%;
   background: transparent;
+}
+
+/* Tables that stand in for charts */
+.chart-table-wrap {
+  max-height: 640px;
+  overflow: auto;
+  border: 1px solid #1f2027;
+  border-radius: 12px;
+}
+.chart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.chart-table th,
+.chart-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #1c1d23;
+  color: #c9ccd4;
+  text-align: left;
+  vertical-align: top;
+}
+.chart-table thead th {
+  position: sticky;
+  top: 0;
+  background: #14151a;
+  color: #9698a3;
+  font-weight: 500;
+}
+.chart-table tbody th {
+  color: #f0f0f3;
+  font-weight: 550;
+}
+.chart-table a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

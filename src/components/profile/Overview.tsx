@@ -8,21 +8,11 @@ import {
   type ModelProfile,
   type ProfileBucket,
 } from '../../lib/profiles';
-import {
-  DOMAINS,
-  approxPages,
-  day,
-  modalityList,
-  money,
-  rankLabel,
-  score,
-  standing,
-  tokens,
-  whole,
-} from './format';
+import { DOMAINS, day, modalityList, money, rankLabel, score, standing } from './format';
 import { DomainKey, Meter, Sources } from './parts';
 import { ResearchRecord, Standing } from './Standing';
 import { Specs } from './Specs';
+import { ComparisonSummary, Faq, ModelSummary, PeerHighlights } from './Summary';
 import { ShareButton } from '../charts/ShareButton';
 
 export type ProfileTab = 'overview' | 'performance' | 'pricing' | 'providers' | 'tokens';
@@ -48,9 +38,6 @@ export default function Overview({
     .map((domain) => ({ domain, result: primaryResult(profile, domain) }))
     .filter((entry) => entry.result);
   const category = (id: string) => profile.categories.find((entry) => entry.id === id);
-  const index = profile.results.find((result) => result.category === 'capability-index');
-  const cheapest = cheapestOffering(profile);
-  const noCharge = noChargeCount(profile);
   const facts: { ok: boolean | null; text: string }[] = [
     {
       ok: profile.reasoning,
@@ -191,54 +178,14 @@ export default function Overview({
           )}
         </section>
 
-        <section className="profile-glance" aria-label="At a glance">
-          <div className="glance-tile">
-            <span>Capability index</span>
-            <strong>{index ? score(index.score, 'index') : 'Not rated'}</strong>
-            <small>
-              {index
-                ? rankLabel(index.rank, index.total) + ' on general ability'
-                : 'Not tested yet'}
-            </small>
-          </div>
-          <div className="glance-tile">
-            <span>Lowest price</span>
-            <strong>
-              {cheapest
-                ? `${money(cheapest.inputPrice)} / ${money(cheapest.outputPrice)}`
-                : noCharge
-                  ? 'No per-token charge'
-                  : 'Not reported'}
-            </strong>
-            <small>
-              {cheapest
-                ? `input / output per 1M tokens, at ${cheapest.provider}`
-                : noCharge
-                  ? 'Free tiers or plans only, usually with limits'
-                  : 'No listed price'}
-            </small>
-          </div>
-          <div className="glance-tile">
-            <span>Context window</span>
-            <strong>{tokens(profile.contextWindow)} tokens</strong>
-            <small>
-              {profile.contextWindow
-                ? `reads about ${approxPages(profile.contextWindow)} at once`
-                : 'Not reported'}
-            </small>
-          </div>
-          <div className="glance-tile">
-            <span>Where to use it</span>
-            <strong>
-              {whole(profile.offerings.length)}{' '}
-              {profile.offerings.length === 1 ? 'provider' : 'providers'}
-            </strong>
-            <small>
-              {profile.official ? `including ${profile.maker} directly` : 'third-party hosts'}
-            </small>
-          </div>
+        <section className="profile-glance" aria-label="Model summary">
+          <ModelSummary profile={profile} />
         </section>
       </div>
+
+      <ComparisonSummary profile={profile} />
+
+      <PeerHighlights profile={profile} />
 
       <section className="profile-card" aria-labelledby="facts-heading">
         <div className="profile-card-head">
@@ -297,6 +244,8 @@ export default function Overview({
           </ul>
         </section>
       )}
+
+      <Faq profile={profile} />
 
       <p className="profile-note">
         <Gauge size={16} aria-hidden="true" />
