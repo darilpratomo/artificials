@@ -29,7 +29,7 @@
 
 .brand-lockup .brand-mark {
   display: block;
-  /* The pixel matrix is square, unlike the previous 36x32 raster mark. */
+  /* A square box; the 40x35 matrix is centred inside it. */
   flex: 0 0 32px;
   width: 32px;
   height: 32px;

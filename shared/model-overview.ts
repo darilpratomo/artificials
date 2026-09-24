@@ -81,6 +81,25 @@ export interface Release {
   notable: boolean;
 }
 
+/** One release on the full timeline, with the detail a timeline entry shows. */
+export interface TimelineEntry extends Release {
+  maxOutput?: number;
+  inputPrice?: number;
+  outputPrice?: number;
+  priceFrom?: 'maker' | 'median';
+  knowledge?: string;
+  toolCall?: boolean;
+  structuredOutput?: boolean;
+  /** Epoch AI's record: developer, country, access and estimated training compute. */
+  record?: { organization?: string; country?: string; access?: string; trainingCompute?: number };
+}
+
+export interface Timeline {
+  version: 1;
+  updatedAt: string;
+  entries: TimelineEntry[];
+}
+
 export interface Highlight {
   id: string;
   title: string;
@@ -98,6 +117,31 @@ export interface Highlight {
   date?: string;
 }
 
+/** Shape of the market, over models from known makers (see `isNotable`). */
+export interface Market {
+  /** Models the shares below are measured over. */
+  base: number;
+  openWeights: number;
+  reasoning: number;
+  readsImages: number;
+  /** Median reference price among models with a paid listing, USD per 1M tokens, blended. */
+  medianPrice: number | null;
+  millionContext: number;
+  /** Releases in the 30 days up to the newest listing. */
+  recent: number;
+  makers: {
+    makerId: string;
+    maker: string;
+    models: number;
+    best?: { name: string; slug?: string; index: number };
+  }[];
+  widest: { slug: string; name: string; makerId: string; maker: string; hosts: number }[];
+  gap?: {
+    open: { name: string; slug?: string; makerId: string; index: number };
+    closed: { name: string; slug?: string; makerId: string; index: number };
+  };
+}
+
 export interface ModelOverview {
   version: 1;
   updatedAt: string;
@@ -110,6 +154,7 @@ export interface ModelOverview {
   metrics: Pick<OverviewTest, 'id' | 'label' | 'domain' | 'unit' | 'sourceId'>[];
   releases: Release[];
   highlights: Highlight[];
+  market: Market;
 }
 
 /** Every published test, loaded only when a chart or profile needs it. */
@@ -201,7 +246,7 @@ export function buildOverview(
   catalog: CatalogSnapshot,
   benchmarks: BenchmarkSnapshot,
   sources: ProfileBucket['sources'],
-): { overview: ModelOverview; tests: OverviewTests; explorer: Explorer } {
+): { overview: ModelOverview; tests: OverviewTests; explorer: Explorer; timeline: Timeline } {
   const bySlug = new Map(profiles.map((profile) => [profile.slug, profile]));
   const linked = (category: string, row: string) => {
     const slug = links[`${category}:${row}`];
@@ -313,6 +358,33 @@ export function buildOverview(
     seen.add(key);
     return true;
   });
+  const timelineOf = (profile: ModelProfile): TimelineEntry => {
+    const base = releaseOf(profile);
+    const price = referencePrice(profile);
+    const record = profile.facts;
+    return {
+      ...base,
+      ...(profile.maxOutput ? { maxOutput: profile.maxOutput } : {}),
+      ...(price
+        ? { inputPrice: price.input, outputPrice: price.output, priceFrom: price.from }
+        : {}),
+      ...(profile.knowledge ? { knowledge: profile.knowledge } : {}),
+      ...(profile.toolCall !== undefined ? { toolCall: profile.toolCall } : {}),
+      ...(profile.structuredOutput !== undefined
+        ? { structuredOutput: profile.structuredOutput }
+        : {}),
+      ...(record
+        ? {
+            record: {
+              ...(record.organization ? { organization: record.organization } : {}),
+              ...(record.country ? { country: record.country } : {}),
+              ...(record.access ? { access: record.access } : {}),
+              ...(record.trainingCompute ? { trainingCompute: record.trainingCompute } : {}),
+            },
+          }
+        : {}),
+    };
+  };
   const notable = unique.filter(isNotable).slice(0, 150);
   const others = unique.filter((profile) => !isNotable(profile)).slice(0, 60);
   const releases = [...notable, ...others]
@@ -441,6 +513,80 @@ export function buildOverview(
       date: newest.date,
     });
 
+  // Market shape, over models from known makers so one-host listings do not skew it.
+  const share = (count: number) => (known.length ? count / known.length : 0);
+  const prices = known
+    .map((profile) => referencePrice(profile)?.blended)
+    .filter((value): value is number => value !== undefined)
+    .sort((a, b) => a - b);
+  const newestDay = releases[0]?.date;
+  const makerCounts = new Map<string, { makerId: string; maker: string; models: number }>();
+  for (const profile of known) {
+    const entry = makerCounts.get(profile.makerId) ?? {
+      makerId: profile.makerId,
+      maker: profile.maker,
+      models: 0,
+    };
+    entry.models += 1;
+    makerCounts.set(profile.makerId, entry);
+  }
+  const bestOf = (makerId: string) => {
+    const point = index.find((entry) => entry.makerId === makerId);
+    return point
+      ? { name: point.name, ...(point.slug ? { slug: point.slug } : {}), index: point.index }
+      : undefined;
+  };
+  const closedLeader = index.find((point) => point.openWeights === false);
+  const market: Market = {
+    base: known.length,
+    openWeights: share(known.filter((profile) => profile.openWeights).length),
+    reasoning: share(known.filter((profile) => profile.reasoning).length),
+    readsImages: share(known.filter((profile) => profile.inputModalities.includes('image')).length),
+    medianPrice: prices.length ? round(prices[Math.floor((prices.length - 1) / 2)], 3) : null,
+    millionContext: known.filter((profile) => (profile.contextWindow ?? 0) >= 1_000_000).length,
+    recent: newestDay
+      ? releases.filter(
+          (release) =>
+            release.notable && Date.parse(newestDay) - Date.parse(release.date) < 30 * 86_400_000,
+        ).length
+      : 0,
+    makers: [...makerCounts.values()]
+      .sort((a, b) => b.models - a.models || a.maker.localeCompare(b.maker))
+      .slice(0, 12)
+      .map((entry) => {
+        const best = bestOf(entry.makerId);
+        return { ...entry, ...(best ? { best } : {}) };
+      }),
+    widest: [...known]
+      .sort((a, b) => b.offerings.length - a.offerings.length || a.slug.localeCompare(b.slug))
+      .slice(0, 10)
+      .map((profile) => ({
+        slug: profile.slug,
+        name: profile.name,
+        makerId: profile.makerId,
+        maker: profile.maker,
+        hosts: profile.offerings.length,
+      })),
+    ...(openLeader && closedLeader
+      ? {
+          gap: {
+            open: {
+              name: openLeader.name,
+              ...(openLeader.slug ? { slug: openLeader.slug } : {}),
+              makerId: openLeader.makerId,
+              index: openLeader.index,
+            },
+            closed: {
+              name: closedLeader.name,
+              ...(closedLeader.slug ? { slug: closedLeader.slug } : {}),
+              makerId: closedLeader.makerId,
+              index: closedLeader.index,
+            },
+          },
+        }
+      : {}),
+  };
+
   const flags = (profile: ModelProfile) =>
     (profile.openWeights ? FLAGS.openWeights : 0) |
     (profile.reasoning ? FLAGS.reasoning : 0) |
@@ -497,8 +643,10 @@ export function buildOverview(
       })),
       releases,
       highlights,
+      market,
     },
     tests: { version: 1, checkedAt, tests },
     explorer: { version: 1, updatedAt: catalog.updatedAt, models },
+    timeline: { version: 1, updatedAt: catalog.updatedAt, entries: unique.map(timelineOf) },
   };
 }

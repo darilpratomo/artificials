@@ -8,6 +8,7 @@ import type {
 } from '../../lib/profiles';
 import { DOMAINS, day, rankLabel, score, whole } from './format';
 import { DomainKey, Explainer, Meter, Sources } from './parts';
+import { ShareButton } from '../charts/ShareButton';
 
 function Detail({ result }: { result: ProfileResult }) {
   const parts = [`Setting: ${result.configuration}`];
@@ -121,11 +122,44 @@ export default function Performance({
 
   return (
     <div className="profile-panel-body">
-      <Explainer>
-        A benchmark is a standard test. Scores show the share of tasks solved. Each rank compares{' '}
-        {profile.name} with every model tested on the same benchmark, so ranks from different tests
-        are not added together.
-      </Explainer>
+      <div className="profile-intro-row">
+        <Explainer>
+          A benchmark is a standard test. Scores show the share of tasks solved. Each rank compares{' '}
+          {profile.name} with every model tested on the same benchmark, so ranks from different
+          tests are not added together.
+        </Explainer>
+        <ShareButton
+          title={`${profile.name}: test results`}
+          render={(tools) => {
+            const style = getComputedStyle(document.documentElement);
+            return tools.listImage(
+              {
+                title: `${profile.name}: test results`,
+                subtitle:
+                  'Best published score on each test, with its rank among every model tested on it.',
+                source: bucket.sources
+                  .filter((source) => source.id !== 'epoch-models')
+                  .map((source) => `${source.name} (${source.license})`)
+                  .join(', '),
+              },
+              groups.flatMap(({ categories }) =>
+                categories.map((category) => {
+                  const best = profile.results.find((result) => result.category === category.id)!;
+                  return {
+                    label: category.label,
+                    detail: `#${whole(best.rank)} of ${whole(best.total)} models tested`,
+                    value: score(best.score, category.unit),
+                    fraction: best.score / 100,
+                    color:
+                      style.getPropertyValue(`--domain-${DOMAINS[category.domain].token}`).trim() ||
+                      undefined,
+                  };
+                }),
+              ),
+            );
+          }}
+        />
+      </div>
 
       {index.length > 0 && indexInfo && (
         <section className="profile-card index-card" aria-labelledby="index-heading">

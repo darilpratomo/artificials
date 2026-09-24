@@ -5,6 +5,7 @@ import { Layout } from './components/Layout';
 import Home from './pages/Home';
 import Models from './pages/Models';
 import Leaderboard from './pages/Leaderboard';
+import Releases from './pages/Releases';
 import Compare from './pages/Compare';
 import Learn from './pages/Learn';
 import Tools from './pages/Tools';
@@ -24,6 +25,7 @@ export function renderPage(path: string, lesson?: Lesson, overview?: ModelOvervi
             <Route index element={<Home initial={overview} />} />
             <Route path="models" element={<Models />} />
             <Route path="leaderboard" element={<Leaderboard />} />
+            <Route path="releases" element={<Releases />} />
             <Route path="compare" element={<Compare />} />
             <Route path="news" element={<Learn />} />
             <Route path="news/:slug" element={<Learn />} />

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { makerLogo } from '../../../shared/makers';
 import { Select } from '../Select';
 import { FLAGS, useExplorer, type ExplorerRow } from '../../lib/overview';
@@ -23,6 +23,66 @@ const FILTERS: [number, string][] = [
   [FLAGS.imageInput, 'Reads images'],
 ];
 const PAGE = 25;
+
+/** Page numbers to offer: the first, the last, and the current page's neighbours. */
+function pageList(page: number, pages: number): (number | 'gap')[] {
+  const wanted = new Set([1, pages, page - 1, page, page + 1]);
+  const list: (number | 'gap')[] = [];
+  for (let value = 1; value <= pages; value += 1) {
+    if (!wanted.has(value)) continue;
+    const last = list.at(-1);
+    if (typeof last === 'number' && value - last > 1) list.push('gap');
+    list.push(value);
+  }
+  return list;
+}
+
+function Pager({
+  page,
+  pages,
+  onPage,
+}: {
+  page: number;
+  pages: number;
+  onPage: (page: number) => void;
+}) {
+  if (pages <= 1) return null;
+  return (
+    <nav className="pager" aria-label="Model list pages">
+      <button type="button" onClick={() => onPage(page - 1)} disabled={page === 1}>
+        <ChevronLeft size={17} aria-hidden="true" />
+        <span>Previous</span>
+      </button>
+      <ol>
+        {pageList(page, pages).map((item, index) =>
+          item === 'gap' ? (
+            <li key={`gap-${index}`} className="pager-gap" aria-hidden="true">
+              …
+            </li>
+          ) : (
+            <li key={item}>
+              <button
+                type="button"
+                aria-current={item === page ? 'page' : undefined}
+                aria-label={`Page ${item}`}
+                onClick={() => onPage(item)}
+              >
+                {item}
+              </button>
+            </li>
+          ),
+        )}
+      </ol>
+      <span className="pager-status" aria-hidden="true">
+        {page} / {pages}
+      </span>
+      <button type="button" onClick={() => onPage(page + 1)} disabled={page === pages}>
+        <span>Next</span>
+        <ChevronRight size={17} aria-hidden="true" />
+      </button>
+    </nav>
+  );
+}
 
 /** Nulls last, whatever the direction. */
 function by<T>(value: (row: ExplorerRow) => T | null, compare: (a: T, b: T) => number) {
@@ -74,7 +134,8 @@ export function ModelExplorer({ total }: { total: number }) {
   const [maker, setMaker] = useState('all');
   const [sort, setSort] = useState<Sort>('hosts');
   const [flags, setFlags] = useState(0);
-  const [shown, setShown] = useState(PAGE);
+  const [page, setPage] = useState(1);
+  const table = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const element = section.current;
@@ -112,7 +173,20 @@ export function ModelExplorer({ total }: { total: number }) {
       .sort((a, b) => SORTERS[sort](a, b) || a[1].localeCompare(b[1]));
   }, [data, query, maker, sort, flags]);
 
-  const reset = () => setShown(PAGE);
+  const reset = () => setPage(1);
+  const pages = Math.max(1, Math.ceil(rows.length / PAGE));
+  const current = Math.min(page, pages);
+  const first = (current - 1) * PAGE;
+  const turn = (next: number) => {
+    setPage(next);
+    // Bring the top of the list back into view, so the new page is what shows.
+    const top = table.current?.getBoundingClientRect().top ?? 0;
+    if (top < 80)
+      table.current?.scrollIntoView({
+        block: 'start',
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      });
+  };
   return (
     <div className="explorer" ref={section} onFocus={() => setWanted(true)}>
       <div className="explorer-controls">
@@ -159,20 +233,29 @@ export function ModelExplorer({ total }: { total: number }) {
           ))}
         </Select>
       </div>
-      <div className="explorer-filters" role="group" aria-label="Show only">
-        {FILTERS.map(([flag, label]) => (
-          <button
-            key={flag}
-            type="button"
-            aria-pressed={(flags & flag) === flag}
-            onClick={() => {
-              setFlags((value) => value ^ flag);
-              reset();
-            }}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="explorer-bar">
+        <div className="explorer-filters" role="group" aria-label="Show only">
+          {FILTERS.map(([flag, label]) => (
+            <button
+              key={flag}
+              type="button"
+              aria-pressed={(flags & flag) === flag}
+              onClick={() => {
+                setFlags((value) => value ^ flag);
+                reset();
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {data && (
+          <p className="explorer-count" role="status">
+            {rows.length === data.models.length
+              ? `${rows.length.toLocaleString('en-US')} models`
+              : `${rows.length.toLocaleString('en-US')} of ${data.models.length.toLocaleString('en-US')} models match`}
+          </p>
+        )}
       </div>
       {error ? (
         <div className="dash-state" role="alert">
@@ -187,12 +270,7 @@ export function ModelExplorer({ total }: { total: number }) {
         </div>
       ) : (
         <>
-          <p className="explorer-count" role="status">
-            {rows.length === data.models.length
-              ? `${rows.length.toLocaleString('en-US')} models`
-              : `${rows.length.toLocaleString('en-US')} of ${data.models.length.toLocaleString('en-US')} models match`}
-          </p>
-          <div className="explorer-table" role="table" aria-label="Models">
+          <div className="explorer-table" role="table" aria-label="Models" ref={table}>
             <div className="explorer-row explorer-head" role="row">
               <span role="columnheader">Model</span>
               <span role="columnheader">Released</span>
@@ -201,7 +279,7 @@ export function ModelExplorer({ total }: { total: number }) {
               <span role="columnheader">Index</span>
               <span role="columnheader">Hosts</span>
             </div>
-            {rows.slice(0, shown).map((row) => (
+            {rows.slice(first, first + PAGE).map((row) => (
               <div className="explorer-row" role="row" key={row[0]}>
                 <span role="cell" className="explorer-model">
                   <img src={makerLogo(row[2])} alt="" width="32" height="32" loading="lazy" />
@@ -233,19 +311,18 @@ export function ModelExplorer({ total }: { total: number }) {
               </p>
             )}
           </div>
+          <div className="explorer-foot">
+            <p>
+              {rows.length
+                ? `Showing ${(first + 1).toLocaleString('en-US')}–${Math.min(first + PAGE, rows.length).toLocaleString('en-US')} of ${rows.length.toLocaleString('en-US')}`
+                : ''}
+            </p>
+            <Pager page={current} pages={pages} onPage={turn} />
+          </div>
           <p className="explorer-note">
             Price is the maker’s own list price, or the middle price across hosts, blended as three
             input tokens for every output token. Index is the Epoch Capabilities Index.
           </p>
-          {rows.length > shown && (
-            <button
-              type="button"
-              className="btn btn-outline btn-small explorer-more"
-              onClick={() => setShown((value) => value + PAGE * 2)}
-            >
-              Show {Math.min(PAGE * 2, rows.length - shown)} more
-            </button>
-          )}
         </>
       )}
     </div>

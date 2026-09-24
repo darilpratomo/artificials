@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
-import type { Explorer, ModelOverview, OverviewTests } from '../../shared/model-overview';
+import type {
+  Explorer,
+  ModelOverview,
+  OverviewTests,
+  Timeline,
+} from '../../shared/model-overview';
 
 export type {
   Explorer,
@@ -11,6 +16,8 @@ export type {
   OverviewTests,
   Release,
   TestRow,
+  Timeline,
+  TimelineEntry,
 } from '../../shared/model-overview';
 export { FLAGS } from '../../shared/model-overview';
 
@@ -21,6 +28,7 @@ const loaded = new Map<string, unknown>();
 const isOverview = (value: ModelOverview) => value?.version === 1 && Array.isArray(value.index);
 const isTests = (value: OverviewTests) => value?.version === 1 && Array.isArray(value.tests);
 const isExplorer = (value: Explorer) => value?.version === 1 && Array.isArray(value.models);
+const isTimeline = (value: Timeline) => value?.version === 1 && Array.isArray(value.entries);
 
 /**
  * The prerendered home page carries its overview inline, so the first view
@@ -104,3 +112,9 @@ export function useTests(enabled: boolean, attempt = 0) {
 export function useExplorer(enabled: boolean, attempt = 0) {
   return useFile<Explorer>('explorer.json', isExplorer, enabled, attempt);
 }
+
+/** Every dated release with its details, for the release timeline page. */
+export function useTimeline(attempt = 0) {
+  return useFile<Timeline>('timeline.json', isTimeline, true, attempt);
+}
+

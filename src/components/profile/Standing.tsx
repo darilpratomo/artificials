@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { RankChart, type RankItem } from '../charts/RankChart';
 import { ScatterChart } from '../charts/ScatterChart';
+import { ShareButton } from '../charts/ShareButton';
 import { compactUsd } from '../charts/scale';
 import { useOverview } from '../../lib/overview';
 import type { ModelProfile } from '../../lib/profiles';
@@ -64,12 +65,34 @@ export function Standing({ profile }: { profile: ModelProfile }) {
   return (
     <>
       <section className="profile-card" aria-labelledby="neighbours-heading">
-        <div className="profile-card-head">
-          <h2 id="neighbours-heading">Nearby on the capability index</h2>
-          <p>
-            {profile.name} ranks #{position + 1} of {data!.index.length} models on the Epoch
-            Capabilities Index. These are the models just above and below it.
-          </p>
+        <div className="profile-card-head has-action">
+          <div>
+            <h2 id="neighbours-heading">Nearby on the capability index</h2>
+            <p>
+              {profile.name} ranks #{position + 1} of {data!.index.length} models on the Epoch
+              Capabilities Index. These are the models just above and below it.
+            </p>
+          </div>
+          <ShareButton
+            title={`${profile.name} on the capability index`}
+            render={(tools) =>
+              tools.rankImage(
+                {
+                  title: `${profile.name} on the capability index`,
+                  subtitle: `#${position + 1} of ${data!.index.length} models on the Epoch Capabilities Index, with the models ranked just above and below it.`,
+                  source: 'Epoch AI (CC BY 4.0)',
+                },
+                neighbours.map((item) => ({
+                  name: item.name,
+                  makerId: item.makerId,
+                  value: item.value,
+                  highlight: item.key === own.name,
+                })),
+                'index',
+                (value) => value.toFixed(1),
+              )
+            }
+          />
         </div>
         <RankChart
           items={neighbours}
@@ -81,15 +104,40 @@ export function Standing({ profile }: { profile: ModelProfile }) {
       </section>
       {own.price && (
         <section className="profile-card" aria-labelledby="value-heading">
-          <div className="profile-card-head">
-            <h2 id="value-heading">Score against price</h2>
-            <p>
-              {`Every model on the index with a listed price. Up and to the left is better value. At ${
-                own.price.from === 'maker'
-                  ? `${profile.maker || 'the maker'}’s own list price`
-                  : 'the middle price across hosts'
-              }, ${profile.name} costs ${price(own.price.blended)} per 1M tokens, blended three input tokens to one output token.`}
-            </p>
+          <div className="profile-card-head has-action">
+            <div>
+              <h2 id="value-heading">Score against price</h2>
+              <p>
+                {`Every model on the index with a listed price. Up and to the left is better value. At ${
+                  own.price.from === 'maker'
+                    ? `${profile.maker || 'the maker'}’s own list price`
+                    : 'the middle price across hosts'
+                }, ${profile.name} costs ${price(own.price.blended)} per 1M tokens, blended three input tokens to one output token.`}
+              </p>
+            </div>
+            <ShareButton
+              title={`${profile.name}: score against price`}
+              render={(tools) =>
+                tools.scatterImage(
+                  {
+                    title: `${profile.name}: score against price`,
+                    subtitle: `Capability index against blended list price per 1M tokens. ${profile.name} is highlighted.`,
+                    source: 'Epoch AI (CC BY 4.0) and models.dev (MIT)',
+                  },
+                  points.map((point) => ({
+                    name: point.name,
+                    makerId: point.makerId,
+                    maker: point.maker,
+                    x: point.x,
+                    y: point.y,
+                    highlight: point.key === own.name,
+                  })),
+                  PRICE_AXIS,
+                  INDEX_AXIS,
+                  { frontier: 'cheapest' },
+                )
+              }
+            />
           </div>
           <ScatterChart
             points={points}

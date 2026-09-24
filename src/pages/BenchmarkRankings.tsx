@@ -11,6 +11,7 @@ import { PageHeading } from '../components/Layout';
 import { DomainKey } from '../components/profile/parts';
 import { DOMAINS } from '../components/profile/format';
 import { makerLogo } from '../../shared/makers';
+import { ShareButton } from '../components/charts/ShareButton';
 import { loadProfileLinks, testLabel, type ProfileLinks } from '../lib/profiles';
 import '../domain-colors.css';
 
@@ -199,6 +200,27 @@ export default function BenchmarkRankings() {
                 <span role="status">
                   {rows.length} of {selected.rows.length} evaluated configurations
                 </span>
+                {rows.length > 0 && (
+                  <ShareButton
+                    title={`${testLabel(selected)}: top ${Math.min(rows.length, 25)}`}
+                    render={(tools) =>
+                      tools.rankImage(
+                        {
+                          title: `${testLabel(selected)}: top ${Math.min(rows.length, 25)}`,
+                          subtitle: selected.description,
+                          source: source ? `${source.name} (${source.license})` : 'published results',
+                        },
+                        rows.slice(0, 25).map((row) => ({
+                          name: nameOf(row.id)?.name ?? row.model,
+                          makerId: row.providerId,
+                          value: row.score,
+                        })),
+                        selected.unit === 'index' ? 'index' : 'percent',
+                        (value) => formatScore(value, selected),
+                      )
+                    }
+                  />
+                )}
               </div>
               <div className="benchmark-list" aria-label={`${testLabel(selected)} results`}>
                 <div className="benchmark-list-heading" aria-hidden="true">

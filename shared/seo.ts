@@ -28,6 +28,10 @@ const pages: Record<string, [string, string]> = {
     'AI model rankings and benchmarks',
     'Compare published AI benchmarks for coding, reasoning, mathematics, language, and image generation, with source and update information.',
   ],
+  '/releases': [
+    'AI model release timeline',
+    'Every AI model release, newest first: release dates, prices, context windows, capabilities and makers, updated automatically.',
+  ],
   '/compare': [
     'Compare AI models',
     'Compare AI model context windows, input and output pricing, capabilities, and provider specifications side by side.',
@@ -114,7 +118,7 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
         ? 'context'
         : 'engineering';
   const image =
-    SITE_URL + (article ? `/editorial/${kind}.webp` : '/editorial/hero-brand-pixel.webp');
+    SITE_URL + (article ? `/editorial/${kind}.webp` : '/editorial/hero-brand-orbit.webp');
   const structured = article
     ? {
         '@context': 'https://schema.org',
@@ -162,7 +166,7 @@ export function modelMetadata(model: ModelMetaInput | null, slug = model?.slug ?
       description:
         'This model is not in the Artificials catalog. Browse AI models by capability, price and provider.',
       canonical,
-      image: SITE_URL + '/editorial/hero-brand-pixel.webp',
+      image: SITE_URL + '/editorial/hero-brand-orbit.webp',
       known: false,
       robots: 'noindex,follow',
       type: 'website' as const,
@@ -174,7 +178,7 @@ export function modelMetadata(model: ModelMetaInput | null, slug = model?.slug ?
     title: `${model.name}: benchmarks, pricing and providers — Artificials`,
     description: `${model.name}${by}. ${model.hasResults ? 'How it ranks on benchmarks, ' : 'Capabilities, '}prices from ${hosts}, context window and a cost calculator. Updated automatically.`,
     canonical,
-    image: SITE_URL + '/editorial/hero-brand-pixel.webp',
+    image: SITE_URL + '/editorial/hero-brand-orbit.webp',
     known: true,
     robots: 'index,follow,max-image-preview:large',
     type: 'website' as const,

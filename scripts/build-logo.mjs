@@ -45,18 +45,29 @@ function runsOf(row) {
   return runs;
 }
 
-function markSvg(matrix, { color = '#ffffff', padding = 1 } = {}) {
+/**
+ * The mark is wider than it is tall, but icons and saved files are square, so
+ * the art is centred in a square of the longer side.
+ */
+function square(matrix) {
   const columns = matrix[0].length;
   const rows = matrix.length;
+  const side = Math.max(columns, rows);
+  return { side, offsetX: (side - columns) / 2, offsetY: (side - rows) / 2 };
+}
+
+function markSvg(matrix, { color = '#ffffff', padding = 1 } = {}) {
+  const { side, offsetX, offsetY } = square(matrix);
   const rects = matrix
     .flatMap((row, y) =>
       runsOf(row).map(
-        ([x, width]) => `<rect x="${x + padding}" y="${y + padding}" width="${width}" height="1"/>`,
+        ([x, width]) =>
+          `<rect x="${x + padding + offsetX}" y="${y + padding + offsetY}" width="${width}" height="1"/>`,
       ),
     )
     .join('');
-  const size = columns + padding * 2;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${rows + padding * 2}" width="${size * 32}" height="${(rows + padding * 2) * 32}" fill="${color}" shape-rendering="crispEdges" role="img" aria-label="Artificials"><title>Artificials</title>${rects}</svg>`;
+  const size = side + padding * 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size * 24}" height="${size * 24}" fill="${color}" shape-rendering="crispEdges" role="img" aria-label="Artificials"><title>Artificials</title>${rects}</svg>`;
 }
 
 function lockupSvg(matrix, { color = '#ffffff' } = {}) {
@@ -81,18 +92,18 @@ function lockupSvg(matrix, { color = '#ffffff' } = {}) {
  * vanish against a light tab strip.
  */
 function faviconSvg(matrix, { mark = '#f5f5f7', tile = '#0a0a0d' } = {}) {
-  const columns = matrix[0].length;
-  const rows = matrix.length;
-  const pad = 3;
-  const size = columns + pad * 2;
+  const { side, offsetX, offsetY } = square(matrix);
+  const pad = 4;
+  const size = side + pad * 2;
   const rects = matrix
     .flatMap((row, y) =>
       runsOf(row).map(
-        ([x, width]) => `<rect x="${x + pad}" y="${y + pad}" width="${width}" height="1"/>`,
+        ([x, width]) =>
+          `<rect x="${x + pad + offsetX}" y="${y + pad + offsetY}" width="${width}" height="1"/>`,
       ),
     )
     .join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${rows + pad * 2}"><rect width="${size}" height="${rows + pad * 2}" rx="6" fill="${tile}"/><g fill="${mark}" shape-rendering="crispEdges">${rects}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" rx="${Math.round(size * 0.2)}" fill="${tile}"/><g fill="${mark}" shape-rendering="crispEdges">${rects}</g></svg>`;
 }
 
 /* --- Minimal PNG writer: no dependency needed for flat pixel art. --- */
@@ -115,20 +126,24 @@ function chunk(type, data) {
   return Buffer.concat([head, data, tail]);
 }
 
-/** Renders the matrix as a transparent RGBA PNG at the requested pixel scale. */
+/**
+ * Renders the matrix as a square, transparent RGBA PNG at the requested pixel
+ * scale. The scale must be even when the art is centred on a half cell.
+ */
 function markPng(matrix, { scale, color = [255, 255, 255], padding = 1 } = {}) {
-  const columns = matrix[0].length + padding * 2;
-  const rows = matrix.length + padding * 2;
-  const width = columns * scale;
-  const height = rows * scale;
+  const { side, offsetX, offsetY } = square(matrix);
+  const width = (side + padding * 2) * scale;
+  const height = width;
+  const left = Math.round((padding + offsetX) * scale);
+  const top = Math.round((padding + offsetY) * scale);
   const raw = Buffer.alloc((width * 4 + 1) * height);
   let offset = 0;
   for (let y = 0; y < height; y += 1) {
     raw[offset] = 0; // No per-row filter; the art is flat.
     offset += 1;
-    const sourceRow = matrix[Math.floor(y / scale) - padding];
+    const sourceRow = y >= top ? matrix[Math.floor((y - top) / scale)] : undefined;
     for (let x = 0; x < width; x += 1) {
-      const column = Math.floor(x / scale) - padding;
+      const column = x >= left ? Math.floor((x - left) / scale) : -1;
       const on = sourceRow && sourceRow[column] === '1';
       raw[offset] = on ? color[0] : 0;
       raw[offset + 1] = on ? color[1] : 0;
@@ -156,12 +171,12 @@ await mkdir(OUT, { recursive: true });
 const files = [
   ['artificials-logo.svg', Buffer.from(markSvg(matrix))],
   ['artificials-lockup.svg', Buffer.from(lockupSvg(matrix))],
-  // 1024px for anyone saving the logo to reuse it at print size.
-  ['artificials-logo-large.png', markPng(matrix, { scale: 44 })],
+  // About 1000px for anyone saving the logo to reuse it at print size.
+  ['artificials-logo-large.png', markPng(matrix, { scale: 24 })],
   // The copy the page links for right-click saving. Pixel art has no detail to
   // lose, so a small file is indistinguishable and costs far fewer bytes.
-  ['artificials-logo.png', markPng(matrix, { scale: 11 })],
-  ['artificials-mark.png', markPng(matrix, { scale: 11 })],
+  ['artificials-logo.png', markPng(matrix, { scale: 6 })],
+  ['artificials-mark.png', markPng(matrix, { scale: 6 })],
 ];
 
 for (const [name, data] of files) {

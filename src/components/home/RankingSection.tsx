@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight, BarChart3, Table2 } from 'lucide-react';
 import { Select } from '../Select';
 import { RankChart, type RankItem } from '../charts/RankChart';
+import { ShareButton } from '../charts/ShareButton';
 import { useTests, type ModelOverview } from '../../lib/overview';
-import { DOMAINS, ago, day, price } from '../profile/format';
+import { DOMAINS, day, price } from '../profile/format';
 
 const INDEX = 'capability-index';
 const COUNTS = ['15', '25', '50', 'all'];
@@ -107,6 +108,30 @@ export function RankingSection({ overview }: { overview: ModelOverview }) {
             )}
             {table ? 'Show chart' : 'Show table'}
           </button>
+          {items.length > 0 && (
+            <ShareButton
+              title={`${title}: top ${Math.min(items.length, 30)} models`}
+              render={(tools) =>
+                tools.rankImage(
+                  {
+                    title: `${title}: top ${Math.min(items.length, 30)} models`,
+                    subtitle:
+                      metric === INDEX
+                        ? 'One score built from many tests. Higher is better.'
+                        : description,
+                    source: source ? `${source.name} (${source.license})` : 'published results',
+                  },
+                  items.map((item) => ({
+                    name: item.name,
+                    makerId: item.makerId,
+                    value: item.value,
+                  })),
+                  unit,
+                  format,
+                )
+              }
+            />
+          )}
         </div>
       </div>
       {metric === INDEX && (
@@ -186,7 +211,7 @@ export function RankingSection({ overview }: { overview: ModelOverview }) {
               <a href={source.url} target="_blank" rel="noopener noreferrer">
                 {source.name}
               </a>{' '}
-              ({source.license}), checked {ago(source.checkedAt)}.
+              ({source.license}).
             </>
           )}
         </p>

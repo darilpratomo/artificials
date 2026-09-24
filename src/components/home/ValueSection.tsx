@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart3, Table2 } from 'lucide-react';
 import { ScatterChart, type ScatterAxis, type ScatterPoint } from '../charts/ScatterChart';
+import { ShareButton } from '../charts/ShareButton';
 import { compactTokens, compactUsd, monthYear } from '../charts/scale';
-import type { IndexPoint } from '../../lib/overview';
+import type { IndexPoint, Release } from '../../lib/overview';
 import { day, price, tokens } from '../profile/format';
 
 type View = 'price' | 'date' | 'context';
@@ -32,7 +33,7 @@ const VIEWS: {
     id: 'date',
     tab: 'Release date',
     title: 'Capability index over time',
-    text: 'Each point is a model at its release. The line steps up each time a new model sets the highest score so far.',
+    text: 'Each point is a model at its release, once Epoch AI has published its score. The line steps up each time a new model sets the highest score so far. Rings along the bottom are newer releases still waiting for a score.',
     axis: { kind: 'time', label: 'Release date', format: monthYear },
     value: (point) => (point.releasedAt ? Date.parse(point.releasedAt) : undefined),
   },
@@ -47,7 +48,14 @@ const VIEWS: {
 ];
 
 /** Where each model sits on two measures at once. */
-export function ValueSection({ index }: { index: IndexPoint[] }) {
+export function ValueSection({
+  index,
+  releases = [],
+}: {
+  index: IndexPoint[];
+  /** Recent releases, so the time view can show models not scored yet. */
+  releases?: Release[];
+}) {
   const [view, setView] = useState<View>('price');
   const [openOnly, setOpenOnly] = useState(false);
   const [table, setTable] = useState(false);
@@ -75,6 +83,33 @@ export function ValueSection({ index }: { index: IndexPoint[] }) {
         })),
     [index, openOnly, current, view],
   );
+  // Releases since shortly before the newest scored model, not scored yet.
+  const pending = useMemo(() => {
+    if (view !== 'date') return [];
+    const scored = index
+      .map((point) => (point.releasedAt ? Date.parse(point.releasedAt) : 0))
+      .reduce((a, b) => Math.max(a, b), 0);
+    const seen = new Set(index.map((point) => point.slug).filter(Boolean));
+    return releases
+      .filter(
+        (release) =>
+          release.notable &&
+          release.index === undefined &&
+          !seen.has(release.slug) &&
+          (!openOnly || release.openWeights) &&
+          Date.parse(release.date) > scored - 30 * 86_400_000,
+      )
+      .slice(0, 48)
+      .map((release) => ({
+        key: `pending:${release.slug}`,
+        name: release.name,
+        makerId: release.makerId,
+        maker: release.maker,
+        x: Date.parse(release.date),
+        href: `/models/${release.slug}`,
+        details: [`Released ${day(release.date)}`],
+      }));
+  }, [view, index, releases, openOnly]);
   const y = useMemo(
     () => ({ label: 'Capability index', format: (value: number) => value.toFixed(0) }),
     [],
@@ -122,6 +157,31 @@ export function ValueSection({ index }: { index: IndexPoint[] }) {
             )}
             {table ? 'Show chart' : 'Show table'}
           </button>
+          <ShareButton
+            title={current.title}
+            render={(tools) =>
+              tools.scatterImage(
+                {
+                  title: current.title,
+                  subtitle: current.text,
+                  source:
+                    view === 'date'
+                      ? 'Epoch AI (CC BY 4.0)'
+                      : 'Epoch AI (CC BY 4.0) and models.dev (MIT)',
+                },
+                points.map((point) => ({
+                  name: point.name,
+                  makerId: point.makerId,
+                  maker: point.maker,
+                  x: point.x,
+                  y: point.y,
+                })),
+                current.axis,
+                y,
+                { frontier: frontier?.kind, quadrant: view === 'price', pending },
+              )
+            }
+          />
         </div>
       </div>
       <label className="dash-check">
@@ -173,6 +233,8 @@ export function ValueSection({ index }: { index: IndexPoint[] }) {
           y={y}
           frontier={frontier}
           quadrant={view === 'price' ? 'Above-median score, below-median price' : undefined}
+          pending={pending}
+          pendingLabel="Released, not scored yet"
           label={`${current.title}, ${points.length} models`}
         />
       )}

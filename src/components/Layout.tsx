@@ -115,6 +115,7 @@ export function Layout() {
   const links = [
     ['/models', 'Models'],
     ['/leaderboard', 'Rankings'],
+    ['/releases', 'Releases'],
     ['/compare', 'Compare'],
     ['/news', 'Insights'],
     ['/learn', 'Learn AI'],
@@ -252,6 +253,7 @@ export function Layout() {
             <h3>Intelligence</h3>
             <Link to="/models">Model directory</Link>
             <Link to="/leaderboard">Model rankings</Link>
+            <Link to="/releases">Model releases</Link>
             <Link to="/compare">Compare models</Link>
             <Link to="/news">Insights & guides</Link>
             <Link to="/learn">Learn AI</Link>

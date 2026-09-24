@@ -84,6 +84,16 @@ test('a tested model shows its standing, prices and every analysis tab', async (
   expect(errors).toEqual([]);
 });
 
+test('a profile lists its full specifications and research record', async ({ page }) => {
+  await page.goto('/models/claude-opus-5-5');
+  const specs = page.locator('section:has(#specs-heading)');
+  await expect(specs.locator('.spec-group')).toHaveCount(5);
+  await expect(specs).toContainText('API model ID');
+  await expect(specs).toContainText('Max output');
+  await expect(specs).toContainText('Tool calling');
+  await expect(page.getByRole('button', { name: /specifications" as an image/ })).toBeVisible();
+});
+
 test('the profile passes automated accessibility checks', async ({ page }) => {
   const [slug] = (await directory(page)).find((entry) => entry[4] === 1)!;
   await page.goto(`/models/${slug}`);

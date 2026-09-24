@@ -10,7 +10,7 @@ const KIND: Record<Highlight['kind'], string> = {
   derived: 'Calculated',
 };
 
-function value(highlight: Highlight) {
+export function highlightValue(highlight: Highlight) {
   switch (highlight.unit) {
     case 'index':
       return highlight.value.toFixed(1);
@@ -48,7 +48,7 @@ export function Highlights({ items }: { items: Highlight[] }) {
               {item.maker && <span>{item.maker}</span>}
             </div>
           </div>
-          <p className="highlight-value">{value(item)}</p>
+          <p className="highlight-value">{highlightValue(item)}</p>
           <p className="highlight-detail">
             <span>{item.detail}</span>
             <span className={`highlight-kind kind-${item.kind}`}>{KIND[item.kind]}</span>

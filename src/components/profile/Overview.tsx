@@ -22,6 +22,8 @@ import {
 } from './format';
 import { DomainKey, Meter, Sources } from './parts';
 import { ResearchRecord, Standing } from './Standing';
+import { Specs } from './Specs';
+import { ShareButton } from '../charts/ShareButton';
 
 export type ProfileTab = 'overview' | 'performance' | 'pricing' | 'providers' | 'tokens';
 
@@ -98,11 +100,45 @@ export default function Overview({
     <div className="profile-panel-body">
       <div className="profile-overview-grid">
         <section className="profile-card profile-skills" aria-labelledby="skills-heading">
-          <div className="profile-card-head">
-            <h2 id="skills-heading">Where it stands</h2>
-            <p>
-              Its rank among all models tested on each benchmark. A longer bar means a better rank.
-            </p>
+          <div className="profile-card-head has-action">
+            <div>
+              <h2 id="skills-heading">Where it stands</h2>
+              <p>
+                Its rank among all models tested on each benchmark. A longer bar means a better
+                rank.
+              </p>
+            </div>
+            {areas.length > 0 && (
+              <ShareButton
+                title={`${profile.name}: where it stands`}
+                render={(tools) => {
+                  const style = getComputedStyle(document.documentElement);
+                  return tools.listImage(
+                    {
+                      title: `${profile.name}: where it stands`,
+                      subtitle:
+                        'Rank among all models tested on each benchmark. A longer bar means a better rank.',
+                      source: bucket.sources
+                        .filter((source) => source.id !== 'epoch-models')
+                        .map((source) => `${source.name} (${source.license})`)
+                        .join(', '),
+                    },
+                    areas.map(({ domain, result }) => {
+                      const info = category(result!.category)!;
+                      return {
+                        label: DOMAINS[domain].label,
+                        detail: `${info.label}: ${score(result!.score, info.unit)}`,
+                        value: rankLabel(result!.rank, result!.total),
+                        fraction: standing(result!.rank, result!.total) / 100,
+                        color:
+                          style.getPropertyValue(`--domain-${DOMAINS[domain].token}`).trim() ||
+                          undefined,
+                      };
+                    }),
+                  );
+                }}
+              />
+            )}
           </div>
           {areas.length ? (
             <>
@@ -228,6 +264,8 @@ export default function Overview({
           ))}
         </ul>
       </section>
+
+      <Specs profile={profile} />
 
       <ResearchRecord profile={profile} />
 

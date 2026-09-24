@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ChevronDown } from 'lucide-react';
 import { makerLogo } from '../../../shared/makers';
 import type { Release } from '../../lib/overview';
 import { day, price, tokens } from '../profile/format';
@@ -101,12 +102,9 @@ export function ReleaseTimeline({ releases }: { releases: Release[] }) {
         ))}
       </ol>
       {list.length > shown && (
-        <button
-          type="button"
-          className="btn btn-outline btn-small timeline-more"
-          onClick={() => setShown((value) => value + 15)}
-        >
-          Show more releases
+        <button type="button" className="dash-more" onClick={() => setShown((value) => value + 15)}>
+          Show {Math.min(15, list.length - shown)} more releases
+          <ChevronDown size={17} aria-hidden="true" />
         </button>
       )}
     </div>

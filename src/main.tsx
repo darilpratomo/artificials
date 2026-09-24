@@ -11,6 +11,7 @@ const Models = lazy(() => import('./pages/Models'));
 const ModelProfile = lazy(() => import('./pages/ModelProfile'));
 const Compare = lazy(() => import('./pages/Compare'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
+const Releases = lazy(() => import('./pages/Releases'));
 const Academy = lazy(() => import('./pages/Academy'));
 const AcademyLesson = lazy(() => import('./pages/AcademyLesson'));
 const Learn = lazy(() => import('./pages/Learn'));
@@ -54,6 +55,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="models" element={<Models />} />
               <Route path="models/:slug" element={<ModelProfile />} />
               <Route path="leaderboard" element={<Leaderboard />} />
+              <Route path="releases" element={<Releases />} />
               <Route path="compare" element={<Compare />} />
               <Route path="learn" element={<Academy />} />
               <Route path="learn/:slug" element={<AcademyLesson />} />

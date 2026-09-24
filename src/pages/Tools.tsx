@@ -229,8 +229,8 @@ export default function Tools() {
             or contents to analytics. Clear the workspace when you finish. Downloads remain wherever
             you save them.
           </p>
-          <Link to="/privacy">
-            How privacy works <ArrowRight size={14} />
+          <Link className="text-link" to="/privacy">
+            How privacy works <ArrowRight size={14} aria-hidden="true" />
           </Link>
         </div>
       </section>

@@ -86,7 +86,14 @@ const names = Object.fromEntries(
   ]),
 );
 await writeFile(resolve(staging, 'links.json'), JSON.stringify({ rows: links, names }) + '\n');
-const { overview, tests, explorer } = buildOverview(profiles, links, catalog, benchmarks, sources);
+const { overview, tests, explorer, timeline } = buildOverview(
+  profiles,
+  links,
+  catalog,
+  benchmarks,
+  sources,
+);
+await writeFile(resolve(staging, 'timeline.json'), JSON.stringify(timeline) + '\n');
 await writeFile(resolve(staging, 'overview.json'), JSON.stringify(overview) + '\n');
 await writeFile(resolve(staging, 'tests.json'), JSON.stringify(tests) + '\n');
 await writeFile(resolve(staging, 'explorer.json'), JSON.stringify(explorer) + '\n');

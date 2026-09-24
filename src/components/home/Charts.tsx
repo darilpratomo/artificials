@@ -2,3 +2,4 @@
 export { RankingSection } from './RankingSection';
 export { ValueSection } from './ValueSection';
 export { ModelExplorer } from './ModelExplorer';
+export { MarketSection } from './MarketSection';

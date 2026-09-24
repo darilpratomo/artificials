@@ -403,3 +403,38 @@ a.rank-hit:focus-visible {
     transition: none;
   }
 }
+
+/* Download-as-image control; matches the other chart controls. */
+.share-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #373d49;
+  border-radius: 10px;
+  background: #171a21;
+  color: #e5e8ee;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.share-button:hover:not(:disabled) {
+  background: #20242d;
+}
+.share-button:disabled {
+  opacity: 0.7;
+}
+
+/* Models placed by date only, still waiting for a score. */
+.scatter-frame .scatter-pending {
+  fill: #0b0c0f;
+  stroke-width: 2;
+}
+.chart-legend .legend-pending i {
+  width: 11px;
+  height: 11px;
+  border: 2px solid #c9ccd4;
+  border-radius: 50%;
+  background: transparent;
+}

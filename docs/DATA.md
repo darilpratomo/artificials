@@ -222,6 +222,8 @@ The home page is built from three more generated files in `public/data/models/`:
   picks a single test in the ranking chart.
 - `explorer.json`: one row per model for search and the full list. Loaded when the list comes
   near the screen or the search box is used.
+- `timeline.json` (about 66 KB compressed): every dated release with its prices, limits,
+  capabilities and research record, for the release timeline page at `/releases`.
 
 Definitions, all calculated by Artificials:
 
@@ -238,6 +240,21 @@ Definitions, all calculated by Artificials:
 - Releases: dated profiles up to the snapshot day, newest first. Aliases of one release (same
   maker, name and day) collapse into the most-hosted one. "Known makers" shows models whose maker
   is identified and that the maker sells, several hosts list, or a test covers.
+- Waiting for a score: the time chart places only models on the capability index. Known-maker
+  releases from about a month before the newest scored model onward, without a score yet, are
+  drawn as rings along the time axis, so a new release is visible before any test covers it.
+- Market: shares (open weights, reasoning, image input), the median reference price, models with
+  a million-token context and releases in the last 30 days, all over known-maker models; makers
+  with the most models and their best index score; the most widely hosted models; and the gap
+  between the best closed and best open-weights model on the index.
+
+Every chart has a "Download image" button. The image is redrawn on a canvas from the same data
+(`src/components/charts/share-image.ts`, loaded on first use), 1600 pixels wide, with the
+Artificials pixel mark and wordmark, a faint watermark, `artificials.net` and a data credit line
+that the sources' licences require. Phones get the share sheet; other devices get a download.
+
+The home page shows no last-updated time; charts credit their data source beside them. Check
+times remain on the rankings page and each model's "Sources and method".
 
 Everything refreshes with the six-hourly workflow: a new model appears in the timeline as soon as
 the catalog lists it, and its scores follow once a test covers it. No step needs manual input.

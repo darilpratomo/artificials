@@ -419,3 +419,54 @@ describe('home overview', () => {
     expect(explorer.models).toHaveLength(profiles.length);
   });
 });
+
+describe('market and timeline', () => {
+  const rich = {
+    ...catalog,
+    models: [
+      ...catalog.models,
+      offer('anthropic', 'claude-test-1-fast', 6, 30, {
+        family: 'claude-test',
+        lastUpdated: '2026-02-01',
+        attachment: true,
+        temperature: false,
+        reasoningToggle: true,
+        maxInput: 150000,
+        contextWindow: 1_000_000,
+      }),
+    ],
+  };
+  const { profiles, links } = buildProfiles(rich, benchmarks);
+  const { overview, timeline } = buildOverview(profiles, links, rich, benchmarks, []);
+
+  it('carries every reported detail into the profile', () => {
+    const fast = profiles.find((profile) => profile.slug === 'claude-test-1-fast')!;
+    expect(fast).toMatchObject({
+      family: 'claude-test',
+      lastUpdated: '2026-02-01',
+      attachment: true,
+      temperature: false,
+      reasoningToggle: true,
+      maxInput: 150000,
+    });
+  });
+
+  it('measures the market over models from known makers only', () => {
+    const { market } = overview;
+    // Qwen3 has one host and no maker listing, so it is not counted.
+    expect(market.base).toBe(3);
+    expect(market.millionContext).toBe(1);
+    expect(market.makers[0]).toMatchObject({ makerId: 'anthropic', models: 3 });
+    expect(market.makers[0].best).toMatchObject({ slug: 'claude-test-1', index: 150 });
+    expect(market.widest[0]).toMatchObject({ slug: 'claude-test-1', hosts: 5 });
+    // Blended prices 6, 10 and 12: the middle one.
+    expect(market.medianPrice).toBe(10);
+  });
+
+  it('lists every dated release on the timeline with its details', () => {
+    expect(timeline.entries.length).toBeGreaterThanOrEqual(overview.releases.length);
+    const entry = timeline.entries.find((item) => item.slug === 'claude-test-1')!;
+    expect(entry).toMatchObject({ inputPrice: 3, outputPrice: 15, priceFrom: 'maker' });
+    expect(timeline.entries.every((item) => item.date <= rich.updatedAt.slice(0, 10))).toBe(true);
+  });
+});

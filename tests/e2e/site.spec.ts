@@ -174,6 +174,16 @@ test('home navigation, responsive layout, and private CMS discovery', async ({
   await page.screenshot({ path: `test-results/home-${testInfo.project.name}.png`, fullPage: true });
   await page.locator('footer').getByRole('link', { name: 'Model directory', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Find your next model.' })).toBeVisible();
+  // The arrow opens the model's own page; the listing source has its own GitHub button.
+  const card = page.locator('.model-card').first();
+  await expect(card.getByRole('link', { name: /details$/ })).toHaveAttribute(
+    'href',
+    /^\/models\/[a-z0-9-]+$/,
+  );
+  await expect(card.getByRole('link', { name: /listing source on GitHub$/ })).toHaveAttribute(
+    'target',
+    '_blank',
+  );
   await expect(page.locator('.model-card')).toHaveCount(24);
   await expectFitsViewport(page);
   expect(errors).toEqual([]);

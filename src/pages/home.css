@@ -28,13 +28,13 @@
   font-size: 14px;
 }
 .home-page .hero-label {
-  font-size: 11px;
+  font-size: 12px;
 }
 .home-page .hero-edition {
-  font-size: 10.5px;
+  font-size: 12px;
 }
 .home-page .hero-bottom {
-  font-size: 10.5px;
+  font-size: 12px;
 }
 
 @media (max-width: 760px) {
@@ -62,7 +62,7 @@
     padding-top: 30px;
   }
   .home-page .hero-label {
-    font-size: 9.5px;
+    font-size: 12px;
     letter-spacing: 0.05em;
   }
   .home-page .hero-edition {

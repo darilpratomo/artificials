@@ -4,10 +4,11 @@ import { ArrowDown, ArrowUpRight, BarChart3, GitCompareArrows } from 'lucide-rea
 import { makerLogo } from '../../shared/makers';
 import { ARTICLES } from '../../shared/content';
 import { ArticleCover } from '../components/ArticleCover';
-import { Highlights } from '../components/home/Highlights';
+import { Highlights, highlightValue } from '../components/home/Highlights';
+import { ShareButton } from '../components/charts/ShareButton';
 import { ModelSearch } from '../components/home/ModelSearch';
 import { ReleaseTimeline } from '../components/home/ReleaseTimeline';
-import { ago, day } from '../components/profile/format';
+import { day } from '../components/profile/format';
 import { useOverview, type ModelOverview } from '../lib/overview';
 import '../components/home/dashboard.css';
 import './home.css';
@@ -17,6 +18,7 @@ const charts = () => import('../components/home/Charts');
 const RankingSection = lazy(() => charts().then((module) => ({ default: module.RankingSection })));
 const ValueSection = lazy(() => charts().then((module) => ({ default: module.ValueSection })));
 const ModelExplorer = lazy(() => charts().then((module) => ({ default: module.ModelExplorer })));
+const MarketSection = lazy(() => charts().then((module) => ({ default: module.MarketSection })));
 
 function Pending({ tall = false }: { tall?: boolean }) {
   return (
@@ -31,6 +33,7 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
   const { data, error } = useOverview(attempt, initial);
   const leader = data?.index[0];
   const newest = data?.releases.find((release) => release.notable);
+  const openLeader = data?.index.find((point) => point.openWeights);
   const total = data?.counts.models ?? 0;
 
   return (
@@ -40,12 +43,12 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
           <picture>
             <source
               media="(max-width: 760px)"
-              srcSet="/editorial/hero-brand-mobile-pixel-small.webp 640w, /editorial/hero-brand-mobile-pixel.webp 1024w"
+              srcSet="/editorial/hero-brand-mobile-orbit-small.webp 640w, /editorial/hero-brand-mobile-orbit.webp 1024w"
               sizes="100vw"
             />
             <img
-              src="/editorial/hero-brand-pixel.webp"
-              srcSet="/editorial/hero-brand-pixel-small.webp 960w, /editorial/hero-brand-pixel.webp 1920w"
+              src="/editorial/hero-brand-orbit.webp"
+              srcSet="/editorial/hero-brand-orbit-small.webp 960w, /editorial/hero-brand-orbit.webp 1920w"
               sizes="100vw"
               width="1920"
               height="820"
@@ -58,7 +61,7 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
           <div className="hero-grid" aria-hidden="true" />
           <div className="hero-label mono">
             <span className="signal-light" /> A LITTLE CURIOSITY GOES A LONG WAY
-            <span className="hero-edition">UPDATED EVERY SIX HOURS</span>
+            <span className="hero-edition">MODELS / SCORES / PRICES</span>
           </div>
           <div className="signal-copy">
             <h1>
@@ -140,11 +143,16 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
                 )}
               </div>
               <div>
-                <span>Last checked</span>
-                {data ? (
+                <span>Best open-weights model</span>
+                {openLeader ? (
                   <p>
-                    <strong>{ago(data.checkedAt)}</strong>
-                    <b>Refreshed automatically</b>
+                    <img src={makerLogo(openLeader.makerId)} alt="" width="28" height="28" />
+                    {openLeader.slug ? (
+                      <Link to={`/models/${openLeader.slug}`}>{openLeader.name}</Link>
+                    ) : (
+                      <strong>{openLeader.name}</strong>
+                    )}
+                    <b>{openLeader.index.toFixed(1)}</b>
                   </p>
                 ) : (
                   <p className="live-pending">Loading…</p>
@@ -155,11 +163,34 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
 
           <section id="leaders" className="dash-section container" aria-labelledby="leaders-title">
             <header className="dash-heading">
-              <h2 id="leaders-title">Leaders right now</h2>
-              <p>
-                The top model on each test, from published results. Every card names the test behind
-                it.
-              </p>
+              <div>
+                <h2 id="leaders-title">Leaders right now</h2>
+                <p>
+                  The top model on each test, from published results. Every card names the test
+                  behind it.
+                </p>
+              </div>
+              {data && (
+                <ShareButton
+                  title="AI model leaders"
+                  render={(tools) =>
+                    tools.listImage(
+                      {
+                        title: 'AI model leaders',
+                        subtitle: 'The top model on each test, from published results.',
+                        source:
+                          'Epoch AI (CC BY 4.0), LiveBench (Apache-2.0), T2I-CoReBench (CC BY-SA 4.0), models.dev (MIT)',
+                      },
+                      data.highlights.map((item) => ({
+                        label: item.title,
+                        detail: `${item.name}${item.maker ? `, ${item.maker}` : ''}. ${item.detail}`,
+                        value: highlightValue(item),
+                        makerId: item.makerId,
+                      })),
+                    )
+                  }
+                />
+              )}
             </header>
             {data ? <Highlights items={data.highlights} /> : <Pending />}
           </section>
@@ -190,7 +221,24 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
               </p>
             </header>
             <Suspense fallback={<Pending tall />}>
-              {data ? <ValueSection index={data.index} /> : <Pending tall />}
+              {data ? (
+                <ValueSection index={data.index} releases={data.releases} />
+              ) : (
+                <Pending tall />
+              )}
+            </Suspense>
+          </section>
+
+          <section id="market" className="dash-section container" aria-labelledby="market-title">
+            <header className="dash-heading">
+              <h2 id="market-title">The AI model market</h2>
+              <p>
+                What today’s models can do, what they cost, who makes the most of them and which
+                ones you can buy almost anywhere.
+              </p>
+            </header>
+            <Suspense fallback={<Pending tall />}>
+              {data ? <MarketSection overview={data} /> : <Pending tall />}
             </Suspense>
           </section>
 
@@ -200,11 +248,16 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
             aria-labelledby="releases-title"
           >
             <header className="dash-heading">
-              <h2 id="releases-title">New releases</h2>
-              <p>
-                New models appear here as soon as the catalog lists them. Test scores follow once a
-                test covers the model.
-              </p>
+              <div>
+                <h2 id="releases-title">New releases</h2>
+                <p>
+                  New models appear here as soon as the catalog lists them. Test scores follow once
+                  a test covers the model.
+                </p>
+              </div>
+              <Link className="text-link" to="/releases">
+                Full release timeline <ArrowUpRight size={15} aria-hidden="true" />
+              </Link>
             </header>
             {data ? <ReleaseTimeline releases={data.releases} /> : <Pending />}
           </section>
@@ -249,49 +302,6 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
             ))}
         </div>
       </section>
-
-      {data && (
-        <section className="container dash-method" aria-label="Sources and method">
-          <details>
-            <summary>Sources and method</summary>
-            <div>
-              <p>
-                Artificials groups every listing of a model into one page, links published test
-                results to it, and calculates the rankings, highlights and charts shown here. The
-                data refreshes automatically every six hours. The catalog was last checked{' '}
-                {ago(data.updatedAt)} and test results {ago(data.checkedAt)}.
-              </p>
-              <ul>
-                <li>
-                  Specifications, prices and release dates:{' '}
-                  <a href={data.catalog.sourceUrl} target="_blank" rel="noopener noreferrer">
-                    {data.catalog.source}
-                  </a>{' '}
-                  ({data.catalog.license}).
-                </li>
-                {data.sources.map((source) => (
-                  <li key={source.id}>
-                    {source.id === 'epoch-models' ? 'Model records: ' : 'Test results: '}
-                    <a href={source.url} target="_blank" rel="noopener noreferrer">
-                      {source.name}
-                    </a>{' '}
-                    (
-                    <a href={source.licenseUrl} target="_blank" rel="noopener noreferrer">
-                      {source.license}
-                    </a>
-                    ).
-                  </li>
-                ))}
-              </ul>
-              <p>
-                <Link to="/about#source-methodology">Data and methodology</Link>
-                {' · '}
-                <a href="/data/benchmark-NOTICE.txt">Data credits</a>
-              </p>
-            </div>
-          </details>
-        </section>
-      )}
     </div>
   );
 }

@@ -67,3 +67,22 @@ Final assets: `public/editorial/hero-brand-pixel.webp` (1920×820), `hero-brand-
 Desktop prompt: Replace ONLY the old metallic cursive A emblem on the upper front of the supplied planet with the exact pixel-art helmet/robot-head silhouette from the supplied new logo. Preserve its stepped square geometry, horizontal dark visor and symmetrical face details. Render subtle silver metal inlaid into the planet, with shallow bevels matching the lighting and spherical perspective, in the same location and footprint. Remove the A completely. Preserve the panoramic composition, planet on the right, dark left negative space for HTML, rings, clouds, rocks, stars and lighting. No lettering, watermark or new objects.
 
 Mobile prompt: Edit only the supplied portrait planet at 1024×1536. Replace the old A with the supplied pixel robot head. Use the approved desktop edit as a reference for silver treatment only, not composition. Preserve the exact stepped silhouette, visor and details as shallow silver inlay in the same footprint; no flat white sticker or black square. Remove the A completely. Preserve the full-bleed portrait composition, generous dark starry upper half for HTML, lower centered planet, rings, dust, rocks and monochrome palette. No sidebars, text or watermark.
+
+## Four-part pixel mark planet (24 September 2026)
+
+The owner replaced the helmet mark with a new 40×35 pixel matrix (`src/components/logo-matrix.ts`).
+The hero now uses `hero-brand-orbit.webp` (1920×820), `hero-brand-orbit-small.webp` (960×410),
+`hero-brand-mobile-orbit.webp` (1024×1536) and `hero-brand-mobile-orbit-small.webp` (640×960).
+They are built by `python3 scripts/build-hero-logo.py` with ImageMagick and cwebp (quality 82), not
+with an image generator, so they can be rebuilt whenever the matrix changes.
+
+- Desktop starts from the clean original planet, `hero-banner.webp`, with no earlier mark.
+- The portrait scene has no clean original. The helmet is filled in from its surroundings (a
+  normalised blur of the nearby surface with fine grain), then the new mark is set on top.
+- The mark is drawn from the matrix as a shallow silver inlay: a screened silver fill, a bevel lit
+  from the upper right like the planet itself, and a soft contact shadow. Placement, size and
+  foreshortening match the helmet's measured footprint (centre 1390,216 at 190px wide on desktop;
+  505,712 at 176px wide on the portrait; vertical scale 0.58 and 0.61 for the sphere's curvature).
+
+The earlier `hero-brand-pixel*` files were removed. Favicon and brand downloads come from the same
+matrix through `node scripts/build-logo.mjs`.

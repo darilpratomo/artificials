@@ -26,6 +26,9 @@ export interface ProfileOffering {
   outputPrice: number | null;
   cacheReadPrice?: number;
   cacheWritePrice?: number;
+  reasoningPrice?: number;
+  audioInputPrice?: number;
+  audioOutputPrice?: number;
   contextWindow: number | null;
   maxOutput?: number;
   status?: string;
@@ -95,6 +98,19 @@ export interface ModelProfile {
   toolCall?: boolean;
   structuredOutput?: boolean;
   reasoningEfforts?: string[];
+  /** Model family as the catalog groups it, such as "claude-opus". */
+  family?: string;
+  /** Most recent catalog update to any listing, YYYY-MM-DD. */
+  lastUpdated?: string;
+  maxInput?: number;
+  /** Accepts file attachments. */
+  attachment?: boolean;
+  /** Supports the temperature setting. */
+  temperature?: boolean;
+  /** Reasoning can be switched on and off. */
+  reasoningToggle?: boolean;
+  /** A thinking budget can be set. */
+  reasoningBudget?: boolean;
   /** The maker's own listing, when the maker also sells access directly. */
   official?: string;
   offerings: ProfileOffering[];
@@ -420,6 +436,11 @@ export function buildProfiles(
         outputPrice: offer.outputPrice,
         ...(offer.cacheReadPrice !== undefined ? { cacheReadPrice: offer.cacheReadPrice } : {}),
         ...(offer.cacheWritePrice !== undefined ? { cacheWritePrice: offer.cacheWritePrice } : {}),
+        ...(offer.reasoningPrice !== undefined ? { reasoningPrice: offer.reasoningPrice } : {}),
+        ...(offer.audioInputPrice !== undefined ? { audioInputPrice: offer.audioInputPrice } : {}),
+        ...(offer.audioOutputPrice !== undefined
+          ? { audioOutputPrice: offer.audioOutputPrice }
+          : {}),
         contextWindow: offer.contextWindow,
         ...(offer.maxOutput !== undefined ? { maxOutput: offer.maxOutput } : {}),
         ...(offer.status ? { status: offer.status } : {}),
@@ -479,6 +500,28 @@ export function buildProfiles(
         : {}),
       ...(pick((offer) => offer.reasoningEfforts?.join(','))
         ? { reasoningEfforts: pick((offer) => offer.reasoningEfforts?.join(','))!.split(',') }
+        : {}),
+      ...(pick((offer) => offer.family) ? { family: pick((offer) => offer.family)! } : {}),
+      ...(offers.some((offer) => offer.lastUpdated)
+        ? {
+            lastUpdated: offers
+              .map((offer) => offer.lastUpdated ?? '')
+              .sort()
+              .at(-1)!,
+          }
+        : {}),
+      ...(pick((offer) => offer.maxInput) ? { maxInput: pick((offer) => offer.maxInput)! } : {}),
+      ...(pick((offer) => offer.attachment) !== undefined
+        ? { attachment: pick((offer) => offer.attachment)! }
+        : {}),
+      ...(pick((offer) => offer.temperature) !== undefined
+        ? { temperature: pick((offer) => offer.temperature)! }
+        : {}),
+      ...(pick((offer) => offer.reasoningToggle) !== undefined
+        ? { reasoningToggle: pick((offer) => offer.reasoningToggle)! }
+        : {}),
+      ...(pick((offer) => offer.reasoningBudget) !== undefined
+        ? { reasoningBudget: pick((offer) => offer.reasoningBudget)! }
         : {}),
       ...(official ? { official: official.id } : {}),
       offerings,

@@ -28,9 +28,13 @@ function median(values: number[]) {
   return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
 }
 
+/** A model without a y value yet, such as a release that has not been scored. */
+export type PendingPoint = Omit<ScatterPoint, 'y'>;
+
 interface Placed extends ScatterPoint {
   px: number;
   py: number;
+  pending?: boolean;
 }
 
 /**
@@ -50,8 +54,13 @@ export function ScatterChart({
   quadrant,
   highlight,
   label,
+  pending = [],
+  pendingLabel = 'Not scored yet',
 }: {
   points: ScatterPoint[];
+  /** Shown as hollow rings along the bottom of the plot, placed by x only. */
+  pending?: PendingPoint[];
+  pendingLabel?: string;
   x: ScatterAxis;
   y: { label: string; format: (value: number) => string };
   frontier?: { kind: 'cheapest' | 'record'; label: string };
@@ -75,7 +84,8 @@ export function ScatterChart({
     if (!points.length || !width) return null;
     const xs = points.map((point) => point.x);
     const ys = points.map((point) => point.y);
-    let [x0, x1] = [Math.min(...xs), Math.max(...xs)];
+    const allX = [...xs, ...pending.map((point) => point.x)];
+    let [x0, x1] = [Math.min(...allX), Math.max(...allX)];
     if (x.kind === 'log') [x0, x1] = [x0 / 1.4, x1 * 1.4];
     else {
       const pad = (x1 - x0) * 0.04 || 1;
@@ -101,6 +111,17 @@ export function ScatterChart({
       px: sx(point.x),
       py: sy(point.y),
     }));
+    // Unscored models sit on a row just above the x axis, in two staggered
+    // lanes so neighbours released days apart stay distinguishable.
+    const waiting: Placed[] = [...pending]
+      .sort((a, b) => a.x - b.x)
+      .map((point, index) => ({
+        ...point,
+        y: Number.NaN,
+        px: sx(point.x),
+        py: margin.top + innerHeight - (index % 2 ? 22 : 10),
+        pending: true,
+      }));
 
     let path = '';
     let front: Placed[] = [];
@@ -170,15 +191,16 @@ export function ScatterChart({
         }
       }
     }
-    return { sx, sy, xTicks, yTicks, placed, path, region, labels, x0, x1, y0, y1 };
+    return { sx, sy, xTicks, yTicks, placed, waiting, path, region, labels, x0, x1, y0, y1 };
     // The margins derive from `narrow`, which follows `width`.
-  }, [points, width, narrow, x, frontier, quadrant, highlight, innerWidth, innerHeight]);
+  }, [points, pending, width, narrow, x, frontier, quadrant, highlight, innerWidth, innerHeight]);
 
+  const everything = useMemo(() => (view ? [...view.placed, ...view.waiting] : []), [view]);
   const order = useMemo(
-    () => (view ? [...view.placed].sort((a, b) => a.x - b.x || b.y - a.y) : []),
-    [view],
+    () => [...everything].sort((a, b) => a.x - b.x || (b.y || 0) - (a.y || 0)),
+    [everything],
   );
-  const current = view?.placed.find((point) => point.key === active);
+  const current = everything.find((point) => point.key === active);
 
   const nearest = (event: PointerEvent<SVGSVGElement>) => {
     if (!view) return undefined;
@@ -187,7 +209,7 @@ export function ScatterChart({
     const py = event.clientY - box.top;
     let best: Placed | undefined;
     let distance = 28 * 28;
-    for (const point of view.placed) {
+    for (const point of everything) {
       const d = (point.px - px) ** 2 + (point.py - py) ** 2;
       if (d < distance) {
         distance = d;
@@ -247,6 +269,12 @@ export function ScatterChart({
           <li className="legend-region">
             <i aria-hidden="true" />
             {quadrant}
+          </li>
+        )}
+        {pending.length > 0 && (
+          <li className="legend-pending">
+            <i aria-hidden="true" />
+            {pendingLabel}
           </li>
         )}
       </ul>
@@ -346,6 +374,16 @@ export function ScatterChart({
                     fill={makerColor(point.makerId)}
                   />
                 ))}
+              {view.waiting.map((point) => (
+                <circle
+                  key={point.key}
+                  className="scatter-pending"
+                  cx={point.px}
+                  cy={point.py}
+                  r={narrow ? 4.5 : 5.5}
+                  style={{ stroke: makerColor(point.makerId) }}
+                />
+              ))}
               {current && (
                 <circle className="scatter-focus" cx={current.px} cy={current.py} r={11} />
               )}
@@ -369,7 +407,7 @@ export function ScatterChart({
             <strong>{current.name}</strong>
             {current.maker && <span>{current.maker}</span>}
             <span className="chart-tooltip-value">
-              {y.label}: {y.format(current.y)}
+              {current.pending ? pendingLabel : `${y.label}: ${y.format(current.y)}`}
             </span>
             <span>
               {x.label}: {x.format(current.x)}
@@ -390,7 +428,7 @@ export function ScatterChart({
         </p>
         <p className="sr-only" aria-live="polite">
           {current
-            ? `${current.name}${current.maker ? `, ${current.maker}` : ''}. ${y.label} ${y.format(current.y)}. ${x.label} ${x.format(current.x)}.`
+            ? `${current.name}${current.maker ? `, ${current.maker}` : ''}. ${current.pending ? pendingLabel : `${y.label} ${y.format(current.y)}`}. ${x.label} ${x.format(current.x)}.`
             : ''}
         </p>
       </div>

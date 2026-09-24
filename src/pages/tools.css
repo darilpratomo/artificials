@@ -96,14 +96,14 @@
   animation: utility-float 8s ease-in-out infinite;
 }
 .tools-glass span {
-  font: 11.5px monospace;
+  font: 12px monospace;
   letter-spacing: 0.15em;
   color: #c2cbdd;
 }
 .tools-sculpture-label {
   position: absolute;
   bottom: 0;
-  font: 11.5px monospace;
+  font: 12px monospace;
   letter-spacing: 0.17em;
   color: #9ba4b6;
 }
@@ -687,7 +687,9 @@
   font: inherit;
   font-size: 13.5px;
   cursor: pointer;
-  transition: border-color 0.18s ease, color 0.18s ease;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease;
 }
 .tools-compare-toggle:hover {
   border-color: #6e737f;
@@ -765,7 +767,7 @@
     height: 50px;
   }
   .tools-sculpture-label {
-    font-size: 10.5px;
+    font-size: 12px;
   }
   .tool-work-grid {
     grid-template-columns: 1fr;
@@ -819,7 +821,7 @@
     height: 44px;
   }
   .tool-heading .eyebrow {
-    font-size: 11.5px;
+    font-size: 12px;
   }
   .tool-heading h1 {
     font-size: 33px;

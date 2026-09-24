@@ -4231,7 +4231,7 @@ textarea::placeholder {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 10.5px;
+  font-size: 12px;
   color: #a1a3af;
 }
 .footer-baseline {
@@ -4240,7 +4240,7 @@ textarea::placeholder {
   gap: 25px;
   border-top: 1px solid #ffffff0e;
   padding-block: 24px;
-  font-size: 11.5px;
+  font-size: 12px;
   color: #9698a3;
 }
 .footer-baseline > span:last-child {
@@ -4268,13 +4268,13 @@ textarea::placeholder {
   display: flex;
   gap: 10px;
   align-items: center;
-  font-size: 11.5px;
+  font-size: 12px;
   color: #a7a9b4;
 }
 .hero-edition {
   margin-left: auto;
   color: #6f727e;
-  font-size: 10.5px;
+  font-size: 12px;
 }
 .signal-copy {
   position: relative;
@@ -4353,7 +4353,7 @@ textarea::placeholder {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 10.5px;
+  font-size: 12px;
   color: #7b7e89;
   border-top: 1px solid #ffffff0f;
   padding-top: 22px;
@@ -4369,7 +4369,7 @@ textarea::placeholder {
   align-items: center;
   gap: 7px;
   color: #9699a5;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.05em;
 }
 .model-directory {
@@ -4403,16 +4403,24 @@ textarea::placeholder {
   border-radius: 8px;
 }
 .model-card-top > .mono {
-  font-size: 11.5px;
+  font-size: 12px;
   color: #a3a6b3;
   letter-spacing: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.model-card-top > .icon-btn {
+.model-card-actions {
+  display: flex;
+  flex: none;
+  gap: 2px;
   margin-left: auto;
-  color: #8f92a1;
+}
+.model-card-actions > .icon-btn {
+  color: #a3a6b3;
+}
+.model-card-actions > .icon-btn:hover {
+  color: #ffffff;
 }
 .model-card h3 {
   font-size: 17px;
@@ -4440,7 +4448,7 @@ textarea::placeholder {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 10.5px;
+  font-size: 12px;
   border: 1px solid #343641;
   background: #ffffff02;
   color: #b4b7c2;
@@ -4456,7 +4464,7 @@ textarea::placeholder {
   min-width: 0;
 }
 .model-metrics dt {
-  font-size: 11.5px;
+  font-size: 12px;
   color: #979aa8;
   margin-bottom: 8px;
 }
@@ -4476,11 +4484,11 @@ textarea::placeholder {
   min-height: 37px;
 }
 .model-card-bottom > span {
-  font-size: 10.5px;
+  font-size: 12px;
   color: #8c909e;
 }
 .compare-button {
-  font-size: 11.5px;
+  font-size: 12px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -4502,7 +4510,7 @@ textarea::placeholder {
   animation: skeleton-flow 2s infinite;
 }
 .data-footnote {
-  font-size: 11.5px;
+  font-size: 12px;
   color: #9296a4;
   margin: 22px 0 0;
   line-height: 1.9;
@@ -4630,13 +4638,13 @@ textarea::placeholder {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  font-size: 10.5px;
+  font-size: 12px;
   margin: 20px 0 15px;
   color: #a5aab8;
   text-transform: uppercase;
 }
 .editorial-meta > span:last-child {
-  font-size: 9.5px;
+  font-size: 12px;
   color: #858b9b;
 }
 .editorial-card h3 {
@@ -4698,7 +4706,7 @@ textarea::placeholder {
 }
 .search-hint {
   white-space: nowrap;
-  font-size: 10.5px;
+  font-size: 12px;
   color: #969dab;
 }
 .catalog-filters {
@@ -4732,7 +4740,7 @@ textarea::placeholder {
   color: #a5afbf;
   background: transparent;
   border-radius: 4px;
-  font-size: 11.5px;
+  font-size: 12px;
 }
 .filter-chip.active {
   background: #d8dfec;
@@ -4752,7 +4760,7 @@ textarea::placeholder {
   display: flex;
   gap: 7px;
   align-items: center;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.03em;
 }
 .catalog-loading {
@@ -4822,7 +4830,7 @@ textarea::placeholder {
   font-weight: 500;
 }
 .comparison-tray span {
-  font-size: 11.5px;
+  font-size: 12px;
   color: #a6b0c2;
 }
 .comparison-tray > .text-link {
@@ -4943,7 +4951,7 @@ textarea::placeholder {
   color: #9caac0;
 }
 .compare-empty-slots .mono {
-  font-size: 10.5px;
+  font-size: 12px;
 }
 .compare-empty-slots a > span:last-child {
   font-size: 14px;
@@ -5004,7 +5012,7 @@ textarea::placeholder {
 }
 .ranking-table th {
   padding: 18px 22px;
-  font-size: 11.5px;
+  font-size: 12px;
   color: #a2b0c7;
   background: #181f2b;
   font-weight: 400;
@@ -5047,11 +5055,11 @@ textarea::placeholder {
 .rank-model div > span {
   display: block;
   color: #9daec9;
-  font-size: 11.5px;
+  font-size: 12px;
   margin-top: 5px;
 }
 .rank-reasoning {
-  font-size: 9.5px;
+  font-size: 12px;
   margin-left: auto;
   color: #91a4c4;
   border: 1px solid #3c4c64;
@@ -5066,7 +5074,7 @@ textarea::placeholder {
   letter-spacing: -0.02em;
 }
 .rank-unit {
-  font-size: 10.5px;
+  font-size: 12px;
   color: #9aaccc;
 }
 .ranking-method {
@@ -5243,10 +5251,10 @@ textarea::placeholder {
     width: calc(100% - 54px);
   }
   .hero-label {
-    font-size: 10.5px;
+    font-size: 12px;
   }
   .hero-edition {
-    font-size: 8px;
+    font-size: 12px;
   }
   .signal-copy h1 {
     font-size: 64px;
@@ -5266,7 +5274,7 @@ textarea::placeholder {
     min-height: 630px;
   }
   .hero-bottom {
-    font-size: 9.5px;
+    font-size: 12px;
   }
   .hero-bottom > span:nth-child(2) {
     display: none;
@@ -5291,12 +5299,12 @@ textarea::placeholder {
     font-size: 12.5px;
   }
   .editorial-meta {
-    font-size: 9.5px;
+    font-size: 12px;
     flex-wrap: wrap;
     gap: 6px;
   }
   .editorial-meta > span:last-child {
-    font-size: 8px;
+    font-size: 12px;
   }
   .editorial-grid {
     gap: 17px;
@@ -5309,7 +5317,7 @@ textarea::placeholder {
     font-size: 12.5px;
   }
   .footer-identity .mono {
-    font-size: 8px;
+    font-size: 12px;
   }
   .footer-identity img {
     width: 145px;
@@ -5318,7 +5326,7 @@ textarea::placeholder {
     font-size: 12.5px;
   }
   .footer-baseline {
-    font-size: 10.5px;
+    font-size: 12px;
   }
   .footer-baseline > span:nth-child(2) {
     max-width: 250px;
@@ -5362,7 +5370,7 @@ textarea::placeholder {
     min-height: 795px;
   }
   .hero-label {
-    font-size: 9.5px;
+    font-size: 12px;
     gap: 8px;
   }
   .hero-edition {
@@ -5415,7 +5423,7 @@ textarea::placeholder {
   .hero-bottom {
     bottom: 22px;
     padding-top: 17px;
-    font-size: 8px;
+    font-size: 12px;
   }
   .hero-bottom a {
     gap: 8px;
@@ -5424,13 +5432,13 @@ textarea::placeholder {
     padding-block: 65px;
   }
   .section-kicker {
-    font-size: 10.5px;
+    font-size: 12px;
     margin-bottom: 26px;
     gap: 12px;
     flex-wrap: wrap;
   }
   .data-stamp {
-    font-size: 8px;
+    font-size: 12px;
   }
   .section-heading {
     align-items: flex-start;
@@ -5462,19 +5470,19 @@ textarea::placeholder {
     font-size: 12.5px;
   }
   .capability-tags span {
-    font-size: 11.5px;
+    font-size: 12px;
   }
   .model-metrics dt {
     font-size: 12.5px;
   }
   .model-card-bottom > span {
-    font-size: 11.5px;
+    font-size: 12px;
   }
   .compare-button {
     font-size: 12.5px;
   }
   .data-footnote {
-    font-size: 11.5px;
+    font-size: 12px;
   }
   .editorial-grid {
     grid-template-columns: 1fr;
@@ -5494,11 +5502,11 @@ textarea::placeholder {
     margin-bottom: 18px;
   }
   .editorial-meta {
-    font-size: 11.5px;
+    font-size: 12px;
     margin: 18px 0 12px;
   }
   .editorial-meta > span:last-child {
-    font-size: 9.5px;
+    font-size: 12px;
   }
   .editorial-card > .text-link {
     font-size: 13px;
@@ -5529,7 +5537,7 @@ textarea::placeholder {
     margin: 17px 0;
   }
   .footer-identity .mono {
-    font-size: 10.5px;
+    font-size: 12px;
   }
   .footer-top h3 {
     font-size: 14px;
@@ -5542,7 +5550,7 @@ textarea::placeholder {
   .footer-baseline {
     flex-wrap: wrap;
     gap: 16px;
-    font-size: 10.5px;
+    font-size: 12px;
     padding-block: 20px;
   }
   .footer-baseline > span:nth-child(2) {
@@ -5568,7 +5576,7 @@ textarea::placeholder {
     line-height: 1.85;
   }
   .page-heading .eyebrow {
-    font-size: 10.5px;
+    font-size: 12px;
   }
   .page-heading {
     margin-bottom: 30px;
@@ -5613,7 +5621,7 @@ textarea::placeholder {
     margin: 22px 0 18px;
   }
   .catalog-results-meta .mono {
-    font-size: 10.5px;
+    font-size: 12px;
   }
   .catalog-pagination {
     gap: 15px;
@@ -5649,10 +5657,10 @@ textarea::placeholder {
     font-size: 12.5px;
   }
   .comparison-tray span {
-    font-size: 10.5px;
+    font-size: 12px;
   }
   .comparison-tray > .btn {
-    font-size: 11.5px;
+    font-size: 12px;
     padding: 10px;
     min-height: 33px;
   }
@@ -5671,10 +5679,10 @@ textarea::placeholder {
     gap: 23px;
   }
   .compare-empty-slots .mono {
-    font-size: 8px;
+    font-size: 12px;
   }
   .compare-empty-slots a > span:last-child {
-    font-size: 11.5px;
+    font-size: 12px;
   }
   .compare-empty h2 {
     font-size: 27px;
@@ -6099,19 +6107,23 @@ textarea::placeholder {
   }
   .benchmark-row,
   .benchmark-list-heading {
-    grid-template-columns: 25px minmax(0, 1fr) 72px;
-    gap: 9px;
-    padding: 17px 0;
+    grid-template-columns: 36px minmax(0, 1fr) 78px;
+    gap: 10px;
+    padding: 16px 0;
+  }
+  .benchmark-rank {
+    font-variant-numeric: tabular-nums;
   }
   .benchmark-model {
-    gap: 8px;
+    gap: 10px;
   }
   .benchmark-model img {
-    width: 23px;
-    height: 23px;
+    width: 30px;
+    height: 30px;
+    padding: 4px;
   }
   .benchmark-model h3 {
-    font-size: 13px;
+    font-size: 14.5px;
   }
   .benchmark-score strong {
     font-size: 16px;
@@ -6339,7 +6351,7 @@ input[type='radio'] {
   margin: 0 22px;
 }
 .mobile-menu-heading .mono {
-  font-size: 11.5px;
+  font-size: 12px;
   color: #9da8bb;
 }
 .mobile-menu-links {
@@ -6381,7 +6393,7 @@ input[type='radio'] {
 }
 .menu-link-number {
   font:
-    10.5px ui-monospace,
+    12px ui-monospace,
     monospace;
   color: #9cabc0;
 }
@@ -6927,4 +6939,63 @@ img[src^='/providers/'] {
   border-radius: 8px;
   background: #f6f7f9;
   object-fit: contain;
+}
+
+/* Touch targets: links and small buttons get at least 36px of height on touch-size screens. */
+@media (max-width: 799px) {
+  .site-footer a,
+  .site-footer button,
+  .text-link,
+  .compare-button,
+  .analytics-settings-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+  }
+  .icon-btn,
+  .preview-actions .icon-btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .faq button {
+    min-height: 48px;
+  }
+  .hero-bottom a,
+  .site-header .nav-login {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+}
+
+/* Disclosures show an icon, never the browser's text triangle. Summaries that
+   already carry their own icon keep it. */
+summary {
+  list-style: none;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+summary:not(:has(svg))::before {
+  content: '';
+  display: inline-block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.5em;
+  vertical-align: -0.15em;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  transition: transform 0.2s ease;
+}
+details[open] > summary:not(:has(svg))::before {
+  transform: rotate(90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  summary::before {
+    transition: none;
+  }
 }

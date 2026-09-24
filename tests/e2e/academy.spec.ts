@@ -97,8 +97,8 @@ test('brand profiles use icons and public articles omit the byline and captions'
       page.locator('.hero-banner-art img').evaluate((el) => (el as HTMLImageElement).naturalWidth),
     )
     .toBeGreaterThan(0);
-  // Data credits on the home page stay compact: a closed disclosure, not a banner.
-  await expect(page.locator('.dash-method details')).not.toHaveAttribute('open');
+  // The home page credits each chart's data beside the chart, with no separate sources block.
+  await expect(page.locator('.dash-method')).toHaveCount(0);
 });
 
 test('academy, lesson reader, and labs are accessible without horizontal page overflow', async ({

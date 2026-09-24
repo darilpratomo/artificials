@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Check, Plus, Brain, ScanEye } from 'lucide-react';
 import { modelSlug } from '../../shared/model-profiles';
+import { GithubIcon } from './GithubIcon';
 import { compactNumber, tokenPrice, providerLogo, type ModelRecord } from '../lib/catalog';
 export default function ModelCard({
   model,
@@ -24,15 +25,26 @@ export default function ModelCard({
           alt=""
         />
         <span className="mono">{model.provider}</span>
-        <a
-          className="icon-btn"
-          href={model.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`Source for ${model.name}`}
-        >
-          <ArrowUpRight size={16} />
-        </a>
+        <span className="model-card-actions">
+          <a
+            className="icon-btn"
+            href={model.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${model.name} listing source on GitHub`}
+            title="Listing source on GitHub"
+          >
+            <GithubIcon size={16} />
+          </a>
+          <Link
+            className="icon-btn"
+            to={`/models/${modelSlug(model.modelId)}`}
+            aria-label={`${model.name} details`}
+            title="Model details"
+          >
+            <ArrowUpRight size={16} aria-hidden="true" />
+          </Link>
+        </span>
       </div>
       <h3>
         {/* The whole model, across every provider, lives on its profile page. */}

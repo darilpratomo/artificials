@@ -99,7 +99,7 @@ test('the price chart supports the keyboard and opens a model', async ({ page })
   await chart.focus();
   await page.keyboard.press('Home');
   for (let step = 0; step < target; step += 1) await page.keyboard.press('ArrowRight');
-  await expect(panel.locator('[aria-live="polite"]')).toContainText(order[target].name);
+  await expect(panel.locator('.scatter-frame [aria-live="polite"]')).toContainText(order[target].name);
   await expect(panel.locator('.scatter-tooltip')).toContainText(order[target].name);
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(new RegExp(`/models/${order[target].slug}$`));
@@ -127,7 +127,7 @@ test('releases, search and the full list work without loading everything up fron
   // Timeline: known makers by default, every listing on request, more on demand.
   const entries = page.locator('.timeline-entry');
   const before = await entries.count();
-  await page.getByRole('button', { name: 'Show more releases' }).click();
+  await page.getByRole('button', { name: /Show \d+ more releases/ }).click();
   await expect.poll(() => entries.count()).toBeGreaterThan(before);
   await page.getByRole('button', { name: 'All listings' }).click();
   await expect(page.getByRole('button', { name: 'All listings' })).toHaveAttribute(
@@ -193,6 +193,68 @@ test('home sections are accessible and stay inside narrow screens', async ({ pag
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
     .analyze();
   expect(result.violations.map((violation) => violation.id)).toEqual([]);
+});
+
+test('the full list pages through every model with numbered pages', async ({ page }) => {
+  const data = await overview(page);
+  await page.goto('/');
+  await page.locator('#all-models').scrollIntoViewIfNeeded();
+  const foot = page.locator('.explorer-foot > p');
+  await expect(foot).toHaveText(`Showing 1–25 of ${data.counts.models.toLocaleString('en-US')}`);
+  await page
+    .getByRole('navigation', { name: 'Model list pages' })
+    .getByRole('button', { name: 'Next' })
+    .click();
+  await expect(foot).toHaveText(`Showing 26–50 of ${data.counts.models.toLocaleString('en-US')}`);
+  // The search box and both selects share one height, so the toolbar lines up.
+  const heights = await page
+    .locator('#all-models .explorer-controls > *')
+    .evaluateAll((items) => items.map((item) => Math.round(item.getBoundingClientRect().height)));
+  expect(new Set(heights).size).toBe(1);
+});
+
+test('the market, the time chart and the release timeline link up', async ({ page }) => {
+  const data = await overview(page);
+  await page.goto('/');
+  const market = page.locator('#market');
+  await market.scrollIntoViewIfNeeded();
+  await expect(market.locator('.market-stats li')).toHaveCount(6);
+  await expect(market.locator('.market-list').first().locator('li')).toHaveCount(
+    data.market.makers.length,
+  );
+  // Newer releases without a score still show on the time chart, as rings.
+  const value = page.locator('#value');
+  await value.scrollIntoViewIfNeeded();
+  await value.getByRole('button', { name: 'Release date' }).click();
+  await expect(value.locator('.legend-pending')).toContainText('not scored yet');
+  expect(await value.locator('.scatter-pending').count()).toBeGreaterThan(0);
+  await page.getByRole('link', { name: 'Full release timeline' }).click();
+  await expect(page).toHaveURL(/\/releases$/);
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Every AI model release.' }),
+  ).toBeVisible();
+});
+
+test('charts download as branded images', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'Downloads are checked once, in desktop Chrome');
+  await page.goto('/');
+  for (const section of ['#rankings', '#value', '#leaders', '#market']) {
+    const scope = page.locator(section);
+    await scope.scrollIntoViewIfNeeded();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      scope
+        .getByRole('button', { name: /as an image/ })
+        .first()
+        .click(),
+    ]);
+    expect(download.suggestedFilename()).toMatch(/^artificials-[a-z0-9-]+\.png$/);
+    const file = await download.path();
+    const bytes = readFileSync(file);
+    // A real PNG, 1600 pixels wide.
+    expect(String.fromCharCode(...bytes.subarray(1, 4))).toBe('PNG');
+    expect(new DataView(bytes.buffer, bytes.byteOffset).getUint32(16)).toBe(1600);
+  }
 });
 
 test('model data is in the initial HTML for search engines', async ({ request }) => {

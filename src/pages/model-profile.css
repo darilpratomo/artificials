@@ -901,11 +901,11 @@
   gap: 6px;
 }
 .provider-badges em {
-  padding: 1px 8px;
+  padding: 2px 9px;
   border: 1px solid var(--profile-line);
   border-radius: 999px;
   color: var(--profile-ink-2);
-  font-size: 0.72rem;
+  font-size: 12.5px;
   font-style: normal;
 }
 .provider-badges .badge-cheapest {
@@ -1113,4 +1113,72 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;
   }
+}
+
+/* A card heading with an action, such as downloading the chart, on its right. */
+.profile-card-head.has-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+.profile-card-head.has-action > div {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.profile-intro-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px 24px;
+}
+.profile-intro-row > .profile-explainer {
+  flex: 1 1 420px;
+}
+
+/* Standalone links such as host names get a taller hit area on touch screens. */
+@media (max-width: 799px) {
+  .provider-name a {
+    display: inline-block;
+    padding-block: 7px;
+    margin-block: -7px;
+  }
+}
+
+/* Specifications */
+.spec-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 22px 28px;
+}
+.spec-group h3 {
+  margin: 0 0 6px;
+  color: var(--profile-ink-2, #c9ccd4);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.spec-group dl {
+  display: grid;
+  margin: 0;
+}
+.spec-group dl > div {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.8fr) minmax(0, 1.2fr);
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--profile-line, #23242b);
+}
+.spec-group dt {
+  color: #9698a3;
+  font-size: 14px;
+}
+.spec-group dd {
+  margin: 0;
+  color: #eceef2;
+  font-size: 14.5px;
+  overflow-wrap: anywhere;
 }
