@@ -1,5 +1,4 @@
 import { makerColor, makerLogo } from '../../../shared/makers';
-import { LOGO_MATRIX } from '../logo-matrix';
 import { linearTicks, logTicks, niceDomain, timeTicks } from './scale';
 
 /**
@@ -10,6 +9,7 @@ import { linearTicks, logTicks, niceDomain, timeTicks } from './scale';
  */
 
 const WIDTH = 1600;
+const EXPORT_SCALE = 2.5;
 const INK = '#f3f4f7';
 const MUTED = '#a3a6b2';
 const FAINT = '#6b7080';
@@ -17,6 +17,7 @@ const GRID = '#24252c';
 const SURFACE = '#0b0c0f';
 const SANS = '"Inter Variable", Inter, "Helvetica Neue", Arial, sans-serif';
 const BRAND = 'Michroma, Sora, "Helvetica Neue", Arial, sans-serif';
+const BRAND_MARK = '/brand/artificials-symbol-large.png';
 
 export interface ShareFrame {
   title: string;
@@ -78,9 +79,10 @@ async function fontsReady() {
 
 function canvas(height: number) {
   const element = document.createElement('canvas');
-  element.width = WIDTH;
-  element.height = height;
+  element.width = Math.round(WIDTH * EXPORT_SCALE);
+  element.height = Math.round(height * EXPORT_SCALE);
   const context = element.getContext('2d')!;
+  context.scale(EXPORT_SCALE, EXPORT_SCALE);
   context.fillStyle = SURFACE;
   context.fillRect(0, 0, WIDTH, height);
   return { element, context };
@@ -107,23 +109,37 @@ function clip(context: CanvasRenderingContext2D, text: string, width: number) {
   return `${cut}…`;
 }
 
-/** The pixel mark, drawn from the same matrix as the site header. */
-function drawMark(context: CanvasRenderingContext2D, x: number, y: number, cell: number) {
-  for (const [row, cells] of LOGO_MATRIX.entries())
-    for (const match of cells.matchAll(/1+/g))
-      context.fillRect(x + match.index! * cell, y + row * cell, match[0].length * cell, cell);
+async function drawBrandMark(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  alpha = 1,
+) {
+  const logo = await image(BRAND_MARK);
+  context.save();
+  context.globalAlpha = alpha;
+  if (logo) {
+    context.drawImage(logo, x, y, size, size);
+  } else {
+    context.fillStyle = INK;
+    context.font = `700 ${Math.round(size * 0.72)}px ${SANS}`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText('A', x + size / 2, y + size / 2);
+  }
+  context.restore();
 }
 
 /** Mark plus wordmark, like the header. Returns the lockup's width. */
-function drawLockup(
+async function drawLockup(
   context: CanvasRenderingContext2D,
   right: number,
   top: number,
   height: number,
   alpha = 1,
 ) {
-  const cell = height / LOGO_MATRIX.length;
-  const markWidth = LOGO_MATRIX[0].length * cell;
+  const markWidth = height;
   context.save();
   context.globalAlpha = alpha;
   context.font = `${Math.round(height * 0.52)}px ${BRAND}`;
@@ -131,17 +147,17 @@ function drawLockup(
   const textWidth = context.measureText(word).width;
   const gap = height * 0.32;
   const left = right - markWidth - gap - textWidth;
-  context.fillStyle = INK;
-  drawMark(context, left, top, cell);
+  await drawBrandMark(context, left, top, markWidth, alpha);
   context.textBaseline = 'middle';
+  context.fillStyle = INK;
   context.fillText(word, left + markWidth + gap, top + height / 2 + 1);
   context.restore();
   return markWidth + gap + textWidth;
 }
 
 /** Title block, lockup and a faint centred watermark. Returns the y where content starts. */
-function drawHeader(context: CanvasRenderingContext2D, frame: ShareFrame, height: number) {
-  const lockup = drawLockup(context, WIDTH - 64, 56, 44);
+async function drawHeader(context: CanvasRenderingContext2D, frame: ShareFrame, height: number) {
+  const lockup = await drawLockup(context, WIDTH - 64, 56, 44);
   context.fillStyle = INK;
   context.font = `600 44px ${SANS}`;
   context.textBaseline = 'alphabetic';
@@ -162,17 +178,7 @@ function drawHeader(context: CanvasRenderingContext2D, frame: ShareFrame, height
   }
   // A watermark faint enough never to compete with the data.
   const size = Math.min(160, height * 0.2);
-  context.save();
-  context.globalAlpha = 0.045;
-  const cell = size / LOGO_MATRIX.length;
-  context.fillStyle = INK;
-  drawMark(
-    context,
-    WIDTH / 2 - (LOGO_MATRIX[0].length * cell) / 2,
-    height / 2 - size / 2 + 40,
-    cell,
-  );
-  context.restore();
+  await drawBrandMark(context, WIDTH / 2 - size / 2, height / 2 - size / 2 + 40, size, 0.05);
   return y + 24;
 }
 
@@ -227,7 +233,7 @@ export async function rankImage(
   const items = bars.slice(0, 30);
   const height = 1000;
   const { element, context } = canvas(height);
-  const top = drawHeader(context, frame, height);
+  const top = await drawHeader(context, frame, height);
   const plotTop = top + 30;
   const plotBottom = height - 330;
   const left = 110;
@@ -294,7 +300,7 @@ export async function listImage(frame: ShareFrame, rows: ShareRow[]) {
   const headerGuess = 190 + (frame.subtitle ? 64 : 0);
   const height = Math.max(640, headerGuess + shown.length * rowHeight + 150);
   const { element, context } = canvas(height);
-  let y = drawHeader(context, frame, height) + 10;
+  let y = (await drawHeader(context, frame, height)) + 10;
   const hasLogos = shown.some((row) => row.makerId);
   const labelLeft = 64 + (hasLogos ? 58 : 0);
   const barLeft = 700;
@@ -359,7 +365,7 @@ export async function scatterImage(
   await fontsReady();
   const height = 1000;
   const { element, context } = canvas(height);
-  let top = drawHeader(context, frame, height);
+  let top = await drawHeader(context, frame, height);
   // Legend: makers by number of points.
   const makers = new Map<string, { name: string; count: number }>();
   for (const point of points) {

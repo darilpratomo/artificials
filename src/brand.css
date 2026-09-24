@@ -35,6 +35,11 @@
   height: 32px;
 }
 
+.brand-mark-image {
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.12));
+}
+
 .brand-name {
   font-family: 'Michroma', 'Sora', sans-serif;
   /* Michroma runs wide and has no bold cut, so the size comes down and the

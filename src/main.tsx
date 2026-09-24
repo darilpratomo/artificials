@@ -11,6 +11,9 @@ const Models = lazy(() => import('./pages/Models'));
 const ModelProfile = lazy(() => import('./pages/ModelProfile'));
 const Compare = lazy(() => import('./pages/Compare'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
+const Leaders = lazy(() => import('./pages/Leaders'));
+const ScorePriceTime = lazy(() => import('./pages/ScorePriceTime'));
+const Market = lazy(() => import('./pages/Market'));
 const Releases = lazy(() => import('./pages/Releases'));
 const Academy = lazy(() => import('./pages/Academy'));
 const AcademyLesson = lazy(() => import('./pages/AcademyLesson'));
@@ -54,6 +57,9 @@ createRoot(document.getElementById('root')!).render(
               <Route index element={<Home />} />
               <Route path="models" element={<Models />} />
               <Route path="models/:slug" element={<ModelProfile />} />
+              <Route path="leaders" element={<Leaders />} />
+              <Route path="score-price-time" element={<ScorePriceTime />} />
+              <Route path="market" element={<Market />} />
               <Route path="leaderboard" element={<Leaderboard />} />
               <Route path="releases" element={<Releases />} />
               <Route path="compare" element={<Compare />} />

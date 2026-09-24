@@ -6,6 +6,8 @@
 .rank-chart,
 .scatter-frame {
   position: relative;
+  min-width: 0;
+  max-width: 100%;
   /* A chart never widens the page, even for the frame before it re-measures
      after a resize. Vertical overflow stays visible for labels and tooltips. */
   overflow-x: clip;
@@ -22,6 +24,8 @@
 }
 .rank-plot {
   position: relative;
+  min-width: 0;
+  max-width: 100%;
 }
 .rank-axis {
   position: absolute;
@@ -66,6 +70,8 @@
 .rank-columns {
   display: grid;
   grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+  min-width: 0;
+  max-width: 100%;
   padding-bottom: 150px;
 }
 .rank-column {
@@ -409,9 +415,10 @@ a.rank-hit:focus-visible {
   display: inline-flex;
   flex: none;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  width: 44px;
   min-height: 44px;
-  padding: 10px 14px;
+  padding: 0;
   border: 1px solid #373d49;
   border-radius: 10px;
   background: #171a21;

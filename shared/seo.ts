@@ -28,6 +28,18 @@ const pages: Record<string, [string, string]> = {
     'AI model rankings and benchmarks',
     'Compare published AI benchmarks for coding, reasoning, mathematics, language, and image generation, with source and update information.',
   ],
+  '/leaders': [
+    'Current AI model leaders',
+    'Explore the leading AI models by capability, coding, reasoning, image generation and more, then open the full ranking table.',
+  ],
+  '/score-price-time': [
+    'AI model score, price and time chart',
+    'Compare AI model capability against price, release date and context window with interactive filters and downloadable charts.',
+  ],
+  '/market': [
+    'AI model market overview',
+    'Understand the AI model market by maker activity, availability, pricing, open weights and model capabilities.',
+  ],
   '/releases': [
     'AI model release timeline',
     'Every AI model release, newest first: release dates, prices, context windows, capabilities and makers, updated automatically.',

@@ -7,12 +7,27 @@ type BrandProps = { className?: string; animate?: boolean };
 export function Brand({ className = '', animate = false }: BrandProps) {
   return (
     <span className={`brand-lockup ${className}`.trim()}>
-      <PixelLogo
-        className="brand-mark"
-        animate={animate}
-        repeatEvery={animate ? 10000 : 0}
-        downloadable
-      />
+      {animate ? (
+        <PixelLogo
+          className="brand-mark"
+          animate
+          repeatEvery={10000}
+          downloadable
+          soften
+        />
+      ) : (
+        <img
+          className="brand-mark brand-mark-image"
+          src="/brand/artificials-symbol.png"
+          width="32"
+          height="32"
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          loading="lazy"
+          draggable
+        />
+      )}
       <span className="brand-name">Artificials</span>
     </span>
   );

@@ -252,7 +252,10 @@ export function Layout() {
           <div>
             <h3>Intelligence</h3>
             <Link to="/models">Model directory</Link>
+            <Link to="/leaders">Current leaders</Link>
             <Link to="/leaderboard">Model rankings</Link>
+            <Link to="/score-price-time">Score, price & time</Link>
+            <Link to="/market">Market overview</Link>
             <Link to="/releases">Model releases</Link>
             <Link to="/compare">Compare models</Link>
             <Link to="/news">Insights & guides</Link>

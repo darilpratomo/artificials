@@ -27,6 +27,8 @@ export interface PixelLogoProps {
    * "Save image as" or a long press, exactly like any other logo image.
    */
   downloadable?: boolean;
+  /** Slightly rounds the animated matrix blocks so the header mark reads softer. */
+  soften?: boolean;
 }
 
 /** Row runs of active cells, so each run becomes one rectangle instead of many. */
@@ -132,6 +134,7 @@ export function PixelLogo({
   repeatEvery = 0,
   duration = 1400,
   downloadable = false,
+  soften = false,
 }: PixelLogoProps) {
   // Server rendering and reduced-motion visitors get the finished mark, so the
   // logo is never missing from prerendered HTML or from a static preference.
@@ -242,8 +245,7 @@ export function PixelLogo({
       aria-label={title}
       aria-hidden={title ? undefined : true}
       focusable="false"
-      // Keep the blocks sharp instead of letting the renderer soften the edges.
-      shapeRendering="crispEdges"
+      shapeRendering={soften ? 'geometricPrecision' : 'crispEdges'}
     >
       {blocks.map((block) =>
         moving ? (
@@ -262,10 +264,25 @@ export function PixelLogo({
               } as React.CSSProperties
             }
           >
-            <rect x={block.x} y={block.y} width={block.width} height={1} />
+            <rect
+              x={block.x}
+              y={block.y}
+              width={block.width}
+              height={1}
+              rx={soften ? 0.18 : undefined}
+              ry={soften ? 0.18 : undefined}
+            />
           </g>
         ) : (
-          <rect key={block.key} x={block.x} y={block.y} width={block.width} height={1} />
+          <rect
+            key={block.key}
+            x={block.x}
+            y={block.y}
+            width={block.width}
+            height={1}
+            rx={soften ? 0.18 : undefined}
+            ry={soften ? 0.18 : undefined}
+          />
         ),
       )}
     </svg>

@@ -33,6 +33,7 @@ export function ShareButton({
       onClick={save}
       disabled={state === 'working'}
       aria-label={`Download "${title}" as an image`}
+      title={state === 'error' ? 'Try again' : `Download "${title}"`}
     >
       {state === 'working' ? (
         <LoaderCircle size={16} className="spin" aria-hidden="true" />
@@ -41,7 +42,7 @@ export function ShareButton({
       ) : (
         <ImageDown size={16} aria-hidden="true" />
       )}
-      <span aria-live="polite">
+      <span className="sr-only" aria-live="polite">
         {state === 'working'
           ? 'Preparing…'
           : state === 'done'

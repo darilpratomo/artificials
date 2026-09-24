@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart3, Table2 } from 'lucide-react';
+import { makerColor } from '../../../shared/makers';
 import { ScatterChart, type ScatterAxis, type ScatterPoint } from '../charts/ScatterChart';
 import { ShareButton } from '../charts/ShareButton';
 import { compactTokens, compactUsd, monthYear } from '../charts/scale';
@@ -51,21 +52,24 @@ const VIEWS: {
 export function ValueSection({
   index,
   releases = [],
+  detailed = false,
 }: {
   index: IndexPoint[];
   /** Recent releases, so the time view can show models not scored yet. */
   releases?: Release[];
+  detailed?: boolean;
 }) {
   const [view, setView] = useState<View>('price');
   const [openOnly, setOpenOnly] = useState(false);
   const [table, setTable] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
   const current = VIEWS.find((entry) => entry.id === view)!;
   const points: ScatterPoint[] = useMemo(
     () =>
       index
         .filter((point) => (!openOnly || point.openWeights) && current.value(point) !== undefined)
         .map((point) => ({
-          key: point.name,
+          key: point.slug ?? `${point.name}:${point.makerId}`,
           name: point.name,
           makerId: point.makerId,
           maker: point.maker,
@@ -110,6 +114,26 @@ export function ValueSection({
         details: [`Released ${day(release.date)}`],
       }));
   }, [view, index, releases, openOnly]);
+  useEffect(() => {
+    setSelected((current) =>
+      current.filter((key) => points.some((point) => point.key === key)),
+    );
+  }, [points]);
+  const filteredPoints = selected.length
+    ? points.filter((point) => selected.includes(point.key))
+    : points;
+  const filteredPending = selected.length ? [] : pending;
+  const filterChoices = useMemo(
+    () =>
+      [...points]
+        .sort((a, b) => b.y - a.y || a.name.localeCompare(b.name))
+        .slice(0, detailed ? 36 : 14),
+    [points, detailed],
+  );
+  const toggleModel = (key: string) =>
+    setSelected((current) =>
+      current.includes(key) ? current.filter((entry) => entry !== key) : [...current, key],
+    );
   const y = useMemo(
     () => ({ label: 'Capability index', format: (value: number) => value.toFixed(0) }),
     [],
@@ -169,7 +193,7 @@ export function ValueSection({
                       ? 'Epoch AI (CC BY 4.0)'
                       : 'Epoch AI (CC BY 4.0) and models.dev (MIT)',
                 },
-                points.map((point) => ({
+                filteredPoints.map((point) => ({
                   name: point.name,
                   makerId: point.makerId,
                   maker: point.maker,
@@ -178,7 +202,7 @@ export function ValueSection({
                 })),
                 current.axis,
                 y,
-                { frontier: frontier?.kind, quadrant: view === 'price', pending },
+                { frontier: frontier?.kind, quadrant: view === 'price', pending: filteredPending },
               )
             }
           />
@@ -192,10 +216,42 @@ export function ValueSection({
         />
         Open-weights models only
       </label>
+      {filterChoices.length > 0 && (
+        <div className={`model-filter${selected.length ? ' has-selection' : ''}`}>
+          <div className="model-filter-head">
+            <span>
+              {selected.length
+                ? `${filteredPoints.length} selected model${filteredPoints.length === 1 ? '' : 's'}`
+                : 'Tap model labels to focus the chart'}
+            </span>
+            <button
+              type="button"
+              className="text-link"
+              disabled={!selected.length}
+              onClick={() => setSelected([])}
+            >
+              Show all
+            </button>
+          </div>
+          <div className="model-filter-list" role="group" aria-label="Filter models in the chart">
+            {filterChoices.map((point) => (
+              <button
+                key={point.key}
+                type="button"
+                aria-pressed={selected.includes(point.key)}
+                onClick={() => toggleModel(point.key)}
+              >
+                <i style={{ background: makerColor(point.makerId) }} aria-hidden="true" />
+                <span>{point.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {table ? (
         <div className="chart-table-wrap">
           <table className="chart-table">
-            <caption className="sr-only">{`${current.title}: ${points.length} models`}</caption>
+            <caption className="sr-only">{`${current.title}: ${filteredPoints.length} models`}</caption>
             <thead>
               <tr>
                 <th scope="col">Model</th>
@@ -205,7 +261,7 @@ export function ValueSection({
               </tr>
             </thead>
             <tbody>
-              {[...points]
+              {[...filteredPoints]
                 .sort((a, b) => b.y - a.y)
                 .map((point) => (
                   <tr key={point.key}>
@@ -228,14 +284,14 @@ export function ValueSection({
         </div>
       ) : (
         <ScatterChart
-          points={points}
+          points={filteredPoints}
           x={current.axis}
           y={y}
           frontier={frontier}
           quadrant={view === 'price' ? 'Above-median score, below-median price' : undefined}
-          pending={pending}
+          pending={filteredPending}
           pendingLabel="Released, not scored yet"
-          label={`${current.title}, ${points.length} models`}
+          label={`${current.title}, ${filteredPoints.length} models`}
         />
       )}
       <div className="dash-foot">
@@ -245,7 +301,7 @@ export function ValueSection({
             : view === 'date'
               ? 'Release dates come from Epoch AI’s records, or the catalog listing when Epoch AI has none. '
               : 'Context windows are the maker’s listed value, or the most common value across hosts. '}
-          {points.length} of {index.length} models on the index have this information.
+          {filteredPoints.length} of {index.length} models on the index are visible in this view.
         </p>
       </div>
     </div>

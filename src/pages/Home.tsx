@@ -170,27 +170,32 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
                   behind it.
                 </p>
               </div>
-              {data && (
-                <ShareButton
-                  title="AI model leaders"
-                  render={(tools) =>
-                    tools.listImage(
-                      {
-                        title: 'AI model leaders',
-                        subtitle: 'The top model on each test, from published results.',
-                        source:
-                          'Epoch AI (CC BY 4.0), LiveBench (Apache-2.0), T2I-CoReBench (CC BY-SA 4.0), models.dev (MIT)',
-                      },
-                      data.highlights.map((item) => ({
-                        label: item.title,
-                        detail: `${item.name}${item.maker ? `, ${item.maker}` : ''}. ${item.detail}`,
-                        value: highlightValue(item),
-                        makerId: item.makerId,
-                      })),
-                    )
-                  }
-                />
-              )}
+              <div className="dash-heading-actions">
+                <Link className="text-link" to="/leaders">
+                  Full rankings <ArrowUpRight size={15} aria-hidden="true" />
+                </Link>
+                {data && (
+                  <ShareButton
+                    title="AI model leaders"
+                    render={(tools) =>
+                      tools.listImage(
+                        {
+                          title: 'AI model leaders',
+                          subtitle: 'The top model on each test, from published results.',
+                          source:
+                            'Epoch AI (CC BY 4.0), LiveBench (Apache-2.0), T2I-CoReBench (CC BY-SA 4.0), models.dev (MIT)',
+                        },
+                        data.highlights.map((item) => ({
+                          label: item.title,
+                          detail: `${item.name}${item.maker ? `, ${item.maker}` : ''}. ${item.detail}`,
+                          value: highlightValue(item),
+                          makerId: item.makerId,
+                        })),
+                      )
+                    }
+                  />
+                )}
+              </div>
             </header>
             {data ? <Highlights items={data.highlights} /> : <Pending />}
           </section>
@@ -214,11 +219,16 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
 
           <section id="value" className="dash-section container" aria-labelledby="value-title">
             <header className="dash-heading">
-              <h2 id="value-title">Score, price and time</h2>
-              <p>
-                Which models give the most for the money, how fast the top score is rising, and how
-                much text each one can take in.
-              </p>
+              <div>
+                <h2 id="value-title">Score, price and time</h2>
+                <p>
+                  Which models give the most for the money, how fast the top score is rising, and
+                  how much text each one can take in.
+                </p>
+              </div>
+              <Link className="text-link" to="/score-price-time">
+                Explore the chart <ArrowUpRight size={15} aria-hidden="true" />
+              </Link>
             </header>
             <Suspense fallback={<Pending tall />}>
               {data ? (
@@ -231,11 +241,16 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
 
           <section id="market" className="dash-section container" aria-labelledby="market-title">
             <header className="dash-heading">
-              <h2 id="market-title">The AI model market</h2>
-              <p>
-                What today’s models can do, what they cost, who makes the most of them and which
-                ones you can buy almost anywhere.
-              </p>
+              <div>
+                <h2 id="market-title">The AI model market</h2>
+                <p>
+                  What today’s models can do, what they cost, who makes the most of them and which
+                  ones you can buy almost anywhere.
+                </p>
+              </div>
+              <Link className="text-link" to="/market">
+                Market details <ArrowUpRight size={15} aria-hidden="true" />
+              </Link>
             </header>
             <Suspense fallback={<Pending tall />}>
               {data ? <MarketSection overview={data} /> : <Pending tall />}
@@ -264,11 +279,16 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
 
           <section id="all-models" className="dash-section container" aria-labelledby="all-title">
             <header className="dash-heading">
-              <h2 id="all-title">Every model</h2>
-              <p>
-                All {total ? total.toLocaleString('en-US') : ''} models we track, with release date,
-                context window, price and capability index where known.
-              </p>
+              <div>
+                <h2 id="all-title">Every model</h2>
+                <p>
+                  All {total ? total.toLocaleString('en-US') : ''} models we track, with release
+                  date, context window, price and capability index where known.
+                </p>
+              </div>
+              <Link className="text-link" to="/models">
+                Open directory <ArrowUpRight size={15} aria-hidden="true" />
+              </Link>
             </header>
             <Suspense fallback={<Pending tall />}>
               <ModelExplorer total={total} />

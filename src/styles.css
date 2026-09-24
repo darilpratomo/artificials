@@ -4532,7 +4532,9 @@ textarea::placeholder {
   gap: 23px;
 }
 .editorial-card {
-  display: block;
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
 }
 .editorial-art {
   height: 210px;
@@ -4658,9 +4660,11 @@ textarea::placeholder {
   font-size: 13px;
   line-height: 1.85;
   max-width: 330px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 .editorial-card > .text-link {
+  margin-top: auto;
+  padding-top: 8px;
   font-size: 12.5px;
 }
 .reveal-ready {
@@ -6660,7 +6664,7 @@ input[type='radio'] {
   min-width: 0;
   height: 44px;
   margin: 0;
-  padding: 10px 0;
+  padding: 0;
   border: 0;
   border-radius: 0;
   outline: none;
@@ -6668,6 +6672,9 @@ input[type='radio'] {
   background: transparent;
   color: #e3e7ef;
   font-size: 15px;
+  line-height: 44px;
+  -webkit-appearance: none;
+  appearance: none;
 }
 :is(.search-field, .benchmark-search) {
   min-height: 46px;
