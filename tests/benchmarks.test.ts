@@ -60,9 +60,15 @@ describe('published benchmark normalization', () => {
       expect(Date.parse(source.checkedAt)).not.toBeNaN();
       expect(source.license).toBeTruthy();
       expect(category.rows[0].rank).toBe(1);
+      // Percentages stop at 100; the capability index is an open-ended scale.
+      const ceiling = category.unit === 'index' ? 400 : 100;
       category.rows.forEach((row, i) => {
         expect(row.score).toBeGreaterThanOrEqual(0);
-        expect(row.score).toBeLessThanOrEqual(100);
+        expect(row.score).toBeLessThanOrEqual(ceiling);
+        if (row.ciLow !== undefined) {
+          expect(row.ciLow).toBeLessThanOrEqual(row.score);
+          expect(row.ciHigh!).toBeGreaterThanOrEqual(row.score);
+        }
         expect(new URL(row.sourceUrl).protocol).toBe('https:');
         if (i) expect(row.score).toBeLessThanOrEqual(category.rows[i - 1].score);
       });

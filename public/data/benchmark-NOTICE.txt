@@ -10,6 +10,19 @@ results only, rounding to two decimals, competition ranking, JSON normalization,
 provider-family labels. Model configurations and source scores are preserved.
 The source's evaluation release date and its revision/check timestamps are distinct.
 
+Epoch AI: benchmark evaluations run by Epoch AI, and the Epoch Capabilities Index.
+Epoch AI, 'Capabilities & Benchmarking'. Published online at epoch.ai.
+Retrieved from https://epoch.ai/benchmarks (data: https://epoch.ai/data/benchmark_data.zip).
+Licence: Creative Commons Attribution 4.0 International,
+https://creativecommons.org/licenses/by/4.0/
+Only Epoch AI's own evaluations are used. Results in the archive that come from
+other projects keep their own licences and are not republished.
+Artificials modifications: fractions converted to percentages, the latest run
+kept when a configuration was tested more than once, standard errors converted
+to percentage points, rounding to two decimals, competition ranking, JSON
+normalization, provider-family labels, and matching of results to model
+profiles. Plain-language test descriptions are written by Artificials.
+
 T2I-CoReBench: Ouxiang Li, Yuan Wang, Xinting Hu, Huijuan Huang, Rui Chen,
 Jiarong Ou, Xin Tao, Pengfei Wan, Xiaojuan Qi, and Fuli Feng.
 Source: https://t2i-corebench.github.io/

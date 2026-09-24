@@ -145,7 +145,7 @@ export function Layout() {
               aria-label="Artificials home"
               onClick={() => setOpen(false)}
             >
-              <Brand />
+              <Brand animate />
             </Link>
             <nav className="site-links" aria-label="Main navigation">
               {links.map(([url, label]) => (
@@ -281,16 +281,6 @@ export function Layout() {
           <span>
             EN / USD <ArrowUpRight size={12} />
           </span>
-        </div>
-        <div className="footer-wordmark" aria-hidden="true">
-          <img
-            className="footer-brand-echo"
-            src="/brand/artificials-mark.webp"
-            width="260"
-            height="226"
-            alt=""
-            loading="lazy"
-          />
         </div>
       </footer>
     </>

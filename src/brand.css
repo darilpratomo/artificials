@@ -1,4 +1,12 @@
 @font-face {
+  font-family: 'Michroma';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('@fontsource/michroma/files/michroma-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
   font-family: 'Sora';
   font-style: normal;
   font-weight: 100 800;
@@ -21,18 +29,21 @@
 
 .brand-lockup .brand-mark {
   display: block;
-  flex: 0 0 36px;
-  width: 36px;
+  /* The pixel matrix is square, unlike the previous 36x32 raster mark. */
+  flex: 0 0 32px;
+  width: 32px;
   height: 32px;
-  object-fit: contain;
 }
 
 .brand-name {
-  font-family: 'Sora', sans-serif;
-  font-size: 23px;
+  font-family: 'Michroma', 'Sora', sans-serif;
+  /* Michroma runs wide and has no bold cut, so the size comes down and the
+     tracking opens up rather than being squeezed like the previous face. */
+  font-size: 17px;
   font-style: normal;
-  font-weight: 600;
-  letter-spacing: -0.055em;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -41,11 +52,12 @@
     gap: 6px;
   }
   .site-header .brand-name {
-    font-size: 19px;
+    font-size: 13.5px;
+    letter-spacing: 0.01em;
   }
   .site-header .brand-mark {
-    width: 30px;
-    height: 28px;
-    flex-basis: 30px;
+    width: 27px;
+    height: 27px;
+    flex-basis: 27px;
   }
 }

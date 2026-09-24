@@ -3,6 +3,7 @@ dist/
 .wrangler/
 .vercel/
 .output/
+.claude/
 .dev.vars
 .dev.vars.*
 !.dev.vars.example
@@ -22,3 +23,7 @@ playwright-report/
 
 .catalog-staging/
 .benchmark-snapshot.tmp
+
+# Model profiles are generated from the committed snapshots at build time.
+public/data/models/
+.profiles-staging/

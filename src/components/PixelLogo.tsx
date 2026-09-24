@@ -1,43 +1,109 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { LOGO_MATRIX, LOGO_COLUMNS, LOGO_ROWS } from './logo-matrix';
+import { LOGO_COLUMNS, LOGO_MATRIX, LOGO_ROWS } from './logo-matrix';
 import './pixel-logo.css';
 
+/** Downloadable copies generated from this same matrix by scripts/build-logo.mjs. */
+export const LOGO_FILE = '/brand/artificials-logo.png';
+
 export interface PixelLogoProps {
-  /** Edge of one pixel in CSS pixels. Mobile scales down via CSS. */
-  pixelSize?: number;
-  /** Space between pixels in CSS pixels. */
-  gap?: number;
-  /** Total assembling time in milliseconds, including per-pixel delays. */
-  duration?: number;
+  /** Height of the mark in CSS pixels; the width follows the square matrix. */
+  size?: number;
+  /** Overrides the inherited text colour. */
   color?: string;
-  background?: string;
-  /** Rendered next to the mark once the assembly finishes. */
-  wordmark?: string;
-  /** Skips the animation and paints the finished logo immediately. */
-  still?: boolean;
   className?: string;
-  onComplete?: () => void;
+  /**
+   * Decorative by default. The lockup supplies the accessible name, so the mark
+   * itself stays hidden from assistive technology.
+   */
+  title?: string;
+  /** Plays the scatter-and-assemble cycle. */
+  animate?: boolean;
+  /** Milliseconds from one assembly to the next. 0 plays once and stops. */
+  repeatEvery?: number;
+  /** Assembling time in milliseconds, including the staggered delays. */
+  duration?: number;
+  /**
+   * Renders a real <img> so the mark can be saved with the browser's own
+   * "Save image as" or a long press, exactly like any other logo image.
+   */
+  downloadable?: boolean;
 }
 
-interface PixelSeed {
+/** Row runs of active cells, so each run becomes one rectangle instead of many. */
+export function rowRuns(row: string) {
+  const runs: { start: number; length: number }[] = [];
+  let start = -1;
+  for (let index = 0; index <= row.length; index += 1) {
+    const active = row[index] === '1';
+    if (active && start === -1) start = index;
+    if (!active && start !== -1) {
+      runs.push({ start, length: index - start });
+      start = -1;
+    }
+  }
+  return runs;
+}
+
+interface Block {
   key: string;
-  column: number;
-  row: number;
-  /** Start offset from the final position, in CSS pixels. */
+  x: number;
+  y: number;
+  width: number;
+  /** Scatter offset in matrix units, relative to the final position. */
   tx: number;
   ty: number;
-  rotation: number;
-  delay: number;
+  /** Stagger for assembling, and for dispersing, in milliseconds. */
+  inDelay: number;
+  outDelay: number;
 }
 
-const ROWS = LOGO_ROWS;
-const COLUMNS = LOGO_COLUMNS;
-const CENTER_X = (COLUMNS - 1) / 2;
-const CENTER_Y = (ROWS - 1) / 2;
+const CENTER_X = (LOGO_COLUMNS - 1) / 2;
+const CENTER_Y = (LOGO_ROWS - 1) / 2;
 const MAX_DISTANCE = Math.hypot(CENTER_X, CENTER_Y);
-/** Longest single pixel flight; the rest of the budget is spent on delays. */
-const TRAVEL_MS = 620;
-const FADE_MS = 260;
+/** Flight time for a single block, in each direction. */
+const TRAVEL_IN_MS = 620;
+const TRAVEL_OUT_MS = 520;
+
+/**
+ * Blocks scatter outward along their own angle from the centre and return along
+ * the same path. Assembling is staggered from the centre out; dispersing runs
+ * the other way, from the edges in, so the two halves read as one continuous
+ * motion rather than the same move played twice.
+ */
+export function buildBlocks(duration: number, seed = Math.random): Block[] {
+  const blocks: Block[] = [];
+  const inBudget = Math.max(0, duration - TRAVEL_IN_MS);
+  const outBudget = Math.max(0, Math.round(duration * 0.55) - TRAVEL_OUT_MS);
+  for (let row = 0; row < LOGO_ROWS; row += 1) {
+    for (const run of rowRuns(LOGO_MATRIX[row])) {
+      const midX = run.start + run.length / 2 - 0.5;
+      const dx = midX - CENTER_X;
+      const dy = row - CENTER_Y;
+      const distance = Math.hypot(dx, dy);
+      const angle = Math.atan2(dy, dx);
+      // Distances are in matrix units, so the scatter scales with any size.
+      const radius = 5 + seed() * 7;
+      const ordered = MAX_DISTANCE ? distance / MAX_DISTANCE : 0;
+      blocks.push({
+        key: `${row}-${run.start}`,
+        x: run.start,
+        y: row,
+        width: run.length,
+        tx: Math.cos(angle) * radius + (seed() - 0.5) * 4,
+        ty: Math.sin(angle) * radius + (seed() - 0.5) * 4,
+        // Jitter is kept small and centred on the ordered position. A large
+        // random share lets one block land far ahead of the rest, which shows
+        // as a single flash followed by a pause before the others arrive.
+        inDelay: Math.round(Math.max(0, ordered * inBudget + (seed() - 0.5) * inBudget * 0.12)),
+        // Reversed ordering: the outer blocks leave first.
+        outDelay: Math.round(
+          Math.max(0, (1 - ordered) * outBudget + (seed() - 0.5) * outBudget * 0.12),
+        ),
+      });
+    }
+  }
+  return blocks;
+}
 
 function prefersReducedMotion() {
   return (
@@ -47,130 +113,184 @@ function prefersReducedMotion() {
   );
 }
 
+type Phase = 'assembled' | 'scattered';
+
 /**
- * Pixels start scattered around the logo and fly inward. Delay grows with the
- * distance from the centre so the shape resolves from the middle outward, with
- * a little jitter so the order never looks mechanical.
+ * The Artificials mark, drawn from the pixel matrix as a single inline SVG.
+ *
+ * SVG rather than a raster file so the mark stays crisp at any size and follows
+ * the surrounding text colour. Horizontal runs are merged into one rectangle
+ * each, which removes the hairline seams separate squares would show and keeps
+ * the element count low.
  */
-function buildSeeds(duration: number): PixelSeed[] {
-  const seeds: PixelSeed[] = [];
-  // Reserve the flight time so the last pixel lands on the requested duration.
-  const delayBudget = Math.max(0, duration - TRAVEL_MS);
-  for (let row = 0; row < ROWS; row += 1) {
-    for (let column = 0; column < COLUMNS; column += 1) {
-      if (LOGO_MATRIX[row][column] !== '1') continue;
-      const dx = column - CENTER_X;
-      const dy = row - CENTER_Y;
-      const distance = Math.hypot(dx, dy);
-      // Push each pixel outward along its own angle from the centre.
-      const angle = Math.atan2(dy, dx);
-      const radius = 60 + Math.random() * 100;
-      const ordered = MAX_DISTANCE ? distance / MAX_DISTANCE : 0;
-      seeds.push({
-        key: `${row}-${column}`,
-        column,
-        row,
-        tx: Math.cos(angle) * radius + (Math.random() - 0.5) * 40,
-        ty: Math.sin(angle) * radius + (Math.random() - 0.5) * 40,
-        rotation: (Math.random() - 0.5) * 90,
-        delay: Math.round(ordered * delayBudget * 0.72 + Math.random() * delayBudget * 0.28),
-      });
-    }
-  }
-  return seeds;
-}
-
 export function PixelLogo({
-  pixelSize = 14,
-  gap = 2,
-  duration = 1800,
-  color = '#ffffff',
-  background = 'transparent',
-  wordmark = 'ARTIFICIALS',
-  still = false,
+  size = 32,
+  color,
   className = '',
-  onComplete,
+  title,
+  animate = false,
+  repeatEvery = 0,
+  duration = 1400,
+  downloadable = false,
 }: PixelLogoProps) {
-  // Server rendering and reduced-motion visitors get the finished logo, so the
-  // shape is never missing from prerendered HTML or from a static preference.
-  const [assembled, setAssembled] = useState(true);
-  const [generation, setGeneration] = useState(0);
-  const completion = useRef(onComplete);
-  completion.current = onComplete;
-
-  const seeds = useMemo(
-    () => buildSeeds(duration),
-    // A replay reseeds the scatter so the second run is not a copy of the first.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [duration, generation],
+  // Server rendering and reduced-motion visitors get the finished mark, so the
+  // logo is never missing from prerendered HTML or from a static preference.
+  // An animating mark starts scattered instead, otherwise the finished logo
+  // paints for one frame before the animation begins and reads as a flicker.
+  const [phase, setPhase] = useState<Phase>(() =>
+    animate && typeof window !== 'undefined' && !prefersReducedMotion() ? 'scattered' : 'assembled',
   );
+  const [run, setRun] = useState(0);
+  // Prerendered HTML must show the plain finished mark. Marking it as animated
+  // in the static markup paints the assembled logo before JavaScript runs, and
+  // the switch to the scattered start then reads as a flicker.
+  const [active, setActive] = useState(false);
+  useEffect(() => setActive(true), []);
+  const moving = animate && active;
+  // Before React takes over, the prerendered markup shows the finished mark.
+  // Handing straight to a scattered start makes that first paint read as a
+  // flicker, so an animating mark is held invisible until the run begins. The
+  // static markup keeps the full logo for crawlers and for no-JavaScript.
+  const pending = animate && !active;
+  // Blocks keep stable keys so React updates them in place. Recreating them, or
+  // changing their offsets mid-flight, restarts the animation and paints as a
+  // blink, so new scatter values are only taken while the mark is hidden.
+  const blocks = useMemo(
+    () => buildBlocks(duration),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [duration, run],
+  );
+  const timers = useRef<number[]>([]);
 
   useEffect(() => {
-    if (still || prefersReducedMotion()) {
-      setAssembled(true);
+    if (!animate || prefersReducedMotion()) {
+      setPhase('assembled');
       return;
     }
-    setAssembled(false);
-    // Paint the scattered state once before releasing the transition, otherwise
-    // the browser collapses both states into a single frame and nothing moves.
-    const frame = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setAssembled(true));
-    });
+    // One frame is enough for the browser to pick up the scattered starting
+    // keyframe before the assembly is released.
+    const frame = requestAnimationFrame(() => setPhase('assembled'));
     return () => cancelAnimationFrame(frame);
-  }, [still, generation]);
+  }, [animate, run]);
 
   useEffect(() => {
-    if (!assembled) return;
-    // No timers or loops keep running once the logo has settled.
-    const settle = window.setTimeout(
-      () => completion.current?.(),
-      still || prefersReducedMotion() ? 0 : duration + FADE_MS,
+    if (!animate || !repeatEvery || prefersReducedMotion()) return;
+    const outTime = Math.round(duration * 0.55) + TRAVEL_OUT_MS;
+    // Hold the finished mark, disperse it, then start the next assembly.
+    const hold = Math.max(1200, repeatEvery - duration - outTime);
+    const clear = () => {
+      for (const timer of timers.current) window.clearTimeout(timer);
+      timers.current = [];
+    };
+    const cycle = () => {
+      clear();
+      timers.current.push(
+        window.setTimeout(() => {
+          // Skip the cycle while the tab is hidden; no work happens off-screen.
+          if (document.hidden) {
+            cycle();
+            return;
+          }
+          setPhase('scattered');
+          // Wait for the slowest block to finish leaving before reseeding, so
+          // no visible block is ever moved to a new starting offset.
+          timers.current.push(window.setTimeout(() => setRun((value) => value + 1), outTime + 80));
+        }, duration + hold),
+      );
+    };
+    cycle();
+    return clear;
+  }, [animate, repeatEvery, duration, run]);
+
+  const style = moving
+    ? ({
+        '--logo-travel-in': `${TRAVEL_IN_MS}ms`,
+        '--logo-travel-out': `${TRAVEL_OUT_MS}ms`,
+      } as React.CSSProperties)
+    : undefined;
+
+  // A plain image, for the static case and for saving. Browsers only offer
+  // "Save image as" and long-press save on a real <img>.
+  if (downloadable && !animate) {
+    return (
+      <img
+        className={`pixel-logo${className ? ` ${className}` : ''}`}
+        src={LOGO_FILE}
+        width={size}
+        height={size}
+        alt={title ?? ''}
+        aria-hidden={title ? undefined : true}
+        draggable
+        decoding="async"
+      />
     );
-    return () => window.clearTimeout(settle);
-  }, [assembled, duration, still]);
+  }
 
-  const style = {
-    '--pixel-size': `${pixelSize}px`,
-    '--pixel-gap': `${gap}px`,
-    '--pixel-columns': COLUMNS,
-    '--pixel-color': color,
-    '--pixel-travel': `${TRAVEL_MS}ms`,
-    '--pixel-fade': `${FADE_MS}ms`,
-    '--wordmark-delay': `${duration + 60}ms`,
-    background,
-  } as React.CSSProperties;
-
-  return (
-    <div
-      className={`pixel-logo${assembled ? ' is-assembled' : ''}${className ? ` ${className}` : ''}`}
+  const mark = (
+    <svg
+      className={`pixel-logo${moving ? ' is-animated' : ''}${phase === 'assembled' ? ' is-assembled' : ''}${pending ? ' is-pending' : ''}${className && !downloadable ? ` ${className}` : ''}`}
+      // Present in the prerendered HTML so CSS can hold the mark from the very
+      // first paint. Waiting for React to add a class leaves the finished logo
+      // on screen for a few frames, which reads as a flicker.
+      data-animates={animate ? '' : undefined}
+      viewBox={`0 0 ${LOGO_COLUMNS} ${LOGO_ROWS}`}
+      width={size}
+      height={size}
       style={style}
-      role="img"
-      aria-label={wordmark ? `${wordmark} logo` : 'ARTIFICIALS logo'}
+      fill={color ?? 'currentColor'}
+      role={title ? 'img' : undefined}
+      aria-label={title}
+      aria-hidden={title ? undefined : true}
+      focusable="false"
+      // Keep the blocks sharp instead of letting the renderer soften the edges.
+      shapeRendering="crispEdges"
     >
-      <div className="pixel-logo-grid" data-solid={gap <= 0 ? 'true' : 'false'} aria-hidden="true">
-        {seeds.map((seed) => (
-          <span
-            key={`${generation}-${seed.key}`}
-            className="pixel"
+      {blocks.map((block) =>
+        moving ? (
+          // The transform lives on a wrapping <g>. Transitioning a 3D transform
+          // directly on an SVG <rect> is unreliable: browsers accept the value
+          // but refuse to interpolate it, leaving the mark static.
+          <g
+            key={block.key}
+            className="pixel-block"
             style={
               {
-                gridColumn: seed.column + 1,
-                gridRow: seed.row + 1,
-                '--tx': `${seed.tx.toFixed(2)}px`,
-                '--ty': `${seed.ty.toFixed(2)}px`,
-                '--rotation': `${seed.rotation.toFixed(2)}deg`,
-                '--delay': `${seed.delay}ms`,
+                '--tx': `${block.tx.toFixed(2)}px`,
+                '--ty': `${block.ty.toFixed(2)}px`,
+                '--in-delay': `${block.inDelay}ms`,
+                '--out-delay': `${block.outDelay}ms`,
               } as React.CSSProperties
             }
-          />
-        ))}
-      </div>
-      {wordmark && (
-        <span className="pixel-logo-wordmark" aria-hidden="true">
-          {wordmark}
-        </span>
+          >
+            <rect x={block.x} y={block.y} width={block.width} height={1} />
+          </g>
+        ) : (
+          <rect key={block.key} x={block.x} y={block.y} width={block.width} height={1} />
+        ),
       )}
-    </div>
+    </svg>
+  );
+
+  if (!downloadable) return mark;
+
+  // The animation needs SVG, but saving needs an image. Stack both: the SVG
+  // shows the motion, and a matching <img> sits on top to receive the context
+  // menu and long press. The image is transparent so the SVG stays visible.
+  return (
+    <span className={`pixel-logo-saveable${className ? ` ${className}` : ''}`}>
+      {mark}
+      <img
+        className="pixel-logo-file"
+        src={LOGO_FILE}
+        width={size}
+        height={size}
+        alt={title ?? ''}
+        aria-hidden={title ? undefined : true}
+        draggable
+        decoding="async"
+        loading="lazy"
+      />
+    </span>
   );
 }
 

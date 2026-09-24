@@ -1,42 +1,34 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Clock3, Search } from 'lucide-react';
 import {
-  ArrowUpRight,
-  Clock3,
-  Code2,
-  Image,
-  Brain,
-  Sigma,
-  Database,
-  Languages,
-  ListChecks,
-  Trophy,
-  Search,
-} from 'lucide-react';
-import type { BenchmarkSnapshot } from '../../shared/benchmarks';
+  BENCHMARK_DOMAINS,
+  type BenchmarkCategory,
+  type BenchmarkDomain,
+  type BenchmarkSnapshot,
+} from '../../shared/benchmarks';
 import { PageHeading } from '../components/Layout';
+import { DomainKey } from '../components/profile/parts';
+import { DOMAINS } from '../components/profile/format';
 import { providerLogo } from '../lib/catalog';
+import { loadProfileLinks, testLabel, type ProfileLinks } from '../lib/profiles';
+import '../domain-colors.css';
 
-const icons: Record<string, typeof Brain> = {
-  overall: Trophy,
-  coding: Code2,
-  'agentic-coding': Code2,
-  image: Image,
-  reasoning: Brain,
-  math: Sigma,
-  'data-analysis': Database,
-  language: Languages,
-  'instruction-following': ListChecks,
-};
 const date = (value: string) =>
   new Date(value).toLocaleString('en-US', {
     dateStyle: 'medium',
     timeStyle: 'short',
     timeZone: 'UTC',
   }) + ' UTC';
+
+const domainOf = (category: BenchmarkCategory): BenchmarkDomain => category.domain ?? 'overall';
+const formatScore = (value: number, category: BenchmarkCategory) =>
+  category.unit === 'index' ? value.toFixed(1) : value.toFixed(2);
+
 export default function BenchmarkRankings() {
   const [params, setParams] = useSearchParams();
   const [data, setData] = useState<BenchmarkSnapshot | null>(null);
+  const [links, setLinks] = useState<ProfileLinks>({ rows: {}, names: {} });
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [attempt, setAttempt] = useState(0);
@@ -58,21 +50,64 @@ export default function BenchmarkRankings() {
       });
     return () => controller.abort();
   }, [attempt]);
+  useEffect(() => {
+    let active = true;
+    // Links to model pages are an enhancement; rankings render without them.
+    loadProfileLinks().then((value) => active && setLinks(value));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const domains = useMemo(
+    () =>
+      (['overall', ...BENCHMARK_DOMAINS] as BenchmarkDomain[])
+        .map((domain) => ({
+          domain,
+          // The broad capability index leads its group, matching the default view.
+          categories: (data?.categories.filter((category) => domainOf(category) === domain) ?? [])
+            .map((category, index) => ({ category, index }))
+            .sort(
+              (a, b) =>
+                Number(b.category.id === 'capability-index') -
+                  Number(a.category.id === 'capability-index') || a.index - b.index,
+            )
+            .map(({ category }) => category),
+        }))
+        .filter((group) => group.categories.length),
+    [data],
+  );
   const selected =
-    data?.categories.find((c) => c.id === params.get('category')) || data?.categories[0];
+    data?.categories.find((c) => c.id === params.get('category')) ||
+    data?.categories.find((c) => c.id === 'capability-index') ||
+    data?.categories[0];
+  const selectedDomain = selected ? domainOf(selected) : 'overall';
+  const siblings = domains.find((group) => group.domain === selectedDomain)?.categories ?? [];
   const source = data?.sources.find((s) => s.id === selected?.sourceId);
+  const nameOf = (id: string) => {
+    const slug = selected ? links.rows[`${selected.id}:${id}`] : undefined;
+    return slug ? { slug, name: links.names[slug] } : null;
+  };
   const rows =
     selected?.rows.filter((r) =>
-      (r.model + ' ' + r.provider).toLowerCase().includes(query.toLowerCase()),
+      `${r.model} ${r.provider} ${nameOf(r.id)?.name ?? ''}`
+        .toLowerCase()
+        .includes(query.toLowerCase()),
     ) || [];
   const stale = source && Date.now() - Date.parse(source.checkedAt) > 48 * 60 * 60 * 1000;
   const top = selected?.rows[0];
+  const best = top?.score || 1;
+  const choose = (category: BenchmarkCategory) => {
+    setParams({ category: category.id });
+    setQuery('');
+  };
+
   return (
     <div className="container page benchmark-page">
       <PageHeading
         eyebrow="EVIDENCE OVER HYPE"
         title="The right model. For your task."
-        text="Explore published benchmark results across coding, reasoning, image generation and more. Every score has a source."
+        text="See how AI models rank on coding, math, reasoning, knowledge and more. Pick a skill to compare every model tested on it."
       />
       {error ? (
         <div className="ranking-notice" role="alert">
@@ -82,90 +117,81 @@ export default function BenchmarkRankings() {
           </button>
         </div>
       ) : !data ? (
-        <p role="status">Loading published benchmark results…</p>
+        <p role="status">Loading benchmark results…</p>
       ) : (
         <>
-          <div className="benchmark-categories" aria-label="Benchmark categories">
-            {data.categories.map((category) => {
-              const Icon = icons[category.id] || Brain;
-              return (
+          <div className="benchmark-domains" aria-label="Skill areas">
+            {domains.map(({ domain, categories }) => (
+              <button
+                key={domain}
+                type="button"
+                className={`domain-${DOMAINS[domain].token}`}
+                aria-pressed={selectedDomain === domain}
+                onClick={() => choose(categories[0])}
+              >
+                <DomainKey domain={domain} />
+                <span>{DOMAINS[domain].label}</span>
+              </button>
+            ))}
+          </div>
+          {siblings.length > 1 && (
+            <div className="benchmark-tests" aria-label={`${DOMAINS[selectedDomain].label} tests`}>
+              {siblings.map((category) => (
                 <button
                   key={category.id}
+                  type="button"
                   aria-pressed={selected?.id === category.id}
-                  onClick={() => {
-                    setParams({ category: category.id });
-                    setQuery('');
-                  }}
+                  onClick={() => choose(category)}
                 >
-                  <Icon size={18} />
-                  <span>{category.name}</span>
+                  {testLabel(category)}
                 </button>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
           {selected && source && (
-            <>
+            <div className={`domain-${DOMAINS[selectedDomain].token}`}>
               <div className="benchmark-overview">
                 <div>
-                  <span className="eyebrow">
-                    {source.name} / {selected.name}
+                  <span className="benchmark-kicker">
+                    <DomainKey domain={selectedDomain} />
+                    {DOMAINS[selectedDomain].label}
                   </span>
-                  <h2>
-                    {selected.name === 'Overall'
-                      ? 'A broader view of capability.'
-                      : selected.name + ', measured.'}
-                  </h2>
+                  <h2>{testLabel(selected)}</h2>
                   <p>{selected.description}</p>
-                  <a
-                    className="text-link"
-                    href={source.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View original leaderboard <ArrowUpRight size={14} />
-                  </a>
                 </div>
                 {top && (
                   <div className="benchmark-leader">
-                    <span className="mono">HIGHEST PUBLISHED SCORE IN THIS VIEW</span>
-                    <strong>{top.model}</strong>
+                    <span>Top score</span>
+                    <strong>{nameOf(top.id)?.name ?? top.model}</strong>
                     <div>
-                      <b>{top.score.toFixed(2)}</b>
-                      <span>/ 100</span>
+                      <b>{formatScore(top.score, selected)}</b>
+                      <span>{selected.unit === 'index' ? 'index points' : '/ 100'}</span>
                     </div>
-                    <small>
-                      {source.name} · {source.edition}
-                    </small>
+                    {nameOf(top.id) && <small>Setting: {top.model}</small>}
                   </div>
                 )}
               </div>
               <div className="benchmark-freshness">
-                <Clock3 size={16} />
+                <Clock3 size={16} aria-hidden="true" />
                 <div>
                   <strong>
                     {stale
-                      ? 'Update delayed · last valid results shown'
-                      : 'Automatically refreshed · every 6 hours'}
+                      ? 'Update delayed. Showing the last valid results.'
+                      : 'Updated automatically every 6 hours.'}
                   </strong>
                   <span>
-                    Source checked {date(source.checkedAt)}. {source.edition}.
-                  </span>
-                  {source.sourceUpdatedAt && (
-                    <span>Source revision last changed {date(source.sourceUpdatedAt)}.</span>
-                  )}
-                  <span>
-                    New scores appear after the source publishes them. Retrieval time is not the
-                    evaluation date.
+                    Results checked {date(source.checkedAt)}. New scores appear once the test's
+                    results are published.
                   </span>
                 </div>
               </div>
               <div className="benchmark-toolbar">
                 <label className="benchmark-search">
-                  <Search size={17} />
+                  <Search size={17} aria-hidden="true" />
                   <input
                     type="search"
                     aria-label="Search benchmark models"
-                    placeholder="Find a model or provider…"
+                    placeholder="Find a model or maker…"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                   />
@@ -174,48 +200,52 @@ export default function BenchmarkRankings() {
                   {rows.length} of {selected.rows.length} evaluated configurations
                 </span>
               </div>
-              <div className="benchmark-list" aria-label={`${selected.name} benchmark results`}>
-                <div className="benchmark-list-heading mono" aria-hidden="true">
-                  <span>RANK</span>
-                  <span>MODEL / CONFIGURATION</span>
-                  <span>SCORE / 100</span>
-                  <span />
+              <div className="benchmark-list" aria-label={`${testLabel(selected)} results`}>
+                <div className="benchmark-list-heading" aria-hidden="true">
+                  <span>Rank</span>
+                  <span>Model</span>
+                  <span>{selected.unit === 'index' ? 'Index' : 'Score'}</span>
                 </div>
-                {rows.map((row) => (
-                  <article className="benchmark-row" key={row.id}>
-                    <span className="benchmark-rank mono" aria-label={`Rank ${row.rank}`}>
-                      {String(row.rank).padStart(2, '0')}
-                    </span>
-                    <div className="benchmark-model">
-                      <img
-                        src={providerLogo(row.providerId)}
-                        alt=""
-                        width="30"
-                        height="30"
-                        loading="lazy"
-                      />
-                      <div>
-                        <h3>{row.model}</h3>
-                        <span>{row.provider}</span>
+                {rows.map((row) => {
+                  const profile = nameOf(row.id);
+                  const width =
+                    selected.unit === 'index' ? (row.score / best) * 100 : Math.min(100, row.score);
+                  return (
+                    <article className="benchmark-row" key={row.id}>
+                      <span className="benchmark-rank" aria-label={`Rank ${row.rank}`}>
+                        {row.rank}
+                      </span>
+                      <div className="benchmark-model">
+                        <img
+                          src={providerLogo(row.providerId)}
+                          alt=""
+                          width="30"
+                          height="30"
+                          loading="lazy"
+                        />
+                        <div>
+                          <h3>
+                            {profile ? (
+                              <Link to={`/models/${profile.slug}`}>{profile.name}</Link>
+                            ) : (
+                              row.model
+                            )}
+                          </h3>
+                          <span>
+                            {row.provider}
+                            {profile && row.model !== profile.name ? ` · ${row.model}` : ''}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="benchmark-score">
-                      <strong>{row.score.toFixed(2)}</strong>
-                      <div className="benchmark-bar" aria-hidden="true">
-                        <i style={{ width: row.score + '%' }} />
+                      <div className="benchmark-score">
+                        <strong>{formatScore(row.score, selected)}</strong>
+                        <div className="benchmark-bar" aria-hidden="true">
+                          <i style={{ width: `${Math.max(1, width)}%` }} />
+                        </div>
                       </div>
-                    </div>
-                    <a
-                      className="icon-btn"
-                      href={row.sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`Published results for ${row.model}`}
-                    >
-                      <ArrowUpRight size={17} />
-                    </a>
-                  </article>
-                ))}
+                    </article>
+                  );
+                })}
                 {!rows.length && (
                   <p className="empty-benchmarks">No evaluated models match this search.</p>
                 )}
@@ -224,30 +254,23 @@ export default function BenchmarkRankings() {
                 <h2>What these scores mean.</h2>
                 <p>{selected.methodology}</p>
                 <p>
-                  Scores are only comparable within the selected benchmark and edition. Models not
-                  evaluated by the source are absent, not scored zero. Ties at the displayed
-                  precision share a rank; small gaps do not prove a meaningful quality difference.
+                  Scores are only comparable within the selected test and edition. Models that were
+                  not tested are absent, not scored zero. Ties at the displayed precision share a
+                  rank, and small gaps do not prove a meaningful difference.
                 </p>
-                <p>
-                  Source:{' '}
-                  <a href={source.dataUrl} target="_blank" rel="noopener noreferrer">
-                    {source.name} published results
+                <p className="caption">
+                  Analysis by Artificials, based on results published by{' '}
+                  <a href={source.url} target="_blank" rel="noopener noreferrer">
+                    {source.name}
                   </a>{' '}
-                  ·{' '}
+                  (
                   <a href={source.licenseUrl} target="_blank" rel="noopener noreferrer">
                     {source.license}
                   </a>
-                  . Artificials normalizes and ranks these results; it does not run these
-                  evaluations.{' '}
-                  <a href="/data/benchmark-NOTICE.txt">Data attribution and modifications</a>.
+                  ). <a href="/data/benchmark-NOTICE.txt">Data credits</a>.
                 </p>
-                {source.sourceUpdatedAt && (
-                  <p className="caption">
-                    Source revision last modified {date(source.sourceUpdatedAt)}.
-                  </p>
-                )}
               </section>
-            </>
+            </div>
           )}
         </>
       )}

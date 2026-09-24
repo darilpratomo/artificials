@@ -19,6 +19,7 @@
       "/sitemap.xml",
       "/news",
       "/news/*",
+      "/models/*",
     ],
   },
   "vars": {

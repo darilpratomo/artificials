@@ -24,11 +24,13 @@ export function identity(model: string) {
   return { provider: found?.[1] || 'See source', providerId: found?.[2] || 'unknown' };
 }
 
-export function rankRows(rows: Omit<BenchmarkRow, 'rank'>[]): BenchmarkRow[] {
+/** Percent scores must stay within 0–100; index scales pass their own ceiling. */
+export function rankRows(rows: Omit<BenchmarkRow, 'rank'>[], maximum = 100): BenchmarkRow[] {
   if (new Set(rows.map((r) => r.id)).size !== rows.length) throw Error('Duplicate benchmark row');
   const sorted = rows
     .map((r) => {
-      if (!Number.isFinite(r.score) || r.score < 0 || r.score > 100) throw Error('Invalid score');
+      if (!Number.isFinite(r.score) || r.score < 0 || r.score > maximum)
+        throw Error('Invalid score');
       return { ...r, score: Math.round(r.score * 100) / 100, rank: 0 };
     })
     .sort((a, b) => b.score - a.score || a.model.localeCompare(b.model));
@@ -39,6 +41,15 @@ export function rankRows(rows: Omit<BenchmarkRow, 'rank'>[]): BenchmarkRow[] {
   });
 }
 
+const categoryDomain: Record<string, BenchmarkCategory['domain']> = {
+  reasoning: 'reasoning',
+  coding: 'coding',
+  'agentic-coding': 'agentic',
+  math: 'math',
+  'data-analysis': 'data',
+  language: 'language',
+  'instruction-following': 'language',
+};
 const categoryInfo: Record<string, [string, string, string]> = {
   Reasoning: ['reasoning', 'Reasoning', 'Logical, spatial and multi-step reasoning tasks.'],
   Coding: ['coding', 'Coding', 'Code generation and completion on the published LiveBench tasks.'],
@@ -99,6 +110,8 @@ export function parseLiveBench(
       name,
       description,
       sourceId: 'livebench',
+      unit: 'percent' as const,
+      domain: categoryDomain[id],
       methodology: `Arithmetic mean of the ${tasks.length} published task scores in this category. Only complete results are ranked. Exact model and effort configurations are preserved.`,
       rows: rankRows(
         records.flatMap((record) => {
@@ -122,6 +135,8 @@ export function parseLiveBench(
     id: 'overall',
     name: 'Overall',
     sourceId: 'livebench',
+    unit: 'percent',
+    domain: 'overall',
     description: 'Broad language-model performance across the current LiveBench release.',
     methodology: `Equal-weight mean of all ${categories.length} category means, matching the published aggregation method for complete results. This is LiveBench performance, not a universal best-model score.`,
     rows: rankRows(
@@ -168,6 +183,8 @@ export function parseImageBench(html: string, sourceUrl: string): BenchmarkCateg
     id: 'image',
     name: 'Image generation',
     sourceId: 'corebench',
+    unit: 'percent',
+    domain: 'image',
     description: 'Text-to-image composition and visual reasoning, evaluated by T2I-CoReBench.',
     methodology:
       'Published overall scores with the Gemini 2.5 Flash evaluator. These measure composition and reasoning across 12 dimensions, not human aesthetic preference. Prompt-rewriting variants and other evaluators are excluded. Coverage is limited to models evaluated by the source.',

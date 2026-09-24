@@ -4246,25 +4246,6 @@ textarea::placeholder {
   display: flex;
   gap: 10px;
 }
-.footer-wordmark {
-  font-size: clamp(90px, 20.6vw, 330px);
-  font-weight: 550;
-  letter-spacing: -0.083em;
-  line-height: 0.95;
-  margin: 10px auto -3.5vw;
-  width: calc(100% - 110px);
-  color: #6c707c;
-  white-space: nowrap;
-  display: flex;
-  align-items: flex-start;
-  gap: 35px;
-}
-.footer-wordmark svg {
-  width: 40px;
-  height: 40px;
-  margin-top: 30px;
-  color: #292b32;
-}
 .signal-hero {
   position: relative;
   overflow: clip;
@@ -5929,14 +5910,6 @@ textarea::placeholder {
   .footer-baseline > span:nth-child(2) {
     max-width: 250px;
   }
-  .footer-wordmark {
-    width: calc(100% - 54px);
-    gap: 20px;
-  }
-  .footer-wordmark svg {
-    width: 25px;
-    margin-top: 12px;
-  }
   .auth-story h1 {
     font-size: 42px;
   }
@@ -6338,17 +6311,6 @@ textarea::placeholder {
   .footer-baseline > span:last-child {
     margin-left: auto;
   }
-  .footer-wordmark {
-    width: calc(100% - 36px);
-    font-size: 20vw;
-    gap: 10px;
-    margin: 14px auto -6px;
-  }
-  .footer-wordmark svg {
-    width: 16px;
-    height: 16px;
-    margin-top: 10px;
-  }
   .page {
     padding-top: 45px;
     padding-bottom: 65px;
@@ -6628,32 +6590,64 @@ textarea::placeholder {
 .benchmark-page {
   padding-top: 45px;
 }
-.benchmark-categories {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 9px;
-  margin: 35px 0;
+.benchmark-domains {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 35px 0 14px;
 }
-.benchmark-categories button {
-  padding: 16px 12px;
+.benchmark-domains button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 14px 7px 7px;
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: 999px;
   background: var(--surface);
   color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+.benchmark-domains button:hover {
+  color: var(--text);
+  border-color: #3b3d47;
+}
+.benchmark-domains button[aria-pressed='true'] {
+  border-color: var(--domain);
+  background: color-mix(in srgb, var(--domain) 14%, var(--surface));
+  color: var(--text);
+}
+.benchmark-domains button:focus-visible,
+.benchmark-tests button:focus-visible {
+  outline: 2px solid #7fb2ff;
+  outline-offset: 2px;
+}
+.benchmark-tests {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 9px;
-  font-size: 12px;
-  text-align: left;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
 }
-.benchmark-categories button svg {
-  flex-shrink: 0;
+.benchmark-tests button {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12.5px;
+  cursor: pointer;
 }
-.benchmark-categories button[aria-pressed='true'] {
+.benchmark-tests button[aria-pressed='true'] {
+  border-color: #e6e7ec;
   background: #e6e7ec;
   color: #111216;
-  border-color: #e6e7ec;
+}
+.benchmark-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
 }
 .benchmark-overview {
   display: grid;
@@ -6680,8 +6674,8 @@ textarea::placeholder {
   border: 1px solid #393b46;
   border-radius: 10px;
 }
-.benchmark-leader > .mono {
-  font-size: 9px;
+.benchmark-leader > span {
+  font-size: 12px;
   color: #a3a6b2;
   display: block;
   line-height: 1.8;
@@ -6762,7 +6756,7 @@ textarea::placeholder {
 .benchmark-row,
 .benchmark-list-heading {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) minmax(100px, 200px) 36px;
+  grid-template-columns: 40px minmax(0, 1fr) minmax(100px, 220px);
   gap: 18px;
   align-items: center;
   padding: 19px 16px;
@@ -6771,8 +6765,17 @@ textarea::placeholder {
   border-top: 1px solid var(--border);
 }
 .benchmark-list-heading {
-  font-size: 9px;
+  font-size: 12px;
   color: var(--muted);
+}
+.benchmark-model h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+.benchmark-model h3 a:hover,
+.benchmark-model h3 a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .benchmark-rank {
   color: #b8bac4;
@@ -6809,7 +6812,7 @@ textarea::placeholder {
   margin-bottom: 9px;
 }
 .benchmark-bar {
-  height: 4px;
+  height: 6px;
   background: #25262d;
   border-radius: 4px;
   overflow: hidden;
@@ -6817,7 +6820,8 @@ textarea::placeholder {
 .benchmark-bar i {
   height: 100%;
   display: block;
-  background: linear-gradient(90deg, #7b7e8d, #e8e9ef);
+  border-radius: 0 4px 4px 0;
+  background: var(--domain, #c9ccd4);
 }
 .benchmark-page .ranking-method > p {
   margin-bottom: 14px;
@@ -6867,22 +6871,13 @@ textarea::placeholder {
   .reveal-ready.revealed {
     transform: none;
   }
-  .benchmark-categories {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
   .benchmark-overview {
     gap: 20px;
   }
 }
 @media (max-width: 639px) {
-  .benchmark-categories {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-  .benchmark-categories button {
-    min-height: 52px;
-    font-size: 11px;
-    padding: 12px;
+  .benchmark-domains button {
+    font-size: 12px;
   }
   .benchmark-overview {
     grid-template-columns: minmax(0, 1fr);
@@ -6894,7 +6889,7 @@ textarea::placeholder {
   }
   .benchmark-row,
   .benchmark-list-heading {
-    grid-template-columns: 25px minmax(0, 1fr) 58px 25px;
+    grid-template-columns: 25px minmax(0, 1fr) 72px;
     gap: 9px;
     padding: 17px 0;
   }
@@ -6911,13 +6906,8 @@ textarea::placeholder {
   .benchmark-score strong {
     font-size: 16px;
   }
-  .benchmark-row .icon-btn {
-    width: 25px;
-    padding: 0;
-    min-width: 0;
-  }
   .benchmark-list-heading {
-    font-size: 7px;
+    font-size: 11px;
   }
   .ranking-view-switch a {
     font-size: 10px;
@@ -7326,25 +7316,6 @@ input[type='radio'] {
 }
 
 /* A compact, quiet brand signature replaces the oversized footer lettering. */
-.site-footer .footer-wordmark {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: calc(100% - 40px);
-  height: clamp(104px, 13vw, 166px);
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 8px 0 20px;
-  gap: 0;
-}
-.footer-wordmark .footer-brand-echo {
-  display: block;
-  width: clamp(100px, 14vw, 170px);
-  height: 100%;
-  object-fit: contain;
-  opacity: 0.24;
-  pointer-events: none;
-}
 .site-footer .social-links a {
   width: 44px;
   height: 44px;
@@ -7867,4 +7838,15 @@ input[type='radio'] {
     flex-basis: 125px;
     padding-inline: 10px;
   }
+}
+
+/* Model card title opens the model's profile. */
+.model-card-link {
+  color: inherit;
+  text-decoration: none;
+}
+.model-card-link:hover,
+.model-card-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }

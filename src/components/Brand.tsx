@@ -1,19 +1,17 @@
+import { PixelLogo } from './PixelLogo';
 import '../brand.css';
 
-type BrandProps = { className?: string };
+type BrandProps = { className?: string; animate?: boolean };
 
-/** The supplied mark is decorative; the live wordmark gives links their accessible name. */
-export function Brand({ className = '' }: BrandProps) {
+/** The mark is decorative; the live wordmark gives links their accessible name. */
+export function Brand({ className = '', animate = false }: BrandProps) {
   return (
     <span className={`brand-lockup ${className}`.trim()}>
-      <img
+      <PixelLogo
         className="brand-mark"
-        src="/brand/artificials-mark-small.webp"
-        width="36"
-        height="32"
-        alt=""
-        aria-hidden="true"
-        decoding="async"
+        animate={animate}
+        repeatEvery={animate ? 10000 : 0}
+        downloadable
       />
       <span className="brand-name">Artificials</span>
     </span>

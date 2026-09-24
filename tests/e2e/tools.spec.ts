@@ -10,9 +10,6 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
     localStorage.setItem('artificials-analytics-consent-v1', 'denied'),
   );
-  // Suppress the one-per-session logo intro so it never covers the page under
-  // test. The intro has its own suite.
-  await page.addInitScript(() => sessionStorage.setItem('artificialsIntroPlayed', 'true'));
   if (process.env.E2E_PRODUCTION === '1') {
     await page.route('**/*', async (route) => {
       if (!route.request().isNavigationRequest()) return route.continue();

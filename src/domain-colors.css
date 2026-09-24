@@ -1,0 +1,57 @@
+/*
+ * One fixed colour per skill area, shared by model profiles and rankings.
+ * These are the dark-surface steps of a categorical palette validated against
+ * this site's surface (#101115): all pass lightness, chroma, colour-blind
+ * separation for adjacent areas, and 3:1 contrast. Text never uses these
+ * colours; they mark bars, keys and accents, always beside a text label.
+ */
+:root {
+  --domain-overall: #c9ccd4;
+  --domain-coding: #3987e5;
+  --domain-math: #d95926;
+  --domain-knowledge: #199e70;
+  --domain-agentic: #c98500;
+  --domain-language: #d55181;
+  --domain-data: #008300;
+  --domain-reasoning: #9085e9;
+  --domain-image: #e66767;
+  --status-warning: #fab219;
+  --status-critical: #d03b3b;
+}
+.domain-overall {
+  --domain: var(--domain-overall);
+}
+.domain-coding {
+  --domain: var(--domain-coding);
+}
+.domain-math {
+  --domain: var(--domain-math);
+}
+.domain-knowledge {
+  --domain: var(--domain-knowledge);
+}
+.domain-agentic {
+  --domain: var(--domain-agentic);
+}
+.domain-language {
+  --domain: var(--domain-language);
+}
+.domain-data {
+  --domain: var(--domain-data);
+}
+.domain-reasoning {
+  --domain: var(--domain-reasoning);
+}
+.domain-image {
+  --domain: var(--domain-image);
+}
+.domain-key {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  color: var(--domain);
+  background: color-mix(in srgb, var(--domain) 16%, transparent);
+}

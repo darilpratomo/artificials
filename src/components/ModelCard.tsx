@@ -1,4 +1,6 @@
+import { Link } from 'react-router-dom';
 import { ArrowUpRight, Check, Plus, Brain, ScanEye } from 'lucide-react';
+import { modelSlug } from '../../shared/model-profiles';
 import { compactNumber, tokenPrice, providerLogo, type ModelRecord } from '../lib/catalog';
 export default function ModelCard({
   model,
@@ -32,7 +34,12 @@ export default function ModelCard({
           <ArrowUpRight size={16} />
         </a>
       </div>
-      <h3>{model.name}</h3>
+      <h3>
+        {/* The whole model, across every provider, lives on its profile page. */}
+        <Link className="model-card-link" to={`/models/${modelSlug(model.modelId)}`}>
+          {model.name}
+        </Link>
+      </h3>
       <p className="model-identifier">{model.modelId}</p>
       <div className="capability-tags">
         {model.reasoning && (

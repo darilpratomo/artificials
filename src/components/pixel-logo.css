@@ -1,104 +1,108 @@
-.pixel-logo {
-  --pixel-size: 14px;
-  --pixel-gap: 2px;
-  --pixel-columns: 21;
-  --pixel-color: #ffffff;
-  --pixel-travel: 620ms;
-  --pixel-fade: 260ms;
-  --wordmark-delay: 1860ms;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(16px, 4vw, 34px);
-  max-width: 90vw;
-  /* The requested size is a ceiling. The mark shrinks to fit narrow screens so
-     it never overflows or swamps the page, which 16px pixels do on a phone. */
-  --pixel-cell: min(var(--pixel-size), calc((90vw - 12px) / var(--pixel-columns)));
-}
+/* The static mark needs no styling; only the animated variant moves its blocks.
+   Offsets are in the SVG user coordinate system, so they scale with whatever
+   size the logo is rendered at.
 
-@media (max-width: 760px) {
-  .pixel-logo {
-    /* Phones get a 9-12px pixel, so the mark stays a logo rather than filling
-       the screen, and the stacked wordmark still has room underneath. */
-    --pixel-cell: clamp(
-      9px,
-      min(calc((58vw - 12px) / var(--pixel-columns)), calc(30vh / var(--pixel-columns))),
-      12px
-    );
+   Keyframes rather than transitions: browsers accept a transform on an SVG
+   element but will not reliably interpolate one through a CSS transition, so a
+   transition-based version can render as a static mark. */
+@keyframes pixel-block-in {
+  from {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(0.35);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    /* No transform at the end: a settled block left in a transform keeps its
+       own compositing layer, which shows as hairline seams between rows. */
+    transform: none;
   }
 }
 
-.pixel-logo-grid {
-  display: grid;
-  grid-template-columns: repeat(var(--pixel-columns), var(--pixel-cell));
-  grid-auto-rows: var(--pixel-cell);
-  gap: var(--pixel-gap);
-  flex: none;
-}
-
-/* A hairline outset closes the sub-pixel seams left by fractional sizes, so the
-   mark reads as solid shapes rather than a lattice of separate squares. */
-.pixel-logo-grid[data-solid='true'] .pixel {
-  box-shadow: 0 0 0 0.5px var(--pixel-color);
-}
-
-.pixel {
-  display: block;
-  width: var(--pixel-cell);
-  height: var(--pixel-cell);
-  background: var(--pixel-color);
-  opacity: 0;
-  transform: translate(var(--tx), var(--ty)) scale(0.2) rotate(var(--rotation));
-  /* Only the animating properties are promoted, and only while they animate. */
-  will-change: transform, opacity;
-}
-
-.pixel-logo.is-assembled .pixel {
-  opacity: 1;
-  transform: translate(0, 0) scale(1) rotate(0deg);
-  transition:
-    opacity var(--pixel-fade) ease var(--delay),
-    transform var(--pixel-travel) cubic-bezier(0.18, 0.82, 0.19, 1) var(--delay);
-}
-
-.pixel-logo-wordmark {
-  font-family: 'Sora', 'Inter Variable', sans-serif;
-  font-size: clamp(1.4rem, 5.2vw, 2.6rem);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: var(--pixel-color);
-  white-space: nowrap;
-  opacity: 0;
-  transform: translateX(-10px);
-}
-
-.pixel-logo.is-assembled .pixel-logo-wordmark {
-  opacity: 1;
-  transform: translateX(0);
-  transition:
-    opacity 520ms ease var(--wordmark-delay),
-    transform 520ms cubic-bezier(0.18, 0.82, 0.19, 1) var(--wordmark-delay);
-}
-
-@media (max-width: 760px) {
-  .pixel-logo {
-    flex-direction: column;
-    gap: clamp(14px, 5vw, 26px);
-  }
-  .pixel-logo-wordmark {
-    letter-spacing: 0.09em;
-  }
-}
-
-/* Reduced motion shows the finished logo with no assembling and no delays. */
-@media (prefers-reduced-motion: reduce) {
-  .pixel,
-  .pixel-logo.is-assembled .pixel,
-  .pixel-logo-wordmark,
-  .pixel-logo.is-assembled .pixel-logo-wordmark {
+@keyframes pixel-block-out {
+  from {
     opacity: 1;
     transform: none;
-    transition: none;
-    will-change: auto;
   }
+  to {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(0.35);
+  }
+}
+
+/* Held from the first paint until the assembly starts. The attribute ships in
+   the prerendered HTML, so there is no window where the finished mark shows.
+
+   Both shapes must be covered: the static markup draws plain <rect> elements,
+   and React replaces them with <g class="pixel-block"> wrappers. Hiding only
+   the wrappers leaves the prerendered mark visible for the few frames before
+   React takes over, which is exactly the flash this prevents. */
+.pixel-logo[data-animates] .pixel-block,
+.pixel-logo[data-animates] > rect {
+  opacity: 0;
+}
+
+/* Without JavaScript the assembly never runs, so restore the finished mark
+   rather than leaving an empty space where the logo should be. */
+@media (scripting: none) {
+  .pixel-logo[data-animates] > rect {
+    opacity: 1;
+  }
+}
+
+.pixel-logo.is-animated .pixel-block {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  /* Promote each block for the whole cycle. Without this the browser moves
+     blocks in and out of their own compositing layer as the animation starts
+     and stops, and the re-rasterisation shows as a one-frame blink. */
+  will-change: transform, opacity;
+  /* Dispersing: accelerates away, staggered from the edges inward. */
+  animation: pixel-block-out var(--logo-travel-out, 520ms) cubic-bezier(0.55, 0, 0.9, 0.45)
+    var(--out-delay, 0ms) both;
+}
+
+.pixel-logo.is-animated.is-assembled .pixel-block {
+  /* Assembling: a long decelerating settle so blocks arrive softly.
+     `backwards` holds the scattered start through the stagger, and the block is
+     left with no transform once it lands, so the settled mark is pixel-exact. */
+  animation: pixel-block-in var(--logo-travel-in, 620ms) cubic-bezier(0.16, 0.84, 0.24, 1)
+    var(--in-delay, 0ms) backwards;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-logo.is-animated .pixel-block,
+  .pixel-logo.is-animated.is-assembled .pixel-block {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
+/* Saveable variant: the drawn SVG provides the motion, and a matching image
+   layer on top gives the browser something to offer "Save image as" on. */
+.pixel-logo-saveable {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  line-height: 0;
+}
+
+/* The wrapper carries the caller's sizing class, so the drawing fills it. */
+.pixel-logo-saveable > .pixel-logo {
+  width: 100%;
+  height: 100%;
+}
+
+.pixel-logo-saveable .pixel-logo-file {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Invisible but still hit-testable, so the saved file is the real logo. */
+  opacity: 0;
 }

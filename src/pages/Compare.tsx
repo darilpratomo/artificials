@@ -8,8 +8,18 @@ import {
   providerLogo,
   type ModelRecord,
 } from '../lib/catalog';
+import { modelSlug, useProfiles } from '../lib/profiles';
 export default function Compare() {
   const { models, toggle, clear } = useComparison();
+  const profiles = useProfiles(models.map((m) => modelSlug(m.modelId)));
+  const capability = (m: ModelRecord) => {
+    const profile = profiles[modelSlug(m.modelId)];
+    if (profile === undefined) return 'Loading…';
+    const index = profile?.results.find((result) => result.category === 'capability-index');
+    return index
+      ? `${index.score.toFixed(1)} (#${index.rank} of ${index.total})`
+      : 'Not tested yet';
+  };
   const rows: [string, (m: ModelRecord) => string][] = [
     ['API provider', (m) => m.provider],
     ['Model identifier', (m) => m.modelId],
@@ -21,7 +31,7 @@ export default function Compare() {
     ['Reasoning', (m) => (m.reasoning ? 'Reported' : 'Not reported')],
     ['Open weights', (m) => (m.openWeights ? 'Reported' : 'Not reported')],
     ['Release date', (m) => m.releaseDate || 'Not reported'],
-    ['Intelligence benchmark', () => 'Not available in this source'],
+    ['Capability index', capability],
   ];
   return (
     <div className="container page comparison-page">
@@ -62,7 +72,11 @@ export default function Compare() {
                         height="35"
                         alt=""
                       />
-                      <h2>{m.name}</h2>
+                      <h2>
+                        <Link className="model-card-link" to={`/models/${modelSlug(m.modelId)}`}>
+                          {m.name}
+                        </Link>
+                      </h2>
                       <span>{m.provider}</span>
                     </th>
                   ))}

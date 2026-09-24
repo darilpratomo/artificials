@@ -1,4 +1,12 @@
-import { publicPages, pageMetadata, metadataHtml, escapeHtml, SITE_URL } from '../shared/seo';
+import {
+  publicPages,
+  pageMetadata,
+  metadataHtml,
+  escapeHtml,
+  modelMetadata,
+  SITE_URL,
+} from '../shared/seo';
+import type { DirectoryEntry, ProfileDirectory } from '../shared/model-profiles';
 import type { Article } from '../shared/content';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
@@ -303,8 +311,33 @@ async function publishedArticles(env: Env): Promise<Article[]> {
   if (error) throw new Error('articles');
   return data || [];
 }
+// The profile directory is a static asset; keep one parsed copy per isolate.
+let profileDirectory: { loadedAt: number; bySlug: Map<string, DirectoryEntry> } | null = null;
+async function profileEntries(env: Env, requestUrl: string) {
+  if (profileDirectory && Date.now() - profileDirectory.loadedAt < 5 * 60 * 1000)
+    return profileDirectory.bySlug;
+  const response = await env.ASSETS.fetch(
+    new Request(new URL('/data/models/directory.json', requestUrl)),
+  );
+  if (!response.ok) throw new Error('profile directory');
+  const directory = (await response.json()) as ProfileDirectory;
+  profileDirectory = {
+    loadedAt: Date.now(),
+    bySlug: new Map(directory.models.map((entry) => [entry[0], entry])),
+  };
+  return profileDirectory.bySlug;
+}
 app.get('/sitemap.xml', async (c) => {
   const pages = publicPages(await publishedArticles(c.env));
+  try {
+    // Profiles with benchmark results or several hosts carry enough substance to index.
+    for (const [slug, , , offerings, hasResults] of (
+      await profileEntries(c.env, c.req.url)
+    ).values())
+      if (hasResults || offerings >= 3) pages.push({ path: '/models/' + slug });
+  } catch {
+    // A missing directory must not take the rest of the sitemap down.
+  }
   return c.body(
     '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
       pages
@@ -372,6 +405,36 @@ app.on('GET', ['/news', '/news/:slug'], async (c) => {
   const policy = shell.headers.get('Content-Security-Policy');
   if (policy) c.header('Content-Security-Policy', policy);
   return c.html(html, listing || article ? 200 : 404);
+});
+// Model profiles render in the browser; the Worker supplies the right title and
+// description on first paint, and a real 404 status for unknown models.
+app.get('/models/:slug', async (c) => {
+  const slug = c.req.param('slug');
+  let entry: DirectoryEntry | undefined;
+  if (/^[a-z0-9][a-z0-9-]{0,99}$/.test(slug)) {
+    try {
+      entry = (await profileEntries(c.env, c.req.url)).get(slug);
+    } catch {
+      // Fall through to the not-found response.
+    }
+  }
+  const shell = await c.env.ASSETS.fetch(new Request(new URL('/app-shell', c.req.url)));
+  const meta = modelMetadata(
+    entry
+      ? {
+          slug: entry[0],
+          name: entry[1],
+          maker: entry[2],
+          offerings: entry[3],
+          hasResults: entry[4] === 1,
+        }
+      : null,
+    slug,
+  );
+  const html = (await shell.text()).replace('</head>', metadataHtml(meta) + '</head>');
+  const policy = shell.headers.get('Content-Security-Policy');
+  if (policy) c.header('Content-Security-Policy', policy);
+  return c.html(html, entry ? 200 : 404);
 });
 app.get('/_private/:token', async (c) => {
   c.header('X-Robots-Tag', 'noindex, nofollow');

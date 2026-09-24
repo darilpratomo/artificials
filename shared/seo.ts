@@ -76,6 +76,17 @@ export function publicPages(articles: Article[] = ARTICLES) {
 }
 export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
   const path = pathname.replace(/\/$/, '') || '/';
+  const profile = /^\/models\/([a-z0-9][a-z0-9-]{0,99})$/.exec(path);
+  if (profile)
+    return {
+      ...modelMetadata(
+        { slug: profile[1], name: 'AI model profile', maker: '', offerings: 0, hasResults: false },
+        profile[1],
+      ),
+      title: 'AI model profile — Artificials',
+      description:
+        'Benchmarks, pricing across providers, context window and capabilities for an AI model.',
+    };
   const article = articles.find((a) => a.published && path === '/news/' + a.slug);
   const lesson = academy.lessons.find((l) => path === '/learn/' + l.slug);
   const known = Boolean(pages[path] || article || lesson);
@@ -132,6 +143,41 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
     robots: known ? 'index,follow,max-image-preview:large' : 'noindex,follow',
     type: article ? 'article' : 'website',
     structured,
+  };
+}
+export interface ModelMetaInput {
+  slug: string;
+  name: string;
+  maker: string;
+  offerings: number;
+  hasResults: boolean;
+}
+/** Search metadata for a model profile. `null` means the slug is unknown. */
+export function modelMetadata(model: ModelMetaInput | null, slug = model?.slug ?? '') {
+  const canonical = SITE_URL + '/models/' + slug;
+  if (!model)
+    return {
+      title: 'Model not found — Artificials',
+      description:
+        'This model is not in the Artificials catalog. Browse AI models by capability, price and provider.',
+      canonical,
+      image: SITE_URL + '/editorial/hero-brand.webp',
+      known: false,
+      robots: 'noindex,follow',
+      type: 'website' as const,
+      structured: null,
+    };
+  const hosts = model.offerings === 1 ? '1 provider' : `${model.offerings} providers`;
+  const by = model.maker ? ` by ${model.maker}` : '';
+  return {
+    title: `${model.name}: benchmarks, pricing and providers — Artificials`,
+    description: `${model.name}${by}. ${model.hasResults ? 'How it ranks on benchmarks, ' : 'Capabilities, '}prices from ${hosts}, context window and a cost calculator. Updated automatically.`,
+    canonical,
+    image: SITE_URL + '/editorial/hero-brand.webp',
+    known: true,
+    robots: 'index,follow,max-image-preview:large',
+    type: 'website' as const,
+    structured: null,
   };
 }
 export function escapeHtml(value: string) {

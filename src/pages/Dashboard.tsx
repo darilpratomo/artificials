@@ -72,7 +72,7 @@ export default function Dashboard() {
       </div>
       {session.requiresMfa && (
         <div className="notice">
-          Verify your authenticator code in Security settings below to unlock your account.
+          Verify your authenticator code in Security settings below to finish signing in.
         </div>
       )}
       <div className="dashboard-stats">

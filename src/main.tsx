@@ -6,9 +6,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './styles.css';
 import { Provider } from './lib/context';
 import { Layout, EmptyState } from './components/Layout';
-import LogoIntro from './components/LogoIntro';
 import Home from './pages/Home';
 const Models = lazy(() => import('./pages/Models'));
+const ModelProfile = lazy(() => import('./pages/ModelProfile'));
 const Compare = lazy(() => import('./pages/Compare'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
 const Academy = lazy(() => import('./pages/Academy'));
@@ -47,12 +47,12 @@ createRoot(document.getElementById('root')!).render(
       <Provider>
         <Metadata />
         <Analytics />
-        <LogoIntro />
         <Suspense fallback={<div className="loading-panel">Loading Artificials…</div>}>
           <Routes>
             <Route element={<Layout />}>
               <Route index element={<Home />} />
               <Route path="models" element={<Models />} />
+              <Route path="models/:slug" element={<ModelProfile />} />
               <Route path="leaderboard" element={<Leaderboard />} />
               <Route path="compare" element={<Compare />} />
               <Route path="learn" element={<Academy />} />

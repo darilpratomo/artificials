@@ -103,7 +103,7 @@ export default function Info() {
           </p>
         </section>
         <div className="closing-banner">
-          <h2>Explore the AI landscape.</h2>
+          <h2>Find the right model.</h2>
           <Link className="btn" to="/models">
             Explore models <ArrowUpRight size={16} />
           </Link>
@@ -182,11 +182,11 @@ export default function Info() {
             </p>
             <h2>3. Why we process information</h2>
             <p>
-              The free file utilities in Tools process selected files locally in your browser.
-              File contents and file names are not uploaded to Artificials or sent to analytics.
-              They are held temporarily in the active workspace; clearing it or leaving the page
-              releases that workspace. Files you download remain on your device. Normal website
-              delivery and optional page-view analytics still work as described in this policy.
+              The free file utilities in Tools process selected files locally in your browser. File
+              contents and file names are not uploaded to Artificials or sent to analytics. They are
+              held temporarily in the active workspace; clearing it or leaving the page releases
+              that workspace. Files you download remain on your device. Normal website delivery and
+              optional page-view analytics still work as described in this policy.
             </p>
             <p>
               We use account and project data to provide the service and fulfill our agreement with

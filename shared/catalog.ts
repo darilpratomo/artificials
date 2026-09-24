@@ -29,8 +29,40 @@ export interface ModelRecord {
   providerUrl: string | null;
   description?: string;
   status?: string;
+  /** Largest completion the host accepts, in tokens. */
+  maxOutput?: number;
+  /** Separate input cap, when a host reports one below the context window. */
+  maxInput?: number;
+  /** USD per million tokens for cached input reads and writes, when reported. */
+  cacheReadPrice?: number;
+  cacheWritePrice?: number;
+  /** USD per million reasoning tokens, when billed separately from output. */
+  reasoningPrice?: number;
+  audioInputPrice?: number;
+  audioOutputPrice?: number;
+  /** Higher prices that apply once a request exceeds a context size. */
+  longContextPricing?: LongContextPrice[];
+  /** Training-data cutoff as reported: YYYY-MM or YYYY-MM-DD. */
+  knowledge?: string;
+  lastUpdated?: string;
+  family?: string;
+  toolCall?: boolean;
+  structuredOutput?: boolean;
+  attachment?: boolean;
+  temperature?: boolean;
+  /** Named reasoning-effort levels the host exposes, in source order. */
+  reasoningEfforts?: string[];
+  reasoningToggle?: boolean;
+  reasoningBudget?: boolean;
   /** Absent unless a separately licensed, methodologically comparable result is supplied. */
   benchmark?: ModelBenchmark;
+}
+export interface LongContextPrice {
+  /** Requests above this many input tokens use these prices. */
+  threshold: number;
+  input: number | null;
+  output: number | null;
+  cacheRead: number | null;
 }
 export interface CatalogProvider {
   id: string;
@@ -162,6 +194,83 @@ function modalities(value: unknown): string[] {
     .slice(0, 20)
     .sort();
 }
+/** Optional detail fields. Each is included only when the source reports a valid value. */
+function details(
+  model: Record<string, unknown>,
+  cost: Record<string, unknown> | null,
+  limits: Record<string, unknown> | null,
+): Partial<ModelRecord> {
+  const out: Partial<ModelRecord> = {};
+  const set = <K extends keyof ModelRecord>(key: K, value: ModelRecord[K] | null | undefined) => {
+    if (value !== null && value !== undefined) out[key] = value;
+  };
+  set('maxOutput', finite(limits?.output) || null);
+  const maxInput = finite(limits?.input);
+  if (maxInput) set('maxInput', maxInput);
+  set('cacheReadPrice', finite(cost?.cache_read, 1e7));
+  set('cacheWritePrice', finite(cost?.cache_write, 1e7));
+  set('reasoningPrice', finite(cost?.reasoning, 1e7));
+  set('audioInputPrice', finite(cost?.input_audio, 1e7));
+  set('audioOutputPrice', finite(cost?.output_audio, 1e7));
+  const tiers: LongContextPrice[] = [];
+  if (Array.isArray(cost?.tiers))
+    for (const raw of cost.tiers.slice(0, 8)) {
+      const tier = record(raw);
+      const bound = record(tier?.tier);
+      const threshold = bound?.type === 'context' ? finite(bound.size, 1e9) : null;
+      if (!tier || !threshold) continue;
+      tiers.push({
+        threshold,
+        input: finite(tier.input, 1e7),
+        output: finite(tier.output, 1e7),
+        cacheRead: finite(tier.cache_read, 1e7),
+      });
+    }
+  const over = record(cost?.context_over_200k);
+  if (!tiers.length && over)
+    tiers.push({
+      threshold: 200000,
+      input: finite(over.input, 1e7),
+      output: finite(over.output, 1e7),
+      cacheRead: finite(over.cache_read, 1e7),
+    });
+  const priced = tiers.filter((tier) => tier.input !== null || tier.output !== null);
+  if (priced.length)
+    set(
+      'longContextPricing',
+      priced.sort((a, b) => a.threshold - b.threshold),
+    );
+  set('knowledge', date(model.knowledge));
+  set('lastUpdated', date(model.last_updated));
+  const family = shortText(model.family, 80);
+  if (family && /^[a-z0-9][a-z0-9._-]*$/i.test(family)) set('family', family.toLowerCase());
+  for (const [key, field] of [
+    ['toolCall', 'tool_call'],
+    ['structuredOutput', 'structured_output'],
+    ['attachment', 'attachment'],
+    ['temperature', 'temperature'],
+  ] as const)
+    if (typeof model[field] === 'boolean') set(key, model[field] as boolean);
+  if (Array.isArray(model.reasoning_options)) {
+    for (const raw of model.reasoning_options.slice(0, 10)) {
+      const option = record(raw);
+      if (option?.type === 'toggle') set('reasoningToggle', true);
+      if (option?.type === 'budget_tokens') set('reasoningBudget', true);
+      if (option?.type === 'effort' && Array.isArray(option.values)) {
+        const efforts = [
+          ...new Set(
+            option.values.filter(
+              (value): value is string =>
+                typeof value === 'string' && /^[a-z][a-z0-9-]{0,15}$/.test(value),
+            ),
+          ),
+        ].slice(0, 8);
+        if (efforts.length) set('reasoningEfforts', efforts);
+      }
+    }
+  }
+  return out;
+}
 /** Reject malformed upstream records; unknown prices are null, never zero. */
 export function normalizeCatalog(
   input: unknown,
@@ -217,6 +326,7 @@ export function normalizeCatalog(
         ...(['alpha', 'beta', 'deprecated'].includes(String(model.status))
           ? { status: String(model.status) }
           : {}),
+        ...details(model, cost, limits),
       });
       modelCount++;
       if (models.size > 50000) throw new Error('Catalog model limit exceeded.');

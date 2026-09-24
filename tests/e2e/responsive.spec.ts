@@ -6,9 +6,6 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
     localStorage.setItem('artificials-analytics-consent-v1', 'denied'),
   );
-  // Suppress the one-per-session logo intro so it never covers the page under
-  // test. The intro has its own suite.
-  await page.addInitScript(() => sessionStorage.setItem('artificialsIntroPlayed', 'true'));
   await page.route('**/api/config', (route) =>
     route.fulfill({
       json: { auth: false, billing: false, ai: false, supportEmail: 'support@artificials.net' },
@@ -90,19 +87,23 @@ test('benchmark categories search source data and recover from a failed load', a
   await page.getByRole('button', { name: 'Try again' }).click();
   await page.getByRole('button', { name: 'Coding', exact: true }).click();
   await expect(page.locator('.benchmark-row').first()).toBeVisible();
-  const name = await page.locator('.benchmark-model h3').first().innerText();
+  // Tested models open their Artificials profile rather than an external table.
+  const link = page.locator('.benchmark-row h3 a').first();
+  await expect(link).toHaveAttribute('href', /^\/models\/[a-z0-9-]+$/);
+  const name = await link.innerText();
   await page.getByRole('searchbox', { name: 'Search benchmark models' }).fill(name);
-  await expect(page.locator('.benchmark-row')).toHaveCount(1);
-  await expect(page.locator('.benchmark-row a')).toHaveAttribute(
-    'href',
-    /raw\.githubusercontent\.com\/LiveBench/,
-  );
+  await expect(page.locator('.benchmark-row').first()).toContainText(name);
+  const matches = await page.locator('.benchmark-row').count();
+  expect(matches).toBeGreaterThan(0);
+  expect(matches).toBeLessThan(10);
+  // The data provider is still credited, compactly, below the results.
+  await expect(page.locator('.ranking-method')).toContainText('LiveBench');
   await page.getByRole('button', { name: 'Image generation', exact: true }).click();
   await expect(page.locator('.benchmark-row').first()).toBeVisible();
   await expect(page.locator('.ranking-method')).toContainText('not human aesthetic preference');
-  await expect(page.locator('.benchmark-row a').first()).toHaveAttribute(
+  await expect(page.locator('.ranking-method a').first()).toHaveAttribute(
     'href',
-    'https://t2i-corebench.github.io/#leaderboard',
+    'https://t2i-corebench.github.io/',
   );
 });
 
@@ -129,22 +130,23 @@ test('hero uses portrait artwork on mobile and footer branding stays centered', 
       .poll(() => profile.locator('img').evaluate((img) => (img as HTMLImageElement).naturalWidth))
       .toBeGreaterThan(0);
   }
-  const wordmark = await page.locator('.footer-brand-echo').boundingBox();
-  expect(Math.abs(wordmark!.x + wordmark!.width / 2 - width / 2)).toBeLessThan(2);
-  expect(wordmark!.width).toBeLessThanOrEqual(170);
-  expect((await page.locator('.footer-wordmark').boundingBox())!.height).toBeLessThanOrEqual(166);
-  await expect(page.locator('.footer-wordmark')).toHaveText('');
+  // The oversized footer watermark was removed; one mark in the footer lockup
+  // is enough, so nothing should render a second copy down there.
+  await expect(page.locator('.footer-wordmark')).toHaveCount(0);
+  await expect(page.locator('.footer-brand-echo')).toHaveCount(0);
   await expect(page.locator('.brand-name')).toHaveText(['Artificials', 'Artificials']);
-  await expect(page.locator('.brand-name').first()).toHaveCSS('font-family', 'Sora, sans-serif');
+  await expect(page.locator('.brand-name').first()).toHaveCSS(
+    'font-family',
+    'Michroma, Sora, sans-serif',
+  );
   await expect(page.locator('img[src="/logo.svg"]')).toHaveCount(0);
-  await expect
-    .poll(() =>
-      page
-        .locator('.brand-mark')
-        .first()
-        .evaluate((img) => (img as HTMLImageElement).naturalWidth),
-    )
-    .toBeGreaterThan(0);
+  // The mark is inline SVG, so assert it actually paints blocks and is square
+  // rather than checking an image's naturalWidth.
+  const mark = page.locator('.brand-mark').first();
+  await expect(mark.locator('rect').first()).toBeAttached();
+  const markBox = (await mark.boundingBox())!;
+  expect(markBox.width).toBeGreaterThan(0);
+  expect(Math.abs(markBox.width - markBox.height)).toBeLessThan(1.5);
 });
 
 test('scroll morphs the header and mobile navigation manages focus and closes on navigation', async ({

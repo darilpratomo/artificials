@@ -32,9 +32,6 @@ test('PDF to Word preserves adjacent font runs and real word gaps', async ({ pag
   await page.addInitScript(() =>
     localStorage.setItem('artificials-analytics-consent-v1', 'denied'),
   );
-  // Suppress the one-per-session logo intro so it never covers the page under
-  // test. The intro has its own suite.
-  await page.addInitScript(() => sessionStorage.setItem('artificialsIntroPlayed', 'true'));
   await page.route('**/api/catalog/summary', (route) =>
     route.fulfill({
       json: JSON.parse(readFileSync('public/data/catalog-summary.json', 'utf8')),

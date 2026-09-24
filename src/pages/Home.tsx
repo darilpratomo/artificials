@@ -34,15 +34,15 @@ export default function Home() {
           <picture>
             <source
               media="(max-width: 760px)"
-              srcSet="/editorial/hero-brand-mobile-small.webp 640w, /editorial/hero-brand-mobile.webp 1024w"
+              srcSet="/editorial/hero-brand-mobile-pixel-small.webp 640w, /editorial/hero-brand-mobile-pixel.webp 1024w"
               sizes="100vw"
             />
             <img
-              src="/editorial/hero-brand.webp"
-              srcSet="/editorial/hero-brand-small.webp 960w, /editorial/hero-brand.webp 1920w"
+              src="/editorial/hero-brand-pixel.webp"
+              srcSet="/editorial/hero-brand-pixel-small.webp 960w, /editorial/hero-brand-pixel.webp 1920w"
               sizes="100vw"
               width="1920"
-              height="819"
+              height="820"
               alt=""
               fetchPriority="high"
             />
@@ -129,8 +129,8 @@ export default function Home() {
               <span>A clearer point of view.</span>
             </h2>
             <p>
-              Discover capabilities, context windows and pricing
-              <br className="desktop-break" /> across the AI landscape. Every number has a source.
+              Compare capabilities, context windows and pricing
+              <br className="desktop-break" /> across every provider. Every number has a source.
             </p>
           </div>
         </Reveal>

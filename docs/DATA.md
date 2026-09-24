@@ -72,14 +72,19 @@ is created to fill a UI. Each record's `benchmark` is absent by default and the 
 
 The [Artificial Analysis API](https://artificialanalysis.ai/data-api) currently limits free API
 access to internal use and forbids redistribution. Its free scores are therefore not imported
-or republished. A paid key alone is not proof of redistribution permission. Before adding a
+or republished. A paid key alone is not proof of redistribution permission. OpenRouter's
+public endpoint data includes latency and throughput fields, but they were empty for current
+models when checked on 24 September 2026, and its terms of service prohibit automated copying
+of information from the service. It is not used. Artificials does not run its own paid speed
+tests, so **no speed or latency figures are shown**; profiles say so plainly. Before adding a
 benchmark feed, obtain the necessary rights for this public commercial site, verify the model
 and exact metric, and preserve its methodology, measurement date and source attribution.
 Do not mix scores from different benchmark methods into a single overall ranking.
 
 Capability rankings now live separately in `public/data/benchmarks.json` and appear by default
-on `/leaderboard`. `scripts/sync-benchmarks.mjs` ingests published LiveBench task scores and
-T2I-CoReBench image-generation results. The six-hour catalog workflow refreshes both sources,
+on `/leaderboard`. `scripts/sync-benchmarks.mjs` ingests published LiveBench task scores,
+Epoch AI's own benchmark evaluations and capability index, and T2I-CoReBench image-generation
+results. The six-hour catalog workflow refreshes both sources,
 validates them, runs checks, and commits the complete snapshots for native Cloudflare deploy.
 Failed source retrieval/schema checks leave the last successful published deployment intact.
 Requests have time and size limits; unexpected category changes or loss of over 25% of a
@@ -95,6 +100,28 @@ Image rankings use the primary Gemini 2.5 Flash evaluator table from T2I-CoReBen
 published overall values. These assess composition/reasoning, not universal image quality or
 human aesthetic preferences. Prompt-rewriting variants and other evaluator tables are excluded.
 Only models evaluated by that source appear. This source updates less often than model releases.
+
+### Epoch AI
+
+`scripts/lib/epoch.ts` reads Epoch AI's published archive (`https://epoch.ai/data/benchmark_data.zip`).
+Epoch licenses **its own** data under CC BY 4.0. The archive also bundles results from other
+projects (files ending in `_external`), which keep their original licences; those are never
+imported. The parser refuses to publish if the README's licence text changes, if a benchmark
+moves or is marked superseded, if a column disappears, or if a score leaves 0–1.
+
+Imported tests: GPQA Diamond, Mock AIME 2024–2025 (OTIS), FrontierMath Tiers 1–3 and Tier 4
+(v2), MATH Level 5, SWE-bench Verified, SimpleQA Verified and chess puzzles. Scores are
+converted to percentages. A configuration tested twice keeps only its latest run. Standard
+errors and evaluation dates are kept. The Epoch Capabilities Index (ECI) is published as its
+own category with `unit: "index"`: it is open-ended, has confidence bounds, and is never shown
+as a percentage. Each ECI row carries the model versions it was built from, taken from
+`processed_data_for_eci.csv`; only that mapping is used from the file, not its bundled
+third-party scores. Two first-party tests (mystery game puzzles, EBR-bench) are skipped
+because they could not be described accurately.
+
+Views show when results were last checked and the test's methodology. Credits appear in a
+compact "Sources and method" note and in the rankings footnote, rather than as prominent
+links; the licences require attribution, and Artificials does not claim to run these tests.
 
 Both views show source-check time, benchmark edition/evaluator, source revision time and
 methodology. A check timestamp is not an evaluation date. Checks older than 48 hours show an
@@ -113,3 +140,38 @@ than injected HTML. Other providers use an original neutral geometric mark. No v
 request is sent to an external image host. Logos identify providers; trademarks remain with
 their owners and do not imply a partnership. `providerLogo(id)` always returns an existing
 local file or the generic fallback.
+
+## Model profiles
+
+`/models/:slug` is one page per underlying model, grouping every host that sells it. Profiles
+are built by `scripts/build-model-profiles.mjs` from the two committed snapshots, at the start
+of every `npm run build` and `npm run dev`. The output in `public/data/models/` is generated,
+git-ignored and deployed with the build: 128 bucket files (FNV-1a hash of the slug),
+`directory.json` for the Worker and search, and `links.json` for rankings.
+
+Grouping: `modelSlug()` lower-cases the model id, drops a host path prefix, Bedrock region and
+vendor prefixes, the Bedrock `-v1:0` suffix and routing suffixes such as `:free` or `@date`.
+Versions and dated snapshots are kept, because two snapshots can behave differently; an
+undated alias and a dated snapshot are therefore separate profiles.
+
+Benchmark matching is conservative, because a wrong match shows one model's score on
+another's page. A row may match its exact name, or the name with configuration markers
+removed: Epoch's `_effort` suffix, an explicit `-high-effort`, a thinking mode, or a trailing
+date. A bare `-max` is never removed ("Qwen3 Max" is not "Qwen3"). A row never attaches when
+its evaluator's attribution contradicts the model's maker. The exact configuration name is
+always shown next to each score. Unmatched rows still appear in rankings, unlinked.
+
+Calculated by Artificials, and labelled as such: standing among tested models, ranks per test
+(never combined across tests), blended price (three input tokens per output token), cost
+estimates, token-to-word conversions (0.75 words per token, 500 words per page, English), and
+similar models (nearest on the capability index).
+
+Prices: a listing with **both** prices at $0 is a free tier or access bundled into a
+subscription (for example plan-based providers). It is labelled "No per-token charge" and is
+never used as a model's lowest price. When several hosts tie on the lowest list price, the
+maker's own listing is named, and no single host gets a "Lowest price" badge.
+
+The Worker serves `/models/*` first: it reads `directory.json` (cached per isolate for five
+minutes), returns the app shell with the model's title, description and canonical URL, and a
+real 404 with `noindex` for unknown or malformed slugs. The sitemap lists profiles that have
+benchmark results or at least three hosts.

@@ -7,7 +7,7 @@ export const EDITORIAL_DEEP_DIVES: Article[] = [
     slug: 'reasoning-models-and-inference-budgets',
     title: 'Reasoning models: when extra thinking earns its cost',
     excerpt:
-      'A practical deep dive into reasoning workloads, inference budgets, verification, and measuring whether additional computation improves the finished task.',
+      'A practical look at reasoning workloads, inference budgets, verification, and measuring whether additional computation improves the finished task.',
     category: 'AI models',
     published: true,
     updated_at: '2026-09-20',
