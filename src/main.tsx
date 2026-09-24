@@ -1,6 +1,7 @@
 import { Analytics } from './components/Analytics';
 import { Metadata } from './components/Metadata';
 import { Component, lazy, Suspense, type ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './styles.css';
@@ -145,12 +146,11 @@ const app = (
   </ErrorBoundary>
 );
 const root = createRoot(container);
+// The live page replaces the prerendered one in a single step, so a tap made
+// meanwhile waits and lands on the live page rather than the static copy.
+const start = () => flushSync(() => root.render(app));
 // A prerendered page stays on screen while its code loads, instead of giving way
 // to the loading panel for a moment. Pages without prerendered HTML render at once.
 const current = container.hasChildNodes() ? pageAt(location.pathname) : undefined;
-if (current)
-  current.preload().then(
-    () => root.render(app),
-    () => root.render(app),
-  );
-else root.render(app);
+if (current) current.preload().then(start, start);
+else start();
