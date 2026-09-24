@@ -113,7 +113,8 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
       : article?.category === 'AI models'
         ? 'context'
         : 'engineering';
-  const image = SITE_URL + (article ? `/editorial/${kind}.webp` : '/editorial/hero-brand.webp');
+  const image =
+    SITE_URL + (article ? `/editorial/${kind}.webp` : '/editorial/hero-brand-pixel.webp');
   const structured = article
     ? {
         '@context': 'https://schema.org',
@@ -161,7 +162,7 @@ export function modelMetadata(model: ModelMetaInput | null, slug = model?.slug ?
       description:
         'This model is not in the Artificials catalog. Browse AI models by capability, price and provider.',
       canonical,
-      image: SITE_URL + '/editorial/hero-brand.webp',
+      image: SITE_URL + '/editorial/hero-brand-pixel.webp',
       known: false,
       robots: 'noindex,follow',
       type: 'website' as const,
@@ -173,7 +174,7 @@ export function modelMetadata(model: ModelMetaInput | null, slug = model?.slug ?
     title: `${model.name}: benchmarks, pricing and providers — Artificials`,
     description: `${model.name}${by}. ${model.hasResults ? 'How it ranks on benchmarks, ' : 'Capabilities, '}prices from ${hosts}, context window and a cost calculator. Updated automatically.`,
     canonical,
-    image: SITE_URL + '/editorial/hero-brand.webp',
+    image: SITE_URL + '/editorial/hero-brand-pixel.webp',
     known: true,
     robots: 'index,follow,max-image-preview:large',
     type: 'website' as const,
