@@ -27,7 +27,14 @@ jobs:
       - run: npm ci
       - name: Fetch and validate the source snapshot
         run: npm run sync:catalog
+      # A benchmark source being down must not hold back new catalog releases:
+      # the catalog is still checked and published, and the run is marked
+      # failed at the end so the problem stays visible.
       - name: Fetch and validate published benchmark results
+        id: benchmarks
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: npm run sync:benchmarks
       - name: Check code, database, data integrity and build
         run: npm run check
@@ -40,3 +47,8 @@ jobs:
             git commit -m 'Refresh verified model catalog and benchmark snapshots'
             git push origin HEAD:main
           fi
+      - name: Report benchmark results that could not be refreshed
+        if: steps.benchmarks.outcome == 'failure'
+        run: |
+          echo '::error::Benchmark results were not refreshed this run. The catalog was, and the last valid benchmark snapshot stays published.'
+          exit 1

@@ -87,6 +87,10 @@ Epoch AI's own benchmark evaluations and capability index, and T2I-CoReBench ima
 results. The six-hour catalog workflow refreshes both sources,
 validates them, runs checks, and commits the complete snapshots for native Cloudflare deploy.
 Failed source retrieval/schema checks leave the last successful published deployment intact.
+A benchmark source that is down does not hold back the catalog: the workflow still checks and
+publishes the new catalog, then marks the run as failed so the problem stays visible. Requests
+to GitHub's API carry the workflow's own token (only ever sent to `api.github.com`), because
+anonymous requests from shared workflow runners are often refused.
 Requests have time and size limits; unexpected category changes or loss of over 25% of a
 category's rows require review. `--accept-shrink` is an explicit operator override, never automatic.
 

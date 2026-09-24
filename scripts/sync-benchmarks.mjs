@@ -5,11 +5,18 @@ import { parseLiveBench, parseImageBench } from './lib/benchmark-sources.ts';
 import { parseEpoch, EPOCH_DATA_URL, EPOCH_URL } from './lib/epoch.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+// GitHub's API allows few anonymous requests from the shared addresses that
+// scheduled workflows run on, so the workflow passes its own token. The token
+// is only ever sent to api.github.com, and redirects are refused.
+const githubToken = process.env.GITHUB_TOKEN;
 async function get(url, maxBytes = 2_000_000) {
+  const headers = { 'user-agent': 'Artificials-benchmarks/1.0 (+https://artificials.net/about)' };
+  if (githubToken && new URL(url).origin === 'https://api.github.com')
+    headers.authorization = `Bearer ${githubToken}`;
   const response = await fetch(url, {
     signal: AbortSignal.timeout(25000),
     redirect: 'error',
-    headers: { 'user-agent': 'Artificials-benchmarks/1.0 (+https://artificials.net/about)' },
+    headers,
   });
   if (!response.ok) throw Error(`Benchmark source returned ${response.status}: ${url}`);
   const reader = response.body.getReader();
