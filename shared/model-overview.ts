@@ -21,6 +21,8 @@ export interface ReferencePrice {
   blended: number;
   /** `maker`: the maker's own listing. `median`: the middle listing across hosts. */
   from: 'maker' | 'median';
+  /** Cached input price from the same listing, when it has one. */
+  cached?: number;
 }
 
 export interface IndexPoint {
@@ -36,6 +38,9 @@ export interface IndexPoint {
   openWeights?: boolean;
   price?: ReferencePrice;
   contextWindow?: number;
+  reasoning?: boolean;
+  /** Epoch AI's estimate of training compute, in FLOP. */
+  compute?: number;
 }
 
 export interface TestRow {
@@ -210,6 +215,7 @@ export function referencePrice(profile: ModelProfile): ReferencePrice | undefine
     output: pick.outputPrice!,
     blended: round(blendedPrice(pick.inputPrice, pick.outputPrice)!),
     from: own ? 'maker' : 'median',
+    ...(pick.cacheReadPrice !== undefined ? { cached: pick.cacheReadPrice } : {}),
   };
 }
 
@@ -280,6 +286,8 @@ export function buildOverview(
       ...(openWeights !== undefined ? { openWeights } : {}),
       ...(price ? { price } : {}),
       ...(profile?.contextWindow ? { contextWindow: profile.contextWindow } : {}),
+      ...(profile ? { reasoning: profile.reasoning } : {}),
+      ...(profile?.facts?.trainingCompute ? { compute: profile.facts.trainingCompute } : {}),
     };
   });
 

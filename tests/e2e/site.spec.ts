@@ -173,7 +173,10 @@ test('home navigation, responsive layout, and private CMS discovery', async ({
   ).toHaveCount(0);
   await page.screenshot({ path: `test-results/home-${testInfo.project.name}.png`, fullPage: true });
   await page.locator('footer').getByRole('link', { name: 'Model directory', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Find your next model.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Compare AI models.' })).toBeVisible();
+  // Provider listings keep one card per host; the comparison is the default view.
+  await page.getByRole('button', { name: 'Provider listings' }).click();
+  await expect(page).toHaveURL(/view=listings/);
   // The arrow opens the model's own page; the listing source has its own GitHub button.
   const card = page.locator('.model-card').first();
   await expect(card.getByRole('link', { name: /details$/ })).toHaveAttribute(
@@ -190,7 +193,7 @@ test('home navigation, responsive layout, and private CMS discovery', async ({
 });
 
 test('model search, provider and modality filters, and pagination', async ({ page }) => {
-  await page.goto('/models');
+  await page.goto('/models?view=listings');
   await expect(page.locator('.model-card')).toHaveCount(24);
   await page.getByRole('button', { name: /Next/ }).click();
   await expect(page.locator('.model-card')).toHaveCount(5);
@@ -211,8 +214,20 @@ test('model search, provider and modality filters, and pagination', async ({ pag
   await expectFitsViewport(page);
 });
 
+test('older filtered links open the provider listings and stay there', async ({ page }) => {
+  await page.goto('/models?query=Atlas');
+  await expect(page.locator('.model-card')).toHaveCount(1);
+  await page.getByRole('searchbox', { name: 'Search models', exact: true }).fill('');
+  await expect(page.locator('.model-card')).toHaveCount(24);
+  await expect(page).toHaveURL(/view=listings/);
+  await expect(page.getByRole('button', { name: 'Provider listings' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+});
+
 test('comparison limit, saved selections, removal, and clearing', async ({ page }) => {
-  await page.goto('/models');
+  await page.goto('/models?view=listings');
   for (const name of ['Fixture Atlas', 'Fixture Boreal', 'Fixture Cipher']) {
     await page.getByRole('button', { name: `Compare ${name}`, exact: true }).click();
   }
@@ -241,7 +256,7 @@ test('comparison limit, saved selections, removal, and clearing', async ({ page 
 
 test('corrupted saved comparison recovers without crashing', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('artificials-compare', '{broken json'));
-  await page.goto('/models');
+  await page.goto('/models?view=listings');
   await page.getByRole('button', { name: 'Compare Fixture Atlas', exact: true }).click();
   await expect(
     page.getByRole('button', { name: 'Remove Fixture Atlas', exact: true }),
@@ -359,7 +374,7 @@ test('main pages are accessible and fit desktop and mobile', async ({ page }, te
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const route of [
     '/',
-    '/models',
+    '/models?view=listings',
     '/leaderboard',
     '/compare',
     '/news',
@@ -372,7 +387,8 @@ test('main pages are accessible and fit desktop and mobile', async ({ page }, te
   ]) {
     await page.goto(route);
     await expect(page.locator('main h1')).toBeVisible();
-    if (route === '/models') await expect(page.locator('.model-card')).toHaveCount(24);
+    if (route === '/models?view=listings')
+      await expect(page.locator('.model-card')).toHaveCount(24);
     if (route === '/leaderboard')
       await expect(page.locator('.benchmark-row').first()).toBeVisible();
     await expectFitsViewport(page, route);

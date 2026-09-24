@@ -22,6 +22,7 @@ export default defineConfig({
         'pdf-text.spec.ts',
         'home.spec.ts',
         'releases.spec.ts',
+        'models.spec.ts',
         'model-profile.spec.ts',
       ],
       use: { ...devices['iPhone 13'], defaultBrowserType: 'webkit' },

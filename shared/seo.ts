@@ -21,8 +21,8 @@ const pages: Record<string, [string, string]> = {
     'Compare AI models by test results, price and context window. Rankings, charts and every new release, refreshed automatically every six hours.',
   ],
   '/models': [
-    'AI model directory',
-    'Explore AI model capabilities, context windows, modalities, and API pricing. Filter model offerings by provider and compare specifications.',
+    'AI model comparison',
+    'Compare AI models on capability, price and context window: the most capable, cheapest and newest models, charts, prices per token and every model we track, with sources.',
   ],
   '/leaderboard': [
     'AI model rankings and benchmarks',

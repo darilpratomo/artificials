@@ -281,6 +281,12 @@
   margin: 0;
   accent-color: #eceef2;
 }
+/* The whole label is the touch target, tall enough for a fingertip. */
+@media (pointer: coarse) {
+  .dash-check {
+    min-height: 40px;
+  }
+}
 .model-filter {
   display: grid;
   gap: 10px;

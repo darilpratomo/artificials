@@ -1472,40 +1472,6 @@
 .mix-picker button[aria-pressed='true'] small {
   color: #3a3c46;
 }
-.price-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  margin: 0 0 10px;
-  padding: 0;
-  list-style: none;
-  color: #c9ccd4;
-  font-size: 13px;
-}
-.price-legend li {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-.price-legend li::before {
-  content: '';
-  width: 12px;
-  height: 8px;
-  border-radius: 3px;
-  background: var(--swatch);
-}
-.price-legend .is-cached,
-.provider-prices .is-cached {
-  --swatch: #6b7080;
-}
-.price-legend .is-input,
-.provider-prices .is-input {
-  --swatch: #c9ccd4;
-}
-.price-legend .is-output,
-.provider-prices .is-output {
-  --swatch: #ffffff;
-}
 .provider-prices {
   display: grid;
   gap: 4px;

@@ -26,7 +26,7 @@ export function renderPage(path: string, lesson?: Lesson, overview?: ModelOvervi
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Home initial={overview} />} />
-            <Route path="models" element={<Models />} />
+            <Route path="models" element={<Models initial={overview} />} />
             <Route path="leaders" element={<Leaders />} />
             <Route path="score-price-time" element={<ScorePriceTime />} />
             <Route path="market" element={<Market />} />

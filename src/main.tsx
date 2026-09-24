@@ -7,25 +7,72 @@ import './styles.css';
 import { Provider } from './lib/context';
 import { Layout, EmptyState } from './components/Layout';
 import Home from './pages/Home';
-const Models = lazy(() => import('./pages/Models'));
-const ModelProfile = lazy(() => import('./pages/ModelProfile'));
-const Compare = lazy(() => import('./pages/Compare'));
-const Leaderboard = lazy(() => import('./pages/Leaderboard'));
-const Leaders = lazy(() => import('./pages/Leaders'));
-const ScorePriceTime = lazy(() => import('./pages/ScorePriceTime'));
-const Market = lazy(() => import('./pages/Market'));
-const Releases = lazy(() => import('./pages/Releases'));
-const Academy = lazy(() => import('./pages/Academy'));
-const AcademyLesson = lazy(() => import('./pages/AcademyLesson'));
-const Learn = lazy(() => import('./pages/Learn'));
-const Tools = lazy(() => import('./pages/Tools'));
-const Studio = lazy(() => import('./pages/Studio'));
-const Pricing = lazy(() => import('./pages/Pricing'));
-const Login = lazy(() => import('./pages/Login'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Info = lazy(() => import('./pages/Info'));
-const Cms = lazy(() => import('./pages/Cms'));
-const Checkout = lazy(() => import('./pages/Checkout'));
+
+/**
+ * A page whose code loads on first use. `preload` fetches it ahead of time;
+ * once loaded, the page renders without suspending, so no loading panel shows.
+ */
+function page(load: Parameters<typeof lazy>[0]) {
+  let loaded: Awaited<ReturnType<typeof load>> | undefined;
+  const preload = () => load().then((module) => (loaded = module));
+  return Object.assign(
+    lazy(() =>
+      loaded
+        ? // A thenable that resolves at once lets React use the page straight away.
+          ({
+            then: (resolve: (module: typeof loaded) => void) => resolve(loaded),
+          } as unknown as ReturnType<typeof load>)
+        : preload(),
+    ),
+    { preload },
+  );
+}
+const Models = page(() => import('./pages/Models'));
+const ModelProfile = page(() => import('./pages/ModelProfile'));
+const Compare = page(() => import('./pages/Compare'));
+const Leaderboard = page(() => import('./pages/Leaderboard'));
+const Leaders = page(() => import('./pages/Leaders'));
+const ScorePriceTime = page(() => import('./pages/ScorePriceTime'));
+const Market = page(() => import('./pages/Market'));
+const Releases = page(() => import('./pages/Releases'));
+const Academy = page(() => import('./pages/Academy'));
+const AcademyLesson = page(() => import('./pages/AcademyLesson'));
+const Learn = page(() => import('./pages/Learn'));
+const Tools = page(() => import('./pages/Tools'));
+const Studio = page(() => import('./pages/Studio'));
+const Pricing = page(() => import('./pages/Pricing'));
+const Login = page(() => import('./pages/Login'));
+const Dashboard = page(() => import('./pages/Dashboard'));
+const Info = page(() => import('./pages/Info'));
+const Cms = page(() => import('./pages/Cms'));
+const Checkout = page(() => import('./pages/Checkout'));
+
+/** The lazily loaded page an address opens, if any. The home page is always bundled. */
+function pageAt(path: string) {
+  const [first = '', second] = path.split('/').slice(1);
+  if (first === 'models') return second ? ModelProfile : Models;
+  if (first === 'learn') return second ? AcademyLesson : Academy;
+  return new Map([
+    ['leaders', Leaders],
+    ['score-price-time', ScorePriceTime],
+    ['market', Market],
+    ['leaderboard', Leaderboard],
+    ['releases', Releases],
+    ['compare', Compare],
+    ['news', Learn],
+    ['tools', Tools],
+    ['studio', Studio],
+    ['pricing', Pricing],
+    ['login', Login],
+    ['dashboard', Dashboard],
+    ['checkout', Checkout],
+    ['about', Info],
+    ['privacy', Info],
+    ['terms', Info],
+    ['contact', Info],
+    ['_private', Cms],
+  ]).get(first);
+}
 class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() {
@@ -45,7 +92,8 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean
     );
   }
 }
-createRoot(document.getElementById('root')!).render(
+const container = document.getElementById('root')!;
+const app = (
   <ErrorBoundary>
     <BrowserRouter>
       <Provider>
@@ -94,5 +142,15 @@ createRoot(document.getElementById('root')!).render(
         </Suspense>
       </Provider>
     </BrowserRouter>
-  </ErrorBoundary>,
+  </ErrorBoundary>
 );
+const root = createRoot(container);
+// A prerendered page stays on screen while its code loads, instead of giving way
+// to the loading panel for a moment. Pages without prerendered HTML render at once.
+const current = container.hasChildNodes() ? pageAt(location.pathname) : undefined;
+if (current)
+  current.preload().then(
+    () => root.render(app),
+    () => root.render(app),
+  );
+else root.render(app);

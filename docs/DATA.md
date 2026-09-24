@@ -279,3 +279,26 @@ times remain on the rankings page and each model's "Sources and method".
 Everything refreshes with the six-hourly workflow: a new model appears in the timeline as soon as
 the catalog lists it, and its scores follow once a test covers it. No step needs manual input.
 Speed and latency are not shown, because no reliable public source is available to republish.
+
+## Models page
+
+`/models` compares underlying models, not listings. It is built from the same `overview.json` as
+the home page, prerendered with that data inline, and shows:
+
+- At a glance: one sentence per measure naming the leaders, each linked to its profile. The most
+  capable models on the capability index; the cheapest reference prices among models with a
+  score; the largest context windows among models with a score; the most capable open-weights
+  models; and the newest releases from known makers.
+- Highlights: the ten highest index scores, with the same ten models' reference prices and
+  context windows.
+- The ranking and score, price and time charts from the home page.
+- Prices: input, cached input and output list prices of the fifteen most capable models with a
+  paid listing, from the same listing as the reference price.
+- Context and scale: the largest context windows among models with a score, and Epoch AI's
+  training compute estimates on a log scale.
+- Every model, sorted by capability index, and a question list answered from the same data
+  (with `FAQPage` structured data).
+
+Host listings, including gateways and resellers, stay under "Provider listings"
+(`/models?view=listings`). Links with the old listing filters (`provider`, `modality`, `page`,
+`sort`, `reasoning`, `openWeights`, `query`) still open that view.

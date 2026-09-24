@@ -273,7 +273,7 @@ test('custom dropdown stays within the viewport and supports keyboard selection'
 
 test('search inputs have one border and editorial images stay compact', async ({ page }) => {
   for (const [path, selector] of [
-    ['/models', '.catalog-search'],
+    ['/models?view=listings', '.catalog-search'],
     ['/leaderboard', '.benchmark-search'],
     ['/news', '.search-field'],
     ['/learn', '.search-field'],

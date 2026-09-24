@@ -129,8 +129,11 @@ test('releases, search and the full list work without loading everything up fron
   // Timeline: known makers by default, every listing on request, more on demand.
   const entries = page.locator('.timeline-entry');
   const before = await entries.count();
-  await page.getByRole('button', { name: /Show \d+ more releases/ }).click();
-  await expect.poll(() => entries.count()).toBeGreaterThan(before);
+  // The prerendered button responds once the app takes over the page, so retry the click.
+  await expect(async () => {
+    await page.getByRole('button', { name: /Show \d+ more releases/ }).click();
+    expect(await entries.count()).toBeGreaterThan(before);
+  }).toPass();
   await page.getByRole('button', { name: 'All listings' }).click();
   await expect(page.getByRole('button', { name: 'All listings' })).toHaveAttribute(
     'aria-pressed',

@@ -6,7 +6,7 @@ import { Select } from '../Select';
 import { FLAGS, useExplorer, type ExplorerRow } from '../../lib/overview';
 import { day, price, tokens } from '../profile/format';
 
-type Sort = 'newest' | 'index' | 'price' | 'context' | 'hosts' | 'name';
+export type Sort = 'newest' | 'index' | 'price' | 'context' | 'hosts' | 'name';
 const SORTS: [Sort, string][] = [
   ['hosts', 'Most hosts'],
   ['newest', 'Newest first'],
@@ -125,14 +125,21 @@ const SORTERS: Record<Sort, (a: ExplorerRow, b: ExplorerRow) => number> = {
  * Every model in the catalog, searchable and sortable. The list file loads
  * only when this section comes near the screen.
  */
-export function ModelExplorer({ total }: { total: number }) {
+export function ModelExplorer({
+  total,
+  defaultSort = 'hosts',
+}: {
+  total: number;
+  /** Where the list starts; the visitor can change it. */
+  defaultSort?: Sort;
+}) {
   const section = useRef<HTMLDivElement>(null);
   const [wanted, setWanted] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const { data, error } = useExplorer(wanted, attempt);
   const [query, setQuery] = useState('');
   const [maker, setMaker] = useState('all');
-  const [sort, setSort] = useState<Sort>('hosts');
+  const [sort, setSort] = useState<Sort>(defaultSort);
   const [flags, setFlags] = useState(0);
   const [page, setPage] = useState(1);
   const table = useRef<HTMLDivElement>(null);

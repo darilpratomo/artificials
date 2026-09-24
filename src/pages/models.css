@@ -1,0 +1,241 @@
+/* Model comparison page. Panels, headings and tabs reuse the home dashboard styles. */
+.models-page {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 80px;
+}
+.models-page .page-heading {
+  margin-bottom: 4px;
+}
+.view-switch {
+  display: inline-flex;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px;
+  border: 1px solid #25262e;
+  border-radius: 12px;
+  background: #0b0c0f;
+}
+.view-switch button {
+  min-height: 42px;
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #b5b8c2;
+  font-size: 14.5px;
+}
+.view-switch button[aria-pressed='true'] {
+  background: #eceef2;
+  color: #101115;
+  font-weight: 550;
+}
+.models-hub {
+  display: grid;
+  gap: 22px;
+}
+.hub-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.hub-sections a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 6px 14px;
+  border: 1px solid #2f3139;
+  border-radius: 99px;
+  color: #c3c6cf;
+  font-size: 14px;
+}
+.hub-sections a:hover {
+  border-color: #4d5260;
+  color: #ffffff;
+}
+.hub-section {
+  scroll-margin-top: 96px;
+  padding-top: 34px;
+}
+.hub-section .dash-heading {
+  margin-bottom: 18px;
+}
+.glance-sentences {
+  display: grid;
+  margin: 0;
+}
+.glance-sentences > div {
+  display: grid;
+  grid-template-columns: minmax(110px, 150px) minmax(0, 1fr);
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid #1f2027;
+}
+.glance-sentences dt {
+  padding-top: 3px;
+  color: #9698a3;
+  font-size: 14px;
+}
+.glance-sentences dd {
+  margin: 0;
+}
+.glance-sentences p {
+  margin: 0;
+  color: #c9ccd4;
+  font-size: 15.5px;
+  line-height: 2;
+}
+.glance-model {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.glance-model img {
+  width: 22px;
+  height: 22px;
+  padding: 3px;
+  border-radius: 6px;
+}
+.glance-model a,
+.glance-model b {
+  color: #f3f4f7;
+  font-weight: 600;
+}
+.glance-model a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.glance-model > span {
+  color: #9698a3;
+  font-variant-numeric: tabular-nums;
+}
+.hub-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
+}
+.hub-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.price-rows {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.price-rows li {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.9fr) minmax(0, 2fr) 140px;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0;
+  border-top: 1px solid #1a1b21;
+}
+.price-rows-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  color: #eceef2;
+  font-size: 14px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.price-rows-name img {
+  width: 22px;
+  height: 22px;
+  padding: 3px;
+  border-radius: 6px;
+}
+.price-rows-name a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.price-rows-bars {
+  display: grid;
+  gap: 3px;
+}
+.price-rows-bars i {
+  display: block;
+  height: 6px;
+  min-width: 3px;
+  border-radius: 3px;
+  background: var(--swatch);
+}
+.price-rows-values {
+  display: grid;
+  color: #f3f4f7;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.price-rows-values small {
+  color: #9698a3;
+  font-size: 12.5px;
+  font-weight: 400;
+}
+.hub-faq {
+  gap: 0;
+}
+.hub-faq summary {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 10px 0;
+  color: #eceef2;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.hub-faq details {
+  border-top: 1px solid #1f2027;
+}
+.hub-faq details:first-child {
+  border-top: 0;
+}
+.hub-faq details p {
+  max-width: 76ch;
+  margin: 0 0 14px 1.5em;
+  color: #b5b8c2;
+  font-size: 15px;
+  line-height: 1.7;
+}
+@media (max-width: 1100px) {
+  .hub-highlights {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hub-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  .glance-sentences > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  .glance-model {
+    white-space: normal;
+  }
+  .price-rows li {
+    grid-template-columns: minmax(0, 1fr) 120px;
+  }
+  .price-rows-bars {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+@media (max-width: 799px) {
+  .glance-model a,
+  .price-rows-name a {
+    display: inline-block;
+    padding-block: 7px;
+    margin-block: -7px;
+  }
+}
