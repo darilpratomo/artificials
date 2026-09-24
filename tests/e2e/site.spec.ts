@@ -166,13 +166,13 @@ test('home navigation, responsive layout, and private CMS discovery', async ({
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Intelligence. In perspective.' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Fixture Atlas', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Leaders right now', exact: true })).toBeVisible();
   await expectFitsViewport(page);
   await expect(
     page.locator('header a[href^="/_private"], footer a[href^="/_private"], a[href="/admin"]'),
   ).toHaveCount(0);
   await page.screenshot({ path: `test-results/home-${testInfo.project.name}.png`, fullPage: true });
-  await page.getByRole('link', { name: 'Explore AI models', exact: true }).click();
+  await page.locator('footer').getByRole('link', { name: 'Model directory', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Find your next model.' })).toBeVisible();
   await expect(page.locator('.model-card')).toHaveCount(24);
   await expectFitsViewport(page);
@@ -332,18 +332,13 @@ test('pricing and account screens reflect unavailable services', async ({ page }
   await expect(page.getByRole('heading', { name: 'A little off the beaten path.' })).toBeVisible();
 });
 
-test('reduced motion keeps the scroll journey readable without horizontal movement', async ({
-  page,
-}) => {
+test('reduced motion keeps the home dashboard readable and inside the screen', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  const journey = page.getByRole('region', { name: 'From discovery to creation' });
-  await journey.scrollIntoViewIfNeeded();
-  await expect(page.locator('.journey-track')).toHaveCSS('transform', 'none');
-  await expect(page.locator('.journey-sticky')).not.toHaveCSS('position', 'sticky');
-  await expect(page.locator('.reveal-ready:not(.revealed)')).toHaveCount(0);
-  for (const title of ['Discover.', 'Understand.', 'Create.']) {
-    await expect(journey.getByRole('heading', { name: title, exact: true })).toBeVisible();
+  for (const name of ['Rankings', 'New releases', 'Every model']) {
+    const heading = page.getByRole('heading', { level: 2, name, exact: true });
+    await heading.scrollIntoViewIfNeeded();
+    await expect(heading).toBeVisible();
   }
   await expectFitsViewport(page);
 });

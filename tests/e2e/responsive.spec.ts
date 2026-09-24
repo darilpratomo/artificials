@@ -188,46 +188,6 @@ test('scroll morphs the header and mobile navigation manages focus and closes on
   }
 });
 
-test('vertical scrolling moves story panels sideways on desktop and mobile', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await page.goto('/');
-  const journey = page.locator('.journey');
-  await expect(journey).toHaveAttribute('data-motion', 'horizontal');
-  const scrollStory = async (fraction: number) => {
-    await journey.evaluate((el, fraction) => {
-      const rect = el.getBoundingClientRect();
-      const sticky = el.querySelector('.journey-sticky') as HTMLElement;
-      scrollTo({
-        top: scrollY + rect.top + (rect.height - sticky.clientHeight) * fraction,
-        behavior: 'instant',
-      });
-    }, fraction);
-  };
-  await scrollStory(0.5);
-  await expect
-    .poll(() =>
-      page
-        .locator('.journey-track')
-        .evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41),
-    )
-    .toBeLessThan(-100);
-  expect((await page.locator('.journey-sticky').boundingBox())!.y).toBeCloseTo(0, 0);
-  await scrollStory(1);
-  await expect(journey.getByRole('link', { name: 'Enter the studio' })).toBeInViewport();
-  await page.keyboard.press('Tab');
-  for (const link of await journey.locator('.journey-panel .text-link').all()) {
-    await link.focus();
-    await expect(link).toBeInViewport({ ratio: 1 });
-  }
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
-    page.viewportSize()!.width,
-  );
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await expect(journey).toHaveAttribute('data-motion', 'static');
-  await expect(page.locator('.journey-track')).toHaveCSS('transform', 'none');
-  await expect(page.locator('.journey-sticky')).not.toHaveCSS('position', 'sticky');
-});
-
 test('portrait art fills the entire hero width at phone and tablet breakpoints', async ({
   page,
 }) => {
@@ -246,9 +206,7 @@ test('portrait art fills the entire hero width at phone and tablet breakpoints',
   }
 });
 
-test('island and horizontal motion pass through intermediate positions and settle', async ({
-  page,
-}) => {
+test('the header island passes through intermediate positions and settles', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
   await page.evaluate(() => scrollTo({ top: 60, behavior: 'instant' }));
@@ -285,37 +243,6 @@ test('island and horizontal motion pass through intermediate positions and settl
     )
     .toBe(1);
   expect((await page.locator('.header-surface').boundingBox())!.width).toBeLessThan(partial!.width);
-
-  await page.locator('.journey').evaluate((el) =>
-    scrollTo({
-      top:
-        scrollY +
-        el.getBoundingClientRect().top +
-        (el.clientHeight - (el.querySelector('.journey-sticky') as HTMLElement).clientHeight) * 0.4,
-      behavior: 'instant',
-    }),
-  );
-  const track = page.locator('.journey-track');
-  await expect
-    .poll(() => track.evaluate((el) => -new DOMMatrix(getComputedStyle(el).transform).m41))
-    .toBeGreaterThan(100);
-  const motion = await page.evaluate(async () => {
-    const rail = document.querySelector('.journey-track')!;
-    const start = -new DOMMatrix(getComputedStyle(rail).transform).m41;
-    scrollTo({ top: scrollY + 64, behavior: 'instant' });
-    const samples: number[] = [];
-    for (let i = 0; i < 10; i++) {
-      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-      samples.push(-new DOMMatrix(getComputedStyle(rail).transform).m41 - start);
-    }
-    return { start, samples };
-  });
-  expect(motion.samples.some((x) => x > 1 && x < 60)).toBe(true);
-  for (let i = 1; i < motion.samples.length; i++)
-    expect(motion.samples[i]).toBeGreaterThanOrEqual(motion.samples[i - 1] - 0.1);
-  await expect
-    .poll(() => track.evaluate((el) => -new DOMMatrix(getComputedStyle(el).transform).m41))
-    .toBeCloseTo(motion.start + 64, 0);
 });
 
 test('custom dropdown stays within the viewport and supports keyboard selection', async ({

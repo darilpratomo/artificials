@@ -917,7 +917,9 @@ function UtilityWorkbench({ tool }: { tool: UtilityDefinition }) {
               <span className="eyebrow">READY WHEN YOU ARE</span>
               <h2>Your files, refreshed.</h2>
               <p>
-                {formatBytes(total)} input → {formatBytes(outputTotal)} output
+                {formatBytes(total)} input{' '}
+                <ArrowRight className="inline-arrow" size={14} aria-hidden="true" />{' '}
+                <span className="sr-only">to</span> {formatBytes(outputTotal)} output
                 {tool.id.startsWith('compress-') &&
                   (outputTotal < total
                     ? ` · ${Math.round((1 - outputTotal / total) * 100)}% smaller`

@@ -9,12 +9,20 @@ import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildProfiles, profileBucket, PROFILE_BUCKETS } from '../shared/model-profiles.ts';
+import { buildOverview } from '../shared/model-overview.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
 const catalog = JSON.parse(await readFile(resolve(data, 'catalog.json'), 'utf8'));
 const benchmarks = JSON.parse(await readFile(resolve(data, 'benchmarks.json'), 'utf8'));
-const { profiles, links } = buildProfiles(catalog, benchmarks);
+// Research facts are optional: profiles build without them.
+let facts = { facts: [] };
+try {
+  facts = JSON.parse(await readFile(resolve(data, 'model-facts.json'), 'utf8'));
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
+const { profiles, links } = buildProfiles(catalog, benchmarks, facts.facts);
 if (profiles.length < 100)
   throw Error('Unexpectedly few model profiles; check the catalog snapshot.');
 
@@ -27,6 +35,15 @@ const sources = benchmarks.sources.map(({ id, name, url, license, licenseUrl, ch
   licenseUrl,
   checkedAt,
 }));
+if (facts.source)
+  sources.push({
+    id: 'epoch-models',
+    name: `${facts.source.name} model records`,
+    url: facts.source.url,
+    license: facts.source.license,
+    licenseUrl: facts.source.licenseUrl,
+    checkedAt: facts.source.checkedAt,
+  });
 const catalogSource = {
   source: catalog.source,
   sourceUrl: catalog.sourceUrl,
@@ -69,10 +86,15 @@ const names = Object.fromEntries(
   ]),
 );
 await writeFile(resolve(staging, 'links.json'), JSON.stringify({ rows: links, names }) + '\n');
+const { overview, tests, explorer } = buildOverview(profiles, links, catalog, benchmarks, sources);
+await writeFile(resolve(staging, 'overview.json'), JSON.stringify(overview) + '\n');
+await writeFile(resolve(staging, 'tests.json'), JSON.stringify(tests) + '\n');
+await writeFile(resolve(staging, 'explorer.json'), JSON.stringify(explorer) + '\n');
 await rm(target, { recursive: true, force: true });
 await rename(staging, target);
 
 const withResults = profiles.filter((profile) => profile.results.length).length;
+const withFacts = profiles.filter((profile) => profile.facts).length;
 const matched = benchmarks.categories
   .map((category) => {
     const hits = category.rows.filter((row) => links[`${category.id}:${row.id}`]).length;
@@ -80,5 +102,5 @@ const matched = benchmarks.categories
   })
   .join(', ');
 console.log(
-  `Model profiles: ${profiles.length} models, ${withResults} with benchmark results, ${PROFILE_BUCKETS} files.\nMatched rows: ${matched}.`,
+  `Model profiles: ${profiles.length} models, ${withResults} with benchmark results, ${withFacts} with research records, ${PROFILE_BUCKETS} files.\nMatched rows: ${matched}.`,
 );

@@ -367,7 +367,12 @@ export default function Studio() {
               <span className="builder-empty-icon">
                 <Sparkles size={34} />
               </span>
-              <span className="eyebrow">IDEA → INTERFACE → APPLICATION</span>
+              <span className="eyebrow inline-flow">
+                IDEA <ArrowRight className="inline-arrow" size={14} aria-hidden="true" />{' '}
+                <span className="sr-only">to</span> INTERFACE{' '}
+                <ArrowRight className="inline-arrow" size={14} aria-hidden="true" />{' '}
+                <span className="sr-only">to</span> APPLICATION
+              </span>
               <h2>
                 One prompt.
                 <br />A working foundation.

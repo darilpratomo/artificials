@@ -132,3 +132,50 @@ describe('Epoch AI benchmark archive', () => {
     ).toThrow(/Too few/);
   });
 });
+
+describe('Epoch AI model records', () => {
+  const records = [
+    'model_version,model_group,date,display_name,organization,country,accessibility,training_compute_flop',
+    'claude-test-1_high,Claude Test 1,2026-09-01,Claude Test 1,Anthropic,United States of America,API access,3.1e25',
+    'claude-test-1_max,Claude Test 1,2026-09-01,,Anthropic,United States of America,API access,3.1e25',
+    'qwen-test_none,Qwen Test,2026-07-01,,"Alibaba,Qwen Team",China,Open weights (unrestricted),',
+    '<script>,Bad,2026-01-01,,X,Y,API access,',
+    'odd-compute,Odd,2026-01-01,,Lab,,API access,12',
+  ].join('\n');
+
+  it('groups versions under one record with release, access and compute', () => {
+    const { facts } = parseEpoch(archive({ 'model_metadata.csv': records }));
+    const claude = facts.find((entry) => entry.name === 'Claude Test 1')!;
+    expect(claude).toEqual({
+      name: 'Claude Test 1',
+      versions: ['claude-test-1_high', 'claude-test-1_max'],
+      releasedAt: '2026-09-01',
+      organization: 'Anthropic',
+      country: 'United States of America',
+      access: 'API access',
+      trainingCompute: 3.1e25,
+    });
+    expect(facts.find((entry) => entry.name === 'Qwen Test')!.organization).toBe(
+      'Alibaba, Qwen Team',
+    );
+    // Unsafe identifiers are skipped and implausible compute is left out.
+    expect(facts.some((entry) => entry.name === 'Bad')).toBe(false);
+    expect(facts.find((entry) => entry.name === 'Odd')!.trainingCompute).toBeUndefined();
+  });
+
+  it('keeps release dates and weight access on capability-index rows', () => {
+    const index = parseEpoch(archive()).categories[0];
+    expect(index.rows.find((row) => row.model === 'Qwen Test')).toMatchObject({
+      releasedAt: '2026-07-01',
+      openWeights: true,
+    });
+    expect(index.rows[0].openWeights).toBe(false);
+  });
+
+  it('refreshes scores even when the records file is missing or changed', () => {
+    expect(parseEpoch(archive({ 'model_metadata.csv': null })).facts).toEqual([]);
+    expect(parseEpoch(archive({ 'model_metadata.csv': 'something,else\n1,2\n' })).facts).toEqual(
+      [],
+    );
+  });
+});

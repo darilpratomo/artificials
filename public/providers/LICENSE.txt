@@ -1,10 +1,10 @@
-Provider SVG artwork and model catalog data sourced from:
+Model catalog data sourced from:
 https://github.com/anomalyco/models.dev
-https://models.dev/logos/{provider}.svg
-Retrieved 2026-09-17. SVGs sanitized, dimensions removed and monochrome fills adjusted.
-Provider names and marks belong to their respective owners. Their appearance identifies
-providers and does not imply affiliation or endorsement. MIT does not grant trademark rights.
-generic.svg is an original Artificials geometric fallback, not a provider's official logo.
+Provider and model-maker brand marks in brand/ are from LobeHub Icons, in their original
+colours; see brand/LICENSE.txt. Provider names and marks belong to their respective owners.
+Their appearance identifies providers and does not imply affiliation or endorsement. MIT does
+not grant trademark rights. generic.svg is an original Artificials geometric fallback, not a
+provider's official logo.
 
 MIT License
 

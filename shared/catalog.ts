@@ -119,46 +119,141 @@ export interface CatalogPage extends CatalogSummary {
 export const CATALOG_SOURCE_URL = 'https://models.dev/api.json';
 export const CATALOG_COVERAGE =
   'Provider-model offerings in the models.dev community catalog. The same model may appear at multiple hosts. Coverage and updates depend on the source; this is not a guaranteed real-time census of all AI models.';
-export const LOGO_PROVIDERS = new Set([
-  'openai',
-  'anthropic',
-  'google',
-  'xai',
-  'deepseek',
-  'mistral',
-  'meta',
-  'nvidia',
-  'alibaba',
-  'cohere',
-  'amazon-bedrock',
-  'groq',
-  'moonshotai',
-  'zhipuai',
-  'minimax',
-  'perplexity',
-  'huggingface',
-  'openrouter',
-  'azure',
-  'cerebras',
-  'togetherai',
-  'ai21',
-  'cloudflare-workers-ai',
-  'deepinfra',
-  'fireworks-ai',
-  'inception',
-]);
+/**
+ * Brand marks in their original colours, keyed by provider or maker id.
+ * Files come from LobeHub Icons (MIT) via scripts/vendor-logos.mjs. Only ids
+ * listed here get a brand mark; everything else uses the neutral fallback, so a
+ * guess can never show another company's logo.
+ */
+export const BRAND_ICONS: Record<string, string> = {
+  openai: 'openai',
+  anthropic: 'anthropic',
+  google: 'google-color',
+  'google-vertex': 'vertexai-color',
+  'google-vertex-anthropic': 'vertexai-color',
+  deepseek: 'deepseek-color',
+  alibaba: 'alibaba-color',
+  'alibaba-cn': 'alibaba-color',
+  'alibaba-coding-plan': 'alibaba-color',
+  'alibaba-coding-plan-cn': 'alibaba-color',
+  'alibaba-token-plan': 'alibaba-color',
+  'alibaba-token-plan-cn': 'alibaba-color',
+  xai: 'xai',
+  moonshotai: 'moonshot',
+  'moonshotai-cn': 'moonshot',
+  'kimi-code-plan-cn': 'kimi-color',
+  'kimi-code-plan-global': 'kimi-color',
+  zai: 'zai',
+  'zai-coding-plan': 'zai',
+  zhipuai: 'zhipu-color',
+  'zhipuai-coding-plan': 'zhipu-color',
+  minimax: 'minimax-color',
+  'minimax-cn': 'minimax-color',
+  'minimax-cn-coding-plan': 'minimax-color',
+  'minimax-coding-plan': 'minimax-color',
+  mistral: 'mistral-color',
+  meta: 'meta-color',
+  llama: 'meta-color',
+  azure: 'azure-color',
+  'azure-cognitive-services': 'azure-color',
+  microsoft: 'microsoft',
+  cohere: 'cohere-color',
+  ai21: 'ai21',
+  'amazon-bedrock': 'bedrock-color',
+  nvidia: 'nvidia-color',
+  perplexity: 'perplexity-color',
+  'perplexity-agent': 'perplexity-color',
+  inception: 'inception',
+  bytedance: 'bytedance-color',
+  volcengine: 'volcengine-color',
+  'volcengine-coding-plan': 'volcengine-color',
+  baidu: 'baidu-color',
+  tencent: 'tencent-color',
+  'tencent-coding-plan': 'tencent-color',
+  'tencent-token-plan': 'tencent-color',
+  'tencent-tokenhub': 'tencent-color',
+  'black-forest-labs': 'bfl',
+  stabilityai: 'stability-color',
+  ibm: 'ibm',
+  watsonx: 'ibm',
+  stepfun: 'stepfun-color',
+  'stepfun-ai': 'stepfun-color',
+  'stepfun-ai-step-plan': 'stepfun-color',
+  'stepfun-step-plan': 'stepfun-color',
+  xiaomi: 'xiaomimimo',
+  'xiaomi-token-plan-ams': 'xiaomimimo',
+  'xiaomi-token-plan-cn': 'xiaomimimo',
+  'xiaomi-token-plan-sgp': 'xiaomimimo',
+  upstage: 'upstage-color',
+  arcee: 'arcee-color',
+  sakana: 'sakana',
+  sensenova: 'sensenova-color',
+  longcat: 'longcat-color',
+  poolside: 'poolside',
+  openrouter: 'openrouter',
+  vercel: 'vercel',
+  v0: 'v0',
+  poe: 'poe-color',
+  zenmux: 'zenmux',
+  venice: 'venice-color',
+  opencode: 'opencode',
+  'opencode-go': 'opencode',
+  'novita-ai': 'novita-color',
+  aihubmix: 'aihubmix-color',
+  digitalocean: 'digitalocean',
+  'qiniu-ai': 'qiniu-color',
+  huggingface: 'huggingface-color',
+  deepinfra: 'deepinfra-color',
+  'cloudflare-ai-gateway': 'cloudflare-color',
+  'cloudflare-workers-ai': 'cloudflare-color',
+  'github-copilot': 'githubcopilot',
+  togetherai: 'together-color',
+  'fireworks-ai': 'fireworks-color',
+  kilo: 'kilocode',
+  '302ai': 'ai302-color',
+  siliconflow: 'siliconcloud-color',
+  'siliconflow-cn': 'siliconcloud-color',
+  groq: 'groq',
+  cerebras: 'cerebras-color',
+  baseten: 'baseten',
+  chutes: 'chutes',
+  nebius: 'nebius',
+  friendli: 'friendli',
+  morph: 'morph-color',
+  lmstudio: 'lmstudio',
+  'ollama-cloud': 'ollama',
+  modelscope: 'modelscope-color',
+  'io-net': 'ionet',
+  crusoe: 'crusoe',
+  wandb: 'wandb-color',
+  'snowflake-cortex': 'snowflake-color',
+  inference: 'inference',
+};
 export function providerLogo(id: string): string {
-  return LOGO_PROVIDERS.has(id) ? `/providers/${id}.svg` : '/providers/generic.svg';
+  const icon = Object.hasOwn(BRAND_ICONS, id) ? BRAND_ICONS[id] : undefined;
+  return icon ? `/providers/brand/${icon}.svg` : '/providers/generic.svg';
 }
 function record(value: unknown): Record<string, unknown> | null {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : null;
 }
+/** The site uses icons, never emoji; strip pictographs that arrive in source text. */
+const PICTOGRAPHS = /[\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{20E3}]/gu;
+export function plainText(value: string) {
+  return value
+    .replace(PICTOGRAPHS, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+/** Removes emoji and pictographs from longer text, keeping its line breaks. */
+export function withoutPictographs(value: string) {
+  return value.replace(PICTOGRAPHS, '').replace(/[ \t]{2,}/g, ' ');
+}
 function shortText(value: unknown, maximum = 200): string | null {
-  return typeof value === 'string' && value.trim().length > 0 && value.length <= maximum
-    ? value.trim()
-    : null;
+  if (typeof value !== 'string' || value.length > maximum) return null;
+  const text = plainText(value);
+  return text.length > 0 ? text : null;
 }
 function finite(value: unknown, maximum = 1e12): number | null {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= maximum
@@ -176,6 +271,8 @@ function safeUrl(value: unknown): string | null {
 }
 function date(value: unknown): string | null {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}(?:-\d{2})?$/.test(value)) return null;
+  // Some listings use 1970-01-01, the Unix epoch, to mean "unknown".
+  if (value < '2000') return null;
   const normalized = value.length === 7 ? `${value}-01` : value;
   const parsed = new Date(`${normalized}T00:00:00Z`);
   return Number.isFinite(parsed.getTime()) && parsed.toISOString().startsWith(normalized)

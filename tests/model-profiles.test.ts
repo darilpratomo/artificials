@@ -12,6 +12,7 @@ import {
 } from '../shared/model-profiles';
 import type { CatalogSnapshot, ModelRecord } from '../shared/catalog';
 import type { BenchmarkCategory, BenchmarkSnapshot } from '../shared/benchmarks';
+import { buildOverview, configurationOf, referencePrice } from '../shared/model-overview';
 
 describe('model identity', () => {
   it('removes host prefixes and routing suffixes but keeps versions', () => {
@@ -253,5 +254,168 @@ describe('published snapshots', () => {
         expect(profile.categories.some((entry) => entry.id === result.category)).toBe(true);
       }
     }
+  });
+});
+
+describe('careful identity rules', () => {
+  const base = { ...catalog, models: [] as ModelRecord[] };
+  const results = (rows: [string, number, string][], id = 'coding'): BenchmarkSnapshot => ({
+    version: 1,
+    sources: [],
+    categories: [category(id, rows)],
+  });
+
+  it('reads a bare "-max" as effort only when another record shows a max setting', () => {
+    const snapshot = {
+      ...base,
+      models: [
+        offer('openai', 'gpt-test-9', 2, 8, { name: 'GPT Test 9' }),
+        offer('alibaba', 'qwen9', 1, 3, { name: 'Qwen9' }),
+      ],
+    };
+    const rows = results([
+      ['gpt-test-9-max', 90, 'openai'],
+      ['qwen9-max', 80, 'alibaba'],
+    ]);
+    // Without evidence, neither row is attached.
+    expect(buildProfiles(snapshot, rows).links['coding:gpt-test-9-max']).toBeUndefined();
+    // Epoch records "gpt-test-9_max", so "-max" there is an effort setting.
+    const { links } = buildProfiles(snapshot, rows, [
+      { name: 'GPT Test 9', versions: ['gpt-test-9_high', 'gpt-test-9_max'] },
+    ]);
+    expect(links['coding:gpt-test-9-max']).toBe('gpt-test-9');
+    expect(links['coding:qwen9-max']).toBeUndefined();
+  });
+
+  it('never names a reseller as the maker, but trusts a lab that only sells its own models', () => {
+    const { profiles } = buildProfiles(
+      {
+        ...base,
+        models: [
+          offer('reseller', 'mystery-7', 1, 2, { name: 'Mystery 7' }),
+          offer('upstage', 'studio-2', 1, 2, { name: 'Studio 2' }),
+        ],
+      },
+      { version: 1, sources: [], categories: [] },
+    );
+    const mystery = profiles.find((profile) => profile.slug === 'mystery-7')!;
+    expect(mystery).toMatchObject({ maker: '', makerId: 'unknown' });
+    const studio = profiles.find((profile) => profile.slug === 'studio-2')!;
+    expect(studio).toMatchObject({
+      maker: 'Upstage',
+      makerId: 'upstage',
+      official: 'upstage/studio-2',
+    });
+  });
+
+  it('ignores placeholder dates and one host’s outlying context window', () => {
+    const { profiles } = buildProfiles(
+      {
+        ...base,
+        models: [
+          offer('a', 'widget-1', 1, 2, {
+            name: 'Widget 1',
+            releaseDate: '1970-01-01',
+            contextWindow: 20000000,
+          }),
+          offer('b', 'widget-1', 1, 2, {
+            name: 'Widget 1',
+            releaseDate: '2026-05-02',
+            contextWindow: 2000000,
+          }),
+          offer('c', 'widget-1', 1, 2, {
+            name: 'Widget 1',
+            releaseDate: '2026-05-03',
+            contextWindow: 2000000,
+          }),
+        ],
+      },
+      { version: 1, sources: [], categories: [] },
+    );
+    expect(profiles[0].releaseDate).toBe('2026-05-02');
+    expect(profiles[0].contextWindow).toBe(2000000);
+  });
+
+  it('tells apart variants that share a display name', () => {
+    const { profiles } = buildProfiles(
+      {
+        ...base,
+        models: [
+          offer('anthropic', 'claude-test-1', 3, 15),
+          offer('anthropic', 'claude-test-1-fast', 6, 30),
+          offer('anthropic', 'claude-test-1-2026-01-01', 3, 15),
+        ],
+      },
+      { version: 1, sources: [], categories: [] },
+    );
+    expect(profiles.map((profile) => profile.name).sort()).toEqual([
+      'Claude Test 1',
+      'Claude Test 1 (2026-01-01)',
+      'Claude Test 1 (fast)',
+    ]);
+  });
+
+  it('attaches research records by exact identifiers only', () => {
+    const { profiles } = buildProfiles(catalog, benchmarks, [
+      {
+        name: 'Claude Test 1',
+        versions: ['claude-test-1_high'],
+        organization: 'Anthropic',
+        country: 'United States of America',
+        access: 'API access',
+        trainingCompute: 3e25,
+      },
+      { name: 'Qwen3 Max', versions: ['qwen3-max'], organization: 'Alibaba' },
+    ]);
+    expect(profiles.find((profile) => profile.slug === 'claude-test-1')!.facts).toMatchObject({
+      name: 'Claude Test 1',
+      trainingCompute: 3e25,
+    });
+    // "qwen3-max" is not "qwen3"; the record stays unattached.
+    expect(profiles.find((profile) => profile.slug === 'qwen3')!.facts).toBeUndefined();
+  });
+});
+
+describe('home overview', () => {
+  const { profiles, links } = buildProfiles(catalog, benchmarks);
+  const { overview, tests, explorer } = buildOverview(profiles, links, catalog, benchmarks, []);
+
+  it('uses the maker’s own price, or else the middle host price, never a free plan', () => {
+    const test = profiles.find((profile) => profile.slug === 'claude-test-1')!;
+    expect(referencePrice(test)).toEqual({ input: 3, output: 15, blended: 6, from: 'maker' });
+    const qwen = profiles.find((profile) => profile.slug === 'qwen3')!;
+    expect(referencePrice(qwen)).toMatchObject({ from: 'median', input: 0.2 });
+  });
+
+  it('names the tested configuration next to the model', () => {
+    expect(configurationOf('gpt-6_high', 'gpt-6')).toBe('high');
+    expect(configurationOf('model_none')).toBe('no reasoning');
+    expect(configurationOf('claude-test-1-high-effort', 'claude-test-1')).toBe('high effort');
+    expect(configurationOf('other-name', 'claude-test-1')).toBe('');
+  });
+
+  it('keeps each model’s best configuration once per test, highest first', () => {
+    const coding = tests.tests.find((entry) => entry.id === 'coding')!;
+    expect(coding.rows[0]).toMatchObject({
+      name: 'Claude Test 1 (high effort)',
+      slug: 'claude-test-1',
+      score: 80,
+    });
+    expect(coding.rows.filter((row) => row.slug === 'claude-test-1')).toHaveLength(1);
+    expect(overview.metrics.map((entry) => entry.id)).toEqual(['coding']);
+  });
+
+  it('lists index models with links, prices and leaders that name their test', () => {
+    expect(overview.index[0]).toMatchObject({
+      name: 'Claude Test 1',
+      slug: 'claude-test-1',
+      makerId: 'anthropic',
+      index: 150,
+    });
+    const leader = overview.highlights.find((entry) => entry.id === 'index')!;
+    expect(leader).toMatchObject({ kind: 'measured', detail: 'Epoch Capabilities Index' });
+    const coding = overview.highlights.find((entry) => entry.id === 'coding')!;
+    expect(coding.detail).toBe('LiveBench coding');
+    expect(explorer.models).toHaveLength(profiles.length);
   });
 });

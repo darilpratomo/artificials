@@ -33,11 +33,11 @@
 }
 .profile-identity img {
   flex: none;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: var(--profile-raised);
-  padding: 8px;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #f6f7f9;
+  padding: 9px;
 }
 .profile-maker {
   margin: 0 0 2px;
@@ -55,7 +55,7 @@
   max-width: 64ch;
   margin: 0;
   color: var(--profile-ink-2);
-  font-size: 1.06rem;
+  font-size: 16px;
   line-height: 1.6;
 }
 .profile-meta {
@@ -64,7 +64,7 @@
   gap: 6px 22px;
   margin: 0;
   color: var(--profile-muted);
-  font-size: 0.9rem;
+  font-size: 14.5px;
 }
 .profile-actions {
   display: flex;
@@ -95,7 +95,7 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--domain) 9%, var(--profile-surface));
   color: var(--profile-ink);
-  font-size: 0.86rem;
+  font-size: 14px;
 }
 .profile-chips svg {
   color: var(--domain);
@@ -129,7 +129,7 @@
   background: transparent;
   color: var(--profile-muted);
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   transition:
@@ -170,14 +170,14 @@
 }
 .profile-card-head h2 {
   margin: 0 0 6px;
-  font-size: 1.18rem;
+  font-size: 17.5px;
   letter-spacing: -0.015em;
 }
 .profile-card-head p {
   max-width: 68ch;
   margin: 0;
   color: var(--profile-muted);
-  font-size: 0.93rem;
+  font-size: 14.5px;
   line-height: 1.6;
 }
 .profile-card-head-row {
@@ -193,7 +193,7 @@
   max-width: 78ch;
   margin: 0;
   color: var(--profile-ink-2);
-  font-size: 0.95rem;
+  font-size: 15px;
   line-height: 1.65;
 }
 .profile-explainer svg {
@@ -207,7 +207,7 @@
   gap: 9px;
   margin: 0;
   color: var(--profile-muted);
-  font-size: 0.88rem;
+  font-size: 14.5px;
 }
 .profile-empty p {
   max-width: 62ch;
@@ -216,7 +216,7 @@
 }
 .profile-empty h2 {
   margin: 0 0 8px;
-  font-size: 1.18rem;
+  font-size: 17.5px;
 }
 .profile-empty-actions {
   display: flex;
@@ -237,7 +237,7 @@
 /* Sources: present and complete, but quiet. */
 .profile-sources {
   color: var(--profile-muted);
-  font-size: 0.84rem;
+  font-size: 14px;
 }
 .profile-sources summary {
   width: fit-content;
@@ -320,19 +320,19 @@
 }
 .skill-label strong {
   display: block;
-  font-size: 0.95rem;
+  font-size: 15px;
 }
 .skill-label small {
   display: block;
   overflow: hidden;
   color: var(--profile-muted);
-  font-size: 0.78rem;
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .skill-rank {
   color: var(--profile-ink);
-  font-size: 0.9rem;
+  font-size: 14.5px;
   font-weight: 600;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -376,7 +376,7 @@
 }
 .glance-tile > span {
   color: var(--profile-muted);
-  font-size: 0.84rem;
+  font-size: 14px;
 }
 .glance-tile strong {
   font-family: 'Plus Jakarta Sans Variable', sans-serif;
@@ -387,7 +387,7 @@
 }
 .glance-tile small {
   color: var(--profile-muted);
-  font-size: 0.8rem;
+  font-size: 13.5px;
   line-height: 1.45;
 }
 
@@ -448,7 +448,7 @@
 .peer-index,
 .peer-price {
   color: var(--profile-ink-2);
-  font-size: 0.9rem;
+  font-size: 14.5px;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -462,7 +462,7 @@
 }
 .index-card h2 {
   margin: 0 0 8px;
-  font-size: 1.18rem;
+  font-size: 17.5px;
 }
 .index-card p {
   max-width: 60ch;
@@ -501,12 +501,12 @@
 }
 .result-group-head h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 16px;
 }
 .result-group-head p {
   margin: 2px 0 0;
   color: var(--profile-muted);
-  font-size: 0.88rem;
+  font-size: 14.5px;
 }
 .result-grid {
   display: grid;
@@ -532,7 +532,7 @@
 }
 .result-card h4 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 15px;
 }
 .result-rank {
   flex: none;
@@ -540,7 +540,7 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--domain) 16%, transparent);
   color: var(--profile-ink);
-  font-size: 0.8rem;
+  font-size: 13.5px;
   font-weight: 600;
 }
 .result-description {
@@ -562,7 +562,7 @@
 }
 .result-score span {
   color: var(--profile-muted);
-  font-size: 0.86rem;
+  font-size: 14px;
 }
 .result-legend {
   display: flex;
@@ -570,7 +570,7 @@
   gap: 4px 16px;
   margin: 0;
   color: var(--profile-muted);
-  font-size: 0.8rem;
+  font-size: 13.5px;
 }
 .result-legend span {
   display: inline-flex;
@@ -591,13 +591,13 @@
 .result-detail {
   margin: 0;
   color: var(--profile-muted);
-  font-size: 0.8rem;
+  font-size: 13.5px;
   overflow-wrap: anywhere;
 }
 .result-others summary {
   width: fit-content;
   color: var(--profile-ink-2);
-  font-size: 0.84rem;
+  font-size: 14px;
   cursor: pointer;
 }
 .result-others ul {
@@ -629,7 +629,7 @@
 }
 .price-provider label {
   color: var(--profile-muted);
-  font-size: 0.84rem;
+  font-size: 14px;
 }
 .price-tiles {
   display: grid;
@@ -645,7 +645,7 @@
 }
 .price-tiles span {
   color: var(--profile-muted);
-  font-size: 0.84rem;
+  font-size: 14px;
 }
 .price-tiles strong {
   font-family: 'Plus Jakarta Sans Variable', sans-serif;
@@ -656,7 +656,7 @@
   max-width: 78ch;
   margin: 14px 0 0;
   color: var(--profile-muted);
-  font-size: 0.86rem;
+  font-size: 14px;
   line-height: 1.6;
 }
 .calc-presets,
@@ -673,7 +673,7 @@
   background: transparent;
   color: var(--profile-ink-2);
   font: inherit;
-  font-size: 0.88rem;
+  font-size: 14.5px;
   cursor: pointer;
 }
 .calc-presets button:hover,
@@ -705,7 +705,7 @@
 }
 .calc-fields label > span {
   color: var(--profile-ink-2);
-  font-size: 0.88rem;
+  font-size: 14.5px;
 }
 .calc-fields input {
   width: 100%;
@@ -715,7 +715,7 @@
   background: var(--profile-raised);
   color: var(--profile-ink);
   font: inherit;
-  font-size: 1rem;
+  font-size: 15px;
   font-variant-numeric: tabular-nums;
 }
 .calc-fields input:focus-visible {
@@ -724,7 +724,7 @@
 }
 .calc-fields small {
   color: var(--profile-muted);
-  font-size: 0.8rem;
+  font-size: 13.5px;
 }
 .calc-results {
   display: grid;
@@ -739,7 +739,7 @@
 }
 .calc-results dt {
   color: var(--profile-muted);
-  font-size: 0.84rem;
+  font-size: 14px;
 }
 .calc-results dd {
   margin: 4px 0 0;
@@ -785,13 +785,13 @@
   gap: 8px;
   min-width: 0;
   overflow: hidden;
-  font-size: 0.9rem;
+  font-size: 14.5px;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 .price-bar-name small {
   color: var(--profile-muted);
-  font-size: 0.75rem;
+  font-size: 13px;
 }
 .price-bar-track {
   display: flex;
@@ -815,7 +815,7 @@
 .price-bar-value {
   flex: none;
   color: var(--profile-ink);
-  font-size: 0.86rem;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
 .price-bar-tip {
@@ -828,7 +828,7 @@
   border-radius: 8px;
   background: #0b0c0f;
   color: var(--profile-ink);
-  font-size: 0.8rem;
+  font-size: 13.5px;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
@@ -855,13 +855,13 @@
   gap: 12px;
   padding: 12px 4px;
   border-top: 1px solid var(--profile-line);
-  font-size: 0.9rem;
+  font-size: 14.5px;
   font-variant-numeric: tabular-nums;
 }
 .provider-head {
   border-top: 0;
   color: var(--profile-muted);
-  font-size: 0.8rem;
+  font-size: 13.5px;
 }
 .provider-name {
   display: flex;
@@ -872,8 +872,8 @@
 .provider-name img {
   flex: none;
   border-radius: 8px;
-  background: var(--profile-raised);
-  padding: 4px;
+  background: #f6f7f9;
+  padding: 5px;
 }
 .provider-name > span {
   display: grid;
@@ -939,12 +939,12 @@
   grid-template-columns: auto 1fr;
   column-gap: 8px;
   align-items: center;
-  font-size: 0.93rem;
+  font-size: 14.5px;
 }
 .fit-label small {
   grid-column: 2;
   color: var(--profile-muted);
-  font-size: 0.78rem;
+  font-size: 13px;
 }
 .fit-track {
   height: 10px;
@@ -965,7 +965,7 @@
 }
 .fit-value {
   color: var(--profile-ink-2);
-  font-size: 0.86rem;
+  font-size: 14px;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -1059,7 +1059,7 @@
     content: attr(data-label);
     display: block;
     color: var(--profile-muted);
-    font-size: 0.75rem;
+    font-size: 13px;
   }
   .fit-list li {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -1083,4 +1083,34 @@
 .provider-badges .badge-plan {
   border-color: color-mix(in srgb, var(--domain-knowledge) 55%, transparent);
   background: color-mix(in srgb, var(--domain-knowledge) 12%, transparent);
+}
+
+/* Research record */
+.record-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+.record-list > div {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--profile-line, #23242b);
+}
+.record-list dt {
+  color: #9698a3;
+  font-size: 14px;
+}
+.record-list dd {
+  margin: 0;
+  color: #eceef2;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 520px) {
+  .record-list > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
 }

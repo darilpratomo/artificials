@@ -117,7 +117,8 @@ own category with `unit: "index"`: it is open-ended, has confidence bounds, and 
 as a percentage. Each ECI row carries the model versions it was built from, taken from
 `processed_data_for_eci.csv`; only that mapping is used from the file, not its bundled
 third-party scores. Two first-party tests (mystery game puzzles, EBR-bench) are skipped
-because they could not be described accurately.
+because they could not be described accurately. Capability-index rows also keep Epoch AI's release date
+and weight access (open or closed) for each model.
 
 Views show when results were last checked and the test's methodology. Credits appear in a
 compact "Sources and method" note and in the rankings footnote, rather than as prominent
@@ -134,12 +135,22 @@ retains that license. Artificials' original UI does not copy the source site's i
 
 ## Logos
 
-26 commonly used provider marks are bundled locally from models.dev's SVG repository.
-They are restricted to static SVG drawing elements, sanitized, and served as images rather
-than injected HTML. Other providers use an original neutral geometric mark. No visitor
-request is sent to an external image host. Logos identify providers; trademarks remain with
-their owners and do not imply a partnership. `providerLogo(id)` always returns an existing
-local file or the generic fallback.
+Brand marks are shown in their original colours. They come from LobeHub Icons
+(`@lobehub/icons-static-svg`, MIT) and are vendored into `public/providers/brand/` by
+`scripts/vendor-logos.mjs`, which copies only the marks listed in `BRAND_ICONS`
+(`shared/catalog.ts`, hosts and providers) and `MAKER_STYLES` (`shared/makers.ts`, model
+makers). The script rejects any SVG with scripts, event handlers, embedded documents,
+images or references; marks are served as images, never injected as HTML. Pages draw
+them on a light tile so black marks, such as OpenAI's or xAI's, stay visible on the dark
+interface. A maker's mark can differ from its cloud's: Microsoft makes Phi, Azure hosts it.
+
+`providerLogo(id)` and `makerLogo(id)` always return an existing local file or the neutral
+fallback, so a guess can never show another company's logo. No visitor request goes to an
+external image host. Trademarks remain with their owners and do not imply a partnership.
+
+Charts colour each maker with its own brand colour (`MAKER_STYLES`), lifted where needed for
+3:1 contrast on the chart surface. Several makers share a blue or an orange, as their brands
+do, so colour never identifies a maker alone: every mark sits beside the maker's logo or name.
 
 ## Model profiles
 
@@ -152,13 +163,24 @@ git-ignored and deployed with the build: 128 bucket files (FNV-1a hash of the sl
 Grouping: `modelSlug()` lower-cases the model id, drops a host path prefix, Bedrock region and
 vendor prefixes, the Bedrock `-v1:0` suffix and routing suffixes such as `:free` or `@date`.
 Versions and dated snapshots are kept, because two snapshots can behave differently; an
-undated alias and a dated snapshot are therefore separate profiles.
+undated alias and a dated snapshot are therefore separate profiles. When variants share a
+display name, each gets the part of its id that tells it apart, such as "Claude Opus 5.5
+(fast)" or "GPT-4o (2024-08-06)".
+
+Maker: a name pattern (`MAKERS`) identifies the maker. Failing that, a listing by a lab that
+only sells its own models counts; any other host is never presented as the maker, and the
+profile says "Maker not reported" until a research record names one.
+
+Profile facts prefer the maker's own listing. Otherwise the release date is the earliest
+plausible date across hosts (placeholders such as 1970-01-01 are ignored) and the context
+window is the most common listed value, so one host's typo cannot inflate it.
 
 Benchmark matching is conservative, because a wrong match shows one model's score on
 another's page. A row may match its exact name, or the name with configuration markers
 removed: Epoch's `_effort` suffix, an explicit `-high-effort`, a thinking mode, or a trailing
-date. A bare `-max` is never removed ("Qwen3 Max" is not "Qwen3"). A row never attaches when
-its evaluator's attribution contradicts the model's maker. The exact configuration name is
+date. A bare `-max` is removed only when another record shows that the same model has a "max"
+effort setting (Epoch AI's `name_max` identifiers); otherwise it is kept ("Qwen3 Max" is not
+"Qwen3"). A row never attaches when its evaluator's attribution contradicts the model's maker. The exact configuration name is
 always shown next to each score. Unmatched rows still appear in rankings, unlinked.
 
 Calculated by Artificials, and labelled as such: standing among tested models, ranks per test
@@ -171,7 +193,48 @@ subscription (for example plan-based providers). It is labelled "No per-token ch
 never used as a model's lowest price. When several hosts tie on the lowest list price, the
 maker's own listing is named, and no single host gets a "Lowest price" badge.
 
+Research records (`public/data/model-facts.json`) come from Epoch AI's `model_metadata.csv`
+and attach the same way as scores, by exact identifier. Profiles show them in a "Research
+record" card with Epoch AI's own model name, organization, country, access category, release
+date and estimated training compute. Where Epoch AI's release date differs from the catalog's,
+both are shown. The file is optional: profiles build without it, and a missing or much smaller
+file never stops the benchmark refresh.
+
 The Worker serves `/models/*` first: it reads `directory.json` (cached per isolate for five
 minutes), returns the app shell with the model's title, description and canonical URL, and a
 real 404 with `noindex` for unknown or malformed slugs. The sitemap lists profiles that have
 benchmark results or at least three hosts.
+
+## Home dashboard
+
+The home page is built from three more generated files in `public/data/models/`:
+
+- `overview.json` (about 17 KB compressed): every model on the capability index with its
+  maker, confidence range, release date, weight access, reference price and context window;
+  the list of tests; up to 210 recent releases; the leaders; and counts. It is also written
+  inline into the prerendered home page, so the first view needs no extra request and search
+  engines see the leaders and releases.
+- `tests.json`: every test's rows, best configuration per model. Loaded only when a visitor
+  picks a single test in the ranking chart.
+- `explorer.json`: one row per model for search and the full list. Loaded when the list comes
+  near the screen or the search box is used.
+
+Definitions, all calculated by Artificials:
+
+- Reference price: the maker's own paid listing, or else the middle paid listing across hosts,
+  blended as three input tokens per output token. Free tiers and plans are never used. It is a
+  list price, not the cost of any particular task.
+- Leaders: the top row of one named test each (capability index, LiveBench coding and agentic
+  coding, FrontierMath Tiers 1–3, GPQA Diamond, SWE-bench Verified, SimpleQA Verified,
+  T2I-CoReBench), the best open-weights model on the index, the lowest reference price among
+  the top ten on the index, the largest listed context window and the newest release. Each card
+  names its test and is labelled as a test result, listing data or a calculation.
+- Frontier lines: on the price chart, the models no cheaper model beats; on the time chart, each
+  new highest score. The shaded region marks above-median score at below-median price.
+- Releases: dated profiles up to the snapshot day, newest first. Aliases of one release (same
+  maker, name and day) collapse into the most-hosted one. "Known makers" shows models whose maker
+  is identified and that the maker sells, several hosts list, or a test covers.
+
+Everything refreshes with the six-hourly workflow: a new model appears in the timeline as soon as
+the catalog lists it, and its scores follow once a test covers it. No step needs manual input.
+Speed and latency are not shown, because no reliable public source is available to republish.

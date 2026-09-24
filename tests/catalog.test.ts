@@ -14,6 +14,7 @@ import {
 import { registerCatalogRoutes } from '../worker/catalog';
 import type { CatalogIndex, CatalogSnapshot, CatalogPage, CatalogSummary } from '../shared/catalog';
 import workerApp from '../worker/index';
+import { MAKER_STYLES, makerLogo } from '../shared/makers';
 import type { Env } from '../worker/types';
 
 const raw = {
@@ -284,11 +285,30 @@ describe('public catalog API', () => {
       }
     }
 
-    const logos = new Set(snapshot.providers.map((provider) => provider.logo));
+    // Pages draw logos with providerLogo() and makerLogo() at render time, so
+    // every mark they can request must exist and be a static drawing.
+    const logos = new Set([
+      ...snapshot.providers.map((provider) => providerLogo(provider.id)),
+      ...Object.keys(MAKER_STYLES).map(makerLogo),
+    ]);
     for (const logo of logos) {
       const svg = await readFile(resolve(`public${logo}`), 'utf8');
       expect(svg).toContain('<svg');
-      expect(svg).not.toMatch(/<script|<foreignObject|\bonload\s*=|javascript:/i);
+      expect(svg).not.toMatch(/<script|<foreignObject|\bonload\s*=|javascript:|href\s*=/i);
     }
+  });
+});
+
+describe('text cleanup', () => {
+  it('drops placeholder release dates and emoji, but keeps paragraph breaks', async () => {
+    const { normalizeCatalog, withoutPictographs } = await import('../shared/catalog');
+    const snapshot = normalizeCatalog(
+      { lab: { name: 'Lab', models: { m: { name: 'M', release_date: '1970-01-01' } } } },
+      '2026-09-24T00:00:00.000Z',
+    );
+    expect(snapshot.models[0].releaseDate).toBeNull();
+    expect(withoutPictographs('Launch day \u{1F680}\n\nMore  text')).toBe(
+      'Launch day \n\nMore text',
+    );
   });
 });

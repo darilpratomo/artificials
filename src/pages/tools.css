@@ -36,7 +36,7 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  font-size: 12px;
+  font-size: 14px;
   color: #c2c7d1;
 }
 .tools-promises svg,
@@ -96,14 +96,14 @@
   animation: utility-float 8s ease-in-out infinite;
 }
 .tools-glass span {
-  font: 9px monospace;
+  font: 11.5px monospace;
   letter-spacing: 0.15em;
   color: #c2cbdd;
 }
 .tools-sculpture-label {
   position: absolute;
   bottom: 0;
-  font: 9px monospace;
+  font: 11.5px monospace;
   letter-spacing: 0.17em;
   color: #9ba4b6;
 }
@@ -136,7 +136,7 @@
   border: 1px solid transparent;
   border-radius: 24px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14.5px;
 }
 .tools-tabs button.active {
   background: #e3e6ec;
@@ -183,7 +183,7 @@
 }
 .tool-card-top > .mono {
   color: var(--tool-muted);
-  font-size: 10px;
+  font-size: 12.5px;
 }
 .tool-icon {
   width: 49px;
@@ -204,7 +204,7 @@
 }
 .tool-card p {
   color: var(--tool-muted);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.8;
   margin-bottom: 28px;
 }
@@ -215,7 +215,7 @@
   margin-top: auto;
   padding-top: 17px;
   border-top: 1px solid #ffffff13;
-  font-size: 12px;
+  font-size: 14px;
   color: #d0d5df;
 }
 .tools-privacy {
@@ -238,7 +238,7 @@
 }
 .tools-privacy p {
   max-width: 720px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--tool-muted);
   line-height: 1.9;
 }
@@ -247,7 +247,7 @@
   gap: 8px;
   align-items: center;
   margin-top: 10px;
-  font-size: 13px;
+  font-size: 14.5px;
 }
 .tools-faq {
   max-width: 860px;
@@ -259,11 +259,11 @@
 }
 .tools-faq summary {
   cursor: pointer;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
 }
 .tools-faq details p {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.9;
   color: var(--tool-muted);
   margin: 16px 0 0;
@@ -335,13 +335,13 @@
 }
 .tools-dropzone p {
   color: var(--tool-muted);
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.8;
   margin: 0;
   max-width: 330px;
 }
 .tools-dropzone > small {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--tool-muted);
   line-height: 1.8;
 }
@@ -375,7 +375,7 @@
   display: flex;
   justify-content: space-between;
   color: #dce1eb;
-  font-size: 12px;
+  font-size: 14px;
   margin-bottom: 10px;
 }
 .tools-field .custom-select {
@@ -405,12 +405,12 @@
 .tools-field > small {
   display: block;
   color: var(--tool-muted);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.8;
   margin-top: 10px;
 }
 .tools-format-note {
-  font-size: 12px;
+  font-size: 14px;
   color: #c0c6d2;
   line-height: 1.9;
   padding-top: 4px;
@@ -418,7 +418,7 @@
 }
 .tools-helper {
   color: var(--tool-muted);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.8;
   display: block;
 }
@@ -440,7 +440,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  font-size: 12px;
+  font-size: 14px;
   margin: 20px 0 12px;
 }
 .tools-list-heading > button {
@@ -448,7 +448,7 @@
   background: transparent;
   color: #bbc5d8;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
   padding: 10px 0 10px 10px;
 }
 .tools-file-list ol {
@@ -473,7 +473,7 @@
 }
 .tools-file-name strong {
   display: block;
-  font-size: 13px;
+  font-size: 14.5px;
   overflow-wrap: anywhere;
   font-weight: 500;
   line-height: 1.5;
@@ -482,7 +482,7 @@
   display: block;
   margin-top: 5px;
   color: var(--tool-muted);
-  font-size: 11px;
+  font-size: 13px;
 }
 .tools-file-actions {
   display: flex;
@@ -511,7 +511,7 @@
   border: 1px solid #874e42;
   background: #3e231e50;
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
@@ -527,7 +527,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.6;
 }
 .tools-progress progress {
@@ -543,7 +543,7 @@
   background: transparent;
   border: 0;
   color: #c2cbdc;
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
 }
 .tools-results {
@@ -564,7 +564,7 @@
 }
 .tools-results-heading p {
   color: #bdc6d7;
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.8;
 }
 .tools-result-grid {
@@ -590,18 +590,18 @@
   background: repeating-conic-gradient(#e0e0e0 0% 25%, #f6f6f6 0% 50%) 50% / 16px 16px;
 }
 .tools-result-card h3 {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.7;
   overflow-wrap: anywhere;
   margin: 0;
 }
 .tools-result-card > small {
   color: #bdc6d7;
-  font-size: 12px;
+  font-size: 14px;
 }
 .tools-result-card > p {
   color: var(--tool-muted);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
   margin-bottom: 10px;
 }
@@ -660,7 +660,7 @@
   border-radius: 999px;
   background: rgba(12, 14, 18, 0.72);
   color: #f2f3f5;
-  font-size: 10px;
+  font-size: 12.5px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   pointer-events: none;
@@ -685,7 +685,7 @@
   background: transparent;
   color: #bdc6d7;
   font: inherit;
-  font-size: 11.5px;
+  font-size: 13.5px;
   cursor: pointer;
   transition: border-color 0.18s ease, color 0.18s ease;
 }
@@ -719,7 +719,7 @@
   margin-top: 2px;
 }
 .tools-work-bottom p {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.9;
   max-width: 750px;
   margin: 0;
@@ -765,7 +765,7 @@
     height: 50px;
   }
   .tools-sculpture-label {
-    font-size: 8px;
+    font-size: 10.5px;
   }
   .tool-work-grid {
     grid-template-columns: 1fr;
@@ -803,10 +803,10 @@
   }
   .tools-tabs button {
     padding: 9px 11px;
-    font-size: 12px;
+    font-size: 14px;
   }
   .tools-hero > div > p {
-    font-size: 15px;
+    font-size: 16px;
   }
   .tools-promises {
     gap: 12px 18px;
@@ -819,7 +819,7 @@
     height: 44px;
   }
   .tool-heading .eyebrow {
-    font-size: 9px;
+    font-size: 11.5px;
   }
   .tool-heading h1 {
     font-size: 33px;

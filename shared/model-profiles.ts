@@ -1,5 +1,10 @@
 import type { CatalogSnapshot, LongContextPrice, ModelRecord } from './catalog.ts';
-import type { BenchmarkDomain, BenchmarkSnapshot, BenchmarkSource } from './benchmarks.ts';
+import type {
+  BenchmarkDomain,
+  BenchmarkSnapshot,
+  BenchmarkSource,
+  ModelFacts,
+} from './benchmarks.ts';
 
 /**
  * Model profiles group every serving offer of one underlying model, so a
@@ -67,9 +72,13 @@ export interface ProfilePeer {
   outputPrice: number | null;
 }
 
+/** A research source's record of the model, shown with its own name and source. */
+export type ProfileFacts = Omit<ModelFacts, 'versions'>;
+
 export interface ModelProfile {
   slug: string;
   name: string;
+  /** Empty when no source names the maker; a host is never presented as the maker. */
   maker: string;
   makerId: string;
   description?: string;
@@ -92,6 +101,7 @@ export interface ModelProfile {
   results: ProfileResult[];
   categories: ProfileCategory[];
   peers: ProfilePeer[];
+  facts?: ProfileFacts;
 }
 
 export interface ProfileBucket {
@@ -159,9 +169,10 @@ const DATE = /-(?:\d{4}-\d{2}-\d{2}|\d{8})$/;
  * Catalog slugs a benchmark row may refer to, most specific first. Only
  * configuration markers are removed: an `_effort` suffix (Epoch's convention),
  * an explicit `-high-effort`, a thinking mode, or a date. A bare `-max` is kept,
- * because "Qwen3 Max" is a different model from "Qwen3".
+ * because "Qwen3 Max" is a different model from "Qwen3", unless `maxEffort`
+ * shows that another source ran the same model at a "max" effort setting.
  */
-export function benchmarkCandidates(name: string): string[] {
+export function benchmarkCandidates(name: string, maxEffort?: Set<string>): string[] {
   const out: string[] = [];
   const add = (value: string) => {
     if (value && !out.includes(value)) out.push(value);
@@ -182,6 +193,8 @@ export function benchmarkCandidates(name: string): string[] {
   }
   const undated = value.replace(DATE, '');
   if (undated !== value) add(undated);
+  const bare = tidy(name).replace(/-max$/, '');
+  if (maxEffort?.has(bare) && bare !== tidy(name)) add(bare);
   return out;
 }
 
@@ -209,7 +222,46 @@ const MAKERS: [RegExp, string, string][] = [
   [/^hunyuan/, 'Tencent', 'tencent'],
   [/^flux/, 'Black Forest Labs', 'black-forest-labs'],
   [/^granite/, 'IBM', 'ibm'],
+  [/^mimo(?:-|\d|$)/, 'Xiaomi', 'xiaomi'],
+  [/^step-?\d/, 'StepFun', 'stepfun'],
+  [/^solar/, 'Upstage', 'upstage'],
+  [/^longcat/, 'Meituan', 'meituan'],
+  [/^(?:hermes|nous-hermes)/, 'Nous Research', 'nousresearch'],
+  [/^(?:stable-diffusion|sd3|sdxl)/, 'Stability AI', 'stabilityai'],
+  [/^recraft/, 'Recraft', 'recraft'],
+  [/^ideogram/, 'Ideogram', 'ideogram'],
+  [/^kling/, 'Kuaishou', 'kuaishou'],
+  [/^lfm-?\d/, 'Liquid AI', 'liquid'],
+  [/^baichuan/, 'Baichuan', 'baichuan'],
+  [/^(?:internlm|intern-s1|internvl)/, 'Shanghai AI Laboratory', 'internlm'],
+  [/^falcon/, 'TII', 'tii'],
+  [/^exaone/, 'LG AI Research', 'lg'],
+  [/^reka/, 'Reka', 'reka'],
 ];
+
+/**
+ * Hosts that serve only their own models. When no name pattern identifies a
+ * model's maker, one of these listing it is taken as the maker; any other host
+ * is never presented as the maker.
+ */
+const LAB_HOSTS: Record<string, string> = {
+  openai: 'OpenAI',
+  anthropic: 'Anthropic',
+  google: 'Google',
+  deepseek: 'DeepSeek',
+  xai: 'xAI',
+  mistral: 'Mistral AI',
+  cohere: 'Cohere',
+  ai21: 'AI21 Labs',
+  moonshotai: 'Moonshot AI',
+  zai: 'Z.ai',
+  minimax: 'MiniMax',
+  upstage: 'Upstage',
+  stepfun: 'StepFun',
+  xiaomi: 'Xiaomi',
+  inception: 'Inception',
+  perplexity: 'Perplexity',
+};
 
 export function makerOf(slug: string): { maker: string; makerId: string } {
   const found = MAKERS.find(([pattern]) => pattern.test(slug));
@@ -268,6 +320,17 @@ function mode<T>(values: T[]): T | undefined {
   return best;
 }
 
+/** The most frequent value; ties go to the larger one. */
+function commonest(values: (number | null)[]): number | null {
+  const counts = new Map<number, number>();
+  for (const value of values) if (value !== null) counts.set(value, (counts.get(value) ?? 0) + 1);
+  let best: number | null = null;
+  for (const [value, count] of counts)
+    if (best === null || count > counts.get(best)! || (count === counts.get(best)! && value > best))
+      best = value;
+  return best;
+}
+
 function median(values: number[]) {
   const sorted = [...values].sort((a, b) => a - b);
   const middle = Math.floor(sorted.length / 2);
@@ -308,7 +371,11 @@ export function primaryResult(profile: ModelProfile, domain: BenchmarkDomain) {
  * Builds every profile from the two published snapshots. Pure and
  * deterministic: the same inputs always produce identical output.
  */
-export function buildProfiles(catalog: CatalogSnapshot, benchmarks: BenchmarkSnapshot) {
+export function buildProfiles(
+  catalog: CatalogSnapshot,
+  benchmarks: BenchmarkSnapshot,
+  facts: ModelFacts[] = [],
+) {
   const groups = new Map<string, ModelRecord[]>();
   for (const model of catalog.models) {
     const slug = modelSlug(model.modelId);
@@ -318,7 +385,14 @@ export function buildProfiles(catalog: CatalogSnapshot, benchmarks: BenchmarkSna
 
   const profiles = new Map<string, ModelProfile>();
   for (const [slug, offers] of [...groups].sort(([a], [b]) => a.localeCompare(b))) {
-    const { maker, makerId } = makerOf(slug);
+    let { maker, makerId } = makerOf(slug);
+    if (makerId === 'unknown') {
+      const lab = offers.find((offer) => Object.hasOwn(LAB_HOSTS, offer.providerId));
+      if (lab) {
+        maker = LAB_HOSTS[lab.providerId];
+        makerId = lab.providerId;
+      }
+    }
     const official = offers.find((offer) => offer.providerId === makerId);
     const lead = official ?? offers[0];
     const pick = <T>(read: (offer: ModelRecord) => T | null | undefined): T | undefined => {
@@ -331,9 +405,10 @@ export function buildProfiles(catalog: CatalogSnapshot, benchmarks: BenchmarkSna
     const contexts = [
       ...new Set(offers.map((offer) => offer.contextWindow).filter((value) => value !== null)),
     ];
+    // A placeholder such as 1970-01-01 from one host must not become the release date.
     const releases = offers
       .map((offer) => offer.releaseDate)
-      .filter((value): value is string => !!value)
+      .filter((value): value is string => !!value && value >= '2000')
       .sort();
     const offerings: ProfileOffering[] = offers
       .map((offer) => ({
@@ -370,15 +445,20 @@ export function buildProfiles(catalog: CatalogSnapshot, benchmarks: BenchmarkSna
       name: cleanName(
         official?.name ?? mode(offers.map((offer) => cleanName(offer.name))) ?? lead.name,
       ),
-      maker: maker || lead.provider,
-      makerId: makerId === 'unknown' ? lead.providerId : makerId,
+      maker,
+      makerId,
       ...(pick((offer) => offer.description)
         ? { description: pick((offer) => offer.description)! }
         : {}),
-      releaseDate: official?.releaseDate ?? releases[0] ?? null,
+      releaseDate:
+        official?.releaseDate && official.releaseDate >= '2000'
+          ? official.releaseDate
+          : (releases[0] ?? null),
       ...(pick((offer) => offer.knowledge) ? { knowledge: pick((offer) => offer.knowledge)! } : {}),
+      // The most common listing, not the largest: one host's typo must not
+      // become the model's context window.
       contextWindow:
-        official?.contextWindow ?? (contexts.length ? Math.max(...(contexts as number[])) : null),
+        official?.contextWindow ?? commonest(offers.map((offer) => offer.contextWindow)),
       maxOutput: pick((offer) => offer.maxOutput) ?? null,
       contextVaries: contexts.length > 1,
       inputModalities:
@@ -408,12 +488,43 @@ export function buildProfiles(catalog: CatalogSnapshot, benchmarks: BenchmarkSna
     });
   }
 
+  // Variants that share a display name, such as a "-fast" mode or a dated
+  // snapshot, get the part of their id that tells them apart.
+  const named = new Map<string, ModelProfile[]>();
+  for (const profile of profiles.values()) {
+    const key = profile.name.toLowerCase();
+    named.set(key, [...(named.get(key) ?? []), profile]);
+  }
+  for (const group of named.values()) {
+    const canonical =
+      group.length > 1 && group.find((profile) => profile.slug === tidy(profile.name));
+    if (!canonical) continue;
+    for (const profile of group) {
+      if (profile === canonical || !profile.slug.startsWith(`${canonical.slug}-`)) continue;
+      const rest = profile.slug.slice(canonical.slug.length + 1);
+      profile.name = `${profile.name} (${/^\d{4}-\d{2}-\d{2}$/.test(rest) ? rest : rest.replace(/-/g, ' ')})`;
+    }
+  }
+
+  // Models some source ran at an explicit "max" effort (Epoch's `name_max`).
+  // Only for these does another source's bare "-max" suffix mean effort.
+  const maxEffort = new Set<string>();
+  const identifiers = [
+    ...benchmarks.categories.flatMap((category) => category.rows.map((row) => row.model)),
+    ...facts.flatMap((record) => record.versions),
+  ];
+  for (const identifier of identifiers) {
+    const at = identifier.lastIndexOf('_');
+    if (at > 0 && identifier.slice(at + 1).toLowerCase() === 'max')
+      maxEffort.add(tidy(identifier.slice(0, at).split('/').pop() ?? ''));
+  }
+
   // Attach benchmark rows. A row attaches to at most one profile, and never to
   // a profile whose maker contradicts the evaluator's attribution.
   const links: Record<string, string> = {};
   const resolve = (names: string[], providerId: string) => {
     for (const name of names)
-      for (const candidate of benchmarkCandidates(name)) {
+      for (const candidate of benchmarkCandidates(name, maxEffort)) {
         const profile = profiles.get(candidate);
         if (!profile) continue;
         const known = makerOf(candidate).makerId;
@@ -457,6 +568,20 @@ export function buildProfiles(catalog: CatalogSnapshot, benchmarks: BenchmarkSna
         profile.categories.push(summary);
     }
   }
+  // Research records attach the same way as scores: by the exact identifiers
+  // the source used, never by a loose name match.
+  for (const record of facts) {
+    const profile = resolve(
+      record.versions.map((version) => version.split('/').pop() ?? version),
+      'unknown',
+    );
+    if (!profile || profile.facts) continue;
+    const { versions, ...rest } = record;
+    void versions;
+    profile.facts = rest;
+    if (!profile.maker && rest.organization) profile.maker = rest.organization;
+  }
+
   const order = benchmarks.categories.map((category) => category.id);
   for (const profile of profiles.values()) {
     profile.results.sort(

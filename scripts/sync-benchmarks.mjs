@@ -126,6 +126,33 @@ await mkdir(directory, { recursive: true });
 const staging = resolve(root, '.benchmark-snapshot.tmp');
 await writeFile(staging, JSON.stringify(snapshot) + '\n');
 await rename(staging, file);
+
+// Model facts are optional detail. A missing or much smaller set keeps the
+// previous file instead of stopping the refresh.
+const factsFile = resolve(directory, 'model-facts.json');
+let previousFacts = 0;
+try {
+  previousFacts = JSON.parse(await readFile(factsFile, 'utf8')).facts.length;
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
+if (epoch.facts.length >= 50 && epoch.facts.length >= previousFacts * 0.75) {
+  const { id, name, url, dataUrl, license, licenseUrl } = snapshot.sources.find(
+    (source) => source.id === 'epoch',
+  );
+  const factsStaging = resolve(root, '.model-facts.tmp');
+  await writeFile(
+    factsStaging,
+    JSON.stringify({
+      version: 1,
+      source: { id, name, url, dataUrl, license, licenseUrl, checkedAt },
+      facts: epoch.facts,
+    }) + '\n',
+  );
+  await rename(factsStaging, factsFile);
+} else {
+  console.warn(`Model facts not updated: ${epoch.facts.length} records (was ${previousFacts}).`);
+}
 console.log(
-  `Benchmarks refreshed: ${categories.map((c) => `${c.name} ${c.rows.length}`).join(', ')}. Checked ${checkedAt}.`,
+  `Benchmarks refreshed: ${categories.map((c) => `${c.name} ${c.rows.length}`).join(', ')}. Model facts: ${epoch.facts.length}. Checked ${checkedAt}.`,
 );

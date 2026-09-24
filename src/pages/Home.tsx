@@ -1,32 +1,38 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ArrowUpRight,
-  ArrowRight,
-  ArrowDown,
-  Cpu,
-  Braces,
-  Layers3,
-  Command,
-  ShieldCheck,
-  Code2,
-  Database,
-  ChevronRight,
-  BookOpen,
-  Wrench,
-} from 'lucide-react';
-import { Reveal, ScrollJourney } from '../components/Motion';
-import { useCatalogSummary, compactNumber, updatedDate, providerLogo } from '../lib/catalog';
-import ModelCard from '../components/ModelCard';
+import { ArrowDown, ArrowUpRight, BarChart3, GitCompareArrows } from 'lucide-react';
+import { makerLogo } from '../../shared/makers';
 import { ARTICLES } from '../../shared/content';
 import { ArticleCover } from '../components/ArticleCover';
-import { HomeLaunchpad, HomeTools, HomeAcademy } from '../components/HomeResources';
-import { useApp } from '../lib/context';
+import { Highlights } from '../components/home/Highlights';
+import { ModelSearch } from '../components/home/ModelSearch';
+import { ReleaseTimeline } from '../components/home/ReleaseTimeline';
+import { ago, day } from '../components/profile/format';
+import { useOverview, type ModelOverview } from '../lib/overview';
+import '../components/home/dashboard.css';
 import './home.css';
-export default function Home() {
-  const { data, error } = useCatalogSummary();
-  const { config } = useApp();
-  const [prompt, setPrompt] = useState('');
+
+// The charts and the full model list load as one chunk, after the page is up.
+const charts = () => import('../components/home/Charts');
+const RankingSection = lazy(() => charts().then((module) => ({ default: module.RankingSection })));
+const ValueSection = lazy(() => charts().then((module) => ({ default: module.ValueSection })));
+const ModelExplorer = lazy(() => charts().then((module) => ({ default: module.ModelExplorer })));
+
+function Pending({ tall = false }: { tall?: boolean }) {
+  return (
+    <div className={`dash-state dash-pending${tall ? ' is-tall' : ''}`} role="status">
+      Loading…
+    </div>
+  );
+}
+
+export default function Home({ initial }: { initial?: ModelOverview }) {
+  const [attempt, setAttempt] = useState(0);
+  const { data, error } = useOverview(attempt, initial);
+  const leader = data?.index[0];
+  const newest = data?.releases.find((release) => release.notable);
+  const total = data?.counts.models ?? 0;
+
   return (
     <div className="home-page">
       <div className="hero-banner-shell">
@@ -52,7 +58,7 @@ export default function Home() {
           <div className="hero-grid" aria-hidden="true" />
           <div className="hero-label mono">
             <span className="signal-light" /> A LITTLE CURIOSITY GOES A LONG WAY
-            <span className="hero-edition">DISCOVER / LEARN / MAKE</span>
+            <span className="hero-edition">UPDATED EVERY SIX HOURS</span>
           </div>
           <div className="signal-copy">
             <h1>
@@ -61,361 +67,231 @@ export default function Home() {
               <span>In perspective.</span>
             </h1>
             <p>
-              Explore AI with a clearer perspective. Learn something new, find the right model, and
-              make everyday work a little lighter.
+              {`Test scores, prices and new releases for ${
+                total ? `${total.toLocaleString('en-US')} ` : ''
+              }AI models, in one place.`}
             </p>
+            <ModelSearch total={total} />
             <div className="hero-actions">
-              <Link className="btn" to="/tools">
-                <Wrench size={16} /> Use free tools <ArrowUpRight size={16} />
+              <a className="btn" href="#rankings">
+                <BarChart3 size={16} aria-hidden="true" /> See the rankings
+              </a>
+              <Link className="btn btn-outline" to="/compare">
+                <GitCompareArrows size={16} aria-hidden="true" /> Compare models
               </Link>
-              <Link className="btn btn-outline" to="/learn">
-                <BookOpen size={16} /> Learn AI <ArrowUpRight size={16} />
-              </Link>
-            </div>
-            <Link className="home-hero-model-link" to="/models">
-              Explore AI models <ArrowRight size={15} />
-            </Link>
-            <div className="hero-trust mono">
-              <ShieldCheck size={14} /> FREE TOOLS & LESSONS. NO ACCOUNT NEEDED.
             </div>
           </div>
           <div className="hero-bottom mono">
-            <a href="#home-tools">
-              SCROLL TO DISCOVER <ArrowDown size={14} />
+            <a href="#leaders">
+              SCROLL TO EXPLORE <ArrowDown size={14} aria-hidden="true" />
             </a>
             <span>HUMAN CURIOSITY. ARTIFICIAL INTELLIGENCE.</span>
-            <span>[ 01 — 07 ]</span>
           </div>
         </section>
       </div>
-      <HomeLaunchpad />
-      <HomeTools />
-      <HomeAcademy />
-      <section className="provider-band" aria-label="Explore leading AI providers">
-        <div className="container">
-          <span className="mono">
-            A WIDER VIEW
-            <br />
-            <b>OF INTELLIGENCE</b>
-          </span>
-          {[
-            ['openai', 'OpenAI'],
-            ['anthropic', 'Anthropic'],
-            ['google', 'Google'],
-            ['xai', 'xAI'],
-            ['deepseek', 'DeepSeek'],
-            ['mistral', 'Mistral'],
-          ].map(([id, name]) => (
-            <Link key={id} to={`/models?provider=${id}`}>
-              <img src={providerLogo(id)} width="25" height="25" alt="" />
-              <span>{name}</span>
-            </Link>
-          ))}
+      {error && !data ? (
+        <div className="container dash-state dash-error" role="alert">
+          <p>{error}</p>
+          <button className="btn btn-small" onClick={() => setAttempt((value) => value + 1)}>
+            Try again
+          </button>
         </div>
-      </section>
-      <section id="intelligence" className="section container intelligence-section">
-        <Reveal>
-          <div className="section-kicker mono">
-            <span>03 / THE INTELLIGENCE INDEX</span>
-            <span className="data-stamp">
-              <span className="signal-light" />
-              {data ? `SYNCED ${updatedDate(data.updatedAt)}` : 'SOURCE-ATTRIBUTED CATALOG'}
-            </span>
-          </div>
-          <div className="section-heading">
-            <h2>
-              A fast-moving field.
-              <br />
-              <span>A clearer point of view.</span>
-            </h2>
-            <p>
-              Compare capabilities, context windows and pricing
-              <br className="desktop-break" /> across every provider. Every number has a source.
-            </p>
-          </div>
-        </Reveal>
-        <Reveal from="right">
-          <div className="index-stats">
-            {[
-              [compactNumber(data?.totalModels), 'MODEL OFFERINGS'],
-              [compactNumber(data?.totalProviders), 'API PROVIDERS'],
-              [compactNumber(data?.reasoningModels), 'REASONING OFFERINGS'],
-              ['Open access', 'NO ACCOUNT REQUIRED'],
-            ].map(([n, label]) => (
-              <div key={label}>
-                <span className="mono">{label}</span>
-                <strong>{n === 'Not reported' ? '—' : n}</strong>
-                <span className="stat-line" />
+      ) : (
+        <>
+          <section className="live-band" aria-label="Right now">
+            <div className="container">
+              <div>
+                <span>Top of the capability index</span>
+                {leader ? (
+                  <p>
+                    <img src={makerLogo(leader.makerId)} alt="" width="28" height="28" />
+                    {leader.slug ? (
+                      <Link to={`/models/${leader.slug}`}>{leader.name}</Link>
+                    ) : (
+                      <strong>{leader.name}</strong>
+                    )}
+                    <b>{leader.index.toFixed(1)}</b>
+                  </p>
+                ) : (
+                  <p className="live-pending">Loading…</p>
+                )}
               </div>
-            ))}
-          </div>
-        </Reveal>
-        <div className="catalog-section-label">
-          <h3>From the frontier</h3>
-          <Link className="text-link" to="/models">
-            View the directory <ArrowUpRight size={15} />
-          </Link>
-        </div>
-        {error ? (
-          <p className="notice" role="status">
-            {error} <Link to="/models">Open the model directory.</Link>
-          </p>
-        ) : (
-          <div className="home-model-grid">
-            {data?.featured?.slice(0, 6).map((m) => (
-              <Reveal key={m.id}>
-                <ModelCard model={m} />
-              </Reveal>
-            )) ||
-              Array.from({ length: 6 }, (_, i) => (
-                <div className="model-skeleton" key={i} aria-label="Loading model details" />
-              ))}
-          </div>
-        )}
-        <p className="data-footnote">
-          Offerings include the same model at different hosts. Scheduled updates; coverage depends
-          on the source.
-        </p>
-      </section>
-      <ScrollJourney>
-        <div className="journey-panel journey-intro">
-          <span className="section-kicker mono">04 / CONNECT THE DOTS</span>
-          <h2>
-            From a signal.
-            <br />
-            To your
-            <br />
-            <span>next big thing.</span>
-          </h2>
-          <p>A better way to navigate artificial intelligence, one perspective at a time.</p>
-          <span className="journey-hint mono">
-            SCROLL TO EXPLORE <ArrowRight size={17} />
-          </span>
-          <div className="journey-orbits" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-          </div>
-        </div>
-        {[
-          {
-            n: '01',
-            title: 'Discover.',
-            text: 'Find the models behind the moment. Explore a source-attributed catalog across leading labs and API providers.',
-            icon: Cpu,
-            to: '/models',
-            label: 'Explore the index',
-            visual: 'discover',
-          },
-          {
-            n: '02',
-            title: 'Understand.',
-            text: 'Context, capabilities and cost. Compare up to three models side by side and find the trade-offs that matter to you.',
-            icon: Layers3,
-            to: '/compare',
-            label: 'Make a comparison',
-            visual: 'understand',
-          },
-          {
-            n: '03',
-            title: 'Create.',
-            text: config.ai
-              ? 'Turn a prompt into a working starting point. Build an application with its own interface, API and database schema.'
-              : 'Explore a full-stack example with its own interface, API and database schema. AI generation is coming soon.',
-            icon: Braces,
-            to: '/studio',
-            label: 'Enter the studio',
-            visual: 'create',
-          },
-        ].map(({ n, title, text, icon: Icon, to, label, visual }) => (
-          <article className={`journey-panel ${visual}`} key={n}>
-            <div className="journey-panel-top mono">
-              <span>{n} / THE PROCESS</span>
-              <Icon size={22} />
+              <div>
+                <span>Newest release</span>
+                {newest ? (
+                  <p>
+                    <img src={makerLogo(newest.makerId)} alt="" width="28" height="28" />
+                    <Link to={`/models/${newest.slug}`}>{newest.name}</Link>
+                    <b>{day(newest.date)}</b>
+                  </p>
+                ) : (
+                  <p className="live-pending">Loading…</p>
+                )}
+              </div>
+              <div>
+                <span>Models tracked</span>
+                {data ? (
+                  <p>
+                    <strong>{data.counts.models.toLocaleString('en-US')}</strong>
+                    <b>{`${data.counts.tested} tested, ${data.counts.providers} providers`}</b>
+                  </p>
+                ) : (
+                  <p className="live-pending">Loading…</p>
+                )}
+              </div>
+              <div>
+                <span>Last checked</span>
+                {data ? (
+                  <p>
+                    <strong>{ago(data.checkedAt)}</strong>
+                    <b>Refreshed automatically</b>
+                  </p>
+                ) : (
+                  <p className="live-pending">Loading…</p>
+                )}
+              </div>
             </div>
-            <div className={`journey-visual visual-${visual}`} aria-hidden="true">
-              {visual === 'discover' ? (
-                <>
-                  <div className="scan-ring" />
-                  <Cpu size={54} strokeWidth={1} />
-                </>
-              ) : visual === 'understand' ? (
-                <>
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                </>
-              ) : (
-                <>
-                  <span className="code-bracket">{'{'}</span>
-                  <Command size={40} />
-                  <span className="code-bracket">{'}'}</span>
-                </>
-              )}
-            </div>
-            <h3>{title}</h3>
-            <p>{text}</p>
-            <Link className="text-link" to={to}>
-              {label}
-              <ArrowUpRight size={16} />
-            </Link>
-          </article>
-        ))}
-      </ScrollJourney>
-      <section className="section container studio-home">
-        <Reveal from="left" className="studio-manifesto">
-          <span className="section-kicker mono">05 / ARTIFICIALS STUDIO</span>
-          <h2>
-            Less between
-            <br />
-            <span>idea and reality.</span>
-          </h2>
-          <p>
-            {config.ai
-              ? 'Describe an app and let AI help you build its first version, with real code you can take with you.'
-              : 'See how a full-stack idea comes together. Explore the example project and its source code while we prepare AI generation for launch.'}
-          </p>
-          <div className="studio-features">
-            <span>
-              <Code2 size={17} /> Your source code
-            </span>
-            <span>
-              <Database size={17} /> Your database schema
-            </span>
-            <span>
-              <ShieldCheck size={17} /> Clear monthly limits
-            </span>
-          </div>
-          {!config.ai && (
-            <span className="home-studio-status">STUDIO PREVIEW · AI GENERATION COMING SOON</span>
-          )}
-          <Link className="text-link" to="/studio">
-            Explore Studio <ArrowUpRight size={16} />
-          </Link>
-        </Reveal>
-        <Reveal from="right">
-          <div className="studio-console">
-            <div className="console-top">
-              <span>
-                <Command size={16} /> ARTIFICIALS STUDIO
-              </span>
-              <span className="mono">PROMPT → PRODUCT</span>
-            </div>
-            <div className="console-content">
-              <span className="console-icon">
-                <Braces size={29} strokeWidth={1} />
-              </span>
-              <h3>What will you build?</h3>
+          </section>
+
+          <section id="leaders" className="dash-section container" aria-labelledby="leaders-title">
+            <header className="dash-heading">
+              <h2 id="leaders-title">Leaders right now</h2>
               <p>
-                {config.ai
-                  ? 'Start with an idea. Make it your own.'
-                  : 'Sketch an idea, then explore the Studio preview.'}
+                The top model on each test, from published results. Every card names the test behind
+                it.
               </p>
-              <label className="sr-only" htmlFor="home-prompt">
-                Describe your app idea
-              </label>
-              <textarea
-                id="home-prompt"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                maxLength={4000}
-                placeholder="A client portal for my design studio, with projects, sign-in and a database…"
-              />
-              <div className="console-input-foot">
-                <span>
-                  <Layers3 size={13} /> Full-stack application
-                </span>
-                <Link
-                  to={'/studio' + (prompt ? '?prompt=' + encodeURIComponent(prompt) : '')}
-                  className="prompt-submit"
-                  aria-label={config.ai ? 'Build this idea' : 'Explore this idea in Studio preview'}
-                >
-                  <ArrowUpRight size={19} />
-                </Link>
-              </div>
-              <div className="console-suggestions">
-                {['A client portal', 'A habit tracker', 'A reading list'].map((s) => (
-                  <button
-                    onClick={() =>
-                      setPrompt(
-                        `Build ${s.toLowerCase()} with sign-in, a beautiful dashboard and a database.`,
-                      )
-                    }
-                    key={s}
-                  >
-                    {s} <PlusIcon />
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="console-bottom mono">
-              <span className="signal-light" /> YOUR NEXT IDEA STARTS HERE <span>V.01</span>
-            </div>
-          </div>
-        </Reveal>
-      </section>
-      <section className="section container home-insights">
-        <Reveal>
-          <div className="section-kicker mono">06 / BEYOND THE HEADLINES</div>
-          <div className="section-heading">
-            <h2>
-              Stay one thought
-              <br />
-              <span>ahead.</span>
-            </h2>
-            <Link className="text-link" to="/news">
-              All insights <ArrowUpRight size={15} />
-            </Link>
-          </div>
-        </Reveal>
+            </header>
+            {data ? <Highlights items={data.highlights} /> : <Pending />}
+          </section>
+
+          <section
+            id="rankings"
+            className="dash-section container"
+            aria-labelledby="rankings-title"
+          >
+            <header className="dash-heading">
+              <h2 id="rankings-title">Rankings</h2>
+              <p>
+                Rank models on the capability index or on a single test. Scores from different tests
+                are never mixed.
+              </p>
+            </header>
+            <Suspense fallback={<Pending tall />}>
+              {data ? <RankingSection overview={data} /> : <Pending tall />}
+            </Suspense>
+          </section>
+
+          <section id="value" className="dash-section container" aria-labelledby="value-title">
+            <header className="dash-heading">
+              <h2 id="value-title">Score, price and time</h2>
+              <p>
+                Which models give the most for the money, how fast the top score is rising, and how
+                much text each one can take in.
+              </p>
+            </header>
+            <Suspense fallback={<Pending tall />}>
+              {data ? <ValueSection index={data.index} /> : <Pending tall />}
+            </Suspense>
+          </section>
+
+          <section
+            id="releases"
+            className="dash-section container"
+            aria-labelledby="releases-title"
+          >
+            <header className="dash-heading">
+              <h2 id="releases-title">New releases</h2>
+              <p>
+                New models appear here as soon as the catalog lists them. Test scores follow once a
+                test covers the model.
+              </p>
+            </header>
+            {data ? <ReleaseTimeline releases={data.releases} /> : <Pending />}
+          </section>
+
+          <section id="all-models" className="dash-section container" aria-labelledby="all-title">
+            <header className="dash-heading">
+              <h2 id="all-title">Every model</h2>
+              <p>
+                All {total ? total.toLocaleString('en-US') : ''} models we track, with release date,
+                context window, price and capability index where known.
+              </p>
+            </header>
+            <Suspense fallback={<Pending tall />}>
+              <ModelExplorer total={total} />
+            </Suspense>
+          </section>
+        </>
+      )}
+
+      <section className="dash-section container home-insights" aria-labelledby="insights-title">
+        <header className="dash-heading">
+          <h2 id="insights-title">Insights and guides</h2>
+          <Link className="text-link" to="/news">
+            All insights <ArrowUpRight size={15} aria-hidden="true" />
+          </Link>
+        </header>
         <div className="editorial-grid">
           {ARTICLES.filter((article) => article.published)
             .slice(0, 3)
-            .map((a, i) => (
-              <Reveal key={a.id} from={i % 2 ? 'right' : 'left'}>
-                <Link to={'/news/' + a.slug} className="editorial-card">
-                  <ArticleCover article={a} decorative />
-                  <div className="editorial-meta mono">
-                    <span>{a.category}</span>
-                    <span>EDITORIAL GUIDE</span>
-                  </div>
-                  <h3>{a.title}</h3>
-                  <p>{a.excerpt}</p>
-                  <span className="text-link">
-                    Read the perspective <ArrowUpRight size={14} />
-                  </span>
-                </Link>
-              </Reveal>
+            .map((article) => (
+              <Link to={'/news/' + article.slug} className="editorial-card" key={article.id}>
+                <ArticleCover article={article} decorative />
+                <div className="editorial-meta">
+                  <span>{article.category}</span>
+                </div>
+                <h3>{article.title}</h3>
+                <p>{article.excerpt}</p>
+                <span className="text-link">
+                  Read the guide <ArrowUpRight size={14} aria-hidden="true" />
+                </span>
+              </Link>
             ))}
         </div>
       </section>
-      <Reveal>
-        <section className="closing-signal container">
-          <span className="section-kicker mono">07 / KEEP YOUR CURIOSITY GOING</span>
-          <h2>
-            Let your curiosity
-            <br />
-            <span>lead the way.</span>
-          </h2>
-          <div className="home-closing-actions">
-            <Link className="btn" to="/learn">
-              Find your next lesson <ArrowUpRight size={16} />
-            </Link>
-            <Link className="btn btn-outline" to="/tools">
-              Make room for better work <ArrowUpRight size={16} />
-            </Link>
-          </div>
-          <div className="closing-cross" aria-hidden="true">
-            <span />
-            <span />
-          </div>
+
+      {data && (
+        <section className="container dash-method" aria-label="Sources and method">
+          <details>
+            <summary>Sources and method</summary>
+            <div>
+              <p>
+                Artificials groups every listing of a model into one page, links published test
+                results to it, and calculates the rankings, highlights and charts shown here. The
+                data refreshes automatically every six hours. The catalog was last checked{' '}
+                {ago(data.updatedAt)} and test results {ago(data.checkedAt)}.
+              </p>
+              <ul>
+                <li>
+                  Specifications, prices and release dates:{' '}
+                  <a href={data.catalog.sourceUrl} target="_blank" rel="noopener noreferrer">
+                    {data.catalog.source}
+                  </a>{' '}
+                  ({data.catalog.license}).
+                </li>
+                {data.sources.map((source) => (
+                  <li key={source.id}>
+                    {source.id === 'epoch-models' ? 'Model records: ' : 'Test results: '}
+                    <a href={source.url} target="_blank" rel="noopener noreferrer">
+                      {source.name}
+                    </a>{' '}
+                    (
+                    <a href={source.licenseUrl} target="_blank" rel="noopener noreferrer">
+                      {source.license}
+                    </a>
+                    ).
+                  </li>
+                ))}
+              </ul>
+              <p>
+                <Link to="/about#source-methodology">Data and methodology</Link>
+                {' · '}
+                <a href="/data/benchmark-NOTICE.txt">Data credits</a>
+              </p>
+            </div>
+          </details>
         </section>
-      </Reveal>
+      )}
     </div>
   );
-}
-function PlusIcon() {
-  return <ChevronRight size={12} />;
 }

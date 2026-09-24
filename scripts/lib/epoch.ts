@@ -1,6 +1,12 @@
 import { unzipSync, strFromU8 } from 'fflate';
 import { parse } from 'csv-parse/sync';
-import type { BenchmarkCategory, BenchmarkDomain, BenchmarkRow } from '../../shared/benchmarks.ts';
+import type {
+  BenchmarkCategory,
+  BenchmarkDomain,
+  BenchmarkRow,
+  ModelFacts,
+} from '../../shared/benchmarks.ts';
+import { plainText } from '../../shared/catalog.ts';
 import { identity, rankRows } from './benchmark-sources.ts';
 
 export const EPOCH_DATA_URL = 'https://epoch.ai/data/benchmark_data.zip';
@@ -8,6 +14,7 @@ export const EPOCH_URL = 'https://epoch.ai/benchmarks';
 const MAX_ENTRY_BYTES = 8 * 1024 * 1024;
 const ECI_FILE = 'epoch_capabilities_index/eci_scores.csv';
 const ECI_VERSIONS_FILE = 'epoch_capabilities_index/processed_data_for_eci.csv';
+const MODEL_FILE = 'model_metadata.csv';
 
 interface EpochSpec {
   file: string;
@@ -142,6 +149,49 @@ export interface EpochResult {
   categories: BenchmarkCategory[];
   /** Latest evaluation date across the imported rows. */
   latestRun: string | null;
+  /** Epoch AI's own records about each model. Empty when the file is missing or changed. */
+  facts: ModelFacts[];
+}
+
+/** A short text field from the source, or undefined when empty or implausible. */
+function field(value: string | undefined, maximum = 120) {
+  const text = plainText(value ?? '');
+  return text && text.length <= maximum ? text : undefined;
+}
+
+/**
+ * Model facts are extra detail, not scores, so an unexpected file never stops
+ * the benchmark refresh: it only leaves the facts out until it is reviewed.
+ */
+function parseFacts(csv: string | undefined): ModelFacts[] {
+  if (!csv) return [];
+  const records = rowsOf(csv);
+  const columns = ['model_version', 'model_group', 'date', 'organization', 'accessibility'];
+  if (!records.length || columns.some((column) => !(column in records[0]))) return [];
+  const groups = new Map<string, ModelFacts>();
+  for (const record of records) {
+    const version = record.model_version?.trim();
+    const name = field(record.model_group) ?? field(record.display_name);
+    if (!version || !name || version.length > 120 || !/^[\w.:/@+-]+$/.test(version)) continue;
+    let facts = groups.get(name);
+    if (!facts) {
+      facts = { name, versions: [] };
+      groups.set(name, facts);
+    }
+    if (facts.versions.length < 40 && !facts.versions.includes(version))
+      facts.versions.push(version);
+    const released = isoDay(record.date);
+    if (released && (!facts.releasedAt || released < facts.releasedAt)) facts.releasedAt = released;
+    facts.organization ??= field(record.organization)?.replace(/,(?=\S)/g, ', ');
+    facts.country ??= field(record.country);
+    facts.access ??= field(record.accessibility, 60);
+    const compute = Number(record.training_compute_flop);
+    if (facts.trainingCompute === undefined && compute > 1e15 && compute < 1e30)
+      facts.trainingCompute = Number(compute.toPrecision(3));
+  }
+  return [...groups.values()]
+    .map((facts) => ({ ...facts, versions: facts.versions.sort() }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
@@ -155,6 +205,7 @@ export function parseEpoch(zip: Uint8Array): EpochResult {
     'benchmark_metadata.csv',
     ECI_FILE,
     ECI_VERSIONS_FILE,
+    MODEL_FILE,
     ...EPOCH_BENCHMARKS.map((spec) => spec.file),
   ]);
   const files = unzipSync(zip, {
@@ -262,6 +313,8 @@ export function parseEpoch(zip: Uint8Array): EpochResult {
     const low = Number(record.eci_ci_low);
     const high = Number(record.eci_ci_high);
     const modelVersions = [...(versions.get(name) ?? [])].sort().slice(0, 20);
+    const releasedAt = isoDay(record.date);
+    const group = record['Accessibility group']?.trim();
     eciRows.push({
       id: name,
       model: record['Display name']?.trim() || name,
@@ -272,6 +325,10 @@ export function parseEpoch(zip: Uint8Array): EpochResult {
         ? { ciLow: low, ciHigh: high }
         : {}),
       ...(modelVersions.length ? { versions: modelVersions } : {}),
+      ...(releasedAt ? { releasedAt } : {}),
+      ...(group === 'Open weights' || group === 'Closed weights'
+        ? { openWeights: group === 'Open weights' }
+        : {}),
     });
   }
   categories.unshift({
@@ -289,5 +346,6 @@ export function parseEpoch(zip: Uint8Array): EpochResult {
 
   for (const category of categories)
     if (category.rows.length < 5) throw Error(`Too few Epoch results: ${category.id}`);
-  return { categories, latestRun };
+  const modelFile = files[MODEL_FILE];
+  return { categories, latestRun, facts: parseFacts(modelFile && strFromU8(modelFile)) };
 }

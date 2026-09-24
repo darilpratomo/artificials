@@ -94,12 +94,19 @@ export default function Info() {
           </p>
           <h2>How to read the rankings</h2>
           <p>
-            Capability rankings use published LiveBench and T2I-CoReBench results, refreshed on a
-            six-hour schedule. Each view identifies its dataset, evaluation scope, aggregation
-            method and source-check time. Missing evaluations are not scored zero. Benchmark results
-            remain separate from specification and price rankings; a larger context window does not
-            establish higher intelligence. See the <Link to="/leaderboard">leaderboard</Link> for
-            the current metric and coverage.
+            Capability rankings use published results from Epoch AI, LiveBench and T2I-CoReBench,
+            refreshed on a six-hour schedule. Each view identifies its dataset, evaluation scope,
+            aggregation method and source-check time. Missing evaluations are not scored zero.
+            Benchmark results remain separate from specification and price rankings; a larger
+            context window does not establish higher intelligence. See the{' '}
+            <Link to="/leaderboard">leaderboard</Link> for the current metric and coverage.
+          </p>
+          <p>
+            Charts, highlights and the release timeline on the home page are calculated by
+            Artificials from these sources. Each highlight names the test it comes from and says
+            whether it is a test result, listing data or a calculation. Prices are list prices, not
+            the cost of a particular task. Speed and latency are not shown, because no reliable
+            public source is available for us to republish.
           </p>
         </section>
         <div className="closing-banner">

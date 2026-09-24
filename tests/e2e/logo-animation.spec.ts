@@ -288,7 +288,8 @@ test('blocks arrive in a continuous flow, with no lone flash', async ({ page }) 
 test('the brand mark costs very little to download', async ({ page }) => {
   const bytes: number[] = [];
   page.on('response', async (response) => {
-    if (/\/brand\/|favicon/.test(new URL(response.url()).pathname)) {
+    // Artificials' own mark only; model makers' logos live under /providers/.
+    if (/^\/brand\/|favicon/.test(new URL(response.url()).pathname)) {
       try {
         bytes.push((await response.body()).length);
       } catch {

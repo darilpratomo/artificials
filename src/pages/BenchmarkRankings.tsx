@@ -10,7 +10,7 @@ import {
 import { PageHeading } from '../components/Layout';
 import { DomainKey } from '../components/profile/parts';
 import { DOMAINS } from '../components/profile/format';
-import { providerLogo } from '../lib/catalog';
+import { makerLogo } from '../../shared/makers';
 import { loadProfileLinks, testLabel, type ProfileLinks } from '../lib/profiles';
 import '../domain-colors.css';
 
@@ -217,7 +217,7 @@ export default function BenchmarkRankings() {
                       </span>
                       <div className="benchmark-model">
                         <img
-                          src={providerLogo(row.providerId)}
+                          src={makerLogo(row.providerId)}
                           alt=""
                           width="30"
                           height="30"
@@ -258,7 +258,7 @@ export default function BenchmarkRankings() {
                   not tested are absent, not scored zero. Ties at the displayed precision share a
                   rank, and small gaps do not prove a meaningful difference.
                 </p>
-                <p className="caption">
+                <p className="ranking-credit">
                   Analysis by Artificials, based on results published by{' '}
                   <a href={source.url} target="_blank" rel="noopener noreferrer">
                     {source.name}

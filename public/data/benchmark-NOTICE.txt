@@ -23,6 +23,15 @@ to percentage points, rounding to two decimals, competition ranking, JSON
 normalization, provider-family labels, and matching of results to model
 profiles. Plain-language test descriptions are written by Artificials.
 
+Epoch AI model records: model_metadata.csv from the same archive, under the same
+licence. Used fields: model name, the model identifiers Epoch AI evaluated, release
+date, organization, country, access category and estimated training compute.
+Artificials modifications: identifiers grouped by model name, text trimmed,
+implausible compute values dropped, compute rounded to three significant figures,
+and records matched to model profiles by exact identifier. Release dates and access
+categories on capability-index rows come from eci_scores.csv. Training compute is
+Epoch AI's estimate and is labelled as such wherever it is shown.
+
 T2I-CoReBench: Ouxiang Li, Yuan Wang, Xinting Hu, Huijuan Huang, Rui Chen,
 Jiarong Ou, Xin Tao, Pengfei Wan, Xiaojuan Qi, and Fuli Feng.
 Source: https://t2i-corebench.github.io/

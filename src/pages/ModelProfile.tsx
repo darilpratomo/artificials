@@ -14,7 +14,8 @@ import {
 import { EmptyState } from '../components/Layout';
 import { applyPageMetadata } from '../components/Metadata';
 import { modelMetadata } from '../../shared/seo';
-import { providerLogo, useComparison, type ModelRecord } from '../lib/catalog';
+import { useComparison, type ModelRecord } from '../lib/catalog';
+import { makerLogo } from '../../shared/makers';
 import { useModelProfile, type ModelProfile as Profile } from '../lib/profiles';
 import Overview, { cheapestOffering, type ProfileTab } from '../components/profile/Overview';
 import Performance from '../components/profile/Performance';
@@ -166,9 +167,9 @@ export default function ModelProfile() {
       </Link>
       <header className="profile-header">
         <div className="profile-identity">
-          <img src={providerLogo(profile.makerId)} width="48" height="48" alt="" />
+          <img src={makerLogo(profile.makerId)} width="48" height="48" alt="" />
           <div>
-            <p className="profile-maker">{profile.maker}</p>
+            <p className="profile-maker">{profile.maker || 'Maker not reported'}</p>
             <h1>{profile.name}</h1>
           </div>
         </div>

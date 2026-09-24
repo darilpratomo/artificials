@@ -126,7 +126,10 @@ export default function Academy() {
       <section className="container academy-curriculum" id="curriculum">
         <div className="section-kicker mono">
           <span>01 / YOUR LEARNING PATH</span>
-          <span>FOUNDATIONS → APPLIED AI</span>
+          <span className="inline-flow">
+            FOUNDATIONS <ArrowRight className="inline-arrow" size={14} aria-hidden="true" />{' '}
+            <span className="sr-only">to</span> APPLIED AI
+          </span>
         </div>
         <div className="section-heading">
           <div>

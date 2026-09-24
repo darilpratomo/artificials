@@ -12,7 +12,7 @@
   background: #171a21;
   color: #e5e8ee;
   font: inherit;
-  font-size: 12px;
+  font-size: 14px;
   text-align: left;
   cursor: pointer;
   transition:
@@ -68,7 +68,7 @@
   justify-content: space-between;
   gap: 14px;
   border-radius: 7px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.5;
   cursor: pointer;
 }

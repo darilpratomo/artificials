@@ -17,8 +17,8 @@ const pages: Record<string, [string, string]> = {
     ]),
   ),
   '/': [
-    'Explore AI, learn Python & use free file tools',
-    'Explore AI models and rankings, learn through hands-on Python lessons, and use free image, PDF and Word tools. Discover more with Artificials.',
+    'AI model rankings, prices and new releases',
+    'Compare AI models by test results, price and context window. Rankings, charts and every new release, refreshed automatically every six hours.',
   ],
   '/models': [
     'AI model directory',

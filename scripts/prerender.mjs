@@ -14,15 +14,28 @@ try {
     .map((file) => `<link rel="stylesheet" href="/${file}">`)
     .join('');
   await writeFile('dist/app-shell.html', template);
+  // The home page renders its leaders and releases into the HTML and carries the
+  // same data inline, so the browser shows it without another request.
+  const overviewText = await readFile('dist/data/models/overview.json', 'utf8');
+  const overview = JSON.parse(overviewText);
+  const inline = `<script type="application/json" id="overview-data">${overviewText
+    .trim()
+    .replace(/</g, '\\u003c')}</script>`;
   for (const { path } of publicPages()) {
     const lesson = path.startsWith('/learn/')
       ? JSON.parse(
           await readFile(`src/content/academy/lessons/${path.split('/').pop()}.json`, 'utf8'),
         )
       : undefined;
+    const home = path === '/';
     const html = template
       .replace('</head>', metadataHtml(pageMetadata(path)) + styles + '</head>')
-      .replace('<div id="root"></div>', `<div id="root">${renderPage(path, lesson)}</div>`);
+      .replace(
+        '<div id="root"></div>',
+        `<div id="root">${renderPage(path, lesson, home ? overview : undefined)}</div>${
+          home ? inline : ''
+        }`,
+      );
     const destination = path === '/' ? 'dist/index.html' : `dist${path}.html`;
     await mkdir(dirname(destination), { recursive: true });
     await writeFile(destination, html);

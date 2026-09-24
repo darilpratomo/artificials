@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FlaskConical, RotateCcw } from 'lucide-react';
+import { ArrowRight, FlaskConical, RotateCcw } from 'lucide-react';
 import { thresholdFixture, thresholdMetrics } from '../lib/academy';
 
 export function ConceptLab({ type = 'threshold' }: { type?: 'threshold' | 'neuron' }) {
@@ -82,7 +82,11 @@ export function ConceptLab({ type = 'threshold' }: { type?: 'threshold' | 'neuro
             <span>
               {input.toFixed(1)} × {weight.toFixed(1)} + {bias.toFixed(1)}
             </span>
-            <span>→ sigmoid →</span>
+            <span className="inline-flow">
+              <ArrowRight className="inline-arrow" size={14} aria-hidden="true" />
+              sigmoid
+              <ArrowRight className="inline-arrow" size={14} aria-hidden="true" />
+            </span>
             <strong>{activation.toFixed(3)}</strong>
           </div>
           {[

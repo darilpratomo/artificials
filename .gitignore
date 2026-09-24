@@ -23,6 +23,7 @@ playwright-report/
 
 .catalog-staging/
 .benchmark-snapshot.tmp
+.model-facts.tmp
 
 # Model profiles are generated from the committed snapshots at build time.
 public/data/models/

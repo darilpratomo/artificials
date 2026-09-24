@@ -1,0 +1,405 @@
+/*
+ * Charts share one quiet frame: dashed grid, neutral text, and colour only on
+ * the marks. Each mark's colour is its maker's; the maker's logo or name
+ * always sits beside it.
+ */
+.rank-chart,
+.scatter-frame {
+  position: relative;
+  /* A chart never widens the page, even for the frame before it re-measures
+     after a resize. Vertical overflow stays visible for labels and tooltips. */
+  overflow-x: clip;
+  overflow-clip-margin: 32px;
+}
+.rank-chart {
+  min-height: 120px;
+}
+
+/* Vertical columns */
+.rank-chart.is-vertical {
+  /* Room for the axis and for the first model's slanted name. */
+  padding-left: 60px;
+}
+.rank-plot {
+  position: relative;
+}
+.rank-axis {
+  position: absolute;
+  inset: 0 0 auto -60px;
+  height: 280px;
+  pointer-events: none;
+}
+.rank-axis span {
+  position: absolute;
+  left: 60px;
+  right: 0;
+  border-top: 1px dashed #272830;
+}
+.rank-axis b {
+  position: absolute;
+  left: -52px;
+  width: 44px;
+  transform: translateY(-50%);
+  color: #8d909b;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.rank-axis .rank-baseline {
+  border-top: 1px dashed #6b7080;
+}
+.rank-axis .rank-baseline b {
+  left: auto;
+  right: 0;
+  width: auto;
+  transform: translateY(-120%);
+  color: #a3a6b2;
+  font-weight: 450;
+}
+.rank-columns,
+.rank-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rank-columns {
+  display: grid;
+  grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+  padding-bottom: 150px;
+}
+.rank-column {
+  position: relative;
+  min-width: 0;
+}
+.rank-column .rank-hit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  outline-offset: 2px;
+}
+.rank-bar {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 280px;
+}
+.rank-bar i {
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  bottom: 0;
+  height: var(--v);
+  min-height: 3px;
+  border-radius: 4px 4px 0 0;
+  background: var(--c);
+  transition: filter 0.2s;
+}
+.rank-bar .rank-value {
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  bottom: calc(var(--v) + 7px);
+  color: #e6e7ec;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.rank-column .rank-logo {
+  width: 26px;
+  height: 26px;
+  margin-top: 10px;
+  padding: 3px;
+  border-radius: 7px;
+}
+.rank-name {
+  position: absolute;
+  top: 330px;
+  right: 50%;
+  max-width: 160px;
+  overflow: hidden;
+  color: #c3c6cf;
+  font-size: 12.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transform: rotate(-50deg);
+  transform-origin: 100% 0;
+}
+.rank-hit:hover .rank-bar i,
+.rank-hit:focus-visible .rank-bar i {
+  filter: brightness(1.18);
+}
+.rank-hit:hover .rank-name,
+.rank-hit:focus-visible .rank-name {
+  color: #ffffff;
+}
+/* Dim the marks of other models, never their text, so labels keep full contrast. */
+.rank-column.is-muted .rank-bar i,
+.rank-row.is-muted .rank-track i {
+  opacity: 0.35;
+}
+.rank-column.is-muted .rank-logo,
+.rank-row.is-muted .rank-logo {
+  opacity: 0.55;
+}
+.rank-column.is-muted .rank-name,
+.rank-column.is-muted .rank-value {
+  color: #9698a3;
+}
+.rank-column.is-highlight .rank-bar i {
+  box-shadow:
+    0 0 0 2px #101115,
+    0 0 0 4px #f0f0f3;
+}
+.rank-column.is-highlight .rank-name {
+  color: #ffffff;
+  font-weight: 600;
+}
+.rank-tooltip {
+  top: 0;
+  left: calc(var(--x) * 100%);
+  transform: translate(calc(var(--x) * -100%), -8px);
+}
+
+/* Horizontal rows */
+.rank-rows {
+  display: grid;
+  gap: 2px;
+}
+.rank-row .rank-hit {
+  display: grid;
+  grid-template-columns: 24px 30px minmax(0, 1.25fr) minmax(70px, 1fr) 64px;
+  grid-template-areas: 'pos logo label track value';
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+a.rank-hit:hover,
+a.rank-hit:focus-visible {
+  background: #ffffff09;
+}
+.rank-position {
+  grid-area: pos;
+  color: #8d909b;
+  font-size: 12.5px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.rank-row .rank-logo {
+  grid-area: logo;
+  width: 30px;
+  height: 30px;
+  padding: 4px;
+}
+.rank-label {
+  grid-area: label;
+  display: grid;
+  min-width: 0;
+}
+.rank-label b {
+  color: #eceef2;
+  font-size: 14.5px;
+  font-weight: 550;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.rank-label small {
+  color: #9698a3;
+  font-size: 12.5px;
+}
+.rank-track {
+  grid-area: track;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #1c1d23;
+}
+.rank-track i {
+  display: block;
+  width: var(--v);
+  height: 100%;
+  border-radius: 99px;
+  background: var(--c);
+}
+.rank-row .rank-value {
+  grid-area: value;
+  color: #eceef2;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.rank-row.is-highlight .rank-hit {
+  background: #ffffff0f;
+  box-shadow: inset 0 0 0 1px #3c3e48;
+}
+@media (max-width: 520px) {
+  .rank-row .rank-hit {
+    grid-template-columns: 20px 28px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'pos logo label value'
+      'pos logo track track';
+    gap: 6px 10px;
+  }
+  .rank-row .rank-logo {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Scatter */
+.scatter-chart {
+  display: grid;
+  gap: 16px;
+}
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: #c9ccd4;
+  font-size: 13px;
+}
+.chart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.chart-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.chart-legend img {
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  border-radius: 5px;
+}
+.legend-line line {
+  stroke: #d5d7de;
+  stroke-width: 2;
+  stroke-dasharray: 1.5 5;
+  stroke-linecap: round;
+}
+.chart-legend .legend-region i {
+  width: 16px;
+  height: 11px;
+  border: 1px solid #ffffff24;
+  border-radius: 3px;
+  background: #ffffff12;
+}
+.scatter-frame svg {
+  display: block;
+  overflow: visible;
+  touch-action: pan-y pinch-zoom;
+}
+.scatter-grid line {
+  stroke: #24252c;
+  stroke-dasharray: 3 4;
+}
+.scatter-grid line.axis,
+.scatter-grid line.tick {
+  stroke: #3a3c46;
+  stroke-dasharray: none;
+}
+.scatter-grid text {
+  fill: #8d909b;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.scatter-grid .axis-title {
+  fill: #b5b8c2;
+  font-size: 12.5px;
+}
+.scatter-region rect {
+  fill: #ffffff0c;
+}
+.scatter-frontier {
+  fill: none;
+  stroke: #d5d7de;
+  stroke-width: 2;
+  stroke-dasharray: 1.5 5;
+  stroke-linecap: round;
+}
+.scatter-frame circle {
+  stroke: #101115;
+  stroke-width: 2;
+}
+.scatter-frame circle.is-muted {
+  opacity: 0.3;
+}
+.scatter-frame circle.is-highlight {
+  stroke: #f0f0f3;
+  stroke-width: 2.5;
+}
+.scatter-frame .scatter-focus {
+  fill: none;
+  stroke: #f0f0f3;
+  stroke-width: 1.5;
+}
+.scatter-labels text {
+  fill: #d5d7de;
+  font-size: 12px;
+  paint-order: stroke;
+  stroke: #101115;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+/* Tooltip */
+.chart-tooltip {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  gap: 3px;
+  width: max-content;
+  max-width: 260px;
+  padding: 12px 14px;
+  border: 1px solid #34363f;
+  border-radius: 10px;
+  background: #1a1b21;
+  box-shadow: 0 16px 40px #00000080;
+  color: #b5b8c2;
+  font-size: 13px;
+  line-height: 1.45;
+  pointer-events: none;
+}
+.chart-tooltip strong {
+  color: #f3f4f7;
+  font-size: 14px;
+  font-weight: 600;
+}
+.chart-tooltip-value {
+  color: #f3f4f7;
+  font-weight: 550;
+}
+.scatter-tooltip {
+  transform: translate(14px, -50%);
+}
+.scatter-tooltip.is-left {
+  transform: translate(calc(-100% - 14px), -50%);
+}
+.scatter-tooltip.is-pinned {
+  pointer-events: auto;
+}
+.chart-tooltip-link {
+  margin-top: 6px;
+  color: #ffffff;
+  font-weight: 550;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rank-bar i,
+  .rank-row .rank-hit {
+    transition: none;
+  }
+}

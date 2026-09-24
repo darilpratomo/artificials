@@ -81,6 +81,16 @@ export function money(value: number | null | undefined) {
   }).format(value);
 }
 
+/** A list price with at least cents shown: $0.20, $0.175, $0.0875, $15.00. */
+export function price(value: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: value >= 1 ? 2 : value >= 0.1 ? 3 : 4,
+  }).format(value);
+}
+
 /** Costs from the calculator can be fractions of a cent. */
 export function cost(value: number) {
   if (value === 0) return '$0';

@@ -21,6 +21,7 @@ import {
   whole,
 } from './format';
 import { DomainKey, Meter, Sources } from './parts';
+import { ResearchRecord, Standing } from './Standing';
 
 export type ProfileTab = 'overview' | 'performance' | 'pricing' | 'providers' | 'tokens';
 
@@ -227,6 +228,10 @@ export default function Overview({
           ))}
         </ul>
       </section>
+
+      <ResearchRecord profile={profile} />
+
+      <Standing profile={profile} />
 
       {profile.peers.length > 0 && (
         <section className="profile-card" aria-labelledby="peers-heading">

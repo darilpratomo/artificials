@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Search } from 'lucide-react';
 import { ARTICLES, ARTICLE_CATEGORIES, type Article } from '../../shared/content';
+import { withoutPictographs } from '../../shared/catalog';
 import { api } from '../lib/api';
 import { EmptyState, PageHeading } from '../components/Layout';
 import { ArticleCover } from '../components/ArticleCover';
@@ -13,8 +14,18 @@ export default function Learn() {
   const [category, setCategory] = useState('All topics');
   const [query, setQuery] = useState('');
   useEffect(() => {
+    // Articles written in the editor are shown without emoji, like the rest of the site.
     void api<{ articles: Article[] }>('/articles')
-      .then((d) => setArticles(d.articles))
+      .then((d) =>
+        setArticles(
+          d.articles.map((article) => ({
+            ...article,
+            title: withoutPictographs(article.title),
+            excerpt: withoutPictographs(article.excerpt),
+            body: withoutPictographs(article.body),
+          })),
+        ),
+      )
       .catch(() => {});
   }, []);
   useEffect(() => {

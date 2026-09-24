@@ -14,13 +14,14 @@ import Studio from './pages/Studio';
 import Pricing from './pages/Pricing';
 import Info from './pages/Info';
 import type { Lesson } from './lib/academy';
-export function renderPage(path: string, lesson?: Lesson) {
+import type { ModelOverview } from './lib/overview';
+export function renderPage(path: string, lesson?: Lesson, overview?: ModelOverview) {
   return renderToString(
     <StaticRouter location={path}>
       <Provider>
         <Routes>
           <Route element={<Layout />}>
-            <Route index element={<Home />} />
+            <Route index element={<Home initial={overview} />} />
             <Route path="models" element={<Models />} />
             <Route path="leaderboard" element={<Leaderboard />} />
             <Route path="compare" element={<Compare />} />
