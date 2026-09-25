@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Explorer, ModelOverview, OverviewTests, Timeline } from '../../shared/model-overview';
 import type { Coding } from '../../shared/coding';
 import type { Trends } from '../../shared/trends';
+import type { Images } from '../../shared/images';
 
 export type {
   Explorer,
@@ -26,6 +27,13 @@ export type {
   CodingTestRow,
 } from '../../shared/coding';
 export type { Trends, TrendModel, TrendPoint, TrendSeries } from '../../shared/trends';
+export type {
+  Images,
+  ImageBoard,
+  ImageCategory,
+  ImageEntry,
+  ImageModel,
+} from '../../shared/images';
 
 const requests = new Map<string, Promise<unknown>>();
 /** Files already loaded, so returning to a page renders at once instead of loading again. */
@@ -37,6 +45,7 @@ const isExplorer = (value: Explorer) => value?.version === 1 && Array.isArray(va
 const isTimeline = (value: Timeline) => value?.version === 1 && Array.isArray(value.entries);
 const isCoding = (value: Coding) => value?.version === 2 && Array.isArray(value.tests);
 const isTrends = (value: Trends) => value?.version === 1 && Array.isArray(value.frontier);
+const isImages = (value: Images) => value?.version === 1 && Array.isArray(value.boards);
 
 /**
  * Prerendered pages carry their data inline, so the first view needs no extra
@@ -136,4 +145,10 @@ export function useCoding(attempt = 0, initial?: Coding) {
 export function useTrends(attempt = 0, initial?: Trends) {
   embedded('trends.json', 'trends-data', isTrends);
   return useFile<Trends>('trends.json', isTrends, true, attempt, initial);
+}
+
+/** Arena's image boards and the automated image test, for the image models page. */
+export function useImages(attempt = 0, initial?: Images) {
+  embedded('images.json', 'images-data', isImages);
+  return useFile<Images>('images.json', isImages, true, attempt, initial);
 }

@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Models from './pages/Models';
 import CodingAgents from './pages/CodingAgents';
 import Trends from './pages/Trends';
+import ImageModels from './pages/ImageModels';
 import Leaderboard from './pages/Leaderboard';
 import Leaders from './pages/Leaders';
 import ScorePriceTime from './pages/ScorePriceTime';
@@ -18,13 +19,19 @@ import Academy from './pages/Academy';
 import { LessonReader } from './pages/AcademyLesson';
 import Info from './pages/Info';
 import type { Lesson } from './lib/academy';
-import type { Coding, ModelOverview, Trends as TrendsData } from './lib/overview';
+import type {
+  Coding,
+  Images as ImagesData,
+  ModelOverview,
+  Trends as TrendsData,
+} from './lib/overview';
 export function renderPage(
   path: string,
   lesson?: Lesson,
   overview?: ModelOverview,
   coding?: Coding,
   trends?: TrendsData,
+  images?: ImagesData,
 ) {
   return renderToString(
     <StaticRouter location={path}>
@@ -35,6 +42,7 @@ export function renderPage(
             <Route path="models" element={<Models initial={overview} />} />
             <Route path="coding-agents" element={<CodingAgents initial={coding} />} />
             <Route path="trends" element={<Trends initial={trends} />} />
+            <Route path="image-models" element={<ImageModels initial={images} />} />
             <Route path="leaders" element={<Leaders />} />
             <Route path="score-price-time" element={<ScorePriceTime />} />
             <Route path="market" element={<Market />} />

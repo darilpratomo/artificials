@@ -12,6 +12,7 @@ import { buildProfiles, profileBucket, PROFILE_BUCKETS } from '../shared/model-p
 import { buildOverview } from '../shared/model-overview.ts';
 import { buildCoding } from '../shared/coding.ts';
 import { buildTrends } from '../shared/trends.ts';
+import { buildImages } from '../shared/images.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
@@ -130,6 +131,15 @@ const trends = buildTrends({
   linkModel,
 });
 await writeFile(resolve(staging, 'trends.json'), JSON.stringify(trends) + '\n');
+// Arena's image boards are optional: without a snapshot the page shows the test alone.
+let arena;
+try {
+  arena = JSON.parse(await readFile(resolve(data, 'image-arena.json'), 'utf8'));
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
+const images = buildImages({ arena, benchmarks });
+await writeFile(resolve(staging, 'images.json'), JSON.stringify(images) + '\n');
 await rm(target, { recursive: true, force: true });
 await rename(staging, target);
 

@@ -1,0 +1,252 @@
+/* Image models page. Panels, headings, tabs and the section index reuse the
+   dashboard and models page styles. */
+.images-page .hub-section > .dash-panel + .dash-panel {
+  margin-top: 12px;
+}
+
+.image-board-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 2px 0 20px;
+}
+
+/* Score lists: rank, model, a dot with its 95% range on a shared axis, score. */
+.score-axis,
+.score-rows li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1.5fr) minmax(0, 2fr) 104px;
+  gap: 14px;
+  align-items: center;
+}
+.score-axis {
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1f2027;
+}
+.score-axis-ticks {
+  display: flex;
+  grid-column: 3;
+  justify-content: space-between;
+  color: #8e909b;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.score-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.score-rows li {
+  padding: 11px 0;
+  border-bottom: 1px solid #1a1b21;
+}
+.score-rows li:last-child {
+  border-bottom: 0;
+}
+.score-rows-rank {
+  color: #8e909b;
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.score-rows-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.score-rows-name img {
+  flex: none;
+  padding: 3px;
+  border-radius: 6px;
+}
+.score-rows-name > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.score-rows-name b {
+  color: #f3f4f7;
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.score-rows-name small {
+  color: #8e909b;
+  font-size: 12.5px;
+}
+.score-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 0 7px;
+  border: 1px solid #2c2d35;
+  border-radius: 999px;
+  color: #c3c6cf;
+  font-size: 11.5px;
+  font-style: normal;
+  line-height: 18px;
+  white-space: nowrap;
+}
+.score-tag.is-new {
+  border-color: #5c5f6b;
+  color: #f3f4f7;
+}
+/* A hairline axis; the range as a soft capsule and the score as a ringed dot. */
+.score-rows-track {
+  position: relative;
+  height: 16px;
+  background: linear-gradient(#26272f, #26272f) center / 100% 1px no-repeat;
+}
+.score-rows-track s {
+  position: absolute;
+  top: 5px;
+  height: 6px;
+  border-radius: 3px;
+  opacity: 0.4;
+}
+.score-rows-track i {
+  position: absolute;
+  top: 3px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #101115;
+}
+.score-rows-score {
+  display: grid;
+  justify-items: end;
+  font-variant-numeric: tabular-nums;
+}
+.score-rows-score b {
+  color: #f3f4f7;
+  font-size: 15px;
+  font-weight: 600;
+}
+.score-rows-score small {
+  color: #8e909b;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* The top three of each category: four across, two rows, even on every width. */
+.image-categories {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.image-category {
+  /* Lists start right under their titles, whatever the height of the row. */
+  align-content: start;
+}
+.image-category h3 {
+  margin: 0 0 12px;
+  color: #f3f4f7;
+  font-size: 16px;
+  font-weight: 600;
+}
+.image-category ol {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.image-category li {
+  display: grid;
+  grid-template-columns: 22px 20px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
+  color: #d9dbe2;
+  font-size: 14px;
+}
+.image-category li img {
+  padding: 2px;
+  border-radius: 5px;
+}
+.image-category-place {
+  padding-top: 1px;
+  color: #8e909b;
+  text-align: right;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+.image-category-name {
+  min-width: 0;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.image-category li b {
+  color: #f3f4f7;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1100px) {
+  .image-categories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* The download button keeps its place beside each panel's title. */
+.images-page .dash-panel-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+}
+@media (max-width: 760px) {
+  .score-axis {
+    display: none;
+  }
+  /* Filters fill even rows instead of leaving one button alone on a line. */
+  .image-board-controls {
+    display: grid;
+  }
+  .image-board-controls .dash-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: auto;
+  }
+  .image-board-controls .dash-tabs:last-child {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .image-board-controls .dash-tabs button {
+    padding-inline: 6px;
+  }
+  .image-board-controls .dash-tabs:last-child button {
+    font-size: 13.5px;
+    white-space: nowrap;
+  }
+  .score-rows li {
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'rank name score'
+      '. track track';
+    gap: 8px 12px;
+  }
+  .score-rows-rank {
+    grid-area: rank;
+    align-self: start;
+    padding-top: 4px;
+  }
+  .score-rows-name {
+    grid-area: name;
+  }
+  .score-rows-score {
+    grid-area: score;
+    align-self: start;
+  }
+  .score-rows-track {
+    grid-area: track;
+  }
+}
+@media (max-width: 560px) {
+  .image-categories {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 380px) {
+  .image-board-controls .dash-tabs:last-child button {
+    white-space: normal;
+  }
+}

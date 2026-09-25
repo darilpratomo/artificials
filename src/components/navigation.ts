@@ -36,6 +36,11 @@ export const NAV_GROUPS: NavGroupItem[] = [
         description: 'How capability, cost and scale are changing',
       },
       {
+        to: '/image-models',
+        label: 'Image models',
+        description: 'Text to image and image editing, ranked by votes',
+      },
+      {
         to: '/score-price-time',
         label: 'Score, price and time',
         description: 'Capability against price and release date',

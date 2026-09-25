@@ -19,6 +19,7 @@ try {
   const pageFiles = {
     'coding-agents': 'CodingAgents',
     trends: 'Trends',
+    'image-models': 'ImageModels',
     leaders: 'Leaders',
     'score-price-time': 'ScorePriceTime',
     market: 'Market',
@@ -77,6 +78,11 @@ try {
   const trendsInline = `<script type="application/json" id="trends-data">${trendsText
     .trim()
     .replace(/</g, '\\u003c')}</script>`;
+  const imagesText = await readFile('dist/data/models/images.json', 'utf8');
+  const images = JSON.parse(imagesText);
+  const imagesInline = `<script type="application/json" id="images-data">${imagesText
+    .trim()
+    .replace(/</g, '\\u003c')}</script>`;
   for (const { path } of publicPages()) {
     const lesson = path.startsWith('/learn/')
       ? JSON.parse(
@@ -86,6 +92,7 @@ try {
     const withData = path === '/' || path === '/models';
     const withCoding = path === '/coding-agents';
     const withTrends = path === '/trends';
+    const withImages = path === '/image-models';
     const html = template
       .replace(
         '</head>',
@@ -99,9 +106,10 @@ try {
           withData ? overview : undefined,
           withCoding ? coding : undefined,
           withTrends ? trends : undefined,
+          withImages ? images : undefined,
         )}</div>${withData ? inline : ''}${withCoding ? codingInline : ''}${
           withTrends ? trendsInline : ''
-        }`,
+        }${withImages ? imagesInline : ''}`,
       );
     const destination = path === '/' ? 'dist/index.html' : `dist${path}.html`;
     await mkdir(dirname(destination), { recursive: true });

@@ -18,6 +18,7 @@
     "sync:catalog": "node scripts/sync-catalog.mjs",
     "check:private": "node scripts/check-private.mjs",
     "sync:benchmarks": "node scripts/sync-benchmarks.mjs",
+    "sync:arena": "node scripts/sync-arena.mjs",
     "profiles": "node scripts/build-model-profiles.mjs",
     "check:academy": "python3 scripts/check-academy.py"
   },
@@ -52,6 +53,7 @@
     "@vitejs/plugin-react": "6.1.1",
     "cheerio": "1.2.0",
     "csv-parse": "7.0.2",
+    "hyparquet": "^1.31.1",
     "prettier": "3.9.7",
     "typescript": "7.0.2",
     "vite": "8.3.0",

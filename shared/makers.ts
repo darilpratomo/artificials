@@ -58,6 +58,13 @@ export const MAKER_STYLES: Record<string, MakerStyle> = {
   tii: { color: '#c7a24a', icon: 'tii-color' },
   lg: { color: '#e5467a', icon: 'lg-color' },
   reka: { color: '#b0b4be', icon: 'reka' },
+  // Image model makers. Microsoft AI makes MAI-Image; Azure hosts other models.
+  microsoft: { color: '#00a4ef', icon: 'microsoft-color' },
+  reve: { color: '#c9ccd4', icon: 'reve' },
+  luma: { color: '#a78dff', icon: 'luma-color' },
+  krea: { color: '#c9ccd4', icon: 'krea' },
+  runway: { color: '#c9ccd4', icon: 'runway' },
+  pruna: { color: '#9b36f6', icon: 'prunaai-color' },
 };
 
 /** Marks for makers without a listed colour; also the "Other" key in legends. */

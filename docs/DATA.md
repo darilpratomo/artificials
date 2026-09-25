@@ -392,3 +392,44 @@ calculated by Artificials from published data:
 
 Sources: Epoch AI (capability index and model records, CC BY 4.0) and models.dev (prices,
 context windows and release dates, MIT), credited beside each chart and in "Sources and method".
+
+## Image models page
+
+`/image-models` ranks image generators and image editors from Arena's published leaderboard
+dataset ([lmarena-ai/leaderboard-dataset](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset),
+CC BY 4.0). Arena shows a visitor two images from the same prompt by two anonymous models and
+asks which is better; its scores come from those blind votes.
+
+`scripts/sync-arena.mjs` (`npm run sync:arena`, run by the scheduled workflow after the benchmark
+sync) checks that the dataset card still says `cc-by-4.0`, then reads the `text_to_image` and
+`image_edit` Parquet files at the revision it checked. Downloads follow redirects only to Hugging
+Face's own hosts. It keeps a compact snapshot in `public/data/image-arena.json`:
+
+- every model and category from the latest publication: score, 95% range, votes, rank,
+  organisation and licence, exactly as published;
+- the first publication each current model appears in;
+- each organisation's best overall score at the last publication of each month.
+
+A failed fetch, a changed licence or a board that shrinks below three quarters of its previous
+size keeps the last snapshot and marks the workflow run failed.
+
+At build time `buildImages` (`shared/images.ts`) writes `public/data/models/images.json`, and the
+page is prerendered with it inline. Artificials only tidies and groups the published data:
+
+- Model names are Arena's identifiers made readable (`gpt-image-2 (medium)` reads
+  "GPT Image 2 (medium)"); names Arena already capitalises are kept as they are.
+- Organisations are matched to the site's makers. Arena leaves two blank; they are named by their
+  model family (Stable Diffusion: Stability AI; P-Image: Pruna AI).
+- "Open weights" means any licence other than Arena's "Proprietary"; licences recorded as
+  identifiers get their owners' names. Several open licences allow only non-commercial use.
+- "New" marks models first seen within 31 days of the publication.
+- Categories covering fewer than twenty models (Arena's per-language boards) are left out.
+- Category cards show the top model of each of the three leading makers, so one maker's versions
+  do not fill every card.
+- The progress chart shows the six makers leading today, with their best score at the end of each
+  month. Arena recomputes every score at each publication, so the chart shows who led and when,
+  not exact gains.
+
+The page does not show a total vote count: Arena's per-model vote counts do not add up to the
+total its site shows, so no total is derived. T2I-CoReBench (CC BY-SA 4.0), an automated test of
+composition and reasoning, is shown beside the votes as a separate measure.

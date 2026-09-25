@@ -28,6 +28,10 @@ const pages: Record<string, [string, string]> = {
     'AI coding agents compared',
     'Compare AI coding agents such as Codex CLI, Claude Code and Gemini CLI on Terminal-Bench 2.0 and SWE-bench: how much the agent changes a model’s score, what a task costs, and how long a task models can finish.',
   ],
+  '/image-models': [
+    'AI image model rankings',
+    'The best AI image generators and image editors, ranked by blind votes in the Arena: every category, open-weights models, each maker’s best and how scores have moved.',
+  ],
   '/trends': [
     'AI trends',
     'How AI is changing: the capability frontier by maker and country, open weights against closed models, the falling cost of capability, context windows, training compute and the pace of releases.',

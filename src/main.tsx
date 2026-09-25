@@ -31,6 +31,7 @@ function page(load: Parameters<typeof lazy>[0]) {
 const Models = page(() => import('./pages/Models'));
 const CodingAgents = page(() => import('./pages/CodingAgents'));
 const Trends = page(() => import('./pages/Trends'));
+const ImageModels = page(() => import('./pages/ImageModels'));
 const ModelProfile = page(() => import('./pages/ModelProfile'));
 const Compare = page(() => import('./pages/Compare'));
 const Leaderboard = page(() => import('./pages/Leaderboard'));
@@ -55,6 +56,7 @@ function pageAt(path: string) {
   return new Map([
     ['coding-agents', CodingAgents],
     ['trends', Trends],
+    ['image-models', ImageModels],
     ['leaders', Leaders],
     ['score-price-time', ScorePriceTime],
     ['market', Market],
@@ -106,6 +108,7 @@ const app = (
               <Route path="models/:slug" element={<ModelProfile />} />
               <Route path="coding-agents" element={<CodingAgents />} />
               <Route path="trends" element={<Trends />} />
+              <Route path="image-models" element={<ImageModels />} />
               <Route path="leaders" element={<Leaders />} />
               <Route path="score-price-time" element={<ScorePriceTime />} />
               <Route path="market" element={<Market />} />
