@@ -2,7 +2,13 @@ import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseLiveBench, parseImageBench } from './lib/benchmark-sources.ts';
-import { parseEpoch, EPOCH_DATA_URL, EPOCH_URL } from './lib/epoch.ts';
+import {
+  parseEpoch,
+  parseTerminalBench,
+  EPOCH_DATA_URL,
+  EPOCH_URL,
+  TERMINAL_BENCH,
+} from './lib/epoch.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 // GitHub's API allows few anonymous requests from the shared addresses that
@@ -58,12 +64,14 @@ if (!release) throw Error('Missing benchmark release');
 const base = `https://raw.githubusercontent.com/${repo}/${commit.sha}/public`;
 const tableUrl = `${base}/table_${release}.csv`;
 const imageUrl = 'https://t2i-corebench.github.io/';
-const [csv, groups, images, epochArchive] = await Promise.all([
+const [csv, groups, images, epochArchive, agentLicence] = await Promise.all([
   get(tableUrl),
   get(`${base}/categories_${release}.json`),
   get(imageUrl),
   // The archive is binary; its size cap is larger than the text sources'.
   get(EPOCH_DATA_URL, 12_000_000),
+  // Optional: without it, the coding agent results keep their last version.
+  get(TERMINAL_BENCH.licenseApi).catch((error) => error),
 ]);
 const epoch = parseEpoch(new Uint8Array(epochArchive.bytes));
 const categories = [
@@ -160,6 +168,56 @@ if (epoch.facts.length >= 50 && epoch.facts.length >= previousFacts * 0.75) {
 } else {
   console.warn(`Model facts not updated: ${epoch.facts.length} records (was ${previousFacts}).`);
 }
+// Coding agent results are optional too. They are published only while the
+// leaderboard's dataset card states Apache-2.0; a failed or much smaller read
+// keeps the previous file.
+const agentsFile = resolve(directory, 'coding-agents.json');
+let previousAgents = 0;
+try {
+  previousAgents = JSON.parse(await readFile(agentsFile, 'utf8')).results.length;
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
+let agentCount = 0;
+try {
+  if (agentLicence instanceof Error) throw agentLicence;
+  if (JSON.parse(agentLicence.text).cardData?.license !== 'apache-2.0')
+    throw Error('Terminal-Bench leaderboard licence changed; review before republishing');
+  const agents = parseTerminalBench(new Uint8Array(epochArchive.bytes));
+  if (agents.results.length < previousAgents * 0.75)
+    throw Error(`${agents.results.length} results (was ${previousAgents})`);
+  const epochSource = snapshot.sources.find((source) => source.id === 'epoch');
+  const agentsStaging = resolve(root, '.coding-agents.tmp');
+  await writeFile(
+    agentsStaging,
+    JSON.stringify({
+      version: 1,
+      source: {
+        id: 'terminal-bench',
+        name: TERMINAL_BENCH.name,
+        url: TERMINAL_BENCH.url,
+        dataUrl: TERMINAL_BENCH.dataUrl,
+        license: TERMINAL_BENCH.license,
+        licenseUrl: TERMINAL_BENCH.licenseUrl,
+        checkedAt,
+        latestRun: agents.latestRun,
+        tasks: TERMINAL_BENCH.tasks,
+        compiledBy: {
+          name: epochSource.name,
+          url: epochSource.url,
+          dataUrl: epochSource.dataUrl,
+          license: epochSource.license,
+          licenseUrl: epochSource.licenseUrl,
+        },
+      },
+      results: agents.results,
+    }) + '\n',
+  );
+  await rename(agentsStaging, agentsFile);
+  agentCount = agents.results.length;
+} catch (error) {
+  console.warn(`Coding agent results not updated: ${error.message}`);
+}
 console.log(
-  `Benchmarks refreshed: ${categories.map((c) => `${c.name} ${c.rows.length}`).join(', ')}. Model facts: ${epoch.facts.length}. Checked ${checkedAt}.`,
+  `Benchmarks refreshed: ${categories.map((c) => `${c.name} ${c.rows.length}`).join(', ')}. Model facts: ${epoch.facts.length}. Coding agent results: ${agentCount}. Checked ${checkedAt}.`,
 );

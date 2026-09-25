@@ -10,6 +10,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildProfiles, profileBucket, PROFILE_BUCKETS } from '../shared/model-profiles.ts';
 import { buildOverview } from '../shared/model-overview.ts';
+import { buildCoding } from '../shared/coding.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
@@ -22,7 +23,14 @@ try {
 } catch (error) {
   if (error.code !== 'ENOENT') throw error;
 }
-const { profiles, links } = buildProfiles(catalog, benchmarks, facts.facts);
+// Coding agent results are optional too: the coding page shows model tests without them.
+let agents;
+try {
+  agents = JSON.parse(await readFile(resolve(data, 'coding-agents.json'), 'utf8'));
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
+const { profiles, links, linkModel } = buildProfiles(catalog, benchmarks, facts.facts);
 if (profiles.length < 100)
   throw Error('Unexpectedly few model profiles; check the catalog snapshot.');
 
@@ -97,6 +105,8 @@ await writeFile(resolve(staging, 'timeline.json'), JSON.stringify(timeline) + '\
 await writeFile(resolve(staging, 'overview.json'), JSON.stringify(overview) + '\n');
 await writeFile(resolve(staging, 'tests.json'), JSON.stringify(tests) + '\n');
 await writeFile(resolve(staging, 'explorer.json'), JSON.stringify(explorer) + '\n');
+const coding = buildCoding({ profiles, tests: tests.tests, agents, linkModel, sources });
+await writeFile(resolve(staging, 'coding.json'), JSON.stringify(coding) + '\n');
 await rm(target, { recursive: true, force: true });
 await rename(staging, target);
 

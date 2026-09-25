@@ -667,5 +667,10 @@ export function buildProfiles(
       }));
   }
 
-  return { profiles: [...profiles.values()], links };
+  return {
+    profiles: [...profiles.values()],
+    links,
+    /** The profile a source's model identifiers belong to, matched like benchmark rows. */
+    linkModel: (names: string[], providerId: string) => resolve(names, providerId)?.slug,
+  };
 }

@@ -84,7 +84,7 @@ Do not mix scores from different benchmark methods into a single overall ranking
 Capability rankings now live separately in `public/data/benchmarks.json` and appear by default
 on `/leaderboard`. `scripts/sync-benchmarks.mjs` ingests published LiveBench task scores,
 Epoch AI's own benchmark evaluations and capability index, and T2I-CoReBench image-generation
-results. The six-hour catalog workflow refreshes both sources,
+results, plus Terminal-Bench 2.0 agent results for the coding agents page (see below). The six-hour catalog workflow refreshes both sources,
 validates them, runs checks, and commits the complete snapshots for native Cloudflare deploy.
 Failed source retrieval/schema checks leave the last successful published deployment intact.
 A benchmark source that is down does not hold back the catalog: the workflow still checks and
@@ -306,3 +306,48 @@ the home page, prerendered with that data inline, and shows:
 Host listings, including gateways and resellers, stay under "Provider listings"
 (`/models?view=listings`). Links with the old listing filters (`provider`, `modality`, `page`,
 `sort`, `reasoning`, `openWeights`, `query`) still open that view.
+
+## Coding agents page
+
+`/coding-agents` compares coding agents (the program around a model that edits files and runs
+commands) and the models inside them. It is built from `public/data/models/coding.json`,
+generated at build time, and prerendered with that data inline.
+
+Agent results come from the Terminal-Bench 2.0 leaderboard: one result per agent and model, as
+the share of the 89 tasks solved, with its standard error and run date. The leaderboard's
+submissions are published under Apache-2.0 on Hugging Face
+(`harborframework/terminal-bench-2-leaderboard`); the scores are read from Epoch AI's
+compilation of the leaderboard (`terminalbench_external.csv` in the Epoch AI archive, CC BY 4.0),
+which is the only `_external` file used. `scripts/sync-benchmarks.mjs` writes them to
+`public/data/coding-agents.json` only while the dataset card states `apache-2.0` (checked through
+the Hugging Face API on every refresh). Like the model records, the file is optional: a failed
+or much smaller read keeps the previous file and never stops the benchmark refresh.
+
+Cleaning, in `parseTerminalBench` (`scripts/lib/epoch.ts`): rows must cite the leaderboard;
+agent names are trimmed and merged across spellings ("Terminus 2", "Terminus-2"); an entry
+listed twice (with and without "_unknown", or with an assumed effort at the same score) keeps
+its latest run. Models are matched to profiles the same way as benchmark rows. An agent counts as
+the model maker's own when the builder the source names is the model's maker, such as Codex CLI
+by OpenAI running GPT-5.5.
+
+The page shows, all calculated by Artificials from those results:
+
+- Leaderboard: agent and model pairs on a fixed 0–100% scale with one standard error, filtered
+  by builder (the model's maker or independent) or by model.
+- Agent effect: for models that at least three agents ran, the gap between the best and weakest
+  agent, with every agent's score on opening a row.
+- Agents: each agent's builder, the number of models it ran, its best result and latest run.
+- Models on coding tests: LiveBench agentic coding and coding, and Epoch AI's SWE-bench
+  Verified, one test per chart. Each test runs every model the same way, so these compare
+  models, not agents, and include models newer than the agent results.
+- Coding score against the blended list price, with the best score at each price. The price is
+  not the cost of a task.
+- Questions answered from the same data, with `FAQPage` structured data, and the sources with
+  their licences and retrieval times.
+
+The Terminal-Bench 2.0 leaderboard's newest result is from April 2026; newer agent and model
+pairs appear after it lists them. Cost, time and tokens per task are not shown: the openly
+licensed results do not include them, and Artificials does not run agents itself. Other agent
+leaderboards were checked on 25 September 2026 and are not used: SWE-bench's site data is CC
+BY-NC 4.0 (not for a commercial site); DeepSWE, CursorBench and METR publish no licence for
+their results; Aider's leaderboard stopped updating in October 2025.

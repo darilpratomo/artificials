@@ -392,6 +392,7 @@ describe('home overview', () => {
     expect(configurationOf('model_none')).toBe('no reasoning');
     expect(configurationOf('claude-test-1-high-effort', 'claude-test-1')).toBe('high effort');
     expect(configurationOf('other-name', 'claude-test-1')).toBe('');
+    expect(configurationOf('gpt-5-2025-08-07', 'gpt-5')).toBe('2025-08-07');
   });
 
   it('keeps each model’s best configuration once per test, highest first', () => {

@@ -4,6 +4,7 @@ import { Provider } from './lib/context';
 import { Layout } from './components/Layout';
 import Home from './pages/Home';
 import Models from './pages/Models';
+import CodingAgents from './pages/CodingAgents';
 import Leaderboard from './pages/Leaderboard';
 import Leaders from './pages/Leaders';
 import ScorePriceTime from './pages/ScorePriceTime';
@@ -18,8 +19,13 @@ import Studio from './pages/Studio';
 import Pricing from './pages/Pricing';
 import Info from './pages/Info';
 import type { Lesson } from './lib/academy';
-import type { ModelOverview } from './lib/overview';
-export function renderPage(path: string, lesson?: Lesson, overview?: ModelOverview) {
+import type { Coding, ModelOverview } from './lib/overview';
+export function renderPage(
+  path: string,
+  lesson?: Lesson,
+  overview?: ModelOverview,
+  coding?: Coding,
+) {
   return renderToString(
     <StaticRouter location={path}>
       <Provider>
@@ -27,6 +33,7 @@ export function renderPage(path: string, lesson?: Lesson, overview?: ModelOvervi
           <Route element={<Layout />}>
             <Route index element={<Home initial={overview} />} />
             <Route path="models" element={<Models initial={overview} />} />
+            <Route path="coding-agents" element={<CodingAgents initial={coding} />} />
             <Route path="leaders" element={<Leaders />} />
             <Route path="score-price-time" element={<ScorePriceTime />} />
             <Route path="market" element={<Market />} />

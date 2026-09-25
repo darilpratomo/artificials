@@ -236,7 +236,10 @@ export function configurationOf(configuration: string, slug?: string): string {
     .toLowerCase()
     .replace(/[._\s]+/g, '-')
     .replace(/[^a-z0-9-]+/g, '-');
-  return tidy.startsWith(slug + '-') ? tidy.slice(slug.length + 1).replace(/-/g, ' ') : '';
+  if (!tidy.startsWith(slug + '-')) return '';
+  // A dated snapshot keeps its date as written: "2025-08-07", not "2025 08 07".
+  const rest = tidy.slice(slug.length + 1);
+  return /^\d{4}-\d{2}-\d{2}$/.test(rest) ? rest : rest.replace(/-/g, ' ');
 }
 
 function isNotable(profile: ModelProfile) {

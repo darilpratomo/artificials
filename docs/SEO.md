@@ -33,4 +33,8 @@ The footer and privacy page offer Analytics preferences. Declining prevents load
 
 To verify: open https://artificials.net in a fresh browser profile, choose **Allow analytics**, and visit two public pages. In the GA4 property, open **Reports → Realtime** to check the visit. Browser blockers or declined consent intentionally prevent collection. Tag detection tools may report no tag until consent is granted. Code/browser tests intercept analytics requests to avoid generating artificial production traffic; acceptance into the GA property must be checked in its dashboard.
 
+## Cloudflare Web Analytics
+
+Cloudflare adds its Web Analytics beacon to HTML responses at the edge (enabled in the Cloudflare dashboard, free). It sets no cookies and stores nothing on the device, loads as a deferred module of about 10 KB compressed and sends one small report per page view, so it runs without the analytics consent that Google Analytics needs. The CSP allows `https://static.cloudflareinsights.com` in `script-src` and `https://cloudflareinsights.com` in `connect-src`; without both, the browser blocks the beacon. The privacy page discloses it.
+
 CSP permits the Google tag and Google Analytics collection endpoints without allowing arbitrary inline scripts or eval. The privacy page discloses optional Google Analytics. No GA account retention settings or property permissions are changed by the website deployment.

@@ -5,6 +5,7 @@ import type {
   OverviewTests,
   Timeline,
 } from '../../shared/model-overview';
+import type { Coding } from '../../shared/coding';
 
 export type {
   Explorer,
@@ -20,6 +21,7 @@ export type {
   TimelineEntry,
 } from '../../shared/model-overview';
 export { FLAGS } from '../../shared/model-overview';
+export type { Coding, CodingAgentRow, CodingTest, CodingTestRow } from '../../shared/coding';
 
 const requests = new Map<string, Promise<unknown>>();
 /** Files already loaded, so returning to a page renders at once instead of loading again. */
@@ -29,20 +31,21 @@ const isOverview = (value: ModelOverview) => value?.version === 1 && Array.isArr
 const isTests = (value: OverviewTests) => value?.version === 1 && Array.isArray(value.tests);
 const isExplorer = (value: Explorer) => value?.version === 1 && Array.isArray(value.models);
 const isTimeline = (value: Timeline) => value?.version === 1 && Array.isArray(value.entries);
+const isCoding = (value: Coding) => value?.version === 1 && Array.isArray(value.tests);
 
 /**
- * The prerendered home page carries its overview inline, so the first view
- * needs no extra request and shows the same content the HTML already had.
+ * Prerendered pages carry their data inline, so the first view needs no extra
+ * request and shows the same content the HTML already had.
  */
-function embeddedOverview() {
-  if (typeof document === 'undefined' || loaded.has('overview.json')) return;
-  const text = document.getElementById('overview-data')?.textContent;
+function embedded<T>(file: string, id: string, valid: (value: T) => boolean) {
+  if (typeof document === 'undefined' || loaded.has(file)) return;
+  const text = document.getElementById(id)?.textContent;
   if (!text) return;
   try {
-    const value = JSON.parse(text) as ModelOverview;
-    if (isOverview(value)) {
-      loaded.set('overview.json', value);
-      requests.set('overview.json', Promise.resolve(value));
+    const value = JSON.parse(text) as T;
+    if (valid(value)) {
+      loaded.set(file, value);
+      requests.set(file, Promise.resolve(value));
     }
   } catch {
     // A damaged inline copy is ignored; the file is fetched instead.
@@ -99,7 +102,7 @@ function useFile<T>(
  * compressed). `initial` lets the prerenderer render real content.
  */
 export function useOverview(attempt = 0, initial?: ModelOverview) {
-  embeddedOverview();
+  embedded('overview.json', 'overview-data', isOverview);
   return useFile<ModelOverview>('overview.json', isOverview, true, attempt, initial);
 }
 
@@ -118,3 +121,9 @@ export function useTimeline(attempt = 0) {
   return useFile<Timeline>('timeline.json', isTimeline, true, attempt);
 }
 
+
+/** Coding agent results and coding tests, for the coding agents page. */
+export function useCoding(attempt = 0, initial?: Coding) {
+  embedded('coding.json', 'coding-data', isCoding);
+  return useFile<Coding>('coding.json', isCoding, true, attempt, initial);
+}

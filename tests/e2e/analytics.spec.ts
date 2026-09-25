@@ -111,4 +111,7 @@ test('every built page has one bootstrap and CSP allows Analytics without inline
   expect(scriptPolicy).toContain('https://www.googletagmanager.com');
   expect(scriptPolicy).not.toMatch(/unsafe-inline|unsafe-eval/);
   expect(policy).toContain('https://*.google-analytics.com');
+  // Cloudflare Web Analytics: its beacon script and its collection endpoint.
+  expect(scriptPolicy).toContain('https://static.cloudflareinsights.com');
+  expect(policy.match(/connect-src ([^;]+)/)![1]).toContain('https://cloudflareinsights.com');
 });

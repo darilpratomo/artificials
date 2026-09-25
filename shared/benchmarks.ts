@@ -88,3 +88,42 @@ export interface ModelFactsSnapshot {
   >;
   facts: ModelFacts[];
 }
+
+/**
+ * One coding agent running one model on an agent benchmark. The agent (the
+ * program that plans, runs commands and edits files) is part of the result:
+ * the same model can score very differently in different agents.
+ */
+export interface AgentResult {
+  /** Stable id: the agent's normalised name and the model identifier. */
+  id: string;
+  agent: string;
+  /** Who built the agent, as the source records it. */
+  agentOrg?: string;
+  /** The model identifier the source used, such as `gpt-5.5_unknown`. */
+  model: string;
+  /** The source's display name for the model. */
+  modelName?: string;
+  provider: string;
+  providerId: string;
+  /** Share of tasks solved, in percent. */
+  score: number;
+  /** One standard error, in percentage points. */
+  stderr?: number;
+  /** The run date the source lists (YYYY-MM-DD). */
+  runDate?: string;
+  rank: number;
+}
+export interface AgentSnapshot {
+  version: 1;
+  source: Pick<BenchmarkSource, 'id' | 'name' | 'url' | 'dataUrl' | 'license' | 'licenseUrl'> & {
+    checkedAt: string;
+    /** The latest run date among the results. */
+    latestRun: string | null;
+    /** Tasks in the benchmark. */
+    tasks: number;
+    /** Where the scores were read from: a compilation of the leaderboard. */
+    compiledBy: Pick<BenchmarkSource, 'name' | 'url' | 'dataUrl' | 'license' | 'licenseUrl'>;
+  };
+  results: AgentResult[];
+}

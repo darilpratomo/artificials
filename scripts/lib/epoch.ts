@@ -1,6 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 import { parse } from 'csv-parse/sync';
 import type {
+  AgentResult,
   BenchmarkCategory,
   BenchmarkDomain,
   BenchmarkRow,
@@ -29,6 +30,7 @@ interface EpochSpec {
 /**
  * Only evaluations Epoch AI runs itself. Files ending in `_external` come from
  * other projects and keep their own licences, so they are never imported here.
+ * The one exception, Terminal-Bench, is read separately by `parseTerminalBench`.
  */
 export const EPOCH_BENCHMARKS: EpochSpec[] = [
   {
@@ -348,4 +350,143 @@ export function parseEpoch(zip: Uint8Array): EpochResult {
     if (category.rows.length < 5) throw Error(`Too few Epoch results: ${category.id}`);
   const modelFile = files[MODEL_FILE];
   return { categories, latestRun, facts: parseFacts(modelFile && strFromU8(modelFile)) };
+}
+
+/** Terminal-Bench 2.0, whose leaderboard submissions are published under Apache-2.0. */
+export const TERMINAL_BENCH = {
+  file: 'terminalbench_external.csv',
+  benchmark: 'Terminal Bench',
+  name: 'Terminal-Bench 2.0',
+  url: 'https://www.tbench.ai/leaderboard/terminal-bench/2.0',
+  dataUrl: 'https://huggingface.co/datasets/harborframework/terminal-bench-2-leaderboard',
+  /** The leaderboard dataset's card data, which states its licence (a few hundred bytes). */
+  licenseApi:
+    'https://huggingface.co/api/datasets/harborframework/terminal-bench-2-leaderboard?expand%5B%5D=cardData',
+  license: 'Apache-2.0',
+  licenseUrl: 'https://www.apache.org/licenses/LICENSE-2.0',
+  tasks: 89,
+};
+/** Rows citing the Terminal-Bench 2.0 leaderboard. Anything else is left out. */
+const TERMINAL_BENCH_SOURCES = new Set([TERMINAL_BENCH.url, 'Terminal-Bench v2 Leaderboard']);
+
+/** "Terminus 2", " Terminus 2 " and "Terminus-2" are one agent. */
+export const agentKey = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+/**
+ * Terminal-Bench 2.0 leaderboard results, one per agent and model, from Epoch
+ * AI's compilation in the same archive. The refresh confirms the leaderboard's
+ * licence before publishing them. Fails closed, like `parseEpoch`.
+ */
+export function parseTerminalBench(zip: Uint8Array): {
+  results: AgentResult[];
+  latestRun: string | null;
+} {
+  const files = unzipSync(zip, {
+    filter: (entry) => {
+      if (entry.name !== 'benchmark_metadata.csv' && entry.name !== TERMINAL_BENCH.file)
+        return false;
+      if (entry.originalSize > MAX_ENTRY_BYTES) throw Error(`Epoch entry too large: ${entry.name}`);
+      return true;
+    },
+  });
+  const text = (name: string) => {
+    const bytes = files[name];
+    if (!bytes) throw Error(`Epoch archive is missing ${name}`);
+    return strFromU8(bytes);
+  };
+  const meta = rowsOf(text('benchmark_metadata.csv')).find(
+    (row) => row.source_file === TERMINAL_BENCH.file,
+  );
+  if (
+    !meta ||
+    meta.benchmark !== TERMINAL_BENCH.benchmark ||
+    meta.score_column !== 'Accuracy mean' ||
+    Number(meta.scale) !== 1
+  )
+    throw Error('Terminal-Bench entry changed in the Epoch archive');
+  if (meta.superseded_by?.trim())
+    throw Error('Terminal-Bench superseded; review before publishing');
+  const records = rowsOf(text(TERMINAL_BENCH.file));
+  const columns = ['Model version', 'Agent', 'Accuracy mean', 'Source'];
+  if (!records.length || columns.some((column) => !(column in records[0])))
+    throw Error('Terminal-Bench schema changed');
+
+  // Each agent keeps the spelling of its name and organisation used most often.
+  const spellings = new Map<string, Map<string, number>>();
+  const organisations = new Map<string, Map<string, number>>();
+  const tally = (map: Map<string, Map<string, number>>, key: string, value?: string) => {
+    if (!value) return;
+    const counts = map.get(key) ?? new Map<string, number>();
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+    map.set(key, counts);
+  };
+  const common = (counts?: Map<string, number>) =>
+    counts && [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0];
+  // Newest run first; on the same day, the entry citing the leaderboard page.
+  const order = (record: Record<string, string>) =>
+    `${isoDay(record['Run date']) ?? ''}|${record.Source.trim().startsWith('https://') ? 1 : 0}|${record.Created ?? ''}`;
+  const kept = new Map<string, Record<string, string>>();
+  for (const record of records) {
+    if (!TERMINAL_BENCH_SOURCES.has(record.Source?.trim() ?? '')) continue;
+    const agent = field(record.Agent?.replace(/\s+/g, ' '), 60);
+    // "_unknown" marks an unrecorded reasoning effort; some entries appear with and without it.
+    const model = record['Model version']?.trim().replace(/_unknown$/, '');
+    if (!agent || !model || model.length > 120 || !/^[\w.:/@+-]+$/.test(model)) continue;
+    if (!record['Accuracy mean']?.trim()) continue;
+    const key = agentKey(agent);
+    if (!key) continue;
+    tally(spellings, key, agent);
+    tally(organisations, key, field(record['Agent Org'], 60));
+    const id = `${key}:${model}`;
+    const previous = kept.get(id);
+    if (!previous || order(record) > order(previous)) kept.set(id, record);
+  }
+  // One leaderboard entry is sometimes listed twice, once with an assumed
+  // effort ("_medium") and once without, at the same score. Keep one.
+  const entries = new Map<string, [string, Record<string, string>]>();
+  for (const [id, record] of kept) {
+    const [key, model] = [id.slice(0, id.indexOf(':')), id.slice(id.indexOf(':') + 1)];
+    const base = model.replace(/_[a-z]+$/i, '');
+    const entry = `${key}:${base}:${Number(record['Accuracy mean']).toFixed(3)}`;
+    const previous = entries.get(entry);
+    if (!previous || order(record) > order(previous[1])) entries.set(entry, [id, record]);
+  }
+
+  let latestRun: string | null = null;
+  const results: Omit<AgentResult, 'rank'>[] = [...entries.values()].map(([id, record]) => {
+    const key = id.slice(0, id.indexOf(':'));
+    const model = id.slice(id.indexOf(':') + 1);
+    const value = Number(record['Accuracy mean']);
+    if (!Number.isFinite(value) || value < 0 || value > 1)
+      throw Error('Terminal-Bench score outside 0–1');
+    const stderr = Number(record['Accuracy SE']);
+    const runDate = isoDay(record['Run date']);
+    if (runDate && (!latestRun || runDate > latestRun)) latestRun = runDate;
+    const organisation = common(organisations.get(key));
+    const modelName = field(record.Name, 80);
+    return {
+      id,
+      agent: common(spellings.get(key))!,
+      ...(organisation ? { agentOrg: organisation } : {}),
+      model,
+      ...(modelName ? { modelName } : {}),
+      ...maker(model, record['Model Org']?.trim() || record.Organization || ''),
+      score: Math.round(value * 10000) / 100,
+      ...(Number.isFinite(stderr) && stderr > 0 && stderr < 1
+        ? { stderr: Math.round(stderr * 10000) / 100 }
+        : {}),
+      ...(runDate ? { runDate } : {}),
+    };
+  });
+  if (results.length < 40 || new Set(results.map((row) => agentKey(row.agent))).size < 10)
+    throw Error('Unexpectedly few Terminal-Bench results');
+  results.sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
+  let rank = 0;
+  return {
+    latestRun,
+    results: results.map((row, index) => {
+      if (!index || results[index - 1].score !== row.score) rank = index + 1;
+      return { ...row, rank };
+    }),
+  };
 }

@@ -204,13 +204,14 @@ export default function Info() {
             </p>
             <h2>4. Service providers and international processing</h2>
             <p>
-              Cloudflare provides hosting and security. Supabase provides authentication and
-              database storage. OpenAI processes AI requests. Paddle handles checkout and
-              subscription payments as merchant of record. We do not receive or store your full card
-              number. Google processes sign-in information if you choose Google sign-in. Cloudflare
-              Turnstile helps protect sign-in from automated abuse. These providers may process
-              information outside your country; the applicable arrangements depend on their
-              processing locations, terms, and transfer safeguards.
+              Cloudflare provides hosting and security, and Cloudflare Web Analytics counts page
+              views and measures how quickly pages load, without cookies or other storage on your
+              device. Supabase provides authentication and database storage. OpenAI processes AI
+              requests. Paddle handles checkout and subscription payments as merchant of record. We
+              do not receive or store your full card number. Google processes sign-in information if
+              you choose Google sign-in. Cloudflare Turnstile helps protect sign-in from automated
+              abuse. These providers may process information outside your country; the applicable
+              arrangements depend on their processing locations, terms, and transfer safeguards.
             </p>
             <p>
               Model metadata is fetched and cached by our server. Browsing the catalog does not send
@@ -226,10 +227,10 @@ export default function Info() {
               use their own essential storage. With your permission, Google Analytics uses
               first-party cookies to measure visits to public pages, including device/browser
               information and approximate location. Google processes this information under its own
-              privacy policy. Analytics is optional and stays off until you accept; advertising
-              features are disabled. We do not include your email, Studio prompts, query strings,
-              account pages or private CMS URLs in our page-view events. Your analytics choice is
-              saved on this device.
+              privacy policy. Google Analytics is optional and stays off until you accept;
+              advertising features are disabled. We do not include your email, Studio prompts, query
+              strings, account pages or private CMS URLs in our page-view events. Your analytics
+              choice is saved on this device.
             </p>
             <p>
               <a
@@ -242,7 +243,7 @@ export default function Info() {
             </p>
             <h2 id="preferences">6. Your preferences</h2>
             <p>
-              You can allow or decline analytics below. Declining stops further analytics collection
+              You can allow or decline Google Analytics below. Declining stops further collection
               and removes Google Analytics cookies from this browser; it does not erase data
               previously received by Google.
             </p>

@@ -6306,6 +6306,19 @@ input[type='radio'] {
 .site-header .site-links {
   gap: 22px;
 }
+/* Every link stays on one line down to the menu breakpoint. */
+.site-header .site-links a,
+.site-header .nav-login {
+  white-space: nowrap;
+}
+@media (min-width: 1101px) and (max-width: 1280px) {
+  .site-header .site-links {
+    gap: clamp(12px, calc((100vw - 1100px) / 8 + 12px), 22px);
+  }
+  .site-header .site-nav {
+    gap: 16px;
+  }
+}
 .site-header .site-actions {
   gap: 16px;
 }

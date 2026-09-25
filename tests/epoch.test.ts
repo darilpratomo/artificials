@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { strToU8, zipSync } from 'fflate';
-import { EPOCH_BENCHMARKS, parseEpoch } from '../scripts/lib/epoch';
+import {
+  EPOCH_BENCHMARKS,
+  parseEpoch,
+  parseTerminalBench,
+  TERMINAL_BENCH,
+} from '../scripts/lib/epoch';
 
 const LICENSE =
   "## Licensing\nEpoch AI's data is free to use, distribute, and reproduce provided the source and authors are credited under the [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/).\n";
@@ -177,5 +182,91 @@ describe('Epoch AI model records', () => {
     expect(parseEpoch(archive({ 'model_metadata.csv': 'something,else\n1,2\n' })).facts).toEqual(
       [],
     );
+  });
+});
+
+const TB_HEADER =
+  'Model version,Agent,Accuracy mean,Release date,Organization,Country,Training compute (FLOP),Training compute notes,Accuracy SE,Agent Org,Model Org,Run date,Notes,Source,Source Link,Created,Name,id';
+/** Twelve agents on four models each, all citing the leaderboard. */
+function terminalRows() {
+  const rows: string[] = [];
+  for (let agent = 0; agent < 12; agent += 1)
+    for (const [model, name, org] of [
+      ['gpt-test-1_unknown', 'GPT Test 1', 'OpenAI'],
+      ['claude-test-1_unknown', 'Claude Test 1', 'Anthropic'],
+      ['gemini-test', 'Gemini Test', 'Google'],
+      ['qwen-test', 'Qwen Test', 'Alibaba'],
+    ])
+      rows.push(
+        `${model},Agent ${agent},${(0.3 + agent / 40).toFixed(3)},2026-01-01,${org},USA,,,0.02,Org ${agent},${org},2026-02-0${(agent % 9) + 1},,${TERMINAL_BENCH.url},,2026-03-01T00:00:00.000Z,${name},r${agent}${model}`,
+      );
+  return rows;
+}
+function terminalArchive(
+  rows: string[],
+  metadata = 'Terminal Bench,True,terminalbench_external.csv,Accuracy mean,1.0,0.0,1.0,2025-05-19,',
+) {
+  return zipSync({
+    'benchmark_metadata.csv': strToU8(
+      `benchmark,in_eci,source_file,score_column,scale,random_baseline,score_ceiling,release_date,superseded_by\n${metadata}`,
+    ),
+    [TERMINAL_BENCH.file]: strToU8([TB_HEADER, ...rows].join('\n')),
+  });
+}
+
+describe('Terminal-Bench results from the Epoch AI archive', () => {
+  it('keeps leaderboard rows only, merges spellings of one agent and keeps the newest run', () => {
+    const rows = [
+      ...terminalRows(),
+      // Same agent, spelled differently, listed without "_unknown" and run later:
+      // replaces the older entry.
+      `gpt-test-1, agent-0 ,0.9,2026-01-01,OpenAI,USA,,,0.03,Org 0,OpenAI,2026-04-01,,Terminal-Bench v2 Leaderboard,,2026-05-01T00:00:00.000Z,GPT Test 1,late`,
+      // The same entry again with an assumed effort and the same score: merged.
+      `gpt-test-1_medium,Agent 1,0.325,2026-01-01,OpenAI,USA,,,0.02,Org 1,OpenAI,2026-01-01,,${TERMINAL_BENCH.url},,2026-03-01T00:00:00.000Z,GPT Test 1,dup`,
+      // No leaderboard source: left out.
+      `gpt-test-1_unknown,Rogue Agent,0.99,2026-01-01,OpenAI,USA,,,0.01,Rogue,OpenAI,2026-05-01,,,,2026-05-01T00:00:00.000Z,GPT Test 1,rogue`,
+    ];
+    const { results, latestRun } = parseTerminalBench(terminalArchive(rows));
+    expect(results).toHaveLength(48);
+    expect(results.some((row) => row.agent === 'Rogue Agent')).toBe(false);
+    expect(results[0]).toMatchObject({
+      id: 'agent0:gpt-test-1',
+      agent: 'Agent 0',
+      agentOrg: 'Org 0',
+      model: 'gpt-test-1',
+      modelName: 'GPT Test 1',
+      providerId: 'openai',
+      score: 90,
+      stderr: 3,
+      runDate: '2026-04-01',
+      rank: 1,
+    });
+    expect(latestRun).toBe('2026-04-01');
+    // Equal scores share a rank.
+    const tied = results.filter((row) => row.agent === 'Agent 11');
+    expect(new Set(tied.map((row) => row.rank)).size).toBe(1);
+  });
+
+  it('stops when the archive entry changes, is superseded or holds an impossible score', () => {
+    expect(() =>
+      parseTerminalBench(
+        terminalArchive(
+          terminalRows(),
+          'Terminal Bench,True,terminalbench_external.csv,Pass rate,1.0,0.0,1.0,2025-05-19,',
+        ),
+      ),
+    ).toThrow(/changed/);
+    expect(() =>
+      parseTerminalBench(
+        terminalArchive(
+          terminalRows(),
+          'Terminal Bench,True,terminalbench_external.csv,Accuracy mean,1.0,0.0,1.0,2025-05-19,Terminal Bench 3',
+        ),
+      ),
+    ).toThrow(/superseded/);
+    const broken = terminalRows();
+    broken[0] = broken[0].replace(',0.300,', ',1.300,');
+    expect(() => parseTerminalBench(terminalArchive(broken))).toThrow(/outside/);
+    expect(() => parseTerminalBench(terminalArchive(terminalRows().slice(0, 20)))).toThrow(/few/);
   });
 });

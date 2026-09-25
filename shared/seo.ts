@@ -24,6 +24,10 @@ const pages: Record<string, [string, string]> = {
     'AI model comparison',
     'Compare AI models on capability, price and context window: the most capable, cheapest and newest models, charts, prices per token and every model we track, with sources.',
   ],
+  '/coding-agents': [
+    'AI coding agents compared',
+    'Compare AI coding agents such as Codex CLI, Claude Code and Gemini CLI on Terminal-Bench 2.0, see how much the agent changes a model’s score, and rank models on coding tests and price.',
+  ],
   '/leaderboard': [
     'AI model rankings and benchmarks',
     'Compare published AI benchmarks for coding, reasoning, mathematics, language, and image generation, with source and update information.',

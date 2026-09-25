@@ -17,6 +17,7 @@ try {
   // Each page's own code downloads alongside the main bundle, so the app takes over
   // the prerendered page as soon as it runs. Mirrors `pageAt` in src/main.tsx.
   const pageFiles = {
+    'coding-agents': 'CodingAgents',
     leaders: 'Leaders',
     'score-price-time': 'ScorePriceTime',
     market: 'Market',
@@ -66,6 +67,12 @@ try {
   const inline = `<script type="application/json" id="overview-data">${overviewText
     .trim()
     .replace(/</g, '\\u003c')}</script>`;
+  // The coding agents page does the same with its own data.
+  const codingText = await readFile('dist/data/models/coding.json', 'utf8');
+  const coding = JSON.parse(codingText);
+  const codingInline = `<script type="application/json" id="coding-data">${codingText
+    .trim()
+    .replace(/</g, '\\u003c')}</script>`;
   for (const { path } of publicPages()) {
     const lesson = path.startsWith('/learn/')
       ? JSON.parse(
@@ -73,6 +80,7 @@ try {
         )
       : undefined;
     const withData = path === '/' || path === '/models';
+    const withCoding = path === '/coding-agents';
     const html = template
       .replace(
         '</head>',
@@ -80,9 +88,12 @@ try {
       )
       .replace(
         '<div id="root"></div>',
-        `<div id="root">${renderPage(path, lesson, withData ? overview : undefined)}</div>${
-          withData ? inline : ''
-        }`,
+        `<div id="root">${renderPage(
+          path,
+          lesson,
+          withData ? overview : undefined,
+          withCoding ? coding : undefined,
+        )}</div>${withData ? inline : ''}${withCoding ? codingInline : ''}`,
       );
     const destination = path === '/' ? 'dist/index.html' : `dist${path}.html`;
     await mkdir(dirname(destination), { recursive: true });

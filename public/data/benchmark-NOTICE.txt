@@ -15,8 +15,10 @@ Epoch AI, 'Capabilities & Benchmarking'. Published online at epoch.ai.
 Retrieved from https://epoch.ai/benchmarks (data: https://epoch.ai/data/benchmark_data.zip).
 Licence: Creative Commons Attribution 4.0 International,
 https://creativecommons.org/licenses/by/4.0/
-Only Epoch AI's own evaluations are used. Results in the archive that come from
-other projects keep their own licences and are not republished.
+Only Epoch AI's own evaluations are used as model tests. Results in the archive
+that come from other projects keep their own licences and are not republished,
+with one exception: the Terminal-Bench 2.0 leaderboard, below, whose data is
+published under Apache-2.0.
 Artificials modifications: fractions converted to percentages, the latest run
 kept when a configuration was tested more than once, standard errors converted
 to percentage points, rounding to two decimals, competition ranking, JSON
@@ -31,6 +33,21 @@ implausible compute values dropped, compute rounded to three significant figures
 and records matched to model profiles by exact identifier. Release dates and access
 categories on capability-index rows come from eci_scores.csv. Training compute is
 Epoch AI's estimate and is labelled as such wherever it is shown.
+
+Terminal-Bench 2.0: leaderboard results for coding agents, by the Terminal-Bench
+project and the teams that submitted each agent.
+Source: https://www.tbench.ai/leaderboard/terminal-bench/2.0
+Leaderboard data: https://huggingface.co/datasets/harborframework/terminal-bench-2-leaderboard
+Licence: Apache License 2.0, https://www.apache.org/licenses/LICENSE-2.0
+License copy: /data/livebench-APACHE-LICENSE.txt (the same Apache License 2.0 text)
+The scores are read from Epoch AI's compilation of the leaderboard
+(terminalbench_external.csv in the Epoch AI archive above, CC BY 4.0). They are
+published only while the leaderboard dataset states Apache-2.0.
+Artificials modifications: fractions converted to percentages, standard errors
+converted to percentage points, rows without a leaderboard source dropped, agent
+names trimmed and merged across spellings, an entry listed more than once kept
+once (latest run), competition ranking, matching of models to profiles, and a
+label for agents built by the model's maker. Artificials does not run these tests.
 
 T2I-CoReBench: Ouxiang Li, Yuan Wang, Xinting Hu, Huijuan Huang, Rui Chen,
 Jiarong Ou, Xin Tao, Pengfei Wan, Xiaojuan Qi, and Fuli Feng.
