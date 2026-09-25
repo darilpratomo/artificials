@@ -8,7 +8,6 @@ import { ScatterChart } from '../components/charts/ScatterChart';
 import { ShareButton } from '../components/charts/ShareButton';
 import { compactTokens, compactUsd } from '../components/charts/scale';
 import { TrendChart, type TrendChartSeries } from '../components/charts/TrendChart';
-import { checkedAt } from '../components/coding/analysis';
 import { flop } from '../components/profile/Standing';
 import { useTrends, type Trends as TrendsData, type TrendSeries } from '../lib/overview';
 import '../components/home/dashboard.css';
@@ -588,7 +587,7 @@ function TrendsContent({ trends }: { trends: TrendsData }) {
                 <a href={source.licenseUrl} target="_blank" rel="noopener noreferrer">
                   {source.license}
                 </a>
-                ). Retrieved {checkedAt(source.checkedAt)}.
+                ).
               </li>
             ))}
             <li>

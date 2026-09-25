@@ -137,16 +137,6 @@ export function day(value: string | null | undefined) {
   });
 }
 
-export function ago(value: string | undefined, now = Date.now()) {
-  const time = value ? Date.parse(value) : NaN;
-  if (!Number.isFinite(time)) return 'recently';
-  const minutes = Math.max(0, Math.round((now - time) / 60000));
-  if (minutes < 60) return minutes <= 1 ? 'just now' : `${minutes} minutes ago`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 48) return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
-  return `${Math.round(hours / 24)} days ago`;
-}
-
 export function score(value: number, unit: 'percent' | 'index') {
   return unit === 'index' ? value.toFixed(1) : `${value.toFixed(1)}%`;
 }

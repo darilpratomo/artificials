@@ -2,24 +2,6 @@ import type { CodingAgentRow } from '../../lib/overview';
 
 export const percent = (value: number) => `${value.toFixed(1)}%`;
 
-/** "Sep 25, 2026 at 01:10 UTC": a retrieval time that reads the same for everyone. */
-export function checkedAt(value: string) {
-  const date = new Date(value);
-  if (!Number.isFinite(date.getTime())) return 'recently';
-  const day = date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
-  const time = date.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'UTC',
-  });
-  return `${day} at ${time} UTC`;
-}
-
 /** One model run by several agents, best agent first. */
 export interface AgentSpread {
   name: string;

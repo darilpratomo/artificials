@@ -22,7 +22,7 @@ import Performance from '../components/profile/Performance';
 import Pricing from '../components/profile/Pricing';
 import Providers from '../components/profile/Providers';
 import Tokens from '../components/profile/Tokens';
-import { ago, day } from '../components/profile/format';
+import { day } from '../components/profile/format';
 import '../domain-colors.css';
 import './model-profile.css';
 
@@ -176,7 +176,6 @@ export default function ModelProfile() {
         {profile.description && <p className="profile-description">{profile.description}</p>}
         <p className="profile-meta">
           <span>Released {day(profile.releaseDate)}</span>
-          <span>Analysis updated {ago(bucket.updatedAt)}</span>
         </p>
         <div className="profile-actions">
           <Chips profile={profile} />

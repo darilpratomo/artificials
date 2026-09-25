@@ -81,10 +81,9 @@ export default function Info() {
         <section className="prose about-methodology" aria-labelledby="source-methodology">
           <h2 id="source-methodology">Where the information comes from</h2>
           <p>
-            Our catalog brings together public model specifications and pricing. Updates are
-            refreshed automatically and the directory shows when information was fetched. A fetch
-            time tells you when we checked the source; it does not establish when every underlying
-            fact was verified.
+            Our catalog brings together public model specifications and pricing, refreshed
+            automatically from each source. A refresh does not establish when every underlying fact
+            was verified.
           </p>
           <p>
             Coverage follows the source and can lag behind provider announcements. Missing prices,
@@ -94,12 +93,12 @@ export default function Info() {
           <h2>How to read the rankings</h2>
           <p>
             Capability rankings use published results from Epoch AI, LiveBench, T2I-CoReBench,
-            SWE-bench, and DeepSWE and CursorBench as compiled by Epoch AI, refreshed every two hours. Coding agent results come from Terminal-Bench 2.0 and SWE-bench. Each view
-            identifies its dataset, evaluation scope, aggregation method and source-check time.
-            Missing evaluations are not scored zero. Benchmark results remain separate from
-            specification and price rankings; a larger context window does not establish higher
-            intelligence. See the <Link to="/leaderboard">leaderboard</Link> for the current metric
-            and coverage.
+            SWE-bench, and DeepSWE and CursorBench as compiled by Epoch AI. Coding agent results
+            come from Terminal-Bench 2.0 and SWE-bench. Each view identifies its dataset, evaluation
+            scope and aggregation method. Missing evaluations are not scored zero. Benchmark results
+            remain separate from specification and price rankings; a larger context window does not
+            establish higher intelligence. See the <Link to="/leaderboard">leaderboard</Link> for
+            the current metric and coverage.
           </p>
           <p>
             Charts, highlights and the release timeline on the home page are calculated by

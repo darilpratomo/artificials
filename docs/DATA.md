@@ -10,7 +10,8 @@ covered by models.dev, which can lag a provider's launch, withdrawal or price ch
 A serving provider may host a model made by another company. A model served through
 several providers is several offerings, not several unique underlying models.
 Catalog records include their exact source URL, provider documentation, and the snapshot's
-retrieval time. Verify pricing and availability with the provider before purchasing.
+retrieval time (kept in the data; the site does not display it). Verify pricing and availability
+with the provider before purchasing.
 
 ## Automatic updates within free hosting limits
 
@@ -40,8 +41,7 @@ Unfiltered first pages at sizes 20, 24 and 40 stream directly from static assets
 requests keep the compact index in isolate memory and load only necessary detail shards.
 The default page has 24 offerings; the maximum is 40 to stay below Cloudflare Free's 50
 subrequest limit. Pagination covers the entire dataset. No request contacts a model provider.
-CDN/browser cache headers allow a five-minute browser cache and one-hour shared cache;
-a deployment's retrieval time remains visible, so users can judge actual freshness.
+CDN/browser cache headers allow a five-minute browser cache and one-hour shared cache.
 
 ## API
 
@@ -125,7 +125,7 @@ third-party scores. Two first-party tests (mystery game puzzles, EBR-bench) are 
 because they could not be described accurately. Capability-index rows also keep Epoch AI's release date
 and weight access (open or closed) for each model.
 
-Views show when results were last checked and the test's methodology. Credits appear in a
+Views show the test's methodology. Credits appear in a
 compact "Sources and method" note and in the rankings footnote, rather than as prominent
 links; the licences require attribution, and Artificials does not claim to run these tests.
 
@@ -274,8 +274,9 @@ exported at 2.5 times that resolution, with the
 Artificials pixel mark and wordmark, a faint watermark, `artificials.net` and a data credit line
 that the sources' licences require. Phones get the share sheet; other devices get a download.
 
-The home page shows no last-updated time; charts credit their data source beside them. Check
-times remain on the rankings page and each model's "Sources and method".
+No page shows update, check or retrieval times (owner decision, 25 September 2026); charts
+credit their data source beside them, and each source keeps its check time in the data files.
+The rankings page says so only when a refresh is more than two days late.
 
 Everything refreshes with the two-hourly workflow: a new model appears in the timeline as soon as
 the catalog lists it, and its scores follow once a test covers it. No step needs manual input.
@@ -363,7 +364,7 @@ The page shows, all calculated by Artificials from those results:
 - Task length: METR's time horizons on a log scale, with their intervals.
 - Models on coding tests (one test per chart) and coding score against the blended list price.
 - Questions answered from the same data, with `FAQPage` structured data, and the sources with
-  their licences and retrieval times.
+  their licences.
 
 Time per task (wall-clock time) is not shown: no source publishes it under a licence this site
 can use. Aider's leaderboard is not used because it stopped updating in October 2025.
@@ -390,5 +391,4 @@ calculated by Artificials from published data:
   the most in the last twelve months.
 
 Sources: Epoch AI (capability index and model records, CC BY 4.0) and models.dev (prices,
-context windows and release dates, MIT), credited beside each chart and in "Sources and method"
-with retrieval times.
+context windows and release dates, MIT), credited beside each chart and in "Sources and method".

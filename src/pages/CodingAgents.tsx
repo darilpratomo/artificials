@@ -11,7 +11,6 @@ import { TaskCost } from '../components/coding/TaskCost';
 import { TimeHorizons, duration } from '../components/coding/TimeHorizons';
 import {
   agentsOf,
-  checkedAt,
   median,
   percent,
   spreads,
@@ -235,7 +234,7 @@ function questions(
   if (source?.latestRun)
     list.push([
       'Why are the newest models missing from the agent results?',
-      `The newest ${source.name} result is from ${day(source.latestRun)}. Agent and model pairs appear here after the leaderboard lists them. For newer models, the model tests on this page, such as DeepSWE, CursorBench and LiveBench agentic coding, are more current.`,
+      `Agent and model pairs appear here only after the ${source.name} leaderboard lists them, which can take weeks after a model is released. For newer models, the model tests on this page, such as DeepSWE, CursorBench and LiveBench agentic coding, are more current.`,
     ]);
   if (agentic?.rows[0])
     list.push([
@@ -334,8 +333,7 @@ function CodingContent({ coding }: { coding: Coding }) {
             <header className="dash-heading">
               <h2 id="leaderboard-title">Leaderboard</h2>
               <p>
-                {source.name} results for {findings.results.length} agent and model pairs, up to{' '}
-                {source.latestRun ? day(source.latestRun) : 'the latest listing'}.{' '}
+                {source.name} results for {findings.results.length} agent and model pairs.{' '}
                 {source.description}
               </p>
             </header>
@@ -470,7 +468,7 @@ function CodingContent({ coding }: { coding: Coding }) {
                     )
                   </>
                 )}
-                . Retrieved {checkedAt(entry.checkedAt)}.
+                .
               </li>
             ))}
             {coding.timeHorizons && (
@@ -487,7 +485,7 @@ function CodingContent({ coding }: { coding: Coding }) {
                 >
                   {coding.timeHorizons.source.license}
                 </a>
-                ). Retrieved {checkedAt(coding.timeHorizons.source.checkedAt)}.
+                ).
               </li>
             )}
             {coding.sources.map((entry) => (
@@ -500,7 +498,7 @@ function CodingContent({ coding }: { coding: Coding }) {
                 <a href={entry.licenseUrl} target="_blank" rel="noopener noreferrer">
                   {entry.license}
                 </a>
-                ). Retrieved {checkedAt(entry.checkedAt)}.
+                ).
               </li>
             ))}
             <li>

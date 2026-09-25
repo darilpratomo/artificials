@@ -35,7 +35,7 @@ The free Academy has nine modules, 36 original lessons, four runnable Python pro
 npm run sync:catalog
 ```
 
-The scheduled GitHub workflow refreshes the snapshot every two hours. Scheduled jobs can be delayed; the website shows the actual last successful source retrieval time. It does not claim guaranteed real-time coverage. Rankings compare reported context windows or base token prices, not invented intelligence scores. Read [data methodology](docs/DATA.md).
+The scheduled GitHub workflow refreshes the snapshot every two hours. Scheduled jobs can be delayed; the rankings page says so when a refresh is more than two days late. The website does not claim guaranteed real-time coverage. Rankings compare reported context windows or base token prices, not invented intelligence scores. Read [data methodology](docs/DATA.md).
 
 ## Verification and deployment
 

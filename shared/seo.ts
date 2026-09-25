@@ -18,7 +18,7 @@ const pages: Record<string, [string, string]> = {
   ),
   '/': [
     'AI model rankings, prices and new releases',
-    'Compare AI models by test results, price and context window. Rankings, charts and every new release, refreshed automatically every two hours.',
+    'Compare AI models by test results, price and context window. Rankings, charts and every new release, refreshed automatically.',
   ],
   '/models': [
     'AI model comparison',

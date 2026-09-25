@@ -152,13 +152,3 @@ export const tokenPrice = (n: number | null | undefined) =>
         currency: 'USD',
         maximumFractionDigits: 3,
       }).format(n);
-export const updatedDate = (date?: string) =>
-  date && Number.isFinite(Date.parse(date))
-    ? new Date(date).toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'UTC',
-      }) + ' UTC'
-    : 'Checking source';

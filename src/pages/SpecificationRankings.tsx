@@ -13,7 +13,6 @@ import {
   useCatalogPage,
   compactNumber,
   tokenPrice,
-  updatedDate,
   providerLogo,
 } from '../lib/catalog';
 export default function Leaderboard() {
@@ -90,7 +89,6 @@ export default function Leaderboard() {
             ? 'Loading rankings…'
             : `${data?.total.toLocaleString('en-US') || 0} provider-model offerings`}
         </span>
-        <span className="mono">{updatedDate(data?.updatedAt)}</span>
       </div>
       {error ? (
         <p role="alert" className="error">

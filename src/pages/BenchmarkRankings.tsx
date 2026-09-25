@@ -15,13 +15,6 @@ import { ShareButton } from '../components/charts/ShareButton';
 import { loadProfileLinks, testLabel, type ProfileLinks } from '../lib/profiles';
 import '../domain-colors.css';
 
-const date = (value: string) =>
-  new Date(value).toLocaleString('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'UTC',
-  }) + ' UTC';
-
 const domainOf = (category: BenchmarkCategory): BenchmarkDomain => category.domain ?? 'overall';
 const formatScore = (value: number, category: BenchmarkCategory) =>
   category.unit === 'index' ? value.toFixed(1) : value.toFixed(2);
@@ -172,20 +165,15 @@ export default function BenchmarkRankings() {
                   </div>
                 )}
               </div>
-              <div className="benchmark-freshness">
-                <Clock3 size={16} aria-hidden="true" />
-                <div>
-                  <strong>
-                    {stale
-                      ? 'Update delayed. Showing the last valid results.'
-                      : 'Updated automatically every two hours.'}
-                  </strong>
-                  <span>
-                    Results checked {date(source.checkedAt)}. New scores appear once the test's
-                    results are published.
-                  </span>
+              {/* Only a delayed refresh is announced; update times are not shown. */}
+              {stale && (
+                <div className="benchmark-freshness">
+                  <Clock3 size={16} aria-hidden="true" />
+                  <div>
+                    <strong>Update delayed. Showing the last valid results.</strong>
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="benchmark-toolbar">
                 <label className="benchmark-search">
                   <Search size={17} aria-hidden="true" />
@@ -208,7 +196,9 @@ export default function BenchmarkRankings() {
                         {
                           title: `${testLabel(selected)}: top ${Math.min(rows.length, 25)}`,
                           subtitle: selected.description,
-                          source: source ? `${source.name} (${source.license})` : 'published results',
+                          source: source
+                            ? `${source.name} (${source.license})`
+                            : 'published results',
                         },
                         rows.slice(0, 25).map((row) => ({
                           name: nameOf(row.id)?.name ?? row.model,

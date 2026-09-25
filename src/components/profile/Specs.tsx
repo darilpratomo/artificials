@@ -42,7 +42,6 @@ export function specGroups(profile: ModelProfile): [string, Row[]][] {
     ...(ids.length > 1 ? [['IDs across hosts', `${whole(ids.length)} different IDs`] as Row] : []),
     ...(profile.family ? [['Family', profile.family] as Row] : []),
     ['Released', day(profile.releaseDate)],
-    ...(profile.lastUpdated ? [['Listing last updated', day(profile.lastUpdated)] as Row] : []),
     ['Knowledge cutoff', profile.knowledge ? day(profile.knowledge) : 'Not reported'],
     ['Weights', profile.openWeights ? 'Open: downloadable' : 'Closed: hosted access only'],
   ];

@@ -77,13 +77,13 @@ test('agent gaps, the agent list, model tests and questions', async ({ page }) =
 
   await expect(page.locator('#faq details').first()).toBeVisible();
   expect(await page.locator('#faq details').count()).toBeGreaterThanOrEqual(8);
-  // Sources name the licences and when the data was retrieved.
+  // Sources name the licences. Update times are not shown (owner decision).
   const sources = page.locator('.coding-sources');
   await sources.locator('summary').click();
   await expect(sources).toContainText('Apache-2.0');
   await expect(sources).toContainText('CC BY 4.0');
   await expect(sources).toContainText('CC BY-NC 4.0');
-  await expect(sources).toContainText('Retrieved');
+  await expect(sources).not.toContainText('Retrieved');
 });
 
 test('a second agent benchmark, cost per task and task length', async ({ page }) => {

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Info } from 'lucide-react';
 import type { BenchmarkDomain } from '../../../shared/benchmarks';
 import type { ProfileBucket } from '../../lib/profiles';
-import { DOMAINS, ago } from './format';
+import { DOMAINS } from './format';
 
 export function DomainKey({ domain }: { domain: BenchmarkDomain }) {
   const Icon = DOMAINS[domain].icon;
@@ -71,8 +71,7 @@ export function Sources({
       <div>
         <p>
           Rankings, standings, blended prices, cost estimates and model grouping are calculated by
-          Artificials. Figures are refreshed automatically; the catalog was last checked{' '}
-          {ago(bucket.updatedAt)}.
+          Artificials.
         </p>
         <ul>
           <li>
@@ -93,7 +92,7 @@ export function Sources({
                 <a href={source.licenseUrl} target="_blank" rel="noopener noreferrer">
                   {source.license}
                 </a>
-                ), checked {ago(source.checkedAt)}.
+                ).
               </li>
             ))}
         </ul>

@@ -11,7 +11,7 @@ import {
   RefreshCw,
   Database,
 } from 'lucide-react';
-import { useCatalogPage, useComparison, updatedDate } from '../../lib/catalog';
+import { useCatalogPage, useComparison } from '../../lib/catalog';
 import ModelCard from '../ModelCard';
 
 /**
@@ -148,9 +148,6 @@ export function ProviderListings() {
               : data
                 ? `${data.total.toLocaleString('en-US')} model offerings`
                 : 'Model catalog'}
-        </span>
-        <span className="mono">
-          <RefreshCw size={12} /> {updatedDate(data?.updatedAt)}
         </span>
       </div>
       {error ? (
