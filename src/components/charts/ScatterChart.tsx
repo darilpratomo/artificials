@@ -83,7 +83,19 @@ export function ScatterChart({
   const help = useId();
   const narrow = width < 640;
   const height = narrow ? 380 : 500;
-  const margin = { top: 16, right: narrow ? 12 : 20, bottom: 50, left: narrow ? 42 : 54 };
+  // A long axis title breaks before its note in brackets when it would run
+  // past the edge of a narrow chart.
+  const split = x.label.lastIndexOf(' (');
+  const titleLines =
+    split > 0 && x.label.length * 6.6 > width - 16
+      ? [x.label.slice(0, split), x.label.slice(split + 1)]
+      : [x.label];
+  const margin = {
+    top: 16,
+    right: narrow ? 12 : 20,
+    bottom: titleLines.length > 1 ? 64 : 50,
+    left: narrow ? 42 : 54,
+  };
   const innerWidth = Math.max(10, width - margin.left - margin.right);
   const innerHeight = height - margin.top - margin.bottom;
 
@@ -110,7 +122,7 @@ export function ScatterChart({
       x.kind === 'log'
         ? logTicks(x0, x1, narrow ? 5 : 9)
         : x.kind === 'time'
-          ? timeTicks(x0, x1)
+          ? timeTicks(x0, x1, innerWidth)
           : linearTicks(x0, x1, narrow ? 4 : 6).ticks;
     const yTicks = linearTicks(y0, y1, narrow ? 4 : 6).ticks.filter((t) => t >= y0 && t <= y1);
     const placed: Placed[] = points.map((point) => ({
@@ -380,10 +392,14 @@ export function ScatterChart({
               <text
                 className="axis-title"
                 x={margin.left + innerWidth / 2}
-                y={height - 6}
+                y={height - 6 - (titleLines.length - 1) * 16}
                 textAnchor="middle"
               >
-                {x.label}
+                {titleLines.map((line, index) => (
+                  <tspan key={line} x={margin.left + innerWidth / 2} dy={index ? 16 : 0}>
+                    {line}
+                  </tspan>
+                ))}
               </text>
             </g>
             {view.path && <path className="scatter-frontier" d={view.path} aria-hidden="true" />}

@@ -16,7 +16,9 @@ import './models.css';
 import './trends.css';
 
 const time = (date: string) => Date.parse(`${date}T00:00:00Z`);
-const score = (value: number) => `${Number(value.toFixed(1))}`;
+/** Index values always show one decimal, like the rest of the site; axis steps are whole. */
+const score = (value: number) => value.toFixed(1);
+const wholeScore = (value: number) => `${Number(value.toFixed(1))}`;
 const OPEN = '#199e70';
 const CLOSED = '#c9ccd4';
 /** Validated categorical steps, in a fixed order by how many models each country has. */
@@ -54,12 +56,15 @@ function toSeries(series: TrendSeries[], colors?: string[]): TrendChartSeries[] 
 function Panel({
   title,
   text,
+  controls,
   share,
   children,
   foot,
 }: {
   title: string;
   text: string;
+  /** Filters such as tabs, beside the title on wide screens and under it on phones. */
+  controls?: ReactNode;
   share?: ReactNode;
   children: ReactNode;
   foot: ReactNode;
@@ -71,6 +76,7 @@ function Panel({
           <h3>{title}</h3>
           <p>{text}</p>
         </div>
+        {controls}
         {share}
       </div>
       {children}
@@ -86,7 +92,12 @@ const lineShare = (
   subtitle: string,
   source: string,
   series: TrendChartSeries[],
-  y: { label: string; format: (value: number) => string; log?: boolean },
+  y: {
+    label: string;
+    format: (value: number) => string;
+    tick?: (value: number) => string;
+    log?: boolean;
+  },
   options: { mode?: 'step' | 'line'; end?: number },
 ) => (
   <ShareButton
@@ -244,7 +255,7 @@ function TrendsContent({ trends }: { trends: TrendsData }) {
   );
   const [computeSince, setComputeSince] = useState('2022');
   const compute = trends.compute.filter((row) => row.date >= `${computeSince}-01-01`);
-  const indexAxis = { label: 'Capability index', format: score };
+  const indexAxis = { label: 'Capability index', format: score, tick: wholeScore };
   return (
     <div className="models-hub">
       <nav className="hub-sections" aria-label="On this page">
@@ -427,47 +438,47 @@ function TrendsContent({ trends }: { trends: TrendsData }) {
         <Panel
           title="Estimated training compute, by release date"
           text="Floating-point operations, on a log scale. The line marks the largest run so far."
-          share={
-            <div className="dash-controls">
-              <div className="dash-tabs" role="group" aria-label="Since">
-                {['2020', '2022', '2024'].map((year) => (
-                  <button
-                    key={year}
-                    type="button"
-                    aria-pressed={computeSince === year}
-                    onClick={() => setComputeSince(year)}
-                  >
-                    Since {year}
-                  </button>
-                ))}
-              </div>
-              <ShareButton
-                title="Estimated training compute of AI models"
-                render={(tools) =>
-                  tools.scatterImage(
-                    {
-                      title: 'Estimated training compute of AI models',
-                      subtitle: 'Floating-point operations, log scale, by release date.',
-                      source: 'Epoch AI (CC BY 4.0)',
-                    },
-                    compute.map((row) => ({
-                      name: row.name,
-                      makerId: row.makerId,
-                      maker: row.maker,
-                      x: time(row.date),
-                      y: Math.log10(row.value),
-                    })),
-                    {
-                      kind: 'time',
-                      label: 'Release date',
-                      format: (value) => new Date(value).getUTCFullYear().toString(),
-                    },
-                    { label: 'Training compute (FLOP)', format: power },
-                    { frontier: 'record' },
-                  )
-                }
-              />
+          controls={
+            <div className="dash-tabs" role="group" aria-label="Since">
+              {['2020', '2022', '2024'].map((year) => (
+                <button
+                  key={year}
+                  type="button"
+                  aria-pressed={computeSince === year}
+                  onClick={() => setComputeSince(year)}
+                >
+                  Since {year}
+                </button>
+              ))}
             </div>
+          }
+          share={
+            <ShareButton
+              title="Estimated training compute of AI models"
+              render={(tools) =>
+                tools.scatterImage(
+                  {
+                    title: 'Estimated training compute of AI models',
+                    subtitle: 'Floating-point operations, log scale, by release date.',
+                    source: 'Epoch AI (CC BY 4.0)',
+                  },
+                  compute.map((row) => ({
+                    name: row.name,
+                    makerId: row.makerId,
+                    maker: row.maker,
+                    x: time(row.date),
+                    y: Math.log10(row.value),
+                  })),
+                  {
+                    kind: 'time',
+                    label: 'Release date',
+                    format: (value) => new Date(value).getUTCFullYear().toString(),
+                  },
+                  { label: 'Training compute (FLOP)', format: power },
+                  { frontier: 'record' },
+                )
+              }
+            />
           }
           foot="Training compute is Epoch AI’s estimate (CC BY 4.0); for closed models it is inferred from public information and can be uncertain."
         >
@@ -597,7 +608,7 @@ function TrendsContent({ trends }: { trends: TrendsData }) {
 const monthLabel = (month: string) =>
   new Date(`${month}-01T00:00:00Z`).toLocaleDateString('en-US', {
     month: 'short',
-    year: '2-digit',
+    year: 'numeric',
     timeZone: 'UTC',
   });
 

@@ -48,16 +48,30 @@ export function logTicks(min: number, max: number, maximum = 8) {
 }
 
 /** Year starts, or half-years when the range is short. */
-export function timeTicks(min: number, max: number) {
+/**
+ * January and July on short ranges, January on longer ones. Given the axis
+ * width, steps widen until each label has room, so narrow charts never
+ * print labels on top of each other.
+ */
+export function timeTicks(min: number, max: number, width?: number) {
   const start = new Date(min);
   const end = new Date(max);
   const years = end.getUTCFullYear() - start.getUTCFullYear();
-  const months = years <= 2 ? 6 : 12;
-  const ticks: number[] = [];
-  const cursor = new Date(Date.UTC(start.getUTCFullYear(), 0, 1));
-  while (cursor.getTime() <= max) {
-    if (cursor.getTime() >= min) ticks.push(cursor.getTime());
-    cursor.setUTCMonth(cursor.getUTCMonth() + months);
+  const at = (months: number) => {
+    const ticks: number[] = [];
+    const cursor = new Date(Date.UTC(start.getUTCFullYear(), 0, 1));
+    while (cursor.getTime() <= max) {
+      if (cursor.getTime() >= min) ticks.push(cursor.getTime());
+      cursor.setUTCMonth(cursor.getUTCMonth() + months);
+    }
+    return ticks;
+  };
+  let months = years <= 2 ? 6 : 12;
+  let ticks = at(months);
+  const room = width ? Math.max(2, Math.floor(width / 76)) : Infinity;
+  while (ticks.length > room && months < 120) {
+    months *= 2;
+    ticks = at(months);
   }
   return ticks;
 }

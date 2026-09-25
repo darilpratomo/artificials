@@ -50,7 +50,13 @@ export function TrendChart({
   height: tall = 360,
 }: {
   series: TrendChartSeries[];
-  y: { label: string; format: (value: number) => string; log?: boolean };
+  /** `tick` formats the axis labels, `format` the values; `format` does both by default. */
+  y: {
+    label: string;
+    format: (value: number) => string;
+    tick?: (value: number) => string;
+    log?: boolean;
+  };
   mode?: 'step' | 'line';
   /** Where record lines stop, in milliseconds; the latest point by default. */
   end?: number;
@@ -92,7 +98,7 @@ export function TrendChart({
     const yTicks = y.log
       ? logTicks(y0, y1, 6)
       : linearTicks(y0, y1, 5).ticks.filter((tick) => tick >= y0 && tick <= y1);
-    return { x0, x1, sx, sy, yTicks, xTicks: timeTicks(x0, x1) };
+    return { x0, x1, sx, sy, yTicks, xTicks: timeTicks(x0, x1, inner.width) };
   }, [series, end, y, inner.width, inner.height]);
 
   // Points in reading order, for the keyboard and the tooltip.
@@ -132,6 +138,10 @@ export function TrendChart({
     .sort((a, b) => a.y - b.y);
   for (let index = 1; index < ends.length; index += 1)
     if (ends[index].y - ends[index - 1].y < 16) ends[index].y = ends[index - 1].y + 16;
+
+  // Dates at the edges stay inside the chart instead of being cut off.
+  const anchor = (x: number) =>
+    x + 30 > inner.width + margin.right ? 'end' : x - 30 < -margin.left ? 'start' : 'middle';
 
   const point = active !== null ? placed[active] : undefined;
   const nearest = (event: PointerEvent<SVGRectElement>) => {
@@ -209,7 +219,7 @@ export function TrendChart({
                 <g key={tick} className="scatter-grid">
                   <line x1={0} x2={inner.width} y1={sy(tick)} y2={sy(tick)} />
                   <text x={-10} y={sy(tick)} textAnchor="end" dominantBaseline="middle">
-                    {y.format(tick)}
+                    {(y.tick ?? y.format)(tick)}
                   </text>
                 </g>
               ))}
@@ -219,7 +229,7 @@ export function TrendChart({
                   className="trend-axis-label"
                   x={sx(tick)}
                   y={inner.height + 22}
-                  textAnchor="middle"
+                  textAnchor={anchor(sx(tick))}
                 >
                   {new Date(tick).toLocaleDateString('en-US', {
                     month: 'short',

@@ -567,7 +567,12 @@ export interface ShareSeries {
 export async function lineImage(
   frame: ShareFrame,
   series: ShareSeries[],
-  y: { label: string; format: (value: number) => string; log?: boolean },
+  y: {
+    label: string;
+    format: (value: number) => string;
+    tick?: (value: number) => string;
+    log?: boolean;
+  },
   options: { mode?: 'step' | 'line'; end?: number } = {},
 ) {
   await fontsReady();
@@ -623,7 +628,7 @@ export async function lineImage(
     context.setLineDash([]);
     context.fillStyle = FAINT;
     context.textAlign = 'right';
-    context.fillText(y.format(tick), plot.left - 12, sy(tick));
+    context.fillText((y.tick ?? y.format)(tick), plot.left - 12, sy(tick));
   }
   context.textAlign = 'center';
   context.textBaseline = 'top';

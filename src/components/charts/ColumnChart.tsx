@@ -20,13 +20,19 @@ export function ColumnChart({
   /** Accessible name and table caption. */
   label: string;
   format: (value: number) => string;
-  /** Label every nth column on the axis. */
+  /** Label at most every nth column on the axis; narrow charts label fewer. */
   every?: number;
 }) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const [active, setActive] = useState<number | null>(null);
   const height = 240;
-  const margin = { top: 18, right: 8, bottom: 30, left: 40 };
+  // Room on the right for half of the last month's label.
+  const margin = {
+    top: 18,
+    right: Math.max(8, Math.ceil(30 - (width - 48) / Math.max(1, columns.length) / 2)),
+    bottom: 30,
+    left: 40,
+  };
   const inner = {
     width: Math.max(10, width - margin.left - margin.right),
     height: height - margin.top - margin.bottom,
@@ -37,6 +43,8 @@ export function ColumnChart({
   const { ticks } = linearTicks(0, max, 4);
   const slot = inner.width / Math.max(1, columns.length);
   const bar = Math.max(4, slot * 0.64);
+  // Each month label needs about 64px.
+  const step = Math.max(every, Math.ceil(64 / slot));
   const sy = (value: number) => inner.height - (value / max) * inner.height;
   const current = active !== null ? columns[active] : undefined;
   // Arrow keys move between columns, like the other charts.
@@ -93,7 +101,7 @@ export function ColumnChart({
                     onPointerEnter={() => setActive(index)}
                     onPointerLeave={() => setActive(null)}
                   />
-                  {(columns.length - 1 - index) % every === 0 && (
+                  {(columns.length - 1 - index) % step === 0 && (
                     <text
                       className="trend-axis-label"
                       x={index * slot + slot / 2}
