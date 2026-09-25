@@ -1,8 +1,29 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { makerColor, makerLogo } from '../../../shared/makers';
-import type { ImageBoard as Board } from '../../lib/overview';
+import type { Board, BoardEntry } from '../../lib/overview';
 import { ShareButton } from '../charts/ShareButton';
 import { whole } from '../profile/format';
+import './arena.css';
+
+export const time = (date: string) => new Date(`${date}T00:00:00Z`).getTime();
+/** "A, B and C". */
+export const list = (names: string[]) =>
+  names.length <= 1 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
+
+/** The overall ranking of a board, best first. */
+export const overallOf = (board: Board) =>
+  board.categories.find((category) => category.id === 'overall')?.entries ?? [];
+
+/** A model's name with its maker's logo, inside a sentence. */
+export function ModelName({ board, entry }: { board: Board; entry: BoardEntry }) {
+  const model = board.models[entry.model];
+  return (
+    <span className="glance-model">
+      <img src={makerLogo(model.makerId)} alt="" width="22" height="22" loading="lazy" />
+      <b>{model.name}</b>
+    </span>
+  );
+}
 
 /** One line of a score list: a model, or a maker's best model. */
 export interface ScoreRow {
@@ -120,14 +141,17 @@ const ACCESS: [Access, string][] = [
 const SHOWN = 20;
 
 /** One of Arena's boards, with its categories and an open-weights filter. */
-export function ImageBoard({
+export function ArenaBoard({
   board,
   text,
+  vote,
   credit,
 }: {
   board: Board;
   /** What the board ranks, for the panel's description. */
   text: string;
+  /** What people compare, for the downloadable image: "Blind votes between two images …". */
+  vote: string;
   credit: string;
 }) {
   const [category, setCategory] = useState(board.categories[0]?.id ?? 'overall');
@@ -159,7 +183,7 @@ export function ImageBoard({
   const heading = `${board.label}: ${current.label.toLowerCase()}`;
   const title = `${heading}${access === 'all' ? '' : `, ${ACCESS.find(([id]) => id === access)![1].toLowerCase()}`}`;
   return (
-    <div className="dash-panel image-board">
+    <div className="dash-panel arena-panel">
       <div className="dash-panel-head">
         <div>
           <h3>{heading}</h3>
@@ -172,7 +196,7 @@ export function ImageBoard({
               tools.listImage(
                 {
                   title: `${title}: Arena scores`,
-                  subtitle: 'Blind votes between two images for the same prompt. Higher is better.',
+                  subtitle: `${vote} Higher is better.`,
                   source: credit,
                 },
                 rows.slice(0, 30).map((row, _, top) => ({
@@ -188,7 +212,7 @@ export function ImageBoard({
           />
         )}
       </div>
-      <div className="image-board-controls">
+      <div className="arena-controls">
         {board.categories.length > 1 && (
           <div className="dash-tabs" role="group" aria-label="Category">
             {board.categories.map((entry) => (
@@ -244,6 +268,53 @@ export function ImageBoard({
             {expanded ? 'Show fewer' : `Show all ${rows.length}`}
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+/** Each maker's best model on a board's overall ranking. */
+export function MakerBests({
+  board,
+  title,
+  credit,
+}: {
+  board: Board;
+  title: string;
+  credit: string;
+}) {
+  const rows = useMemo(() => {
+    const overall = board.categories.find((category) => category.id === 'overall')?.entries ?? [];
+    const seen = new Set<string>();
+    const out: ScoreRow[] = [];
+    for (const entry of overall) {
+      const model = board.models[entry.model];
+      if (model.makerId === 'unknown' || seen.has(model.makerId)) continue;
+      seen.add(model.makerId);
+      out.push({
+        key: model.makerId,
+        name: model.maker,
+        detail: model.name,
+        makerId: model.makerId,
+        rating: entry.rating,
+        lower: entry.lower,
+        upper: entry.upper,
+      });
+    }
+    return out.slice(0, 12);
+  }, [board]);
+  if (!rows.length) return null;
+  return (
+    <div className="dash-panel arena-panel">
+      <div className="dash-panel-head">
+        <div>
+          <h3>{title}</h3>
+          <p>The highest-scoring model from each of the {rows.length} leading makers.</p>
+        </div>
+      </div>
+      <ScoreRows rows={rows} scale={scoreScale(rows)} label={`${title}, highest first`} />
+      <div className="dash-foot">
+        <p>Dots mark the Arena score; the line is its 95% range. {credit}.</p>
       </div>
     </div>
   );

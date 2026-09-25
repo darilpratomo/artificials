@@ -37,8 +37,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: npm run sync:benchmarks
-      # Arena's image boards are optional in the same way.
-      - name: Fetch and validate Arena's image leaderboards
+      # Arena's image and video boards are optional in the same way.
+      - name: Fetch and validate Arena's image and video leaderboards
         id: arena
         continue-on-error: true
         run: npm run sync:arena
@@ -56,5 +56,5 @@ jobs:
       - name: Report benchmark results that could not be refreshed
         if: steps.benchmarks.outcome == 'failure' || steps.arena.outcome == 'failure'
         run: |
-          echo '::error::Benchmark results or image leaderboards were not refreshed this run. The catalog was, and the last valid snapshots stay published.'
+          echo '::error::Benchmark results or Arena leaderboards were not refreshed this run. The catalog was, and the last valid snapshots stay published.'
           exit 1

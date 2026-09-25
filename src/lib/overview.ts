@@ -3,6 +3,7 @@ import type { Explorer, ModelOverview, OverviewTests, Timeline } from '../../sha
 import type { Coding } from '../../shared/coding';
 import type { Trends } from '../../shared/trends';
 import type { Images } from '../../shared/images';
+import type { Videos } from '../../shared/videos';
 
 export type {
   Explorer,
@@ -27,13 +28,9 @@ export type {
   CodingTestRow,
 } from '../../shared/coding';
 export type { Trends, TrendModel, TrendPoint, TrendSeries } from '../../shared/trends';
-export type {
-  Images,
-  ImageBoard,
-  ImageCategory,
-  ImageEntry,
-  ImageModel,
-} from '../../shared/images';
+export type { Images } from '../../shared/images';
+export type { Videos } from '../../shared/videos';
+export type { Board, BoardCategory, BoardEntry, BoardModel } from '../../shared/arena';
 
 const requests = new Map<string, Promise<unknown>>();
 /** Files already loaded, so returning to a page renders at once instead of loading again. */
@@ -46,6 +43,7 @@ const isTimeline = (value: Timeline) => value?.version === 1 && Array.isArray(va
 const isCoding = (value: Coding) => value?.version === 2 && Array.isArray(value.tests);
 const isTrends = (value: Trends) => value?.version === 1 && Array.isArray(value.frontier);
 const isImages = (value: Images) => value?.version === 1 && Array.isArray(value.boards);
+const isVideos = (value: Videos) => value?.version === 1 && Array.isArray(value.boards);
 
 /**
  * Prerendered pages carry their data inline, so the first view needs no extra
@@ -151,4 +149,10 @@ export function useTrends(attempt = 0, initial?: Trends) {
 export function useImages(attempt = 0, initial?: Images) {
   embedded('images.json', 'images-data', isImages);
   return useFile<Images>('images.json', isImages, true, attempt, initial);
+}
+
+/** Arena's video boards, for the video models page. */
+export function useVideos(attempt = 0, initial?: Videos) {
+  embedded('videos.json', 'videos-data', isVideos);
+  return useFile<Videos>('videos.json', isVideos, true, attempt, initial);
 }

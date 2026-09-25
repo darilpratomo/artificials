@@ -41,6 +41,11 @@ export const NAV_GROUPS: NavGroupItem[] = [
         description: 'Text to image and image editing, ranked by votes',
       },
       {
+        to: '/video-models',
+        label: 'Video models',
+        description: 'Text and image to video, ranked by votes',
+      },
+      {
         to: '/score-price-time',
         label: 'Score, price and time',
         description: 'Capability against price and release date',

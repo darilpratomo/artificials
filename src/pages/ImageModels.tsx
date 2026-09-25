@@ -3,9 +3,16 @@ import { makerColor, makerLogo } from '../../shared/makers';
 import { PageHeading } from '../components/Layout';
 import { MetricBars } from '../components/charts/MetricBars';
 import { TrendChart, type TrendChartSeries } from '../components/charts/TrendChart';
-import { ImageBoard, ScoreRows, scoreScale, type ScoreRow } from '../components/images/ImageBoard';
+import {
+  ArenaBoard,
+  MakerBests,
+  ModelName,
+  list,
+  overallOf,
+  time,
+} from '../components/arena/ArenaBoard';
 import { whole } from '../components/profile/format';
-import { useImages, type ImageBoard as Board, type ImageEntry, type Images } from '../lib/overview';
+import { useImages, type Board, type BoardEntry, type Images } from '../lib/overview';
 import '../components/home/dashboard.css';
 import './models.css';
 import './images.css';
@@ -19,24 +26,6 @@ const SECTIONS: [string, string][] = [
   ['test', 'Automated test'],
   ['faq', 'Questions'],
 ];
-
-const time = (date: string) => new Date(`${date}T00:00:00Z`).getTime();
-const list = (names: string[]) =>
-  names.length <= 1 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
-
-/** The overall ranking of a board, best first. */
-const overallOf = (board: Board) =>
-  board.categories.find((category) => category.id === 'overall')?.entries ?? [];
-
-function ModelName({ board, entry }: { board: Board; entry: ImageEntry }) {
-  const model = board.models[entry.model];
-  return (
-    <span className="glance-model">
-      <img src={makerLogo(model.makerId)} alt="" width="22" height="22" loading="lazy" />
-      <b>{model.name}</b>
-    </span>
-  );
-}
 
 function Summary({ images }: { images: Images }) {
   const [text, edit] = [
@@ -132,7 +121,7 @@ function Summary({ images }: { images: Images }) {
  * how the categories differ.
  */
 function CategoryLeaders({ board }: { board: Board }) {
-  const leadersOf = (entries: ImageEntry[]) => {
+  const leadersOf = (entries: BoardEntry[]) => {
     const seen = new Set<string>();
     return entries.filter((entry) => {
       const { makerId } = board.models[entry.model];
@@ -174,53 +163,11 @@ function CategoryLeaders({ board }: { board: Board }) {
   );
 }
 
-/** Each maker's best model on the board. */
-function MakerBests({ board, credit }: { board: Board; credit: string }) {
-  const rows = useMemo(() => {
-    const seen = new Set<string>();
-    const out: ScoreRow[] = [];
-    for (const entry of overallOf(board)) {
-      const model = board.models[entry.model];
-      if (model.makerId === 'unknown' || seen.has(model.makerId)) continue;
-      seen.add(model.makerId);
-      out.push({
-        key: model.makerId,
-        name: model.maker,
-        detail: model.name,
-        makerId: model.makerId,
-        rating: entry.rating,
-        lower: entry.lower,
-        upper: entry.upper,
-      });
-    }
-    return out.slice(0, 12);
-  }, [board]);
-  if (!rows.length) return null;
-  return (
-    <div className="dash-panel image-board">
-      <div className="dash-panel-head">
-        <div>
-          <h3>Each maker’s best text-to-image model</h3>
-          <p>The highest-scoring model from each of the {rows.length} leading makers.</p>
-        </div>
-      </div>
-      <ScoreRows
-        rows={rows}
-        scale={scoreScale(rows)}
-        label="Each maker’s best text-to-image model, highest first"
-      />
-      <div className="dash-foot">
-        <p>Dots mark the Arena score; the line is its 95% range. {credit}.</p>
-      </div>
-    </div>
-  );
-}
-
 function questions(images: Images): [string, string][] {
   const text = images.boards.find((board) => board.id === 'text-to-image');
   const edit = images.boards.find((board) => board.id === 'image-edit');
   const out: [string, string][] = [];
-  const name = (board: Board, entry: ImageEntry) => board.models[entry.model].name;
+  const name = (board: Board, entry: BoardEntry) => board.models[entry.model].name;
   if (text) {
     const [first, second, third] = overallOf(text);
     if (first && second && third)
@@ -331,9 +278,10 @@ function ImagesContent({ images }: { images: Images }) {
               <h2 id="text-title">Text to image</h2>
               <p>{text.models.length} models, ranked by blind votes on the same prompt.</p>
             </header>
-            <ImageBoard
+            <ArenaBoard
               board={text}
               text="Arena score, higher is better. Pick a kind of image, or show only models with downloadable weights."
+              vote="Blind votes between two images for the same prompt."
               credit={credit}
             />
           </section>
@@ -354,7 +302,11 @@ function ImagesContent({ images }: { images: Images }) {
               <h2 id="makers-title">Makers</h2>
               <p>Where each company’s best image model stands.</p>
             </header>
-            <MakerBests board={text} credit={credit} />
+            <MakerBests
+              board={text}
+              title="Each maker’s best text-to-image model"
+              credit={credit}
+            />
           </section>
 
           {progress.length > 0 && (
@@ -400,9 +352,10 @@ function ImagesContent({ images }: { images: Images }) {
               {edit.models.length} models changing a picture on instruction, ranked the same way.
             </p>
           </header>
-          <ImageBoard
+          <ArenaBoard
             board={edit}
             text="Arena score for edits of the same image and instruction, higher is better."
+            vote="Blind votes between two edits of the same image and instruction."
             credit={credit}
           />
         </section>
@@ -499,7 +452,7 @@ export default function ImageModels({ initial }: { initial?: Images }) {
   const [attempt, setAttempt] = useState(0);
   const { data, error } = useImages(attempt, initial);
   return (
-    <div className="container page models-page images-page">
+    <div className="container page models-page arena-page images-page">
       <PageHeading
         eyebrow="IMAGE MODELS"
         title="The best AI image models, ranked by people."

@@ -7,6 +7,7 @@ import Models from './pages/Models';
 import CodingAgents from './pages/CodingAgents';
 import Trends from './pages/Trends';
 import ImageModels from './pages/ImageModels';
+import VideoModels from './pages/VideoModels';
 import Leaderboard from './pages/Leaderboard';
 import Leaders from './pages/Leaders';
 import ScorePriceTime from './pages/ScorePriceTime';
@@ -22,6 +23,7 @@ import type { Lesson } from './lib/academy';
 import type {
   Coding,
   Images as ImagesData,
+  Videos as VideosData,
   ModelOverview,
   Trends as TrendsData,
 } from './lib/overview';
@@ -32,6 +34,7 @@ export function renderPage(
   coding?: Coding,
   trends?: TrendsData,
   images?: ImagesData,
+  videos?: VideosData,
 ) {
   return renderToString(
     <StaticRouter location={path}>
@@ -43,6 +46,7 @@ export function renderPage(
             <Route path="coding-agents" element={<CodingAgents initial={coding} />} />
             <Route path="trends" element={<Trends initial={trends} />} />
             <Route path="image-models" element={<ImageModels initial={images} />} />
+            <Route path="video-models" element={<VideoModels initial={videos} />} />
             <Route path="leaders" element={<Leaders />} />
             <Route path="score-price-time" element={<ScorePriceTime />} />
             <Route path="market" element={<Market />} />

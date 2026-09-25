@@ -13,6 +13,7 @@ import { buildOverview } from '../shared/model-overview.ts';
 import { buildCoding } from '../shared/coding.ts';
 import { buildTrends } from '../shared/trends.ts';
 import { buildImages } from '../shared/images.ts';
+import { buildVideos } from '../shared/videos.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
@@ -131,15 +132,19 @@ const trends = buildTrends({
   linkModel,
 });
 await writeFile(resolve(staging, 'trends.json'), JSON.stringify(trends) + '\n');
-// Arena's image boards are optional: without a snapshot the page shows the test alone.
-let arena;
-try {
-  arena = JSON.parse(await readFile(resolve(data, 'image-arena.json'), 'utf8'));
-} catch (error) {
-  if (error.code !== 'ENOENT') throw error;
+// Arena's boards are optional: without a snapshot the image page shows the
+// test alone, and the video page says there is nothing to show yet.
+async function optionalSnapshot(name) {
+  try {
+    return JSON.parse(await readFile(resolve(data, name), 'utf8'));
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
 }
-const images = buildImages({ arena, benchmarks });
+const images = buildImages({ arena: await optionalSnapshot('image-arena.json'), benchmarks });
 await writeFile(resolve(staging, 'images.json'), JSON.stringify(images) + '\n');
+const videos = buildVideos({ arena: await optionalSnapshot('video-arena.json') });
+await writeFile(resolve(staging, 'videos.json'), JSON.stringify(videos) + '\n');
 await rm(target, { recursive: true, force: true });
 await rename(staging, target);
 

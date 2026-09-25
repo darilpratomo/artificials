@@ -65,6 +65,12 @@ export const MAKER_STYLES: Record<string, MakerStyle> = {
   krea: { color: '#c9ccd4', icon: 'krea' },
   runway: { color: '#c9ccd4', icon: 'runway' },
   pruna: { color: '#9b36f6', icon: 'prunaai-color' },
+  // Video model makers. ShengShu makes Vidu; Aorizon is how Arena lists HappyHorse's maker.
+  pixverse: { color: '#e36cfa', icon: 'pixverse-color' },
+  lightricks: { color: '#c9ccd4', icon: 'lightricks' },
+  pika: { color: '#c9ccd4', icon: 'pika' },
+  shengshu: { color: '#1abfff', icon: 'vidu-color' },
+  aorizon: { color: '#c9ccd4', icon: 'happyhorse' },
 };
 
 /** Marks for makers without a listed colour; also the "Other" key in legends. */

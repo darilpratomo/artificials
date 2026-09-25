@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { BenchmarkSnapshot } from '../shared/benchmarks';
 import {
-  buildImages,
   licenseName,
   makerOf,
   prettyName,
   type ArenaRow,
   type ArenaSnapshot,
-} from '../shared/images';
+} from '../shared/arena';
+import { buildImages } from '../shared/images';
+import { buildVideos } from '../shared/videos';
 
 describe('image model names', () => {
   it('tidies Arena identifiers without changing what they say', () => {
@@ -34,6 +35,15 @@ describe('image model names', () => {
       ['seedream-4-fal', 'Seedream 4 (fal)'],
       ['hidream-o1-image', 'HiDream O1 Image'],
       ['grok-imagine-image-quality (20260519)', 'Grok Imagine Image Quality (20260519)'],
+      // Video boards.
+      ['flux-3-video-20260811', 'FLUX.3 Video (2026-08-11)'],
+      ['runway-gen-4.5', 'Runway Gen-4.5'],
+      ['wan2.7-i2v', 'Wan 2.7 I2V'],
+      ['wan-v2.2-a14b', 'Wan V2.2 A14B'],
+      ['ltx-2-19b', 'LTX-2 19B'],
+      ['minimax-h3', 'MiniMax H3'],
+      ['happyhorse-1.0', 'HappyHorse 1.0'],
+      ['p-video', 'P-Video'],
       // Names Arena already writes with capitals are kept exactly.
       ['Cosmos3-Super-Text2Image (Agentic)', 'Cosmos3-Super-Text2Image (Agentic)'],
     ];
@@ -51,6 +61,11 @@ describe('image model names', () => {
     });
     expect(makerOf('', 'stable-diffusion-v35-large').makerId).toBe('stabilityai');
     expect(makerOf('', 'p-image').makerId).toBe('pruna');
+    expect(makerOf('', 'p-video').makerId).toBe('pruna');
+    expect(makerOf('', 'ltx-2-19b').makerId).toBe('lightricks');
+    expect(makerOf('', 'pixverse-v5.6').makerId).toBe('pixverse');
+    // Arena files some Wan models under the team's name; Wan is Alibaba's.
+    expect(makerOf('wan', 'wan2.7-t2v').makerId).toBe('alibaba');
     expect(makerOf('', 'mystery-image')).toEqual({ makerId: 'unknown', maker: 'Not reported' });
   });
 
@@ -246,5 +261,31 @@ describe('image models page data', () => {
     expect(alone.boards).toEqual([]);
     expect(alone.test).toHaveLength(2);
     expect(alone.sources.map((source) => source.id)).toEqual(['corebench']);
+  });
+});
+
+describe('video models page data', () => {
+  const small = {
+    ...arena,
+    arenas: {
+      'text-to-video': arena.arenas['text-to-image'],
+      // A young board keeps its overall ranking, however few models it has.
+      'video-edit': { ...arena.arenas['image-edit'], rows: rows(6, ['overall']) },
+    },
+  };
+  const videos = buildVideos({ arena: small });
+
+  it('builds the boards in page order, keeping a small overall board', () => {
+    expect(videos.boards.map((board) => [board.id, board.label])).toEqual([
+      ['text-to-video', 'Text to video'],
+      ['video-edit', 'Video editing'],
+    ]);
+    expect(videos.boards[1].categories.map((category) => category.id)).toEqual(['overall']);
+    expect(videos.boards[1].categories[0].entries).toHaveLength(6);
+    expect(videos.sources.map((source) => source.name)).toEqual(['Arena']);
+  });
+
+  it('builds nothing without a snapshot', () => {
+    expect(buildVideos({})).toEqual({ version: 1, boards: [], sources: [] });
   });
 });
