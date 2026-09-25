@@ -17,7 +17,7 @@ import {
   type AgentSpread,
   type AgentSummary,
 } from '../components/coding/analysis';
-import { day } from '../components/profile/format';
+import { day, indexValue } from '../components/profile/format';
 import {
   useCoding,
   type Coding,
@@ -234,16 +234,22 @@ function questions(
   if (source?.latestRun)
     list.push([
       'Why are the newest models missing from the agent results?',
-      `Agent and model pairs appear here only after the ${source.name} leaderboard lists them, which can take weeks after a model is released. For newer models, the model tests on this page, such as DeepSWE, CursorBench and LiveBench agentic coding, are more current.`,
+      `Agent and model pairs appear here only after the ${source.name} leaderboard lists them, which can take weeks after a model is released. For newer models, the model tests on this page, such as Arena WebDev, DeepSWE, CursorBench and LiveBench agentic coding, are more current.`,
     ]);
   if (agentic?.rows[0])
     list.push([
       'Which model is best at agentic coding?',
       `On LiveBench agentic coding, ${agentic.rows[0].name} scores highest at ${percent(agentic.rows[0].score)}${agentic.rows[1] ? `, ahead of ${agentic.rows[1].name} at ${percent(agentic.rows[1].score)}` : ''}. Other agentic tests on this page rank models differently, so check the test closest to your work.`,
     ]);
+  const webdev = coding.tests.find((entry) => entry.id === 'arena-webdev');
+  if (webdev?.rows[1])
+    list.push([
+      'Which AI is best at building websites and web apps?',
+      `On Arena WebDev, where people compare two web apps built from the same request without knowing which model made them, ${webdev.rows[0].name} scores highest at ${indexValue(webdev.rows[0].score)}, ahead of ${webdev.rows[1].name} (${indexValue(webdev.rows[1].score)}). The scores come from blind votes, so they measure which result people prefer.`,
+    ]);
   list.push([
     'Where does this data come from?',
-    'Agent results come from the Terminal-Bench 2.0 leaderboard (Apache-2.0, compiled by Epoch AI) and SWE-bench (CC BY-NC 4.0). Model tests come from LiveBench (Apache-2.0), Epoch AI (CC BY 4.0), SWE-bench, and DeepSWE by Datacurve and CursorBench by Cursor as compiled by Epoch AI; task lengths come from METR, also via Epoch AI. Prices are from models.dev (MIT). Artificials does not run these tests; it matches results to models and calculates the rankings, gaps and charts. Everything refreshes automatically.',
+    'Agent results come from the Terminal-Bench 2.0 leaderboard (Apache-2.0, compiled by Epoch AI) and SWE-bench (CC BY-NC 4.0). Model tests come from Arena (CC BY 4.0), LiveBench (Apache-2.0), Epoch AI (CC BY 4.0), SWE-bench, and DeepSWE by Datacurve and CursorBench by Cursor as compiled by Epoch AI; task lengths come from METR, also via Epoch AI. Prices are from models.dev (MIT). Artificials does not run these tests; it matches results to models and calculates the rankings, gaps and charts. Everything refreshes automatically.',
   ]);
   return list;
 }

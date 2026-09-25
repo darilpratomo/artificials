@@ -52,6 +52,9 @@ export interface TestRow {
   maker: string;
   score: number;
   stderr?: number;
+  /** The published confidence interval, for open-ended scores such as Arena's. */
+  ciLow?: number;
+  ciHigh?: number;
   /** Average cost, tokens or steps per task, for agent tests that publish them. */
   usage?: TaskUsage;
 }
@@ -315,6 +318,7 @@ export function buildOverview(
           ...makerOf(profile, row.providerId, row.provider),
           score: row.score,
           ...(row.stderr !== undefined ? { stderr: row.stderr } : {}),
+          ...(row.ciLow !== undefined ? { ciLow: row.ciLow, ciHigh: row.ciHigh } : {}),
           ...(row.usage ? { usage: row.usage } : {}),
         });
       }

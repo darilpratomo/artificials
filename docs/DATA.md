@@ -83,8 +83,9 @@ Do not mix scores from different benchmark methods into a single overall ranking
 
 Capability rankings now live separately in `public/data/benchmarks.json` and appear by default
 on `/leaderboard`. `scripts/sync-benchmarks.mjs` ingests published LiveBench task scores,
-Epoch AI's own benchmark evaluations and capability index, and T2I-CoReBench image-generation
-results, and the agent tests DeepSWE, CursorBench and SWE-bench Verified (bash only), plus agent
+Epoch AI's own benchmark evaluations and capability index, T2I-CoReBench image-generation
+results, the agent tests DeepSWE, CursorBench and SWE-bench Verified (bash only), and Arena's
+blind-vote tests for language models (see "Arena tests for language models" below), plus agent
 results and task lengths for the coding agents page (see below). The two-hourly catalog workflow refreshes both sources,
 validates them, runs checks, and commits the complete snapshots for native Cloudflare deploy.
 Failed source retrieval/schema checks leave the last successful published deployment intact.
@@ -229,6 +230,31 @@ minutes), returns the app shell with the model's title, description and canonica
 real 404 with `noindex` for unknown or malformed slugs. The sitemap lists profiles that have
 benchmark results or at least three hosts.
 
+## Arena tests for language models
+
+Arena (CC BY 4.0, [leaderboard dataset](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset))
+publishes blind-vote scores: people ask two anonymous models the same thing and vote for the
+better answer. `scripts/sync-benchmarks.mjs` reads the latest `text_style_control` and `webdev`
+tables through `scripts/lib/arena-dataset.mjs` (the same licence check and Hugging Face-only
+redirects as the image and video boards), and `arenaCategories` (`shared/arena.ts`) turns them
+into seven benchmark categories: Arena text (overall), WebDev, coding, math, hard prompts,
+creative writing and instruction following. Text uses style control, the view Arena's own
+leaderboard shows by default, which separates what an answer says from its length and
+formatting. Each row keeps Arena's score, 95% range and rank. The tests are optional: if Arena
+cannot be read, each keeps its last version.
+
+Scores are open-ended ratings, so they are written as whole numbers, as Arena writes them;
+smaller indexes such as the capability index keep one decimal (`indexValue`). Results join the
+rankings page, the home test picker, the compare page and each model's page, where an Arena card
+lists every Arena test the model has a result on.
+
+Rows reach catalog models through `arenaVersions`: an effort in brackets and a snapshot date are
+settings and are removed. "-max" is removed only for Anthropic and OpenAI models, whose top
+effort level it names; elsewhere "Max" names a model tier, such as Qwen3.8 Max, and the row only
+attaches to that exact model, unless another source recorded the model at a max effort. Arena's
+organisation names are mapped to the site's makers; "thinky", Arena's name for the maker of
+Inkling, is shown as Thinking Machines, as the catalog names it.
+
 ## Home dashboard
 
 The home page is built from three more generated files in `public/data/models/`:
@@ -337,8 +363,9 @@ Sources, all refreshed by `scripts/sync-benchmarks.mjs` every two hours:
 - METR time horizons: the length of software task, in the time skilled people need, that a
   model completes half the time, from Epoch AI's compilation. Only the latest method version is
   kept, since versions use different task suites.
-- LiveBench agentic coding and coding, and Epoch AI's SWE-bench Verified, as elsewhere on the
-  site.
+- LiveBench agentic coding and coding, Epoch AI's SWE-bench Verified, and Arena WebDev and
+  Arena coding, as elsewhere on the site. Arena WebDev comes first: its blind votes are published
+  within days, so it covers the newest models soonest.
 
 The three model tests with task costs are regular benchmark categories, so they also appear on
 `/leaderboard` and model profiles. Each optional source keeps its previous results when it

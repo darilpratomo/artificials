@@ -16,6 +16,8 @@ import {
   TIME_HORIZONS,
 } from './lib/epoch.ts';
 import { parseSweBench, SWE_BENCH } from './lib/swe-bench.ts';
+import { DATASET_URL, arenaRevision, readTable } from './lib/arena-dataset.mjs';
+import { ARENA_TESTS, arenaCategories } from '../shared/arena.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 // GitHub's API allows few anonymous requests from the shared addresses that
@@ -86,7 +88,16 @@ async function sweBench() {
     throw Error('SWE-bench licence changed; review before republishing');
   return { url: `${raw}/${SWE_BENCH.file}`, updatedAt: latest.commit.committer.date, board };
 }
-const [csv, groups, images, epochArchive, agentLicence, swe] = await Promise.all([
+/** Arena's language model boards: text with style control, and WebDev. */
+async function arenaBoards() {
+  const revision = await arenaRevision();
+  const [text, webdev] = await Promise.all([
+    readTable('text_style_control', 'latest', revision, 5_000_000),
+    readTable('webdev', 'latest', revision, 2_000_000),
+  ]);
+  return arenaCategories({ text, webdev });
+}
+const [csv, groups, images, epochArchive, agentLicence, swe, arena] = await Promise.all([
   get(tableUrl),
   get(`${base}/categories_${release}.json`),
   get(imageUrl),
@@ -95,6 +106,7 @@ const [csv, groups, images, epochArchive, agentLicence, swe] = await Promise.all
   // Optional sources: without them, their results keep their last version.
   get(TERMINAL_BENCH.licenseApi).catch((error) => error),
   sweBench().catch((error) => error),
+  arenaBoards().catch((error) => error),
 ]);
 const epoch = parseEpoch(new Uint8Array(epochArchive.bytes));
 const directory = resolve(root, 'public/data');
@@ -141,11 +153,21 @@ const agentTests = [
     return sweResult.bashOnly;
   }),
 ].filter(Boolean);
+// Arena's tests are optional too: each keeps its last version if Arena fails.
+const arenaTests = ARENA_TESTS.map((test) =>
+  optional(test.id, () => {
+    if (arena instanceof Error) throw arena;
+    const category = arena.categories.find((entry) => entry.id === test.id);
+    if (!category || category.rows.length < 5) throw Error(`${test.id} missing from Arena`);
+    return category;
+  }),
+).filter(Boolean);
 const categories = [
   ...parseLiveBench(csv.text, JSON.parse(groups.text), tableUrl),
   ...epoch.categories,
   ...agentTests,
   parseImageBench(images.text, imageUrl + '#leaderboard'),
+  ...arenaTests,
 ];
 if (categories.length < 17 || categories.some((c) => c.rows.length < 5))
   throw Error('Unexpectedly small benchmark snapshot');
@@ -206,6 +228,18 @@ const snapshot = {
         checkedAt,
         edition: 'Cursor agent',
         sourceUpdatedAt: epoch.latestRun ? `${epoch.latestRun}T00:00:00.000Z` : null,
+        license: 'CC BY 4.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      },
+      {
+        id: 'arena',
+        name: 'Arena',
+        url: 'https://arena.ai/leaderboard/text',
+        dataUrl: DATASET_URL,
+        checkedAt,
+        edition: 'Text with style control, and WebDev',
+        sourceUpdatedAt:
+          arena instanceof Error || !arena.published ? null : `${arena.published}T00:00:00.000Z`,
         license: 'CC BY 4.0',
         licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
       },

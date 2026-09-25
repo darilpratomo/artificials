@@ -368,15 +368,16 @@ function cleanName(name: string) {
 }
 
 /** Preferred benchmark per skill area, independent of how well a model scored. */
+/** Each skill area's headline test, in order of preference; Arena's votes come last. */
 const PRIMARY: Record<BenchmarkDomain, string[]> = {
-  overall: ['capability-index', 'overall'],
-  coding: ['coding', 'swe-bench-verified'],
-  math: ['mock-aime', 'math', 'frontiermath', 'math-level-5'],
+  overall: ['capability-index', 'overall', 'arena-text'],
+  coding: ['coding', 'swe-bench-verified', 'arena-coding', 'arena-webdev'],
+  math: ['mock-aime', 'math', 'frontiermath', 'math-level-5', 'arena-math'],
   knowledge: ['simpleqa-verified'],
   agentic: ['agentic-coding'],
-  language: ['language', 'instruction-following'],
+  language: ['language', 'instruction-following', 'arena-creative-writing'],
   data: ['data-analysis'],
-  reasoning: ['gpqa-diamond', 'reasoning', 'chess-puzzles'],
+  reasoning: ['gpqa-diamond', 'reasoning', 'chess-puzzles', 'arena-hard-prompts'],
   image: ['image'],
 };
 export function primaryResult(profile: ModelProfile, domain: BenchmarkDomain) {

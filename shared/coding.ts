@@ -77,12 +77,14 @@ export interface Coding {
 
 /** The model tests shown on the coding page, in display order. */
 export const CODING_TESTS = [
+  'arena-webdev',
   'agentic-coding',
   'deepswe',
   'cursorbench',
   'swe-bench-bash-only',
   'swe-bench-verified',
   'coding',
+  'arena-coding',
 ];
 
 /** Agent builders that also make models, by the name sources give them. */

@@ -673,6 +673,52 @@
   color: var(--profile-muted);
   line-height: 1.6;
 }
+/* Arena's votes: one row per test, the score on the right. */
+.arena-card {
+  display: grid;
+  gap: 16px;
+}
+.arena-card h2 {
+  margin: 0 0 8px;
+  font-size: 17.5px;
+}
+.arena-card p {
+  max-width: 60ch;
+  margin: 0;
+  color: var(--profile-muted);
+  line-height: 1.6;
+}
+.arena-results {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.arena-results li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 11px 0;
+  border-top: 1px solid var(--profile-line, #1f2027);
+}
+.arena-results span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.arena-results b {
+  font-weight: 600;
+}
+.arena-results small {
+  color: var(--profile-muted);
+  font-size: 12.5px;
+}
+.arena-results strong {
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
 .index-figure {
   display: grid;
   justify-items: end;

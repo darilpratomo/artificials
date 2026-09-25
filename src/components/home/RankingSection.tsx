@@ -5,7 +5,7 @@ import { Select } from '../Select';
 import { RankChart, type RankItem } from '../charts/RankChart';
 import { ShareButton } from '../charts/ShareButton';
 import { useTests, type ModelOverview } from '../../lib/overview';
-import { DOMAINS, day, price } from '../profile/format';
+import { DOMAINS, day, indexValue, price } from '../profile/format';
 import { PendingIndex } from './PendingIndex';
 
 const INDEX = 'capability-index';
@@ -28,7 +28,7 @@ export function RankingSection({ overview }: { overview: ModelOverview }) {
   const info = overview.metrics.find((entry) => entry.id === metric);
   const unit = metric === INDEX ? 'index' : (info?.unit ?? 'percent');
   const format = (value: number) =>
-    unit === 'index' ? value.toFixed(1) : `${Number(value.toFixed(1))}%`;
+    unit === 'index' ? indexValue(value) : `${Number(value.toFixed(1))}%`;
 
   const all: RankItem[] = useMemo(() => {
     if (metric === INDEX)
@@ -55,6 +55,8 @@ export function RankingSection({ overview }: { overview: ModelOverview }) {
       makerId: row.makerId,
       maker: row.maker,
       value: row.score,
+      low: row.ciLow,
+      high: row.ciHigh,
       href: row.slug ? `/models/${row.slug}` : undefined,
       details: [
         row.name !== row.configuration ? `Tested as ${row.configuration}` : '',

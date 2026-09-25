@@ -60,8 +60,9 @@ describe('published benchmark normalization', () => {
       expect(Date.parse(source.checkedAt)).not.toBeNaN();
       expect(source.license).toBeTruthy();
       expect(category.rows[0].rank).toBe(1);
-      // Percentages stop at 100; the capability index is an open-ended scale.
-      const ceiling = category.unit === 'index' ? 400 : 100;
+      // Percentages stop at 100; the capability index is an open-ended scale,
+      // and Arena's ratings, like chess ratings, run into the thousands.
+      const ceiling = category.sourceId === 'arena' ? 3000 : category.unit === 'index' ? 400 : 100;
       category.rows.forEach((row, i) => {
         expect(row.score).toBeGreaterThanOrEqual(0);
         expect(row.score).toBeLessThanOrEqual(ceiling);

@@ -9,7 +9,7 @@ import {
 } from '../../shared/benchmarks';
 import { PageHeading } from '../components/Layout';
 import { DomainKey } from '../components/profile/parts';
-import { DOMAINS } from '../components/profile/format';
+import { DOMAINS, indexValue } from '../components/profile/format';
 import { makerLogo } from '../../shared/makers';
 import { ShareButton } from '../components/charts/ShareButton';
 import { loadProfileLinks, testLabel, type ProfileLinks } from '../lib/profiles';
@@ -17,7 +17,7 @@ import '../domain-colors.css';
 
 const domainOf = (category: BenchmarkCategory): BenchmarkDomain => category.domain ?? 'overall';
 const formatScore = (value: number, category: BenchmarkCategory) =>
-  category.unit === 'index' ? value.toFixed(1) : value.toFixed(2);
+  category.unit === 'index' ? indexValue(value) : value.toFixed(2);
 
 export default function BenchmarkRankings() {
   const [params, setParams] = useSearchParams();
@@ -159,7 +159,13 @@ export default function BenchmarkRankings() {
                     <strong>{nameOf(top.id)?.name ?? top.model}</strong>
                     <div>
                       <b>{formatScore(top.score, selected)}</b>
-                      <span>{selected.unit === 'index' ? 'index points' : '/ 100'}</span>
+                      <span>
+                        {selected.sourceId === 'arena'
+                          ? 'Arena score'
+                          : selected.unit === 'index'
+                            ? 'index points'
+                            : '/ 100'}
+                      </span>
                     </div>
                     {nameOf(top.id) && <small>Setting: {top.model}</small>}
                   </div>
@@ -216,7 +222,9 @@ export default function BenchmarkRankings() {
                 <div className="benchmark-list-heading" aria-hidden="true">
                   <span>Rank</span>
                   <span>Model</span>
-                  <span>{selected.unit === 'index' ? 'Index' : 'Score'}</span>
+                  <span>
+                    {selected.unit === 'index' && selected.sourceId !== 'arena' ? 'Index' : 'Score'}
+                  </span>
                 </div>
                 {rows.map((row) => {
                   const profile = nameOf(row.id);

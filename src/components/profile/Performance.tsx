@@ -6,7 +6,7 @@ import type {
   ProfileCategory,
   ProfileResult,
 } from '../../lib/profiles';
-import { DOMAINS, day, rankLabel, score, whole } from './format';
+import { DOMAINS, day, indexValue, rankLabel, score, whole } from './format';
 import { DomainKey, Explainer, Meter, Sources } from './parts';
 import { ShareButton } from '../charts/ShareButton';
 import { useTests } from '../../lib/overview';
@@ -142,6 +142,44 @@ function AtAGlance({ profile }: { profile: ModelProfile }) {
   );
 }
 
+/** Arena's blind votes: each Arena test the model has a result on, best configuration first. */
+function ArenaResults({ profile }: { profile: ModelProfile }) {
+  const tests = profile.categories.filter((category) => category.sourceId === 'arena');
+  if (!tests.length) return null;
+  return (
+    <section className="profile-card arena-card" aria-labelledby="arena-heading">
+      <div>
+        <h2 id="arena-heading">Arena: people’s blind votes</h2>
+        <p>
+          People compare two anonymous answers to the same request and vote for the better one.
+          Scores are open-ended, like chess ratings: a higher score wins more often.
+        </p>
+      </div>
+      <ul className="arena-results">
+        {tests.map((category) => {
+          const best = profile.results
+            .filter((result) => result.category === category.id)
+            .sort((a, b) => b.score - a.score)[0];
+          return (
+            <li key={category.id}>
+              <span>
+                <b>{category.label}</b>
+                <small>
+                  {rankLabel(best.rank, best.total)}
+                  {best.ciLow !== undefined && best.ciHigh !== undefined
+                    ? `, likely ${indexValue(best.ciLow)} to ${indexValue(best.ciHigh)}`
+                    : ''}
+                </small>
+              </span>
+              <strong>{indexValue(best.score)}</strong>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 export default function Performance({
   profile,
   bucket,
@@ -240,6 +278,8 @@ export default function Performance({
           </div>
         </section>
       )}
+
+      <ArenaResults profile={profile} />
 
       {groups.map(({ domain, categories }) => (
         <section key={domain} className="result-group" aria-labelledby={`group-${domain}`}>

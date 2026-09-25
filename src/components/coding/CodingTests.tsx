@@ -5,7 +5,7 @@ import type { CodingTest } from '../../lib/overview';
 import { RankChart, type RankItem } from '../charts/RankChart';
 import { ShareButton } from '../charts/ShareButton';
 import { Select } from '../Select';
-import { day, price } from '../profile/format';
+import { day, indexValue, price } from '../profile/format';
 import { percent } from './analysis';
 
 const SHOWN = 20;
@@ -22,6 +22,9 @@ export function CodingTests({
   const [testId, setTestId] = useState(tests[0]?.id);
   const test = tests.find((entry) => entry.id === testId) ?? tests[0];
   if (!test) return null;
+  // Open-ended scores, such as Arena's, are drawn and written as ratings.
+  const unit = test.unit;
+  const format = unit === 'index' ? indexValue : percent;
   const items: RankItem[] = test.rows.slice(0, SHOWN).map((row, index) => ({
     key: `${row.name}|${row.configuration}`,
     name: row.name,
@@ -32,6 +35,9 @@ export function CodingTests({
     href: row.slug ? `/models/${row.slug}` : undefined,
     details: [
       row.stderr !== undefined ? `Standard error ±${row.stderr.toFixed(1)}` : '',
+      row.ciLow !== undefined && row.ciHigh !== undefined
+        ? `95% range ${indexValue(row.ciLow)} to ${indexValue(row.ciHigh)}`
+        : '',
       row.releasedAt ? `Released ${day(row.releasedAt)}` : '',
       row.price !== undefined ? `${price(row.price)} per 1M tokens, blended` : '',
     ].filter(Boolean),
@@ -67,8 +73,8 @@ export function CodingTests({
                   makerId: item.makerId,
                   value: item.value,
                 })),
-                'percent',
-                percent,
+                unit,
+                format,
               )
             }
           />
@@ -76,8 +82,8 @@ export function CodingTests({
       </div>
       <RankChart
         items={items}
-        unit="percent"
-        format={percent}
+        unit={unit}
+        format={format}
         label={`${test.label}, top ${items.length} models, highest first`}
       />
       <div className="dash-foot">

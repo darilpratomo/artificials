@@ -1,7 +1,9 @@
 /**
- * Arena's published leaderboards, as scripts/sync-arena.mjs keeps them, and
- * the board data the image and video pages are built from.
+ * Arena's published leaderboards: the image and video boards, as
+ * scripts/sync-arena.mjs keeps them for their pages, and the language model
+ * boards, which join the benchmark snapshot as tests.
  */
+import type { BenchmarkCategory, BenchmarkDomain, BenchmarkRow } from './benchmarks.ts';
 
 /** One row of Arena's published leaderboard. */
 export interface ArenaRow {
@@ -337,5 +339,216 @@ export function arenaSource(arena: ArenaSnapshot): BoardSource {
     dataUrl: arena.source.dataUrl,
     license: arena.source.license,
     licenseUrl: arena.source.licenseUrl,
+  };
+}
+
+/** A row as Arena's dataset publishes it. */
+export interface ArenaTableRow {
+  model_name: string;
+  organization?: string | null;
+  license?: string | null;
+  category: string;
+  rating: number;
+  rating_lower: number;
+  rating_upper: number;
+  rank: number | bigint;
+  leaderboard_publish_date: string;
+}
+
+/** Arena's organisations for language models: the site's maker id and name. */
+const LLM_MAKERS: Record<string, [id: string, name: string]> = {
+  openai: ['openai', 'OpenAI'],
+  anthropic: ['anthropic', 'Anthropic'],
+  google: ['google', 'Google'],
+  alibaba: ['alibaba', 'Alibaba'],
+  deepseek: ['deepseek', 'DeepSeek'],
+  meta: ['meta', 'Meta'],
+  xai: ['xai', 'xAI'],
+  zai: ['zai', 'Z.ai'],
+  mistral: ['mistral', 'Mistral AI'],
+  tencent: ['tencent', 'Tencent'],
+  moonshot: ['moonshotai', 'Moonshot AI'],
+  xiaomi: ['xiaomi', 'Xiaomi'],
+  minimax: ['minimax', 'MiniMax'],
+  nvidia: ['nvidia', 'NVIDIA'],
+  amazon: ['amazon-bedrock', 'Amazon'],
+  ibm: ['ibm', 'IBM'],
+  microsoft: ['azure', 'Microsoft'],
+  cohere: ['cohere', 'Cohere'],
+  baidu: ['baidu', 'Baidu'],
+  stepfun: ['stepfun', 'StepFun'],
+  'inception-ai': ['inception', 'Inception'],
+  bytedance: ['bytedance', 'ByteDance'],
+  meituan: ['meituan', 'Meituan'],
+  upstage: ['upstage', 'Upstage'],
+  // Makers without a catalog id: named, but never used to rule out a match.
+  allenai: ['unknown', 'Ai2'],
+  'ant-group': ['unknown', 'Ant Group'],
+  poolside: ['unknown', 'Poolside'],
+  // Arena's name for the maker of Inkling, which the catalog calls Thinking Machines.
+  thinky: ['unknown', 'Thinking Machines'],
+};
+
+/** Arena's language model tests the site shows, in the order it lists them. */
+export const ARENA_TESTS: {
+  id: string;
+  board: 'text' | 'webdev';
+  category: string;
+  name: string;
+  domain: BenchmarkDomain;
+  description: string;
+}[] = [
+  {
+    id: 'arena-text',
+    board: 'text',
+    category: 'overall',
+    name: 'Arena text',
+    domain: 'overall',
+    description:
+      'People ask two anonymous models their own question and vote for the better answer. The ranking comes from millions of these blind votes.',
+  },
+  {
+    id: 'arena-webdev',
+    board: 'webdev',
+    category: 'overall',
+    name: 'Arena WebDev',
+    domain: 'coding',
+    description:
+      'People describe a web page or app; two anonymous models each build it, and people vote for the better working result.',
+  },
+  {
+    id: 'arena-coding',
+    board: 'text',
+    category: 'coding',
+    name: 'Arena coding',
+    domain: 'coding',
+    description:
+      'Blind votes on conversations about code: people compare two anonymous answers to their own programming question.',
+  },
+  {
+    id: 'arena-math',
+    board: 'text',
+    category: 'math',
+    name: 'Arena math',
+    domain: 'math',
+    description: 'Blind votes on the math questions people asked two anonymous models.',
+  },
+  {
+    id: 'arena-hard-prompts',
+    board: 'text',
+    category: 'hard_prompts',
+    name: 'Arena hard prompts',
+    domain: 'reasoning',
+    description:
+      'Blind votes on the hardest prompts: complex, specific questions that need real problem solving.',
+  },
+  {
+    id: 'arena-creative-writing',
+    board: 'text',
+    category: 'creative_writing',
+    name: 'Arena creative writing',
+    domain: 'language',
+    description: 'Blind votes on the stories, poems and other writing people asked for.',
+  },
+  {
+    id: 'arena-instruction-following',
+    board: 'text',
+    category: 'instruction_following',
+    name: 'Arena instruction following',
+    domain: 'language',
+    description:
+      'Blind votes on prompts with specific instructions, judged on how well each answer follows them.',
+  },
+];
+
+const ARENA_URLS = {
+  text: 'https://arena.ai/leaderboard/text',
+  webdev: 'https://arena.ai/leaderboard/webdev',
+};
+const METHODOLOGY = {
+  text: 'Arena’s published scores with style control, which separates what an answer says from its length and formatting, as Arena’s leaderboard shows by default. Higher is better on an open-ended scale, like chess ratings; the range is Arena’s 95% confidence interval.',
+  webdev:
+    'Arena’s published WebDev scores. Higher is better on an open-ended scale, like chess ratings; the range is Arena’s 95% confidence interval.',
+};
+
+/**
+ * Identifiers a row may match in the catalog, most specific first. Settings
+ * are stripped so a result reaches its model: an effort in brackets, a
+ * snapshot date, and "-max", which Anthropic and OpenAI use for their top
+ * effort. Elsewhere "Max" names a model tier, such as Qwen3.8 Max, so it stays.
+ */
+export function arenaVersions(model: string, organization = ''): string[] {
+  const out = [model];
+  let value = model.trim().replace(/\s*\((?:minimal|none|low|medium|high|xhigh|max)\)$/i, '');
+  out.push(value);
+  if (/^(anthropic|openai)$/.test(organization)) {
+    value = value.replace(/-max$/, '');
+    out.push(value);
+  }
+  out.push(value.replace(/-(?:\d{8}|\d{4}-\d{2}-\d{2})$/, ''));
+  return [...new Set(out)];
+}
+
+const round = (value: number) => Math.round(value * 10) / 10;
+
+/**
+ * Arena's language model boards as benchmark categories. Each board uses its
+ * latest publication; the result also says when that was.
+ */
+export function arenaCategories(boards: Record<'text' | 'webdev', ArenaTableRow[]>): {
+  categories: BenchmarkCategory[];
+  published: string;
+} {
+  const latest = (rows: ArenaTableRow[]) =>
+    rows.reduce(
+      (last, row) => (row.leaderboard_publish_date > last ? row.leaderboard_publish_date : last),
+      '',
+    );
+  const published = { text: latest(boards.text), webdev: latest(boards.webdev) };
+  const categories = ARENA_TESTS.map((test) => {
+    const rows: BenchmarkRow[] = boards[test.board]
+      .filter(
+        (row) =>
+          row.category === test.category && row.leaderboard_publish_date === published[test.board],
+      )
+      .sort((a, b) => b.rating - a.rating)
+      .map((row) => {
+        const organization = (row.organization ?? '').trim();
+        const [providerId, provider] = LLM_MAKERS[organization] ?? [
+          'unknown',
+          organization
+            ? organization.charAt(0).toUpperCase() + organization.slice(1)
+            : 'See source',
+        ];
+        const license = (row.license ?? '').trim();
+        return {
+          id: row.model_name,
+          model: row.model_name,
+          provider,
+          providerId,
+          score: round(row.rating),
+          rank: Number(row.rank),
+          sourceUrl: ARENA_URLS[test.board],
+          ciLow: round(row.rating_lower),
+          ciHigh: round(row.rating_upper),
+          evaluatedAt: published[test.board],
+          openWeights: license !== '' && license !== 'Proprietary',
+          versions: arenaVersions(row.model_name, organization),
+        };
+      });
+    return {
+      id: test.id,
+      name: test.name,
+      sourceId: 'arena',
+      unit: 'index' as const,
+      domain: test.domain,
+      description: test.description,
+      methodology: METHODOLOGY[test.board],
+      rows,
+    };
+  });
+  return {
+    categories,
+    published: [published.text, published.webdev].sort().at(-1) ?? '',
   };
 }

@@ -137,8 +137,17 @@ export function day(value: string | null | undefined) {
   });
 }
 
+/**
+ * Open-ended scores: ratings in the hundreds and thousands, such as Arena's,
+ * read as whole numbers, the way their sources show them; a small index, such
+ * as the capability index, keeps one decimal.
+ */
+export function indexValue(value: number) {
+  return Math.abs(value) >= 500 ? `${Math.round(value)}` : value.toFixed(1);
+}
+
 export function score(value: number, unit: 'percent' | 'index') {
-  return unit === 'index' ? value.toFixed(1) : `${value.toFixed(1)}%`;
+  return unit === 'index' ? indexValue(value) : `${value.toFixed(1)}%`;
 }
 
 /** 100 for first place, 0 for last. A single entry counts as first. */

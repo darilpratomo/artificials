@@ -38,7 +38,10 @@ export function CodingValue({
     [test],
   );
   if (!test) return null;
-  const y = { label: `${test.label} (%)`, format: (value: number) => `${Math.round(value)}%` };
+  const y =
+    test.unit === 'index'
+      ? { label: `${test.label} (score)`, format: (value: number) => `${Math.round(value)}` }
+      : { label: `${test.label} (%)`, format: (value: number) => `${Math.round(value)}%` };
   const credit = `${credits[test.sourceId] ?? 'published results'} and models.dev (MIT)`;
   const title = `${test.label} against price`;
   return (
@@ -81,7 +84,7 @@ export function CodingValue({
                   y: point.y,
                 })),
                 PRICE_AXIS,
-                { label: y.label, format: percent },
+                { label: y.label, format: test.unit === 'index' ? y.format : percent },
                 { frontier: 'cheapest', quadrant: true },
               )
             }
