@@ -1,0 +1,15 @@
+/* AI trends page. Panels, headings and the section index reuse the dashboard and models styles. */
+.trends-page .hub-section > .dash-panel + .dash-panel {
+  margin-top: 12px;
+}
+
+/* The download button keeps its place beside the title, even in half-width panels. */
+.trends-page .dash-panel-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+@media (max-width: 640px) {
+  .trends-page .dash-panel-head {
+    display: flex;
+  }
+}

@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { buildProfiles, profileBucket, PROFILE_BUCKETS } from '../shared/model-profiles.ts';
 import { buildOverview } from '../shared/model-overview.ts';
 import { buildCoding } from '../shared/coding.ts';
+import { buildTrends } from '../shared/trends.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
@@ -119,6 +120,16 @@ const coding = buildCoding({
   facts: facts.facts,
 });
 await writeFile(resolve(staging, 'coding.json'), JSON.stringify(coding) + '\n');
+const trends = buildTrends({
+  profiles,
+  benchmarks,
+  links,
+  facts: facts.facts,
+  timeline,
+  sources,
+  linkModel,
+});
+await writeFile(resolve(staging, 'trends.json'), JSON.stringify(trends) + '\n');
 await rm(target, { recursive: true, force: true });
 await rename(staging, target);
 

@@ -31,6 +31,11 @@ export const NAV_GROUPS: NavGroupItem[] = [
       },
       { to: '/leaders', label: 'Current leaders', description: 'The best model on each measure' },
       {
+        to: '/trends',
+        label: 'AI trends',
+        description: 'How capability, cost and scale are changing',
+      },
+      {
         to: '/score-price-time',
         label: 'Score, price and time',
         description: 'Capability against price and release date',

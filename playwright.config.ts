@@ -24,6 +24,7 @@ export default defineConfig({
         'releases.spec.ts',
         'models.spec.ts',
         'coding-agents.spec.ts',
+        'trends.spec.ts',
         'model-profile.spec.ts',
       ],
       use: { ...devices['iPhone 13'], defaultBrowserType: 'webkit' },

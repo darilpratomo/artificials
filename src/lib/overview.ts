@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Explorer, ModelOverview, OverviewTests, Timeline } from '../../shared/model-overview';
 import type { Coding } from '../../shared/coding';
+import type { Trends } from '../../shared/trends';
 
 export type {
   Explorer,
@@ -24,6 +25,7 @@ export type {
   CodingTest,
   CodingTestRow,
 } from '../../shared/coding';
+export type { Trends, TrendModel, TrendPoint, TrendSeries } from '../../shared/trends';
 
 const requests = new Map<string, Promise<unknown>>();
 /** Files already loaded, so returning to a page renders at once instead of loading again. */
@@ -34,6 +36,7 @@ const isTests = (value: OverviewTests) => value?.version === 1 && Array.isArray(
 const isExplorer = (value: Explorer) => value?.version === 1 && Array.isArray(value.models);
 const isTimeline = (value: Timeline) => value?.version === 1 && Array.isArray(value.entries);
 const isCoding = (value: Coding) => value?.version === 2 && Array.isArray(value.tests);
+const isTrends = (value: Trends) => value?.version === 1 && Array.isArray(value.frontier);
 
 /**
  * Prerendered pages carry their data inline, so the first view needs no extra
@@ -127,4 +130,10 @@ export function useTimeline(attempt = 0) {
 export function useCoding(attempt = 0, initial?: Coding) {
   embedded('coding.json', 'coding-data', isCoding);
   return useFile<Coding>('coding.json', isCoding, true, attempt, initial);
+}
+
+/** How capability, price, context and scale have moved, for the AI trends page. */
+export function useTrends(attempt = 0, initial?: Trends) {
+  embedded('trends.json', 'trends-data', isTrends);
+  return useFile<Trends>('trends.json', isTrends, true, attempt, initial);
 }

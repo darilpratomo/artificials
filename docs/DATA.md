@@ -367,3 +367,28 @@ The page shows, all calculated by Artificials from those results:
 
 Time per task (wall-clock time) is not shown: no source publishes it under a licence this site
 can use. Aider's leaderboard is not used because it stopped updating in October 2025.
+
+## AI trends page
+
+`/trends` shows how AI is changing, from `public/data/models/trends.json`, generated at build
+time by `buildTrends` (`shared/trends.ts`) and prerendered with that data inline. Every figure is
+calculated by Artificials from published data:
+
+- The frontier: for makers with at least three models on the Epoch Capabilities Index, the
+  models that beat the maker's own best, by release date, drawn as record lines; and each maker's
+  best model.
+- Open weights and closed models, and countries (the developer's country in Epoch AI's model
+  records, for countries with at least five models on the index): the same record lines.
+- The cost of capability: for index levels 120, 130, 140 and 150, the cheapest blended list
+  price among models at or above the level, by release date. Prices are today's list prices from
+  models.dev, not launch prices.
+- Context windows: the median context window of notable catalog releases per quarter, open
+  weights and closed apart, for quarters with at least three models in a group.
+- Training scale: Epoch AI's training compute estimates by release date, on a log scale, with the
+  largest run so far.
+- The pace of releases: notable releases per month for the last 24 months, and the makers with
+  the most in the last twelve months.
+
+Sources: Epoch AI (capability index and model records, CC BY 4.0) and models.dev (prices,
+context windows and release dates, MIT), credited beside each chart and in "Sources and method"
+with retrieval times.

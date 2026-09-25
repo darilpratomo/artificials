@@ -417,12 +417,7 @@ export async function scatterImage(
       return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
     };
     context.fillStyle = 'rgba(255,255,255,0.05)';
-    context.fillRect(
-      plot.left,
-      plot.top,
-      sx(median(xs)) - plot.left,
-      sy(median(ys)) - plot.top,
-    );
+    context.fillRect(plot.left, plot.top, sx(median(xs)) - plot.left, sy(median(ys)) - plot.top);
   }
   context.font = `400 17px ${SANS}`;
   for (const tick of linearTicks(y0, y1, 6).ticks.filter((t) => t >= y0 && t <= y1)) {
@@ -558,6 +553,188 @@ export async function scatterImage(
       }
     }
   }
+  drawFooter(context, frame, height);
+  return element;
+}
+
+export interface ShareSeries {
+  label: string;
+  color: string;
+  points: { x: number; y: number }[];
+}
+
+/** Lines over time: record steps or joined values, with each series named at its end. */
+export async function lineImage(
+  frame: ShareFrame,
+  series: ShareSeries[],
+  y: { label: string; format: (value: number) => string; log?: boolean },
+  options: { mode?: 'step' | 'line'; end?: number } = {},
+) {
+  await fontsReady();
+  const height = 1000;
+  const { element, context } = canvas(height);
+  let top = await drawHeader(context, frame, height);
+  context.font = `400 18px ${SANS}`;
+  context.textBaseline = 'middle';
+  let legendX = 64;
+  for (const entry of series) {
+    const width = context.measureText(entry.label).width + 44;
+    if (legendX + width > WIDTH - 64) {
+      legendX = 64;
+      top += 30;
+    }
+    context.strokeStyle = entry.color;
+    context.lineWidth = 4;
+    context.beginPath();
+    context.moveTo(legendX, top);
+    context.lineTo(legendX + 22, top);
+    context.stroke();
+    context.fillStyle = '#c9ccd4';
+    context.fillText(entry.label, legendX + 30, top);
+    legendX += width + 14;
+  }
+  const plot = { left: 120, right: WIDTH - 250, top: top + 40, bottom: height - 150 };
+  const all = series.flatMap((entry) => entry.points);
+  const x0 = Math.min(...all.map((point) => point.x));
+  const x1 = Math.max(options.end ?? 0, ...all.map((point) => point.x));
+  const values = all.map((point) => point.y);
+  const [y0, y1] = y.log
+    ? [Math.min(...values) / 1.3, Math.max(...values) * 1.3]
+    : niceDomain(Math.min(...values), Math.max(...values), 5);
+  const sx = (value: number) =>
+    plot.left + ((value - x0) / (x1 - x0 || 1)) * (plot.right - plot.left);
+  const sy = (value: number) =>
+    plot.bottom -
+    (y.log
+      ? (Math.log10(value) - Math.log10(y0)) / (Math.log10(y1) - Math.log10(y0) || 1)
+      : (value - y0) / (y1 - y0 || 1)) *
+      (plot.bottom - plot.top);
+  context.font = `400 17px ${SANS}`;
+  const yTicks = y.log
+    ? logTicks(y0, y1, 6)
+    : linearTicks(y0, y1, 5).ticks.filter((tick) => tick >= y0 && tick <= y1);
+  for (const tick of yTicks) {
+    context.strokeStyle = GRID;
+    context.setLineDash([4, 6]);
+    context.beginPath();
+    context.moveTo(plot.left, sy(tick));
+    context.lineTo(plot.right, sy(tick));
+    context.stroke();
+    context.setLineDash([]);
+    context.fillStyle = FAINT;
+    context.textAlign = 'right';
+    context.fillText(y.format(tick), plot.left - 12, sy(tick));
+  }
+  context.textAlign = 'center';
+  context.textBaseline = 'top';
+  for (const tick of timeTicks(x0, x1)) {
+    context.fillStyle = FAINT;
+    context.fillText(
+      new Date(tick).toLocaleDateString('en-US', {
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'UTC',
+      }),
+      sx(tick),
+      plot.bottom + 12,
+    );
+  }
+  context.save();
+  context.translate(40, (plot.top + plot.bottom) / 2);
+  context.rotate(-Math.PI / 2);
+  context.fillStyle = '#b5b8c2';
+  context.fillText(y.label, 0, 0);
+  context.restore();
+  const ends: { label: string; y: number }[] = [];
+  for (const entry of series) {
+    if (!entry.points.length) continue;
+    context.strokeStyle = entry.color;
+    context.lineWidth = 3;
+    context.lineJoin = 'round';
+    context.beginPath();
+    entry.points.forEach((point, index) => {
+      if (!index) context.moveTo(sx(point.x), sy(point.y));
+      else if (options.mode === 'line') context.lineTo(sx(point.x), sy(point.y));
+      else {
+        context.lineTo(sx(point.x), sy(entry.points[index - 1].y));
+        context.lineTo(sx(point.x), sy(point.y));
+      }
+    });
+    const last = entry.points[entry.points.length - 1];
+    if (options.mode !== 'line') context.lineTo(sx(x1), sy(last.y));
+    context.stroke();
+    for (const point of entry.points) {
+      context.fillStyle = entry.color;
+      context.strokeStyle = SURFACE;
+      context.lineWidth = 2;
+      context.beginPath();
+      context.arc(sx(point.x), sy(point.y), 6, 0, Math.PI * 2);
+      context.fill();
+      context.stroke();
+    }
+    ends.push({ label: entry.label, y: sy(last.y) });
+  }
+  ends.sort((a, b) => a.y - b.y);
+  for (let index = 1; index < ends.length; index += 1)
+    if (ends[index].y - ends[index - 1].y < 24) ends[index].y = ends[index - 1].y + 24;
+  context.font = `500 18px ${SANS}`;
+  context.textAlign = 'left';
+  context.textBaseline = 'middle';
+  context.fillStyle = '#e6e7ec';
+  for (const entry of ends)
+    context.fillText(clip(context, entry.label, 220), plot.right + 18, entry.y);
+  drawFooter(context, frame, height);
+  return element;
+}
+
+/** Columns per period, such as releases each month, with every value printed. */
+export async function columnImage(
+  frame: ShareFrame,
+  columns: { label: string; value: number }[],
+  format: (value: number) => string,
+) {
+  await fontsReady();
+  const height = 900;
+  const { element, context } = canvas(height);
+  const top = await drawHeader(context, frame, height);
+  const plot = { left: 100, right: WIDTH - 64, top: top + 40, bottom: height - 150 };
+  const [, ceiling] = niceDomain(0, Math.max(1, ...columns.map((column) => column.value)), 4);
+  const max = linearTicks(0, ceiling, 4);
+  const slot = (plot.right - plot.left) / Math.max(1, columns.length);
+  const sy = (value: number) => plot.bottom - (value / ceiling) * (plot.bottom - plot.top);
+  context.font = `400 17px ${SANS}`;
+  context.textBaseline = 'middle';
+  for (const tick of max.ticks) {
+    context.strokeStyle = GRID;
+    context.setLineDash([4, 6]);
+    context.beginPath();
+    context.moveTo(plot.left, sy(tick));
+    context.lineTo(plot.right, sy(tick));
+    context.stroke();
+    context.setLineDash([]);
+    context.fillStyle = FAINT;
+    context.textAlign = 'right';
+    context.fillText(format(tick), plot.left - 12, sy(tick));
+  }
+  columns.forEach((column, index) => {
+    const width = slot * 0.64;
+    const x = plot.left + index * slot + (slot - width) / 2;
+    context.fillStyle = '#c9ccd4';
+    context.beginPath();
+    context.roundRect(x, sy(column.value), width, plot.bottom - sy(column.value), [5, 5, 0, 0]);
+    context.fill();
+    context.fillStyle = INK;
+    context.textAlign = 'center';
+    context.textBaseline = 'bottom';
+    context.font = `500 15px ${SANS}`;
+    context.fillText(format(column.value), x + width / 2, sy(column.value) - 6);
+    if ((columns.length - 1 - index) % 3 === 0) {
+      context.fillStyle = FAINT;
+      context.textBaseline = 'top';
+      context.font = `400 16px ${SANS}`;
+      context.fillText(column.label, x + width / 2, plot.bottom + 12);
+    }
+  });
   drawFooter(context, frame, height);
   return element;
 }

@@ -18,6 +18,7 @@ try {
   // the prerendered page as soon as it runs. Mirrors `pageAt` in src/main.tsx.
   const pageFiles = {
     'coding-agents': 'CodingAgents',
+    trends: 'Trends',
     leaders: 'Leaders',
     'score-price-time': 'ScorePriceTime',
     market: 'Market',
@@ -71,6 +72,11 @@ try {
   const codingInline = `<script type="application/json" id="coding-data">${codingText
     .trim()
     .replace(/</g, '\\u003c')}</script>`;
+  const trendsText = await readFile('dist/data/models/trends.json', 'utf8');
+  const trends = JSON.parse(trendsText);
+  const trendsInline = `<script type="application/json" id="trends-data">${trendsText
+    .trim()
+    .replace(/</g, '\\u003c')}</script>`;
   for (const { path } of publicPages()) {
     const lesson = path.startsWith('/learn/')
       ? JSON.parse(
@@ -79,6 +85,7 @@ try {
       : undefined;
     const withData = path === '/' || path === '/models';
     const withCoding = path === '/coding-agents';
+    const withTrends = path === '/trends';
     const html = template
       .replace(
         '</head>',
@@ -91,7 +98,10 @@ try {
           lesson,
           withData ? overview : undefined,
           withCoding ? coding : undefined,
-        )}</div>${withData ? inline : ''}${withCoding ? codingInline : ''}`,
+          withTrends ? trends : undefined,
+        )}</div>${withData ? inline : ''}${withCoding ? codingInline : ''}${
+          withTrends ? trendsInline : ''
+        }`,
       );
     const destination = path === '/' ? 'dist/index.html' : `dist${path}.html`;
     await mkdir(dirname(destination), { recursive: true });

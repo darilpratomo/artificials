@@ -680,3 +680,96 @@ a.rank-hit:focus-visible {
 .price-rows .is-output {
   --swatch: #ffffff;
 }
+
+/* Trend lines over time */
+.trend-chart {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.trend-frame svg {
+  display: block;
+  overflow: visible;
+}
+.trend-frame svg:focus-visible {
+  outline: 2px solid #eceef2;
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+.trend-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.trend-dot {
+  stroke: #101115;
+  stroke-width: 2;
+}
+.trend-focus {
+  fill: none;
+  stroke-width: 2;
+}
+.trend-end-label {
+  fill: #c9ccd4;
+  font-size: 12.5px;
+}
+.trend-axis-label {
+  fill: #8d909b;
+  font-size: 12px;
+}
+.trend-hit {
+  cursor: crosshair;
+}
+.trend-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+.trend-tooltip-hint {
+  color: #8d909b;
+  font-size: 12px;
+}
+
+/* Columns per period */
+.column-chart svg {
+  display: block;
+  overflow: visible;
+}
+.column-bar {
+  fill: #c9ccd4;
+}
+.column-bar.is-active {
+  fill: #ffffff;
+}
+.column-hit {
+  cursor: default;
+  outline: none;
+}
+.column-hit:focus-visible {
+  stroke: #eceef2;
+  stroke-width: 1.5;
+}
+.column-tooltip {
+  transform: translate(-50%, calc(-100% - 10px));
+}
+/* A trend legend shows and hides series: shown ones stay plain, hidden ones fade. */
+.trend-legend button[aria-pressed='true'] {
+  border-color: #2f3139;
+  background: transparent;
+  color: #d5d7de;
+}
+.trend-legend button[aria-pressed='true']:hover {
+  border-color: #4d5260;
+  background: #ffffff08;
+}
+.trend-legend button[aria-pressed='false'] {
+  color: #8d909b;
+  text-decoration: line-through;
+}
+.column-chart svg:focus-visible {
+  outline: 2px solid #eceef2;
+  outline-offset: 4px;
+  border-radius: 6px;
+}
