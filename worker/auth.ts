@@ -3,14 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { getCookie, setCookie } from 'hono/cookie';
 import { HTTPException } from 'hono/http-exception';
 import type { Ctx, Env } from './types';
-import { dailyBudgetMicros } from '../shared/plans';
 export const configured = (e: Env) =>
   !!(e.SUPABASE_URL && e.SUPABASE_ANON_KEY && e.SUPABASE_SERVICE_ROLE_KEY);
-export const aiReady = (e: Env) =>
-  e.AI_ENABLED === 'true' &&
-  !!e.OPENAI_API_KEY &&
-  configured(e) &&
-  dailyBudgetMicros(e.GLOBAL_DAILY_AI_BUDGET_MICROS) !== null;
 export const securityChallengePath = (path: string) =>
   path === '/api/security' || path === '/api/security/verify';
 export function auth(c: Ctx) {

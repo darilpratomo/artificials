@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react';
-import type {
-  Explorer,
-  ModelOverview,
-  OverviewTests,
-  Timeline,
-} from '../../shared/model-overview';
+import type { Explorer, ModelOverview, OverviewTests, Timeline } from '../../shared/model-overview';
 import type { Coding } from '../../shared/coding';
 
 export type {
@@ -120,7 +115,6 @@ export function useExplorer(enabled: boolean, attempt = 0) {
 export function useTimeline(attempt = 0) {
   return useFile<Timeline>('timeline.json', isTimeline, true, attempt);
 }
-
 
 /** Coding agent results and coding tests, for the coding agents page. */
 export function useCoding(attempt = 0, initial?: Coding) {

@@ -7,9 +7,7 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
     localStorage.setItem('artificials-analytics-consent-v1', 'denied'),
   );
-  await page.route('**/api/config', (route) =>
-    route.fulfill({ json: { auth: false, ai: false, billing: false } }),
-  );
+  await page.route('**/api/config', (route) => route.fulfill({ json: { auth: false } }));
   await page.route('**/api/session', (route) => route.fulfill({ json: { user: null } }));
 });
 

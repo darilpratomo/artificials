@@ -7,9 +7,7 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
     localStorage.setItem('artificials-analytics-consent-v1', 'denied'),
   );
-  await page.route('**/api/config', (route) =>
-    route.fulfill({ json: { auth: false, ai: false, billing: false } }),
-  );
+  await page.route('**/api/config', (route) => route.fulfill({ json: { auth: false } }));
   await page.route('**/api/session', (route) => route.fulfill({ json: { user: null } }));
   await page.route('**/api/articles', (route) => route.fulfill({ status: 503, json: {} }));
 });
@@ -28,13 +26,16 @@ test('the home page leads with model data, not the other sections', async ({ pag
   await page.goto('/');
   for (const name of ['Leaders right now', 'Rankings', 'Score, price and time', 'New releases'])
     await expect(page.getByRole('heading', { level: 2, name, exact: true })).toBeVisible();
-  // Learn AI, Tools and Studio stay in the header only.
+  // Learn AI and Tools stay in the header only.
   for (const id of ['#home-tools', '#home-academy', '.journey', '.studio-home'])
     await expect(page.locator(id)).toHaveCount(0);
   const header = page.locator('header');
   if (await header.getByRole('link', { name: 'Tools', exact: true }).isVisible()) {
     await expect(header.getByRole('link', { name: 'Learn AI', exact: true })).toBeVisible();
-    await expect(header.getByRole('link', { name: /^Studio/ })).toBeVisible();
+    // The site is free: no sign-in, plans or paid builder in the header.
+    for (const name of [/^Studio/, /^Log in$/, /^Start building/, /^Pricing$/])
+      await expect(header.getByRole('link', { name })).toHaveCount(0);
+    await expect(header.getByRole('link', { name: /^Compare models/ })).toBeVisible();
   }
   // Every leader card names its test and says what kind of figure it is.
   const cards = page.locator('.highlight-card');

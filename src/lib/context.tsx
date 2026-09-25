@@ -3,40 +3,21 @@ import { api } from './api';
 export interface Config {
   auth: boolean;
   google: boolean;
-  billing: boolean;
-  ai: boolean;
   turnstileSiteKey: string;
   legalReady: boolean;
   supportEmail: string;
   privacyEmail: string;
   operatorName: string;
   operatorAddress: string;
-  paddleClientToken?: string;
-  paddleSandbox?: boolean;
 }
+/** Only site editors sign in; visitors never need an account. */
 export interface Session {
   user: { id: string; email: string } | null;
-  subscription?: {
-    plan: string;
-    credits_used: number;
-    credit_limit: number;
-    period_end: string;
-    status: string;
-  };
-  projects?: Project[];
   requiresMfa?: boolean;
-}
-export interface Project {
-  id: string;
-  title: string;
-  updated_at: string;
-  artifact?: import('../../shared/schema').Artifact;
 }
 const fallback: Config = {
   auth: false,
   google: false,
-  billing: false,
-  ai: false,
   turnstileSiteKey: '',
   legalReady: false,
   supportEmail: 'support@artificials.net',

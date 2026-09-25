@@ -1,6 +1,6 @@
 import { AnalyticsPreferencesButton } from '../components/Analytics';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowUpRight, Globe2, BookOpen, Sparkles, Mail } from 'lucide-react';
+import { ArrowUpRight, Globe2, BookOpen, HeartHandshake, Mail } from 'lucide-react';
 import { removeLocal } from '../lib/storage';
 import { useState } from 'react';
 import { PageHeading } from '../components/Layout';
@@ -15,10 +15,10 @@ export default function Info() {
         <PageHeading
           eyebrow="THE IDEA BEHIND ARTIFICIALS"
           title="A clearer view of intelligence."
-          text="An independent guide to AI models, the technology behind them, and the applications you can build."
+          text="A free, independent guide to AI models and the technology behind them, run by volunteers."
         />
         <div className="about-quote">
-          <span>Understand. Compare. Create.</span>
+          <span>Understand. Compare. Learn.</span>
           <h2>
             Technology moves.
             <br />
@@ -29,20 +29,19 @@ export default function Info() {
         </div>
         <div className="about-text">
           <h2>
-            For people exploring AI.
-            <br />
+            For people exploring AI. <br />
             For people building with it.
           </h2>
           <div>
             <p>
-              Artificials connects an AI model directory with clear comparisons, editorial guides,
-              and tools for creating applications. Our focus is making the information useful,
-              understandable, and traceable to its source.
+              Artificials brings together an AI model directory, clear comparisons, editorial
+              guides, a free AI course and free file tools. Our focus is making the information
+              useful, understandable, and traceable to its source.
             </p>
             <p>
-              The directory, comparisons, rankings, and editorial guides are free to explore. Studio
-              is our subscription app builder: generate an interface, server API, and database
-              structure, then download the code and deploy it in your own accounts.
+              Artificials is a non-commercial project run by volunteers to help people understand
+              AI. Everything on the site is free, with no paid plans, no advertising and no
+              sponsored listings. No model maker pays to appear or to rank.
             </p>
             <p>
               We are independent of the AI providers listed here. Provider names and logos identify
@@ -64,9 +63,9 @@ export default function Info() {
               'Read the methodology, distinguish missing data, and compare the metric that matters to you.',
             ],
             [
-              Sparkles,
-              'From understanding to building.',
-              'Generate an application foundation with source code you can inspect, modify, and deploy.',
+              HeartHandshake,
+              'Free for everyone.',
+              'Rankings, guides, lessons and tools are free, without ads or accounts. Volunteers keep it running.',
             ],
           ].map(([Icon, title, text]) => {
             const I = Icon as typeof Globe2;
@@ -123,15 +122,15 @@ export default function Info() {
         <PageHeading
           eyebrow="CONTACT ARTIFICIALS"
           title="How can we help?"
-          text="Questions about your account, a Studio project, or the platform? We’re here to help."
+          text="Spotted a mistake, have a question, or want to help? We’d like to hear from you."
         />
         <div className="contact-card">
           <Mail size={32} />
-          <h2>Support & feedback</h2>
+          <h2>Corrections & feedback</h2>
           <p>
             {config.supportEmail
-              ? 'For product support, billing questions, or feedback, email us. Never include passwords, authentication codes, API keys, or financial account details.'
-              : 'Our support channel is being prepared before subscriptions open.'}
+              ? 'For corrections, questions or feedback, email us. Never include passwords, authentication codes or API keys.'
+              : 'Our contact address is being prepared.'}
           </p>
           {config.supportEmail && (
             <a className="btn" href={'mailto:' + config.supportEmail}>
@@ -140,8 +139,7 @@ export default function Info() {
             </a>
           )}
           <p className="caption">
-            For an existing subscription, you can also manage billing through your account
-            dashboard.
+            Artificials is run by volunteers, so replies can take a few days.
           </p>
         </div>
       </div>
@@ -152,13 +150,10 @@ export default function Info() {
       <PageHeading
         eyebrow="LEGAL & TRUST"
         title={privacy ? 'Privacy policy.' : 'Terms & conditions.'}
-        text="Last updated September 17, 2026"
+        text="Last updated September 25, 2026"
       />
       {!config.legalReady && (
-        <div className="notice">
-          Pre-launch draft. Operator and contact details are being finalized before paid
-          subscriptions become available.
-        </div>
+        <div className="notice">Operator and contact details are being finalized.</div>
       )}
       <div className="prose">
         {privacy ? (
@@ -167,25 +162,18 @@ export default function Info() {
             <p>
               {config.operatorName
                 ? `${config.operatorName}, ${config.operatorAddress}, operates Artificials at artificials.net.`
-                : 'The operator’s legal identity and address will be published here before commercial launch.'}{' '}
+                : 'The operator’s identity and address will be published here.'}{' '}
               {config.privacyEmail
                 ? `Privacy questions: ${config.privacyEmail}.`
                 : 'A privacy contact will be provided before launch.'}
             </p>
             <h2>2. Information we use</h2>
             <p>
-              For accounts, we use your email address, authentication identifiers, and security
-              settings. If you use Studio, we process your prompts, generated code, project records,
-              usage counts, and subscription status. Our infrastructure providers may process
-              technical information such as IP addresses, browser information, security events, and
-              request logs. You can browse the model directory and editorial guides without an
-              account.
-            </p>
-            <p>
-              Do not put passwords, API keys, sensitive personal information, or confidential
-              third-party data into prompts. Prompts are sent to OpenAI to generate your
-              application. We store generated projects and usage records; this application does not
-              maintain a separate prompt-history table.
+              Artificials is free and non-commercial, and you can use all of it without an account.
+              Only the volunteers who edit the site’s articles sign in; for them we use an email
+              address, authentication identifiers and security settings. Our infrastructure
+              providers may process technical information such as IP addresses, browser information,
+              security events and request logs.
             </p>
             <h2>3. Why we process information</h2>
             <p>
@@ -196,41 +184,38 @@ export default function Info() {
               optional page-view analytics still work as described in this policy.
             </p>
             <p>
-              We use account and project data to provide the service and fulfill our agreement with
-              you; billing records for subscription administration and legal obligations; and
-              limited technical information for security, abuse prevention, and service reliability.
-              When you choose Google sign-in, we use the identity information needed to create or
-              access your account.
+              We use editor account data to let editors manage articles, and limited technical
+              information for security, abuse prevention and service reliability. When an editor
+              chooses Google sign-in, we use the identity information needed to access the account.
+              We do not sell information or use it for advertising.
             </p>
             <h2>4. Service providers and international processing</h2>
             <p>
               Cloudflare provides hosting and security, and Cloudflare Web Analytics counts page
               views and measures how quickly pages load, without cookies or other storage on your
-              device. Supabase provides authentication and database storage. OpenAI processes AI
-              requests. Paddle handles checkout and subscription payments as merchant of record. We
-              do not receive or store your full card number. Google processes sign-in information if
-              you choose Google sign-in. Cloudflare Turnstile helps protect sign-in from automated
-              abuse. These providers may process information outside your country; the applicable
-              arrangements depend on their processing locations, terms, and transfer safeguards.
+              device. Supabase provides editor sign-in and stores articles. Google processes sign-in
+              information if an editor chooses Google sign-in. Cloudflare Turnstile helps protect
+              sign-in from automated abuse. These providers may process information outside your
+              country; the applicable arrangements depend on their processing locations, terms, and
+              transfer safeguards.
             </p>
             <p>
-              Model metadata is fetched and cached by our server. Browsing the catalog does not send
-              your Studio prompts to the catalog data source. Links to provider documentation open
-              external websites with their own privacy practices.
+              Model data is fetched and cached by our server, so browsing the catalog sends nothing
+              about you to its sources. Links to provider documentation open external websites with
+              their own privacy practices.
             </p>
             <h2>5. Cookies and device storage</h2>
             <p>
-              Essential HTTP-only cookies maintain your signed-in session. Your selected model
-              comparisons and Academy lesson completion are saved in your browser’s local storage so
-              they remain available as you navigate. Academy progress stays on this device and is
-              not synchronized to an account. Authentication, payment, and security providers may
-              use their own essential storage. With your permission, Google Analytics uses
-              first-party cookies to measure visits to public pages, including device/browser
-              information and approximate location. Google processes this information under its own
-              privacy policy. Google Analytics is optional and stays off until you accept;
-              advertising features are disabled. We do not include your email, Studio prompts, query
-              strings, account pages or private CMS URLs in our page-view events. Your analytics
-              choice is saved on this device.
+              Essential HTTP-only cookies keep an editor signed in. Your selected model comparisons
+              and Academy lesson completion are saved in your browser’s local storage so they remain
+              available as you navigate. Academy progress stays on this device and is not
+              synchronized to an account. Sign-in and security providers may use their own essential
+              storage. With your permission, Google Analytics uses first-party cookies to measure
+              visits to public pages, including device/browser information and approximate location.
+              Google processes this information under its own privacy policy. Google Analytics is
+              optional and stays off until you accept; advertising features are disabled. We do not
+              include email addresses, query strings, account pages or private editor URLs in our
+              page-view events. Your analytics choice is saved on this device.
             </p>
             <p>
               <a
@@ -249,9 +234,8 @@ export default function Info() {
             </p>
             <AnalyticsPreferencesButton />
             <p>
-              You can clear the model comparison saved on this device below. This does not delete
-              your account or saved Studio projects. You can also clear site storage through your
-              browser settings, which may sign you out.
+              You can clear the model comparison saved on this device below. You can also clear site
+              storage through your browser settings.
             </p>
             <button
               className="btn btn-outline"
@@ -265,36 +249,33 @@ export default function Info() {
             </button>
             <h2>7. Retention and deletion</h2>
             <p>
-              Saved projects remain while your account is active unless you delete them. Deleting a
-              project removes its saved code; associated usage entries may remain for billing and
-              abuse prevention. Subscription and payment records may need to be retained for tax,
-              fraud prevention, dispute handling, and other legal obligations. Database backup
-              copies may persist until the provider’s retention period expires.
+              Editor accounts are kept while the editor helps with the site. Database backup copies
+              may persist until the provider’s retention period expires. Analytics data is kept
+              under Google’s and Cloudflare’s retention settings.
             </p>
             <p>
-              To request account deletion, a copy of your information, or a correction, contact the
-              privacy address above. We will verify your identity and apply your local privacy
-              rights, including access, erasure, restriction, portability, objection, and
-              withdrawing consent where applicable. You may also complain to your local data
-              protection authority.
+              To request deletion, a copy of your information, or a correction, contact the privacy
+              address above. We will verify your identity and apply your local privacy rights,
+              including access, erasure, restriction, portability, objection, and withdrawing
+              consent where applicable. You may also complain to your local data protection
+              authority.
             </p>
-            <h2>8. Children and changes</h2>
+            <h2>8. Changes</h2>
             <p>
-              The account and paid Studio service are intended for adults aged 18 and over. We may
-              update this policy when our service or legal obligations change. Material changes will
-              be disclosed on the site before taking effect where required.
+              We may update this policy when the site or legal obligations change. Material changes
+              will be disclosed on the site before taking effect where required.
             </p>
           </>
         ) : (
           <>
-            <h2>1. Service and agreement</h2>
+            <h2>1. The service</h2>
             <p>
               {config.operatorName
                 ? `${config.operatorName}, ${config.operatorAddress}, provides Artificials.`
-                : 'Operator details will be finalized before commercial launch.'}{' '}
-              These terms cover the AI model directory, comparisons, rankings, editorial content,
-              accounts, and Studio. By creating an account or purchasing a plan you agree to these
-              terms. Account holders must be at least 18 and able to enter a contract.
+                : 'Operator details are being finalized.'}{' '}
+              Artificials is a free, non-commercial website run by volunteers: an AI model
+              directory, comparisons, rankings, editorial guides, lessons and file tools. There are
+              no paid plans. By using the site you agree to these terms.
             </p>
             <h2>2. Model information and rankings</h2>
             <p>
@@ -303,74 +284,40 @@ export default function Info() {
               publishing data; we cannot guarantee complete or immediate coverage of every release.
               Check exact model versions, capabilities, licenses, and pricing with the provider
               before relying on them. Rankings describe their stated metric and are not a promise
-              that a model will be best for your task.
+              that a model will be best for your task. Results from other projects keep their
+              creators’ licences, which each page names; some allow only non-commercial reuse.
             </p>
-            <h2>3. Your account</h2>
+            <h2>3. Lessons and free tools</h2>
             <p>
-              Use accurate information, protect your email and authentication factors, and tell us
-              about suspected unauthorized access. Do not share paid access, bypass quotas, resell
-              access without permission, disrupt the service, or attempt to access another person’s
-              data.
+              Lessons and code examples are for learning; review and test code before you use it.
+              The file tools process files in your browser, and you are responsible for the files
+              you choose and for having the right to process them.
             </p>
-            <h2>4. Studio plans and renewals</h2>
+            <h2>4. Editor accounts</h2>
             <p>
-              Plans are billed monthly in USD at the price shown at checkout, with applicable tax
-              added. Subscriptions renew automatically until canceled through the billing portal.
-              Each paid period includes the generation and saved-project limits shown on the pricing
-              page. Unused generations do not roll over. There are no automatic overage charges.
+              Only site editors sign in. Editors must protect their email and authentication factors
+              and tell us about suspected unauthorized access.
             </p>
+            <h2>5. Acceptable use</h2>
             <p>
-              A generation or revision consumes one credit when the request is submitted to the AI
-              provider, including attempts that later fail or are interrupted. Requests rejected
-              before submission due to access or quota checks do not consume credits. Input length,
-              output length, concurrent requests, and daily service capacity are limited. Reaching
-              the shared daily capacity may temporarily pause generation until the next UTC day.
+              Do not use the site for unlawful activity, fraud, phishing, malware, harassment,
+              rights infringement, or collecting data without appropriate permission. Do not disrupt
+              the service or attempt to access data that is not yours. We may restrict access when
+              reasonably necessary to protect the site and its visitors.
             </p>
-            <h2>5. Canceling and refunds</h2>
+            <h2>6. Availability and responsibility</h2>
             <p>
-              You can cancel renewal in your dashboard’s billing portal. Access normally continues
-              through the already paid period. Contact support or Paddle for billing issues and
-              refund requests. Refund eligibility depends on the circumstances and applicable
-              consumer law; these terms do not exclude mandatory cancellation or refund rights.
-              Refunded, disputed, or overdue subscriptions may have generation access suspended.
+              Volunteers run Artificials on free infrastructure, so we cannot guarantee
+              uninterrupted availability or error-free information. To the extent allowed by law,
+              the site is provided as available. Nothing in these terms excludes rights or liability
+              that cannot legally be excluded.
             </p>
-            <h2>6. Generated applications</h2>
+            <h2>7. Changes and contact</h2>
             <p>
-              Studio produces source code and a static design preview. You configure and deploy the
-              downloaded application using your own hosting, database, authentication, and other
-              provider accounts. Hosting costs and third-party charges are separate from your Studio
-              subscription.
-            </p>
-            <p>
-              You can use and modify generated output to the extent permitted by applicable law and
-              third-party licenses. Output may be inaccurate, insecure, incomplete, or similar to
-              output for others. You must review, test, and assess licensing and legal requirements
-              before using or publishing an application. We do not promise that generated output
-              will meet every requirement without engineering work.
-            </p>
-            <h2>7. Acceptable use</h2>
-            <p>
-              Do not use the service for unlawful activity, fraud, phishing, malware, harassment,
-              rights infringement, or collecting data without appropriate permission. Do not submit
-              secrets or data you lack permission to process. We may restrict access when reasonably
-              necessary to protect the service and its users or meet legal obligations.
-            </p>
-            <h2>8. Availability and responsibility</h2>
-            <p>
-              We aim to provide a reliable service but do not guarantee uninterrupted availability
-              or an error-free generated app. Free infrastructure and third-party dependencies
-              impose capacity limits. To the extent allowed by law, the service is provided as
-              available. Nothing in these terms excludes rights or liability that cannot legally be
-              excluded, including applicable consumer protections.
-            </p>
-            <h2>9. Changes and contact</h2>
-            <p>
-              We may update these terms and plan offerings. Price changes apply prospectively with
-              notice where required and do not retroactively change paid periods. Your mandatory
-              local consumer rights remain applicable.{' '}
+              We may update these terms when the site changes.{' '}
               {config.supportEmail
-                ? `For questions or disputes, contact ${config.supportEmail}.`
-                : 'A support address will be published before subscriptions open.'}
+                ? `For questions, contact ${config.supportEmail}.`
+                : 'A contact address will be published here.'}
             </p>
           </>
         )}

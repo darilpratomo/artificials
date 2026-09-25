@@ -26,8 +26,6 @@ try {
     compare: 'Compare',
     news: 'Learn',
     tools: 'Tools',
-    studio: 'Studio',
-    pricing: 'Pricing',
     about: 'Info',
     privacy: 'Info',
     terms: 'Info',
@@ -99,7 +97,7 @@ try {
     await mkdir(dirname(destination), { recursive: true });
     await writeFile(destination, html);
   }
-  for (const route of ['login', 'dashboard', 'checkout', '404'])
+  for (const route of ['login', 'dashboard', '404'])
     await writeFile(
       `dist/${route}.html`,
       template.replace('</head>', metadataHtml(pageMetadata('/' + route)) + '</head>'),

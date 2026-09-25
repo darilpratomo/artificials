@@ -41,13 +41,10 @@ const Academy = page(() => import('./pages/Academy'));
 const AcademyLesson = page(() => import('./pages/AcademyLesson'));
 const Learn = page(() => import('./pages/Learn'));
 const Tools = page(() => import('./pages/Tools'));
-const Studio = page(() => import('./pages/Studio'));
-const Pricing = page(() => import('./pages/Pricing'));
 const Login = page(() => import('./pages/Login'));
 const Dashboard = page(() => import('./pages/Dashboard'));
 const Info = page(() => import('./pages/Info'));
 const Cms = page(() => import('./pages/Cms'));
-const Checkout = page(() => import('./pages/Checkout'));
 
 /** The lazily loaded page an address opens, if any. The home page is always bundled. */
 function pageAt(path: string) {
@@ -64,11 +61,8 @@ function pageAt(path: string) {
     ['compare', Compare],
     ['news', Learn],
     ['tools', Tools],
-    ['studio', Studio],
-    ['pricing', Pricing],
     ['login', Login],
     ['dashboard', Dashboard],
-    ['checkout', Checkout],
     ['about', Info],
     ['privacy', Info],
     ['terms', Info],
@@ -121,11 +115,8 @@ const app = (
               <Route path="news/:slug" element={<Learn />} />
               <Route path="tools" element={<Tools />} />
               <Route path="tools/:toolId" element={<Tools />} />
-              <Route path="studio" element={<Studio />} />
-              <Route path="pricing" element={<Pricing />} />
               <Route path="login" element={<Login />} />
               <Route path="dashboard" element={<Dashboard />} />
-              <Route path="checkout" element={<Checkout />} />
               {['about', 'privacy', 'terms', 'contact'].map((p) => (
                 <Route key={p} path={p} element={<Info />} />
               ))}

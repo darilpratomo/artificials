@@ -6,4 +6,5 @@ Build clean, secure, lightweight software with a professional UI responsive acro
 - Never invent AI model rankings, benchmark scores or freshness. Show source and retrieval time; distinguish catalog metadata from measured benchmarks. The owner asked for no last-updated time on the home page: there, credit each chart's source beside it, and keep retrieval times on the rankings and model pages.
 - Keep admin.md local only. Never add it to Git, deploy uploads, public assets or build output. Never commit secrets.
 - After completed coding changes, run appropriate checks, review the diff, then commit and push to the Artificials GitHub repository. Do not push incomplete work or secrets.
-- The owner selected Cloudflare Free. Do not purchase services or upgrade plans. Paid AI requests remain disabled until credentials and billing are configured.
+- The owner selected Cloudflare Free. Do not purchase services or upgrade plans.
+- Artificials is free and non-commercial, run by volunteers (owner decision, 25 September 2026). Do not add paid plans, checkout, ads, sponsored listings or paid AI features. Data under non-commercial licences such as CC BY-NC may be used; credit every source and keep its licence terms.

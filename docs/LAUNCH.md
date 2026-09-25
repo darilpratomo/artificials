@@ -1,6 +1,6 @@
 # Artificials deployment notes
 
-The owner selected **Cloudflare Workers Free** with GitHub integration. Keep `AI_ENABLED=false`, `BILLING_ENABLED=false`, and `LEGAL_READY=false` until the services, policies, and production checks are configured. Do not upgrade provider plans automatically.
+The owner selected **Cloudflare Workers Free** with GitHub integration. Artificials is free and non-commercial: there is no billing or paid AI to configure. Keep `LEGAL_READY=false` until the operator details and policies are final. Do not upgrade provider plans automatically.
 
 ## Local development
 
@@ -8,18 +8,16 @@ Use Node.js 24 LTS. Run `npm ci`, copy `.dev.vars.example` to `.dev.vars`, then 
 
 ## Required services
 
-- Cloudflare Worker and static assets for hosting; Turnstile for public email sign-in protection.
-- A dedicated Supabase project for Auth and PostgreSQL. Apply `supabase/001_initial.sql` once, followed by `supabase/002_seed.sql`. Configure production email delivery and the exact OAuth callback origin.
-- Paddle merchant approval, monthly USD prices, verified webhooks, and production policy/operator details before opening checkout.
-- An OpenAI API project and server-side secret before enabling paid generation. ChatGPT subscriptions do not include this API usage.
+- Cloudflare Worker and static assets for hosting; Turnstile to protect editor sign-in.
+- Optional, for the article CMS only: a dedicated Supabase project for editor Auth and PostgreSQL. Apply `supabase/001_initial.sql` to `005_remove_paid_features.sql` in order. Configure production email delivery and the exact OAuth callback origin.
 
-Never put API keys or service-role credentials in `VITE_` variables. Configure each server secret in the production Worker, for example `npx wrangler secret put OPENAI_API_KEY --env production`; do not bulk-upload local development overrides to production. The detailed operator guide is intentionally kept local in `admin.md` and excluded from source control and deployment.
+Never put service-role credentials in `VITE_` variables. Configure each server secret in the production Worker, for example `npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY --env production`; do not bulk-upload local development overrides to production. The detailed operator guide is intentionally kept local in `admin.md` and excluded from source control and deployment.
 
 ## Production deployment
 
 `wrangler.jsonc` separates local defaults from `env.production`. Both target the Worker name `artificials`; production deploys must explicitly select the production environment. Run `npm run check` and `npm run test:e2e`, review the diff, then run `npm run deploy`. This script builds the site and executes `wrangler deploy --env production`. If the build already passed, the direct deploy command is `npx wrangler deploy --env production`. Do not use bare `wrangler deploy` for the live site: the top-level variables are for local development.
 
-The production `APP_URL` is `https://artificials.net`; keep `ENVIRONMENT=production`. Configure that same origin in Supabase callbacks, Turnstile and Paddle before enabling those integrations. Secure cookies, CSRF checks, authentication callbacks and sitemap links depend on this value. The workers.dev address remains available for public browsing; account writes use the canonical production origin. Use `--env production` for all production secret commands.
+The production `APP_URL` is `https://artificials.net`; keep `ENVIRONMENT=production`. Configure that same origin in Supabase callbacks and Turnstile before enabling editor sign-in. Secure cookies, CSRF checks, authentication callbacks and sitemap links depend on this value. The workers.dev address remains available for public browsing; account writes use the canonical production origin. Use `--env production` for all production secret commands.
 
 ## Domain connection
 
@@ -47,8 +45,6 @@ Scheduled runs and upstream publication can lag, so this is periodic updating, n
 
 ## Capacity and cost
 
-Free hosting is subject to provider quotas. Workers Free currently allows 100,000 Worker requests/day and 10 ms CPU/request; measure real authenticated generation in staging before selling access. Static assets have separate accounting. Local catalog timing and local Worker smoke tests are not Cloudflare production CPU telemetry; verify the actual deployed requests in Cloudflare before drawing capacity conclusions. Supabase Free has storage, auth and egress limits. Keep services on their free plans and stop or reduce usage at capacity.
+Free hosting is subject to provider quotas. Workers Free currently allows 100,000 Worker requests/day and 10 ms CPU/request. Static assets have separate accounting. Local catalog timing and local Worker smoke tests are not Cloudflare production CPU telemetry; verify the actual deployed requests in Cloudflare before drawing capacity conclusions. Supabase Free has storage, auth and egress limits. Keep services on their free plans and stop or reduce usage at capacity.
 
-Paid generation reserves $0.10 per submitted attempt before calling the provider, with atomic monthly and daily limits. The pinned model, maximum payload, output tokens, and SQL quotas must be reviewed together when changing pricing. No retries or paid tools run automatically. Subscription pricing targets positive contribution after conservative AI reservations and the base processing fee; profit is not guaranteed. OpenAI usage, payment fees, and optional third-party services are separate from hosting costs.
-
-Official references checked September 17, 2026: [Cloudflare limits](https://developers.cloudflare.com/workers/platform/limits/), [Workers Builds setup](https://developers.cloudflare.com/workers/ci-cd/builds/), [Supabase pricing](https://supabase.com/pricing), [OpenAI GPT-5 Mini](https://developers.openai.com/api/docs/models/gpt-5-mini), [Paddle pricing](https://www.paddle.com/pricing).
+Official references checked September 17, 2026: [Cloudflare limits](https://developers.cloudflare.com/workers/platform/limits/), [Workers Builds setup](https://developers.cloudflare.com/workers/ci-cd/builds/), [Supabase pricing](https://supabase.com/pricing).

@@ -60,29 +60,21 @@ const pages: Record<string, [string, string]> = {
     'Learn AI with Python — Artificials Academy',
     'Learn AI through 36 original lessons: foundations, Python, machine learning, neural networks, language models, and four practical projects.',
   ],
-  '/studio': [
-    'Artificials Studio',
-    'Explore Artificials Studio, a workspace for building full-stack application projects with AI, including databases and authentication.',
-  ],
-  '/pricing': [
-    'Studio plans and pricing',
-    'Review Artificials Studio subscription plans, included generation credits, and usage limits before choosing a plan.',
-  ],
   '/about': [
     'About Artificials',
-    'Learn about Artificials and our approach to AI model information, published benchmark evidence, and practical AI education.',
+    'Artificials is a free, non-commercial guide to AI models, published benchmark evidence and practical AI education, run by volunteers.',
   ],
   '/contact': [
     'Contact Artificials',
-    'Contact the Artificials team at support@artificials.net for product questions, feedback, and support.',
+    'Contact the Artificials volunteers at support@artificials.net with corrections, questions and feedback.',
   ],
   '/privacy': [
     'Privacy policy',
-    'Read how Artificials handles account information, local preferences, service data, and privacy requests.',
+    'How Artificials handles analytics, local preferences, editor accounts and privacy requests. Visitors never need an account.',
   ],
   '/terms': [
     'Terms and conditions',
-    'Read the terms for using Artificials, including educational content, AI information, accounts, and Studio services.',
+    'The terms for using Artificials, a free and non-commercial site: model information, rankings, guides, lessons and free tools.',
   ],
 };
 export function publicPages(articles: Article[] = ARTICLES) {
@@ -111,9 +103,8 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
   const lesson = academy.lessons.find((l) => path === '/learn/' + l.slug);
   const known = Boolean(pages[path] || article || lesson);
   const accountTitles: Record<string, string> = {
-    '/login': 'Welcome back',
-    '/dashboard': 'Your workspace',
-    '/checkout': 'Checkout',
+    '/login': 'Editor sign-in',
+    '/dashboard': 'Editor account',
   };
   const title =
     (article?.title ||

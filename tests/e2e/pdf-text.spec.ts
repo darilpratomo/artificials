@@ -39,7 +39,7 @@ test('PDF to Word preserves adjacent font runs and real word gaps', async ({ pag
   );
   await page.route('**/api/config', (route) =>
     route.fulfill({
-      json: { auth: false, ai: false, billing: false, supportEmail: 'support@artificials.net' },
+      json: { auth: false, supportEmail: 'support@artificials.net' },
     }),
   );
   await page.route('**/api/session', (route) => route.fulfill({ json: { user: null } }));

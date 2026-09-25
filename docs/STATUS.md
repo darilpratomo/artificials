@@ -1,6 +1,6 @@
 # Artificials implementation status
 
-Updated: 18 September 2026.
+Updated: 25 September 2026. Artificials is now free and non-commercial: the paid app builder (Studio), plans, checkout and paid AI generation were removed on this date.
 
 ## Implemented
 
@@ -8,15 +8,15 @@ Optional Google Analytics (`G-YR7B1XDDLM`) uses explicit visitor consent, manual
 
 SEO: 53 public pages prerendered as static HTML, per-page metadata/canonicals/social previews, article and website structured data, expanded sitemap and real missing-page 404s. See [SEO.md](SEO.md) for owner Search Console/Bing setup and remaining measurement limits. All dropdowns share an accessible custom combobox; search fields have a single border and consistent spacing; editorial imagery is compact on desktop.
 
-Black/silver responsive English UI with SVG icons, owner-supplied metallic A branding with a Sora wordmark, separate full-width desktop and portrait mobile planetary banners bearing the supplied logo, a continuously interpolated floating header, an animated accessible mobile menu, damped horizontal scroll sequences on desktop and mobile, and reduced-motion fallback. Model directory, capability benchmarks, separate metadata rankings, comparison, illustrated original AI guides, a 36-lesson Learn AI Academy with nine modules and four Python projects, Studio, account dashboard, login, pricing, about/privacy/terms/contact and hidden CMS. Instagram and X profiles use official icon-only brand glyphs in the centered footer. Author names and badges are removed from news and lessons. Visible illustration captions and catalog branding are removed at the owner’s request; distribution license notices remain. Source-backed model snapshots include every offering in the upstream catalog, with pagination, filters, source links and retrieval timestamps.
+Black/silver responsive English UI with SVG icons, owner-supplied metallic A branding with a Sora wordmark, separate full-width desktop and portrait mobile planetary banners bearing the supplied logo, a continuously interpolated floating header, an animated accessible mobile menu, damped horizontal scroll sequences on desktop and mobile, and reduced-motion fallback. Model directory, capability benchmarks, separate metadata rankings, comparison, coding agent results, illustrated original AI guides, a 36-lesson Learn AI Academy with nine modules and four Python projects, free file tools, editor sign-in and account security, about/privacy/terms/contact and hidden CMS. Instagram and X profiles use official icon-only brand glyphs in the centered footer. Author names and badges are removed from news and lessons. Visible illustration captions and catalog branding are removed at the owner’s request; distribution license notices remain. Source-backed model snapshots include every offering in the upstream catalog, with pagination, filters, source links and retrieval timestamps.
 
-Backend includes Supabase Auth/RLS/MFA, Paddle webhook/payment handling, atomic generation quotas and spend reservations, server-only OpenAI API access, isolated static previews and downloadable full-stack source with database schema. AI and billing are disabled by default.
+Backend includes Supabase Auth/RLS/MFA for editors and the article CMS, rate limits and origin checks. There is no payment handling or paid AI; old `/studio`, `/pricing` and `/checkout` links redirect home.
 
 ## Verification scope
 
-Automated checks cover type safety, production build, atomic PostgreSQL operations, ownership/MFA/payment security, catalog normalization/pagination, export structure, desktop/mobile workflows, comparison persistence, reduced motion and automated accessibility.
+Automated checks cover type safety, production build, PostgreSQL permissions, MFA and origin security, catalog normalization/pagination, desktop/mobile workflows, comparison persistence, reduced motion and automated accessibility.
 
-Browser fixtures test interface behavior; real provider model data is checked separately. No OpenAI requests, customer payments or production authentication are performed without configured provider accounts. Automated accessibility checks do not replace manual assistive-technology testing. Generated model code is not guaranteed to build for every possible prompt.
+Browser fixtures test interface behavior; real provider model data is checked separately. No production authentication is performed without configured provider accounts. Automated accessibility checks do not replace manual assistive-technology testing.
 
 Verified locally in this implementation:
 
@@ -37,6 +37,6 @@ Verified locally in this implementation:
 
 The public support contact is support@artificials.net, as supplied by the owner. Website configuration does not provision or verify the mailbox. Editorial illustrations are locally hosted responsive WebP files; asset prompts and provenance are in EDITORIAL-ASSETS.md. Capability benchmarks have nine views, initially 58 LiveBench model configurations and 40 image-model results. These are sourced, scheduled snapshots, not invented scores or guaranteed real-time measurements.
 
-Supabase database/auth/SMTP and admin MFA; OpenAI key and staging usage checks; approved Paddle merchant account, sandbox webhook verification, production prices and legal operator details; optional Google OAuth; Turnstile. The operator must test full generation within Cloudflare Free CPU limits before enabling paid traffic. Hosting and data refresh are subject to provider quotas. There is no guarantee of net profit or complete real-time AI coverage.
+For the optional article CMS: Supabase database/auth/SMTP and editor MFA; legal operator details; optional Google OAuth; Turnstile. Hosting and data refresh are subject to provider quotas. There is no guarantee of complete real-time AI coverage.
 
 The local-only `admin.md` contains the setup and operations guide and is excluded from Git and deploy assets.

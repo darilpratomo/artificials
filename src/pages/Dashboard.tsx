@@ -1,26 +1,18 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import {
-  ArrowUpRight,
-  Plus,
-  FolderOpen,
-  Sparkles,
-  CreditCard,
-  LogOut,
-  ShieldCheck,
-  Trash2,
-  ArrowRight,
-  X,
-} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowUpRight, LogOut, ShieldCheck } from 'lucide-react';
 import { useApp } from '../lib/context';
 import { api, post } from '../lib/api';
 import { EmptyState } from '../components/Layout';
+/**
+ * The account page for site editors: sign-out and two-factor authentication,
+ * which the private editor tools require. Visitors never need an account.
+ */
 export default function Dashboard() {
   const { session, loading, refresh } = useApp();
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [factor, setFactor] = useState<{ id: string; secret?: string } | null>(null);
   const [code, setCode] = useState('');
   const [securityStatus, setSecurityStatus] = useState('');
@@ -36,25 +28,23 @@ export default function Dashboard() {
       setBusy(false);
     }
   }
-  if (loading) return <div className="loading-panel">Opening your workspace…</div>;
+  if (loading) return <div className="loading-panel">Opening your account…</div>;
   if (!session.user)
     return (
       <EmptyState
-        title="Your workspace starts here."
-        text="Sign in to see your projects, manage your plan, and pick up where you left off."
+        title="For site editors."
+        text="Artificials is free to use without an account. Editors sign in here to look after the site’s articles."
         link="/login?next=/dashboard"
-        label="Sign in to your account"
+        label="Editor sign-in"
       />
     );
-  const s = session.subscription;
-  const projects = session.projects || [];
   return (
     <div className="container page dashboard">
       <div className="dashboard-heading">
         <div>
-          <span className="eyebrow">YOUR WORKSPACE</span>
-          <h1>Your workspace.</h1>
-          <p>Manage your projects, check usage, and keep your account protected.</p>
+          <span className="eyebrow">EDITOR ACCOUNT</span>
+          <h1>Editor account.</h1>
+          <p>Keep your sign-in protected with two-factor authentication.</p>
         </div>
         <button
           className="text-link"
@@ -75,155 +65,21 @@ export default function Dashboard() {
           Verify your authenticator code in Security settings below to finish signing in.
         </div>
       )}
-      <div className="dashboard-stats">
-        <div>
-          <span className="stat-icon">
-            <FolderOpen size={20} />
-          </span>
-          <span>Your projects</span>
-          <strong>
-            {projects.length}
-            <small> saved projects</small>
-          </strong>
-        </div>
-        <div>
-          <span className="stat-icon">
-            <Sparkles size={20} />
-          </span>
-          <span>Generations remaining</span>
-          <strong>
-            {s ? Math.max(0, s.credit_limit - s.credits_used) : 0}
-            <small>
-              {' '}
-              {s ? `of ${s.credit_limit} this period` : 'Choose a plan to get started'}
-            </small>
-          </strong>
-          {s && (
-            <progress
-              aria-label="Generations remaining this billing period"
-              value={Math.max(0, s.credit_limit - s.credits_used)}
-              max={s.credit_limit}
-            />
-          )}
-        </div>
-        <div>
-          <span className="stat-icon">
-            <CreditCard size={20} />
-          </span>
-          <span>Your plan</span>
-          <strong className="capitalize">
-            {s?.plan || 'Explorer'}
-            <small>{s?.status || 'Free model directory access'}</small>
-          </strong>
-        </div>
-      </div>
       <div role="alert" className={error ? 'error' : ''}>
         {error}
       </div>
       <div className="dashboard-content">
         <section>
-          <div className="section-heading">
-            <h2>Your projects</h2>
-            <Link className="btn btn-small" to="/studio">
-              <Plus size={16} /> New project
-            </Link>
-          </div>
-          {projects.length ? (
-            <div className="project-grid">
-              {projects.map((p) => (
-                <div className="project-card" key={p.id}>
-                  <span className="project-art">
-                    <FolderOpen size={32} />
-                  </span>
-                  <h3>{p.title}</h3>
-                  <p>Updated {new Date(p.updated_at).toLocaleDateString('en-US')}</p>
-                  <div className="project-actions">
-                    <Link className="text-link" to={'/studio?project=' + p.id}>
-                      Open project <ArrowUpRight size={15} />
-                    </Link>
-                    {confirmDelete === p.id ? (
-                      <>
-                        <button
-                          className="text-link danger"
-                          disabled={busy}
-                          onClick={() =>
-                            void action(async () => {
-                              await api('/projects/' + p.id, { method: 'DELETE' });
-                              setConfirmDelete(null);
-                              await refresh();
-                            })
-                          }
-                        >
-                          Confirm delete
-                        </button>
-                        <button
-                          className="icon-btn"
-                          aria-label="Cancel deletion"
-                          onClick={() => setConfirmDelete(null)}
-                        >
-                          <X size={15} aria-hidden="true" />
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        className="icon-btn"
-                        aria-label={'Delete ' + p.title}
-                        onClick={() => setConfirmDelete(p.id)}
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="dashboard-empty">
-              <span className="empty-icon">
-                <FolderOpen size={30} />
-              </span>
-              <h3>Create your first application.</h3>
-              <p>Your first project starts with a prompt.</p>
-              <Link className="text-link" to="/studio">
-                Open Studio <ArrowRight size={16} />
-              </Link>
-            </div>
-          )}
-        </section>
-        <aside>
           <div className="account-panel">
-            <span className="eyebrow">ACCOUNT AT A GLANCE</span>
-            <h3>Your account</h3>
+            <h2>Signed in</h2>
             <label>Email address</label>
             <p className="account-email">{session.user.email}</p>
-            <label>Billing</label>
-            <p>
-              {s
-                ? `Current access period ends ${new Date(s.period_end).toLocaleDateString('en-US')}.`
-                : 'No paid subscription. Explore at your own pace.'}
-            </p>
-            {s ? (
-              <button
-                className="btn btn-outline full"
-                disabled={busy}
-                onClick={() =>
-                  void action(async () => {
-                    const d = await post<{ url: string }>('/billing/portal');
-                    location.assign(d.url);
-                  })
-                }
-              >
-                Manage subscription <ArrowUpRight size={15} />
-              </button>
-            ) : (
-              <Link className="btn btn-outline full" to="/pricing">
-                Explore Studio plans <ArrowUpRight size={15} />
-              </Link>
-            )}
             <p className="caption">
-              Monthly limits are enforced automatically. No overage charges.
+              Editor access also needs the editor role and a verified authenticator.
             </p>
           </div>
+        </section>
+        <aside>
           <div className="security-panel">
             <ShieldCheck size={21} />
             <h3>Account security</h3>

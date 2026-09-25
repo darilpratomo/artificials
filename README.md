@@ -1,6 +1,6 @@
 # Artificials
 
-Independent AI model directory, sourced capability benchmarks, separate specification/price rankings, side-by-side comparison, illustrated editorial guides, a free 36-lesson AI Academy and a metered full-stack AI app builder for **artificials.net**. English interface; black/silver design, responsive visuals, horizontal scroll storytelling on desktop and mobile, a smoothly morphing floating header, and reduced-motion support. Branding uses the supplied metallic A and a locally hosted Sora wordmark.
+Free, non-commercial AI model directory run by volunteers: sourced capability benchmarks, coding agent results, separate specification/price rankings, side-by-side comparison, illustrated editorial guides, a free 36-lesson AI Academy and free file tools for **artificials.net**. There are no paid plans, ads or sponsored listings. English interface; black/silver design, responsive visuals, horizontal scroll storytelling on desktop and mobile, a smoothly morphing floating header, and reduced-motion support. Branding uses the supplied metallic A and a locally hosted Sora wordmark.
 
 ## Run locally
 
@@ -15,17 +15,15 @@ npm run dev:api
 
 Second terminal: `npm run dev`, then open http://127.0.0.1:5173.
 
-The public catalog works without account credentials. Authentication, CMS, paid generation and checkout require configuration and are disabled until ready. Secrets belong in `.dev.vars` locally and Cloudflare Secrets in production.
+Everything public works without accounts or credentials. Only editor sign-in and the article CMS need configuration, and they stay disabled until ready. Secrets belong in `.dev.vars` locally and Cloudflare Secrets in production.
 
 ## Architecture
 
 - React, TypeScript, Vite, locally hosted fonts and Lucide SVG icons. No animation or 3D runtime dependency.
-- Hono on Cloudflare Workers with static assets; Supabase Auth/Postgres with RLS; Paddle subscriptions; OpenAI Responses on the server.
+- Hono on Cloudflare Workers with static assets; Supabase Auth/Postgres with RLS for editor sign-in and articles.
 - Source-attributed models.dev snapshot; complete paginated provider offerings, precomputed search index and record shards. No artificial 50-model limit. Counts represent offerings, not unique underlying models.
-- `/models`, `/leaderboard`, `/compare`, `/news`, `/learn`, `/learn/:slug`, `/studio`, `/pricing`, `/login`, `/dashboard`, `/about`, `/privacy`, `/terms`, `/contact`.
+- `/models`, `/coding-agents`, `/leaderboard`, `/compare`, `/news`, `/learn`, `/learn/:slug`, `/tools`, `/about`, `/privacy`, `/terms`, `/contact`; `/login` and `/dashboard` are for editors only.
 - CMS at a server-configured unpredictable path; server admin role + MFA remain mandatory. No public admin link.
-- Studio generates downloadable React + Worker API + D1 schema + Supabase Auth projects. Its isolated design preview has no live customer database. Customers deploy exported applications on their own infrastructure.
-- $12/30, $29/90 and $59/200 generation plans per month. Atomic quotas, token/request/concurrency limits and a global spend guard protect API use. These are cost controls, not a guarantee of net profit.
 
 ## Learn AI
 
@@ -50,7 +48,7 @@ npx wrangler deploy --dry-run --env production
 npm run deploy
 ```
 
-The owner selected **Cloudflare Free**. Requests, CPU and build usage remain subject to free-tier limits; OpenAI and payment processing are not free. Vercel Hobby is unsuitable for the commercial SaaS under its [fair-use terms](https://vercel.com/docs/limits/fair-use-guidelines).
+The owner selected **Cloudflare Free**. Requests, CPU and build usage remain subject to free-tier limits. Artificials is non-commercial: it sells nothing and runs no paid AI requests.
 
 Completed, verified changes are committed and pushed to the private Artificials repository. CI verifies code and browser behavior. Deployment requires the repository's Cloudflare connection or deployment secrets; see [launch guide](docs/LAUNCH.md). No paid provider calls run in CI.
 

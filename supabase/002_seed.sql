@@ -61,7 +61,7 @@ Authentication establishes who is signed in. Authorization decides what that per
 A database preserves records between sessions. The API connects the interface to that storage. Parameterized queries help keep submitted values separate from database commands. Check required fields, validation, ownership, and how deletion behaves.
 
 ## Know what the preview shows
-Artificials Studio displays an isolated static design preview. Its downloadable projects include a React interface, a Worker API, D1 database setup, and Supabase authentication. Those features run after you configure your own accounts and deploy the project. Test sign-in, record access, loading states, and errors before publishing.
+A design preview from an AI tool is often a static picture of the interface. Sign-in, saved records, and error handling only work once the project runs with a real server and database in accounts you configure. Deploy it, then test sign-in, record access, loading states, and errors before publishing.
 
 ## Further reading
 https://supabase.com/docs/guides/auth

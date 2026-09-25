@@ -12,21 +12,8 @@ import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { bodyLimit } from 'hono/body-limit';
 import { z, ZodError } from 'zod';
-import {
-  auth,
-  db,
-  configured,
-  aiReady,
-  requireUser,
-  requireAdmin,
-  rate,
-  captcha,
-  hashedIp,
-} from './auth';
+import { auth, db, configured, requireUser, requireAdmin, rate, captcha, hashedIp } from './auth';
 import { sameOrigin } from './security';
-import { generate } from './generation';
-import { billingReady, checkout, paddle, webhook } from './billing';
-import { isPlan } from '../shared/plans';
 import { articleSchema } from '../shared/schema';
 import { ARTICLES } from '../shared/content';
 import type { Env } from './types';
@@ -45,7 +32,6 @@ app.use('*', async (c, next) => {
   if (
     c.req.path.startsWith('/api/') &&
     !['GET', 'HEAD', 'OPTIONS'].includes(c.req.method) &&
-    c.req.path !== '/api/billing/webhook' &&
     !sameOrigin(c.req.header('origin'), c.env.APP_URL) &&
     !(
       c.env.ENVIRONMENT !== 'production' &&
@@ -66,16 +52,12 @@ app.get('/api/config', (c) =>
   c.json({
     auth: configured(c.env),
     google: c.env.GOOGLE_AUTH_ENABLED === 'true',
-    billing: billingReady(c.env),
-    ai: aiReady(c.env),
     turnstileSiteKey: c.env.TURNSTILE_SITE_KEY || '',
     legalReady: c.env.LEGAL_READY === 'true',
     supportEmail: c.env.SUPPORT_EMAIL || '',
     privacyEmail: c.env.PRIVACY_EMAIL || '',
     operatorName: c.env.OPERATOR_NAME || '',
     operatorAddress: c.env.OPERATOR_ADDRESS || '',
-    paddleClientToken: c.env.PADDLE_CLIENT_TOKEN || '',
-    paddleSandbox: c.env.PADDLE_ENVIRONMENT === 'sandbox',
   }),
 );
 app.get('/api/session', async (c) => {
@@ -89,27 +71,8 @@ app.get('/api/session', async (c) => {
     await client.auth.mfa.getAuthenticatorAssuranceLevel();
   if (assuranceError) throw new Error('Account security');
   if (assurance?.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2')
-    return c.json({ user: { id: user.id, email: user.email }, requiresMfa: true, projects: [] });
-  const database = db(c.env);
-  const [subscription, projects] = await Promise.all([
-    database
-      .from('subscriptions')
-      .select('plan,status,credits_used,credit_limit,period_end')
-      .eq('user_id', user.id)
-      .maybeSingle(),
-    database
-      .from('projects')
-      .select('id,title,updated_at')
-      .eq('user_id', user.id)
-      .order('updated_at', { ascending: false })
-      .limit(100),
-  ]);
-  if (subscription.error || projects.error) throw new Error('Session storage');
-  return c.json({
-    user: { id: user.id, email: user.email },
-    subscription: subscription.data,
-    projects: projects.data,
-  });
+    return c.json({ user: { id: user.id, email: user.email }, requiresMfa: true });
+  return c.json({ user: { id: user.id, email: user.email } });
 });
 app.post('/api/auth/otp', async (c) => {
   const { email, captcha: token } = z
@@ -204,56 +167,6 @@ app.get('/api/articles', async (c) => {
   if (error) throw new Error('articles');
   return c.json({ articles: data });
 });
-app.get('/api/projects/:id', async (c) => {
-  const { user } = await requireUser(c);
-  const id = z.string().uuid().parse(c.req.param('id'));
-  const { data, error } = await db(c.env)
-    .from('projects')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single();
-  if (error || !data) throw new HTTPException(404, { message: 'Project not found.' });
-  return c.json(data);
-});
-app.delete('/api/projects/:id', async (c) => {
-  const { user } = await requireUser(c);
-  const id = z.string().uuid().parse(c.req.param('id'));
-  const { data, error } = await db(c.env).rpc('delete_project', { p_user: user.id, p_id: id });
-  if (error) {
-    if (error.message.includes('GENERATION_IN_PROGRESS'))
-      throw new HTTPException(409, { message: 'Wait for the current generation to finish.' });
-    throw new Error('delete project');
-  }
-  if (!data) throw new HTTPException(404, { message: 'Project not found.' });
-  return c.json({ deleted: true });
-});
-app.post('/api/generate', generate);
-app.post('/api/billing/checkout', async (c) => {
-  const { user } = await requireUser(c);
-  await rate(c, 'checkout:' + user.id, 4, 300);
-  const { plan } = await c.req.json();
-  if (!isPlan(plan)) throw new HTTPException(400, { message: 'Unknown plan.' });
-  return c.json(await checkout(c, user.id, plan));
-});
-app.post('/api/billing/portal', async (c) => {
-  const { user } = await requireUser(c);
-  await rate(c, 'portal:' + user.id, 10, 300);
-  const { data } = await db(c.env)
-    .from('subscriptions')
-    .select('paddle_customer_id')
-    .eq('user_id', user.id)
-    .single();
-  if (!data?.paddle_customer_id)
-    throw new HTTPException(404, { message: 'No subscription found.' });
-  const portal = await paddle(
-    c.env,
-    '/customers/' + data.paddle_customer_id + '/portal-sessions',
-    {},
-  );
-  return c.json({ url: portal.urls.general.overview });
-});
-app.post('/api/billing/webhook', webhook);
 app.get('/api/cms/:token/articles', async (c) => {
   await requireAdmin(c);
   const { data, error } = await db(c.env)
@@ -443,6 +356,8 @@ app.get('/_private/:token', async (c) => {
   return c.env.ASSETS.fetch(new Request(new URL('/app-shell', c.req.url)));
 });
 app.all('/admin', (c) => c.text('Not found', 404));
+// Artificials is free and non-commercial; the paid app builder and its plans are gone.
+for (const path of ['/studio', '/pricing', '/checkout']) app.get(path, (c) => c.redirect('/', 301));
 app.all('/api/*', (c) => c.json({ error: 'Not found.' }, 404));
 app.all('*', (c) => c.env.ASSETS.fetch(c.req.raw));
 app.onError((error, c) => {

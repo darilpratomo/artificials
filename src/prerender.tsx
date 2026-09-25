@@ -15,8 +15,6 @@ import Learn from './pages/Learn';
 import Tools from './pages/Tools';
 import Academy from './pages/Academy';
 import { LessonReader } from './pages/AcademyLesson';
-import Studio from './pages/Studio';
-import Pricing from './pages/Pricing';
 import Info from './pages/Info';
 import type { Lesson } from './lib/academy';
 import type { Coding, ModelOverview } from './lib/overview';
@@ -46,8 +44,6 @@ export function renderPage(
             <Route path="tools/:toolId" element={<Tools />} />
             <Route path="learn" element={<Academy />} />
             {lesson && <Route path="learn/:slug" element={<LessonReader lesson={lesson} />} />}
-            <Route path="studio" element={<Studio />} />
-            <Route path="pricing" element={<Pricing />} />
             {['about', 'contact', 'privacy', 'terms'].map((path) => (
               <Route key={path} path={path} element={<Info />} />
             ))}

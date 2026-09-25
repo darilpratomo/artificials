@@ -77,7 +77,7 @@ public endpoint data includes latency and throughput fields, but they were empty
 models when checked on 24 September 2026, and its terms of service prohibit automated copying
 of information from the service. It is not used. Artificials does not run its own paid speed
 tests, so **no speed or latency figures are shown**; profiles say so plainly. Before adding a
-benchmark feed, obtain the necessary rights for this public commercial site, verify the model
+benchmark feed, confirm its licence allows republishing on this public, non-commercial site, verify the model
 and exact metric, and preserve its methodology, measurement date and source attribution.
 Do not mix scores from different benchmark methods into a single overall ranking.
 

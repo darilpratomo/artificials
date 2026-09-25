@@ -2,7 +2,6 @@ import { AnalyticsPreferencesButton } from './Analytics';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { ArrowUpRight, ArrowRight, Globe2, Command } from 'lucide-react';
-import { useApp } from '../lib/context';
 import { Brand } from './Brand';
 export function Layout() {
   const [open, setOpen] = useState(false);
@@ -10,7 +9,6 @@ export function Layout() {
   const header = useRef<HTMLElement>(null);
   const surface = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
-  const { session } = useApp();
   const location = useLocation();
   const previousPath = useRef(location.pathname);
   useEffect(() => {
@@ -121,7 +119,6 @@ export function Layout() {
     ['/news', 'Insights'],
     ['/learn', 'Learn AI'],
     ['/tools', 'Tools'],
-    ['/studio', 'Studio'],
   ];
   return (
     <>
@@ -150,19 +147,18 @@ export function Layout() {
               <Brand animate />
             </Link>
             <nav className="site-links" aria-label="Main navigation">
-              {links.map(([url, label]) => (
-                <NavLink key={url} to={url}>
-                  {label}
-                  {label === 'Studio' && <span className="nav-tag">AI</span>}
-                </NavLink>
-              ))}
+              {/* Compare has its own button beside the menu. */}
+              {links
+                .filter(([url]) => url !== '/compare')
+                .map(([url, label]) => (
+                  <NavLink key={url} to={url}>
+                    {label}
+                  </NavLink>
+                ))}
             </nav>
             <div className="site-actions">
-              <Link className="nav-login" to={session.user ? '/dashboard' : '/login'}>
-                {session.user ? 'Workspace' : 'Log in'}
-              </Link>
-              <Link className="btn btn-small" to="/studio">
-                Start building <ArrowUpRight size={14} />
+              <Link className="btn btn-small" to="/compare">
+                Compare models <ArrowUpRight size={14} />
               </Link>
               <button
                 ref={trigger}
@@ -186,11 +182,7 @@ export function Layout() {
                 <span className="signal-light" />
               </div>
               <div className="mobile-menu-links">
-                {[
-                  ...links,
-                  ['/pricing', 'Pricing'],
-                  [session.user ? '/dashboard' : '/login', session.user ? 'Workspace' : 'Log in'],
-                ].map(([url, label], i) => (
+                {links.map(([url, label], i) => (
                   <NavLink
                     key={url}
                     to={url}
@@ -260,15 +252,12 @@ export function Layout() {
             <Link to="/market">Market overview</Link>
             <Link to="/releases">Model releases</Link>
             <Link to="/compare">Compare models</Link>
-            <Link to="/news">Insights & guides</Link>
-            <Link to="/learn">Learn AI</Link>
           </div>
           <div>
-            <h3>Create</h3>
+            <h3>Learn</h3>
+            <Link to="/news">Insights & guides</Link>
+            <Link to="/learn">Learn AI</Link>
             <Link to="/tools">Free file tools</Link>
-            <Link to="/studio">Artificials Studio</Link>
-            <Link to="/pricing">Plans & pricing</Link>
-            <Link to="/dashboard">Your workspace</Link>
             <Link to="/about">About Artificials</Link>
           </div>
           <div>
@@ -284,7 +273,9 @@ export function Layout() {
         </div>
         <div className="container footer-baseline">
           <span>© {new Date().getFullYear()} Artificials</span>
-          <span>Independent research. Provider trademarks belong to their owners.</span>
+          <span>
+            Free and non-commercial, run by volunteers. Provider trademarks belong to their owners.
+          </span>
           <span>
             EN / USD <ArrowUpRight size={12} />
           </span>

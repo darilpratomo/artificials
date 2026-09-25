@@ -140,8 +140,6 @@ test.beforeEach(async ({ page }) => {
       json: {
         auth: false,
         google: false,
-        billing: false,
-        ai: false,
         legalReady: false,
         supportEmail: 'support@artificials.net',
       },
@@ -288,34 +286,6 @@ test('rankings distinguish context capacity, price, and missing data', async ({ 
   await expectFitsViewport(page);
 });
 
-test('studio example, database, static sandbox and complete project download', async ({
-  page,
-}, testInfo) => {
-  await page.goto('/studio');
-  await page.getByRole('button', { name: 'Explore an example' }).click();
-  await expect(page.getByTitle('Isolated app design preview')).toHaveAttribute('sandbox', '');
-  await expect(page.getByTitle('Isolated app design preview')).toHaveAttribute(
-    'referrerpolicy',
-    'no-referrer',
-  );
-  await page.getByRole('button', { name: 'Database', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'books', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Code', exact: true }).click();
-  await expect(page.locator('.code-preview')).toContainText("api.create('books'");
-  await page.getByRole('button', { name: 'Preview', exact: true }).click();
-  await page.getByRole('button', { name: 'Mobile preview', exact: true }).click();
-  await expectFitsViewport(page);
-  const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Download complete project' }).click();
-  const download = await downloadPromise;
-  expect(download.suggestedFilename()).toBe('the-reading-room.zip');
-  await download.saveAs(`test-results/demo-${testInfo.project.name}.zip`);
-  await page.screenshot({
-    path: `test-results/studio-${testInfo.project.name}.png`,
-    fullPage: true,
-  });
-});
-
 test('editorial search, primary sources and privacy preferences', async ({ page }) => {
   await page.goto('/news');
   await page.getByRole('textbox', { name: 'Search articles', exact: true }).fill('benchmark');
@@ -336,23 +306,20 @@ test('editorial search, primary sources and privacy preferences', async ({ page 
   ).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('artificials-compare'))).toBeNull();
   await page.goto('/terms');
-  await expect(page.getByRole('heading', { name: '4. Studio plans and renewals' })).toBeVisible();
-  await expect(page.getByText(/Pre-launch draft/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: '3. Lessons and free tools' })).toBeVisible();
+  await expect(page.getByText(/free, non-commercial website run by volunteers/)).toBeVisible();
+  await expect(page.getByText(/Studio|subscription|refund/i)).toHaveCount(0);
 });
 
-test('pricing and account screens reflect unavailable services', async ({ page }) => {
-  await page.goto('/pricing');
-  await expect(page.getByText('30 AI generations / month', { exact: true })).toBeVisible();
-  await expect(page.getByText(/Studio subscriptions are coming soon/)).toBeVisible();
-  await page.getByRole('button', { name: 'Choose Pro', exact: true }).click();
-  await expect(page).toHaveURL(/\/login/);
+test('sign-in is only for editors and stays closed until it is set up', async ({ page }) => {
+  await page.goto('/login');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Editor');
+  await expect(page.getByText(/Everything else on Artificials is open to everyone/)).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Continue with email', exact: true }),
   ).toBeDisabled();
   await page.goto('/dashboard');
-  await expect(
-    page.getByRole('link', { name: 'Sign in to your account', exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Editor sign-in', exact: true })).toBeVisible();
   await page.goto('/not-a-page');
   await expect(page.getByRole('heading', { name: 'A little off the beaten path.' })).toBeVisible();
 });
@@ -378,8 +345,7 @@ test('main pages are accessible and fit desktop and mobile', async ({ page }, te
     '/leaderboard',
     '/compare',
     '/news',
-    '/studio',
-    '/pricing',
+    '/coding-agents',
     '/login',
     '/about',
     '/privacy',
@@ -415,9 +381,9 @@ test('main pages are accessible and fit desktop and mobile', async ({ page }, te
     await page.getByRole('button', { name: 'Open menu', exact: true }).click();
     await page
       .getByRole('navigation', { name: 'Mobile navigation' })
-      .getByRole('link', { name: 'Pricing', exact: true })
+      .getByRole('link', { name: 'Compare', exact: true })
       .click();
-    await expect(page.locator('main h1')).toHaveText('Build more. Stay in control.');
+    await expect(page).toHaveURL(/\/compare$/);
     await expect(page.getByRole('button', { name: 'Open menu', exact: true })).toHaveAttribute(
       'aria-expanded',
       'false',

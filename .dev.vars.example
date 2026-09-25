@@ -1,26 +1,17 @@
 # Local development only. Copy to .dev.vars; never commit or bulk-upload it.
-# Set production flags and APP_URL separately in Cloudflare. No VITE_ secrets.
+# Set production values and APP_URL separately in Cloudflare. No VITE_ secrets.
+# Artificials is free and non-commercial: there are no payment or paid AI settings.
 APP_URL=http://localhost:8787
 ENVIRONMENT=development
-PADDLE_ENVIRONMENT=sandbox
-GLOBAL_DAILY_AI_BUDGET_MICROS=10000000
+# Supabase: sign-in for site editors and the article database.
 SUPABASE_URL=
 SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-OPENAI_API_KEY=
-PADDLE_CLIENT_TOKEN=
-PADDLE_API_KEY=
-PADDLE_WEBHOOK_SECRET=
-PADDLE_PRICE_STARTER=
-PADDLE_PRICE_PRO=
-PADDLE_PRICE_STUDIO=
 # Generate: openssl rand -hex 24. Visit /_private/YOUR_VALUE
 CMS_PATH_TOKEN=
 TURNSTILE_SECRET_KEY=
 TURNSTILE_SITE_KEY=
-# Set true only after reading your local admin.md and docs/LAUNCH.md and testing payment webhooks.
-AI_ENABLED=false
-BILLING_ENABLED=false
+# Set true only after reading your local admin.md and docs/LAUNCH.md.
 LEGAL_READY=false
 GOOGLE_AUTH_ENABLED=false
 SUPPORT_EMAIL=support@artificials.net

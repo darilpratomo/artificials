@@ -41,15 +41,16 @@ export default function Login() {
   return (
     <div className="auth-page container">
       <div className="auth-story">
-        <span className="eyebrow">YOUR ARTIFICIALS WORKSPACE</span>
+        <span className="eyebrow">FOR SITE EDITORS</span>
         <h1>
-          Explore intelligence.
+          Editor
           <br />
-          Build what
-          <br />
-          <span>comes next.</span>
+          sign-in.
         </h1>
-        <p>Your projects, usage, and account settings. Connected in one workspace.</p>
+        <p>
+          Artificials is free to use without an account. Sign-in is only for the volunteers who edit
+          the site’s articles.
+        </p>
         <div className="auth-illustration" aria-hidden="true">
           <div />
           <div />
@@ -67,7 +68,7 @@ export default function Login() {
             <h2>You’re signed in.</h2>
             <p>Signed in as {session.user.email}</p>
             <Link className="btn full" to={next}>
-              Open your workspace <ArrowRight size={16} />
+              Open your editor account <ArrowRight size={16} />
             </Link>
           </>
         ) : (
@@ -75,7 +76,7 @@ export default function Login() {
             <span className="auth-icon">
               <Mail size={25} />
             </span>
-            <h2>{sent ? 'Check your inbox.' : 'Welcome to Artificials.'}</h2>
+            <h2>{sent ? 'Check your inbox.' : 'Sign in as an editor.'}</h2>
             <p>
               {sent
                 ? `Enter the sign-in code sent to ${email}.`
@@ -83,8 +84,8 @@ export default function Login() {
             </p>
             {!config.auth && (
               <div className="notice">
-                Account access is being prepared. The model directory and editorial guides are
-                available to explore.
+                Editor sign-in is not set up yet. Everything else on Artificials is open to
+                everyone, without an account.
               </div>
             )}
             {config.google && (
