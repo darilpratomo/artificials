@@ -91,7 +91,8 @@ const COUNTRIES: Record<string, string> = {
   'United Kingdom of Great Britain and Northern Ireland': 'United Kingdom',
   'Korea (Republic of)': 'South Korea',
 };
-const countryOf = (value?: string) => {
+/** The first country Epoch AI records for a model's developer, shortened. */
+export const countryOf = (value?: string) => {
   const first = value?.split(',')[0]?.trim();
   return first ? (COUNTRIES[first] ?? first) : undefined;
 };

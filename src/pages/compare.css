@@ -1,0 +1,57 @@
+/* Compare page. The table is grouped into sections, and rows stay compact so a
+   whole comparison reads without endless scrolling. */
+
+/* Holds the screen-reader notes inside the sideways scroll, so they never
+   widen the page on phones. */
+.comparison-scroll {
+  position: relative;
+}
+.comparison-table tbody th,
+.comparison-table tbody td {
+  padding-block: 12px;
+  vertical-align: top;
+}
+/* Each section keeps its closing line; the base style drops it on the last row. */
+.comparison-table tbody:not(:last-child) tr:last-child > * {
+  border-bottom: 1px solid #2b3340;
+}
+.comparison-table .comparison-section th {
+  padding: 20px 22px 10px;
+  border-right: 0;
+  background: #161c26;
+  color: #eef1f6;
+  font-size: 14px;
+  font-weight: 600;
+}
+/* A second line, such as a test rank or the tokens a price applies above. */
+.comparison-table tbody td small {
+  display: block;
+  margin-top: 2px;
+  color: #9aa3b5;
+  font-size: 12px;
+  font-weight: 400;
+}
+/* The best value in a row, among the models on the shortlist. */
+.comparison-table tbody td.is-best {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* On narrow screens the table scrolls sideways; the row labels and section
+   titles stay in view. A shadow draws their edge, because collapsed table
+   borders do not move with a sticky cell. */
+.comparison-table thead th:first-child,
+.comparison-table tbody th[scope='row'] {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #11151c;
+  box-shadow: inset -1px 0 #2b3340;
+}
+.comparison-table thead th:first-child {
+  background: #161c26;
+}
+.comparison-section th > span {
+  position: sticky;
+  left: 22px;
+}

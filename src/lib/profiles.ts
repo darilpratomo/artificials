@@ -88,10 +88,16 @@ export function loadProfileLinks(): Promise<ProfileLinks> {
   return links;
 }
 
-/** Profiles for several slugs at once, for side-by-side views. Missing slugs map to null. */
+/**
+ * Profiles for several slugs at once, for side-by-side views, with the test
+ * sources their results come from. Missing slugs map to null.
+ */
 export function useProfiles(slugs: string[]) {
   const key = [...new Set(slugs)].sort().join(',');
-  const [profiles, setProfiles] = useState<Record<string, ModelProfile | null>>({});
+  const [state, setState] = useState<{
+    profiles: Record<string, ModelProfile | null>;
+    sources: ProfileBucket['sources'];
+  }>({ profiles: {}, sources: [] });
   useEffect(() => {
     let active = true;
     const wanted = key ? key.split(',') : [];
@@ -100,16 +106,25 @@ export function useProfiles(slugs: string[]) {
         loadBucket(profileBucket(slug))
           .then(
             (bucket) =>
-              [slug, bucket.profiles.find((entry) => entry.slug === slug) ?? null] as const,
+              [slug, bucket.profiles.find((entry) => entry.slug === slug) ?? null, bucket] as const,
           )
-          .catch(() => [slug, null] as const),
+          .catch(() => [slug, null, null] as const),
       ),
     ).then((entries) => {
-      if (active) setProfiles(Object.fromEntries(entries));
+      if (!active) return;
+      const sources = new Map(
+        entries
+          .flatMap(([, , bucket]) => bucket?.sources ?? [])
+          .map((source) => [source.id, source]),
+      );
+      setState({
+        profiles: Object.fromEntries(entries.map(([slug, profile]) => [slug, profile])),
+        sources: [...sources.values()],
+      });
     });
     return () => {
       active = false;
     };
   }, [key]);
-  return profiles;
+  return state;
 }
