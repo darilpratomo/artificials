@@ -19,7 +19,7 @@ test('agent results rank agent and model pairs, filter by builder and by model',
   page,
 }) => {
   const data = await coding(page);
-  const results = data.agents!.results;
+  const results = data.agentTests[0].results;
   await page.goto('/coding-agents');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Coding agents and the models inside them.',
@@ -49,7 +49,7 @@ test('agent results rank agent and model pairs, filter by builder and by model',
 
 test('agent gaps, the agent list, model tests and questions', async ({ page }) => {
   const data = await coding(page);
-  const results = data.agents!.results;
+  const results = data.agentTests[0].results;
   await page.goto('/coding-agents');
 
   // Opening a model lists every agent that ran it.
@@ -68,7 +68,8 @@ test('agent gaps, the agent list, model tests and questions', async ({ page }) =
 
   // Coding tests stay separate: one test per chart.
   const tests = page.locator('#models');
-  await tests.getByRole('button', { name: data.tests[2].label }).click();
+  await tests.getByRole('combobox', { name: 'Choose a coding test to rank' }).click();
+  await page.getByRole('option', { name: data.tests[2].label, exact: true }).click();
   await expect(tests.locator('h3')).toHaveText(data.tests[2].label);
   await expect(
     tests.getByRole('link', { name: `All ${data.tests[2].rows.length} results` }),
@@ -81,7 +82,47 @@ test('agent gaps, the agent list, model tests and questions', async ({ page }) =
   await sources.locator('summary').click();
   await expect(sources).toContainText('Apache-2.0');
   await expect(sources).toContainText('CC BY 4.0');
+  await expect(sources).toContainText('CC BY-NC 4.0');
   await expect(sources).toContainText('Retrieved');
+});
+
+test('a second agent benchmark, cost per task and task length', async ({ page }) => {
+  const data = await coding(page);
+  await page.goto('/coding-agents');
+  // Switching the agent benchmark changes every agent section at once.
+  const second = data.agentTests[1];
+  await page
+    .locator('#leaderboard')
+    .getByRole('button', { name: second.source.name, exact: true })
+    .click();
+  const rows = page.locator('#leaderboard .agent-board li');
+  await expect(rows.first()).toContainText(second.results[0].agent);
+  await expect(page.locator('#agents .agent-list li')).toHaveCount(
+    Math.min(12, new Set(second.results.map((row) => row.agent)).size),
+  );
+
+  // Cost per task: every configuration a source ran, with its usage.
+  const cost = page.locator('#cost');
+  await cost.scrollIntoViewIfNeeded();
+  const first = data.costTests[0];
+  await expect(cost.locator('h3')).toHaveText(`${first.label}: score against cost per task`);
+  await expect(cost.locator('tbody tr')).toHaveCount(Math.min(12, first.rows.length));
+  await expect(cost.locator('tbody tr').first()).toContainText(first.rows[0].name);
+  await cost.getByRole('combobox', { name: 'Choose a test with task costs' }).click();
+  await page.getByRole('option', { name: data.costTests[1].label, exact: true }).click();
+  await expect(cost.locator('h3')).toHaveText(
+    `${data.costTests[1].label}: score against cost per task`,
+  );
+
+  // Task length: METR's time horizons, longest first.
+  const length = page.locator('#task-length');
+  await length.scrollIntoViewIfNeeded();
+  await expect(length.locator('.metric-bars li')).toHaveCount(
+    Math.min(15, data.timeHorizons!.results.length),
+  );
+  await expect(length.locator('.metric-bars li').first()).toContainText(
+    data.timeHorizons!.results[0].name,
+  );
 });
 
 test('the coding agents page is accessible and fits every screen', async ({ page }) => {
@@ -105,7 +146,14 @@ test('the coding agents page is accessible and fits every screen', async ({ page
 test('every coding chart downloads as a branded image', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'Downloads are checked once, in desktop Chrome');
   await page.goto('/coding-agents');
-  for (const section of ['#leaderboard', '#agent-effect', '#models', '#price']) {
+  for (const section of [
+    '#leaderboard',
+    '#agent-effect',
+    '#cost',
+    '#task-length',
+    '#models',
+    '#price',
+  ]) {
     const scope = page.locator(section);
     await scope.scrollIntoViewIfNeeded();
     const [download] = await Promise.all([

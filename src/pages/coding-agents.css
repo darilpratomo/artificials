@@ -388,3 +388,13 @@
     font-size: 12.5px;
   }
 }
+
+/* Cost per task: the table scrolls sideways on phones instead of squeezing. */
+.task-cost-table {
+  max-height: none;
+}
+@media (max-width: 640px) {
+  .task-cost-table .chart-table {
+    min-width: 560px;
+  }
+}

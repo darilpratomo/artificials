@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { strToU8, zipSync } from 'fflate';
 import {
+  CURSORBENCH,
+  DEEPSWE,
   EPOCH_BENCHMARKS,
+  parseCursorBench,
+  parseDeepSwe,
   parseEpoch,
   parseTerminalBench,
+  parseTimeHorizons,
   TERMINAL_BENCH,
+  TIME_HORIZONS,
 } from '../scripts/lib/epoch';
 
 const LICENSE =
@@ -268,5 +274,88 @@ describe('Terminal-Bench results from the Epoch AI archive', () => {
     broken[0] = broken[0].replace(',0.300,', ',1.300,');
     expect(() => parseTerminalBench(terminalArchive(broken))).toThrow(/outside/);
     expect(() => parseTerminalBench(terminalArchive(terminalRows().slice(0, 20)))).toThrow(/few/);
+  });
+});
+
+const zipOf = (name: string, lines: string[]) => zipSync({ [name]: strToU8(lines.join('\n')) });
+
+describe('agent tests compiled by Epoch AI', () => {
+  it('reads DeepSWE with its cost, output tokens and steps per task', () => {
+    const header =
+      'Model version,Pass@1,Pass@4,Harness,Reasoning effort,Release date,Organization,Country,Training compute (FLOP),Training compute notes,Name,95% CI half-width,Runs,Mean cost (USD),Mean output tokens,Mean agent steps,Source,Notes';
+    const rows = Array.from(
+      { length: 12 },
+      (_, index) =>
+        `gpt-test_e${index},${(0.5 + index / 100).toFixed(3)},0.9,mini-swe-agent,high,2026-09-01,OpenAI,USA,,,GPT Test,0.0392,4,${index + 1}.25,${1000 * (index + 1)},${20 + index},${DEEPSWE.url},`,
+    );
+    // Another harness, and a row without the DeepSWE source: left out.
+    rows.push(
+      `other_high,0.9,0.9,claude-code,high,2026-09-01,Anthropic,USA,,,Other,0.02,4,1,1,1,${DEEPSWE.url},`,
+    );
+    rows.push(
+      `stray_high,0.9,0.9,mini-swe-agent,high,2026-09-01,Anthropic,USA,,,Stray,0.02,4,1,1,1,,`,
+    );
+    const category = parseDeepSwe(zipOf(DEEPSWE.file, [header, ...rows]));
+    expect(category).toMatchObject({ id: 'deepswe', sourceId: 'deepswe', domain: 'agentic' });
+    expect(category.rows).toHaveLength(12);
+    expect(category.rows[0]).toMatchObject({
+      model: 'gpt-test_e11',
+      providerId: 'openai',
+      score: 61,
+      stderr: 2,
+      usage: { cost: 12.25, outputTokens: 12000, steps: 31 },
+    });
+    expect(() =>
+      parseDeepSwe(
+        zipOf(DEEPSWE.file, [header, rows[0].replace(',0.500,', ',1.500,'), ...rows.slice(1)]),
+      ),
+    ).toThrow(/outside/);
+    expect(() => parseDeepSwe(zipOf(DEEPSWE.file, ['Model version,Score', 'x,1']))).toThrow(
+      /schema/,
+    );
+  });
+
+  it('reads CursorBench with cost, tokens and steps per task', () => {
+    const header =
+      'Model version,Score,Reasoning level,Cost per task,Tokens per task,Steps per task,Release date,Organization,Country,Training compute (FLOP),Training compute notes,Name,Rank,Source,Notes';
+    const rows = Array.from(
+      { length: 11 },
+      (_, index) =>
+        `claude-test_e${index},${(0.3 + index / 100).toFixed(2)},High,${index + 2},${50000 + index},${60 + index},2026-09-01,Anthropic,USA,,,Claude Test,${index + 1},${CURSORBENCH.url},`,
+    );
+    const category = parseCursorBench(zipOf(CURSORBENCH.file, [header, ...rows]));
+    expect(category.rows[0]).toMatchObject({
+      model: 'claude-test_e10',
+      providerId: 'anthropic',
+      score: 40,
+      usage: { cost: 12, tokens: 50010, steps: 70 },
+    });
+  });
+
+  it('keeps only the latest METR method and merges repeated listings', () => {
+    const header =
+      'Model version,Time horizon,average_score,Release date,Organization,Country,Training compute (FLOP),Training compute notes,CI_high,CI_low,Source,Source link,Notes,Time Horizon (80%),METR version,id';
+    const rows = Array.from(
+      { length: 9 },
+      (_, index) =>
+        `model-${index},${60 * (index + 1)},0.5,2026-0${(index % 9) + 1}-01,OpenAI,USA,,,${120 * (index + 1)},${30 * (index + 1)},,,,${10 * (index + 1)},METR-Horizon-v1.1,r${index}`,
+    );
+    rows.push(`model-8_xhigh,540,0.5,2026-09-01,OpenAI,USA,,,1080,270,,,,90,METR-Horizon-v1.1,dup`);
+    rows.push(`old-model,9999,0.5,2024-01-01,OpenAI,USA,,,10000,9000,,,,10,METR-Horizon-v1.0,old`);
+    const { version, results, latestRelease } = parseTimeHorizons(
+      zipOf(TIME_HORIZONS.file, [header, ...rows]),
+    );
+    expect(version).toBe('METR-Horizon-v1.1');
+    expect(results).toHaveLength(9);
+    expect(results.some((row) => row.model === 'old-model')).toBe(false);
+    expect(results[0]).toMatchObject({
+      model: 'model-8',
+      minutes: 540,
+      low: 270,
+      high: 1080,
+      minutes80: 90,
+      rank: 1,
+    });
+    expect(latestRelease).toBe('2026-09-01');
   });
 });

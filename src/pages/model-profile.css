@@ -823,6 +823,9 @@
 .result-others li strong {
   color: var(--profile-ink);
 }
+.result-others li small {
+  font-size: 12.5px;
+}
 
 /* Pricing */
 .price-provider {

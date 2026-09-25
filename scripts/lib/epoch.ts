@@ -6,6 +6,8 @@ import type {
   BenchmarkDomain,
   BenchmarkRow,
   ModelFacts,
+  TaskUsage,
+  TimeHorizon,
 } from '../../shared/benchmarks.ts';
 import { plainText } from '../../shared/catalog.ts';
 import { identity, rankRows } from './benchmark-sources.ts';
@@ -139,7 +141,7 @@ function isoDay(value: string | undefined) {
   return /^\d{4}-\d{2}-\d{2}$/.test(day) && Number.isFinite(Date.parse(day)) ? day : undefined;
 }
 
-function maker(model: string, organization: string) {
+export function maker(model: string, organization: string) {
   const byName = identity(model);
   if (byName.providerId !== 'unknown')
     return { provider: organization || byName.provider, providerId: byName.providerId };
@@ -486,6 +488,239 @@ export function parseTerminalBench(zip: Uint8Array): {
     latestRun,
     results: results.map((row, index) => {
       if (!index || results[index - 1].score !== row.score) rank = index + 1;
+      return { ...row, rank };
+    }),
+  };
+}
+
+/** Reads only the named entries of the archive. */
+function entries(zip: Uint8Array, names: string[]) {
+  const files = unzipSync(zip, {
+    filter: (entry) => {
+      if (!names.includes(entry.name)) return false;
+      if (entry.originalSize > MAX_ENTRY_BYTES) throw Error(`Epoch entry too large: ${entry.name}`);
+      return true;
+    },
+  });
+  return (name: string) => {
+    const bytes = files[name];
+    if (!bytes) throw Error(`Epoch archive is missing ${name}`);
+    return strFromU8(bytes);
+  };
+}
+
+const positive = (value: string | undefined, maximum: number) => {
+  const number = Number(value);
+  return value?.trim() && Number.isFinite(number) && number > 0 && number <= maximum
+    ? number
+    : undefined;
+};
+const round = (value: number | undefined, digits: number) =>
+  value === undefined ? undefined : Number(value.toFixed(digits));
+function usageOf(usage: TaskUsage): TaskUsage | undefined {
+  const entries = Object.entries(usage).filter(([, value]) => value !== undefined);
+  return entries.length ? (Object.fromEntries(entries) as TaskUsage) : undefined;
+}
+
+/**
+ * Agent tests whose results Epoch AI compiles from other projects. Their
+ * publishers state no licence of their own; Epoch AI republishes them under
+ * CC BY 4.0, and they are credited to both. Used on this non-commercial site.
+ */
+export const DEEPSWE = {
+  file: 'deepswe_external.csv',
+  name: 'DeepSWE',
+  url: 'https://deepswe.datacurve.ai/',
+  publisher: 'Datacurve',
+  tasks: 113,
+};
+export const CURSORBENCH = {
+  file: 'cursorbench_external.csv',
+  name: 'CursorBench',
+  url: 'https://cursor.com/cursorbench',
+  publisher: 'Cursor',
+};
+export const TIME_HORIZONS = {
+  file: 'metr_time_horizons_external.csv',
+  name: 'METR time horizons',
+  url: 'https://metr.org/',
+  publisher: 'METR',
+};
+
+function agentTest(
+  spec: { name: string; url: string },
+  id: string,
+  records: Record<string, string>[],
+  row: (record: Record<string, string>) => Omit<BenchmarkRow, 'rank' | 'sourceUrl'> | undefined,
+  info: Pick<BenchmarkCategory, 'description' | 'methodology'>,
+): BenchmarkCategory {
+  const latest = new Map<string, Omit<BenchmarkRow, 'rank'>>();
+  for (const record of records) {
+    const parsed = row(record);
+    if (!parsed) continue;
+    // One row per exact configuration; the first listed is kept.
+    if (!latest.has(parsed.id)) latest.set(parsed.id, { ...parsed, sourceUrl: spec.url });
+  }
+  const rows = rankRows([...latest.values()]);
+  if (rows.length < 10) throw Error(`Too few ${spec.name} results`);
+  return {
+    id,
+    name: spec.name,
+    sourceId: id,
+    unit: 'percent',
+    domain: 'agentic',
+    ...info,
+    rows,
+  };
+}
+
+function configuration(record: Record<string, string>) {
+  const model = record['Model version']?.trim();
+  return model && model.length <= 120 && /^[\w.:/@+-]+$/.test(model) ? model : undefined;
+}
+
+/** DeepSWE: Datacurve's long software tasks, every model in mini-swe-agent. */
+export function parseDeepSwe(zip: Uint8Array): BenchmarkCategory {
+  const records = rowsOf(entries(zip, [DEEPSWE.file])(DEEPSWE.file));
+  const columns = ['Model version', 'Pass@1', 'Harness', 'Mean cost (USD)', 'Mean agent steps'];
+  if (!records.length || columns.some((column) => !(column in records[0])))
+    throw Error('DeepSWE schema changed');
+  return agentTest(
+    DEEPSWE,
+    'deepswe',
+    records,
+    (record) => {
+      const model = configuration(record);
+      if (!model || record.Source?.trim() !== DEEPSWE.url) return undefined;
+      if (record.Harness?.trim() !== 'mini-swe-agent') return undefined;
+      const value = Number(record['Pass@1']);
+      if (!record['Pass@1']?.trim()) return undefined;
+      if (!Number.isFinite(value) || value < 0 || value > 1)
+        throw Error('DeepSWE score outside 0–1');
+      // A 95% interval's half-width is 1.96 standard errors.
+      const half = positive(record['95% CI half-width'], 1);
+      const usage = usageOf({
+        cost: round(positive(record['Mean cost (USD)'], 1000), 4),
+        outputTokens: round(positive(record['Mean output tokens'], 1e8), 0),
+        steps: round(positive(record['Mean agent steps'], 100000), 1),
+      });
+      return {
+        id: model,
+        model,
+        ...maker(model, record.Organization ?? ''),
+        score: value * 100,
+        ...(half ? { stderr: Math.round((half / 1.96) * 10000) / 100 } : {}),
+        ...(usage ? { usage } : {}),
+      };
+    },
+    {
+      description:
+        'Original, long software engineering tasks from active open-source projects in TypeScript, Go, Python, JavaScript and Rust. Every model runs in the same minimal agent, mini-swe-agent.',
+      methodology:
+        'Pass@1 averaged over repeated runs, with average API cost, output tokens and agent steps per task, as published by Datacurve and compiled by Epoch AI. A suffix such as _high names the reasoning effort. Standard errors are derived from the published 95% intervals.',
+    },
+  );
+}
+
+/** CursorBench: Cursor's tasks from real editor sessions, scored by Cursor. */
+export function parseCursorBench(zip: Uint8Array): BenchmarkCategory {
+  const records = rowsOf(entries(zip, [CURSORBENCH.file])(CURSORBENCH.file));
+  const columns = ['Model version', 'Score', 'Cost per task', 'Tokens per task', 'Steps per task'];
+  if (!records.length || columns.some((column) => !(column in records[0])))
+    throw Error('CursorBench schema changed');
+  return agentTest(
+    CURSORBENCH,
+    'cursorbench',
+    records,
+    (record) => {
+      const model = configuration(record);
+      if (!model || record.Source?.trim() !== CURSORBENCH.url || !record.Score?.trim())
+        return undefined;
+      const value = Number(record.Score);
+      if (!Number.isFinite(value) || value < 0 || value > 1)
+        throw Error('CursorBench score outside 0–1');
+      const usage = usageOf({
+        cost: round(positive(record['Cost per task'], 1000), 2),
+        tokens: round(positive(record['Tokens per task'], 1e9), 0),
+        steps: round(positive(record['Steps per task'], 100000), 0),
+      });
+      return {
+        id: model,
+        model,
+        ...maker(model, record.Organization ?? ''),
+        score: value * 100,
+        ...(usage ? { usage } : {}),
+      };
+    },
+    {
+      description:
+        'Ambiguous, multi-file coding tasks drawn from real sessions in the Cursor editor, run and scored by Cursor.',
+      methodology:
+        'Scores, average cost, tokens and steps per task as published by Cursor and compiled by Epoch AI. Cost applies list prices per million tokens to each model’s token use. A suffix such as _high names the reasoning effort.',
+    },
+  );
+}
+
+/**
+ * METR's time horizons: the length of software tasks, in the time a skilled
+ * person needs, that a model completes half the time. Only the latest method
+ * version is kept, since versions use different task suites.
+ */
+export function parseTimeHorizons(zip: Uint8Array): {
+  version: string;
+  results: TimeHorizon[];
+  latestRelease: string | null;
+} {
+  const records = rowsOf(entries(zip, [TIME_HORIZONS.file])(TIME_HORIZONS.file));
+  const columns = ['Model version', 'Time horizon', 'CI_low', 'CI_high', 'METR version'];
+  if (!records.length || columns.some((column) => !(column in records[0])))
+    throw Error('METR time horizon schema changed');
+  const versions = [
+    ...new Set(records.map((record) => record['METR version']?.trim()).filter(Boolean)),
+  ].sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
+  const version = versions.at(-1);
+  if (!version || !/^METR-Horizon-v\d+(\.\d+)?$/.test(version))
+    throw Error('METR time horizon version changed');
+  const kept = new Map<string, Omit<TimeHorizon, 'rank'>>();
+  let latestRelease: string | null = null;
+  for (const record of records) {
+    if (record['METR version']?.trim() !== version) continue;
+    const identifier = configuration(record)?.replace(/_unknown$/, '');
+    const minutes = positive(record['Time horizon'], 1e6);
+    if (!identifier || minutes === undefined) continue;
+    const low = positive(record.CI_low, 1e6);
+    const high = positive(record.CI_high, 1e6);
+    const minutes80 = positive(record['Time Horizon (80%)'], 1e6);
+    const releasedAt = isoDay(record['Release date']);
+    if (releasedAt && (!latestRelease || releasedAt > latestRelease)) latestRelease = releasedAt;
+    // The same measurement listed with and without an effort label is one result.
+    const base = identifier.replace(/_[a-z]+$/i, '');
+    const key = `${base}:${minutes.toFixed(3)}`;
+    if (kept.has(key)) continue;
+    const modelName = field(record.Name, 80);
+    kept.set(key, {
+      id: identifier,
+      model: identifier,
+      ...(modelName ? { modelName } : {}),
+      ...maker(identifier, record.Organization ?? ''),
+      minutes: Math.round(minutes * 10) / 10,
+      ...(low !== undefined && high !== undefined && low <= minutes && minutes <= high
+        ? { low: Math.round(low * 10) / 10, high: Math.round(high * 10) / 10 }
+        : {}),
+      ...(minutes80 !== undefined ? { minutes80: Math.round(minutes80 * 10) / 10 } : {}),
+      ...(releasedAt ? { releasedAt } : {}),
+    });
+  }
+  const sorted = [...kept.values()].sort(
+    (a, b) => b.minutes - a.minutes || a.id.localeCompare(b.id),
+  );
+  if (sorted.length < 8) throw Error('Too few METR time horizons');
+  let rank = 0;
+  return {
+    version,
+    latestRelease,
+    results: sorted.map((row, index) => {
+      if (!index || sorted[index - 1].minutes !== row.minutes) rank = index + 1;
       return { ...row, rank };
     }),
   };

@@ -15,10 +15,12 @@ Epoch AI, 'Capabilities & Benchmarking'. Published online at epoch.ai.
 Retrieved from https://epoch.ai/benchmarks (data: https://epoch.ai/data/benchmark_data.zip).
 Licence: Creative Commons Attribution 4.0 International,
 https://creativecommons.org/licenses/by/4.0/
-Only Epoch AI's own evaluations are used as model tests. Results in the archive
-that come from other projects keep their own licences and are not republished,
-with one exception: the Terminal-Bench 2.0 leaderboard, below, whose data is
-published under Apache-2.0.
+Epoch AI's own evaluations are used as model tests. From the results in the
+archive that Epoch AI compiles from other projects, four are republished, each
+credited to its creators below: the Terminal-Bench 2.0 leaderboard (Apache-2.0),
+and DeepSWE, CursorBench and METR's time horizons, whose publishers state no
+licence of their own and which Epoch AI republishes under CC BY 4.0. Artificials
+is a free, non-commercial site.
 Artificials modifications: fractions converted to percentages, the latest run
 kept when a configuration was tested more than once, standard errors converted
 to percentage points, rounding to two decimals, competition ranking, JSON
@@ -48,6 +50,40 @@ converted to percentage points, rows without a leaderboard source dropped, agent
 names trimmed and merged across spellings, an entry listed more than once kept
 once (latest run), competition ranking, matching of models to profiles, and a
 label for agents built by the model's maker. Artificials does not run these tests.
+
+DeepSWE: by Datacurve. Source: https://deepswe.datacurve.ai/
+Scores (pass@1), average API cost, output tokens and agent steps per task, with
+every model in mini-swe-agent, read from Epoch AI's compilation
+(deepswe_external.csv, CC BY 4.0).
+Artificials modifications: fractions converted to percentages, standard errors
+derived from the published 95% intervals, rounding, ranking and matching of
+models to profiles.
+
+CursorBench: by Cursor (Anysphere). Source: https://cursor.com/cursorbench
+Scores, average cost, tokens and steps per task, read from Epoch AI's
+compilation (cursorbench_external.csv, CC BY 4.0).
+Artificials modifications: fractions converted to percentages, rounding,
+ranking and matching of models to profiles.
+
+METR time horizons: by METR. Source: https://metr.org/
+The length of task, in the time skilled people need, that a model completes
+half the time, with its interval and the length completed 80% of the time, read
+from Epoch AI's compilation (metr_time_horizons_external.csv, CC BY 4.0).
+Artificials modifications: only the latest method version kept, an entry listed
+twice merged, rounding, ranking and matching of models to profiles.
+
+SWE-bench: by the SWE-bench team (Princeton and Stanford researchers and
+contributors). Source: https://www.swebench.com/ and
+https://github.com/SWE-bench/swe-bench.github.io (data/leaderboards.json).
+Licence: Creative Commons Attribution-NonCommercial 4.0 International,
+https://creativecommons.org/licenses/by-nc/4.0/
+Used only on this free, non-commercial site; published only while the source's
+LICENSE file carries that licence.
+Artificials modifications: from the SWE-bench Verified leaderboard, the
+bash-only (mini-SWE-agent) runs as a model test with average cost and model
+calls per issue, and other agents' single-attempt, single-model entries as agent
+results; Claude model names reordered to the maker's naming, the latest run of
+each configuration kept, ranking and matching of models to profiles.
 
 T2I-CoReBench: Ouxiang Li, Yuan Wang, Xinting Hu, Huijuan Huang, Rui Chen,
 Jiarong Ou, Xin Tao, Pengfei Wan, Xiaojuan Qi, and Fuli Feng.

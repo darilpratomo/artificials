@@ -19,6 +19,21 @@ export interface BenchmarkRow {
   releasedAt?: string;
   /** Whether the source lists the model's weights as downloadable. */
   openWeights?: boolean;
+  /** Average use per task, as the source measured it, for agent tests that publish it. */
+  usage?: TaskUsage;
+}
+/** What one task cost on average. Each source measures its own subset of these. */
+export interface TaskUsage {
+  /** API cost in USD at list prices. */
+  cost?: number;
+  /** All tokens, input and output. */
+  tokens?: number;
+  /** Output tokens only. */
+  outputTokens?: number;
+  /** Agent steps, each a model turn and the actions it takes. */
+  steps?: number;
+  /** Calls to the model. */
+  calls?: number;
 }
 /** Skill areas used to group and colour results. Order is the display order. */
 export const BENCHMARK_DOMAINS = [
@@ -114,16 +129,48 @@ export interface AgentResult {
   runDate?: string;
   rank: number;
 }
-export interface AgentSnapshot {
-  version: 1;
-  source: Pick<BenchmarkSource, 'id' | 'name' | 'url' | 'dataUrl' | 'license' | 'licenseUrl'> & {
-    checkedAt: string;
-    /** The latest run date among the results. */
-    latestRun: string | null;
-    /** Tasks in the benchmark. */
-    tasks: number;
-    /** Where the scores were read from: a compilation of the leaderboard. */
-    compiledBy: Pick<BenchmarkSource, 'name' | 'url' | 'dataUrl' | 'license' | 'licenseUrl'>;
-  };
+/** Where a coding agent or task-length result comes from. */
+export type AgentSource = Pick<
+  BenchmarkSource,
+  'id' | 'name' | 'url' | 'dataUrl' | 'license' | 'licenseUrl'
+> & {
+  checkedAt: string;
+  /** The latest run date among the results. */
+  latestRun: string | null;
+  /** Tasks in the benchmark. */
+  tasks: number;
+  /** What the tasks are, in a sentence. */
+  description: string;
+  /** Where the scores were read from, when not from the benchmark itself. */
+  compiledBy?: Pick<BenchmarkSource, 'name' | 'url' | 'dataUrl' | 'license' | 'licenseUrl'>;
+};
+export interface AgentBenchmark {
+  source: AgentSource;
   results: AgentResult[];
+}
+/**
+ * How long a task, measured in the time it takes a skilled person, a model
+ * completes with a given reliability. METR's measure of agent capability.
+ */
+export interface TimeHorizon {
+  id: string;
+  model: string;
+  modelName?: string;
+  provider: string;
+  providerId: string;
+  /** Task length in minutes that the model completes half the time. */
+  minutes: number;
+  /** Confidence interval of `minutes`. */
+  low?: number;
+  high?: number;
+  /** Task length in minutes that the model completes four times out of five. */
+  minutes80?: number;
+  releasedAt?: string;
+  rank: number;
+}
+export interface AgentSnapshot {
+  version: 2;
+  /** Agent benchmarks: Terminal-Bench 2.0 and SWE-bench Verified. */
+  benchmarks: AgentBenchmark[];
+  timeHorizons?: { source: AgentSource & { version: string }; results: TimeHorizon[] };
 }

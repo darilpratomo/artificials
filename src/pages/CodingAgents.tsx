@@ -7,6 +7,8 @@ import { AgentDirectory } from '../components/coding/AgentDirectory';
 import { AgentEffect } from '../components/coding/AgentEffect';
 import { CodingTests } from '../components/coding/CodingTests';
 import { CodingValue } from '../components/coding/CodingValue';
+import { TaskCost } from '../components/coding/TaskCost';
+import { TimeHorizons, duration } from '../components/coding/TimeHorizons';
 import {
   agentsOf,
   checkedAt,
@@ -17,7 +19,13 @@ import {
   type AgentSummary,
 } from '../components/coding/analysis';
 import { day } from '../components/profile/format';
-import { useCoding, type Coding, type CodingAgentRow } from '../lib/overview';
+import {
+  useCoding,
+  type Coding,
+  type CodingAgentRow,
+  type CodingAgentTest,
+  type CodingTest,
+} from '../lib/overview';
 import '../components/home/dashboard.css';
 import './models.css';
 import './coding-agents.css';
@@ -48,8 +56,7 @@ interface Findings {
   busiest?: AgentSummary;
 }
 
-function findingsOf(coding: Coding): Findings {
-  const results = coding.agents?.results ?? [];
+function findingsOf(results: CodingAgentRow[]): Findings {
   const groups = spreads(results);
   const agents = agentsOf(results);
   return {
@@ -63,15 +70,39 @@ function findingsOf(coding: Coding): Findings {
   };
 }
 
-function AtAGlance({ coding, findings }: { coding: Coding; findings: Findings }) {
+/** The best score on a test, and the cheapest run within five points of it. */
+function valueOf(test: CodingTest | undefined) {
+  const rows = (test?.rows ?? []).filter((row) => row.usage?.cost !== undefined);
+  const best = rows[0];
+  if (!best) return undefined;
+  const cheap = rows
+    .filter((row) => row !== best && best.score - row.score <= 5)
+    .sort((a, b) => a.usage!.cost! - b.usage!.cost!)[0];
+  return cheap && cheap.usage!.cost! < best.usage!.cost! ? { test: test!, best, cheap } : undefined;
+}
+const dollars = (value: number) =>
+  value >= 1 ? `$${value.toFixed(2)}` : `$${Number(value.toPrecision(2))}`;
+
+function AtAGlance({
+  coding,
+  test,
+  findings,
+}: {
+  coding: Coding;
+  test?: CodingAgentTest;
+  findings: Findings;
+}) {
   const { results, own, widest, typical, busiest, groups } = findings;
-  const agentic = coding.tests.find((test) => test.id === 'agentic-coding');
+  const agentic = coding.tests.find((entry) => entry.id === 'agentic-coding');
+  const value = valueOf(coding.costTests.find((entry) => entry.id === 'deepswe'));
+  const horizon = coding.timeHorizons?.results[0];
+  const name = test?.source.name ?? 'the leaderboard';
   const rows: [string, ReactNode][] = [];
   if (results.length >= 2)
     rows.push([
       'Best pair',
       <p key="best">
-        {pair(results[0])} solves the most Terminal-Bench 2.0 tasks, ahead of {pair(results[1])}.
+        {pair(results[0])} solves the most {name} tasks, ahead of {pair(results[1])}.
       </p>,
     ]);
   if (own)
@@ -90,11 +121,34 @@ function AtAGlance({ coding, findings }: { coding: Coding; findings: Findings })
         {widest.worst.agent} {percent(widest.worst.score)}.
       </p>,
     ]);
+  if (value)
+    rows.push([
+      'Cost per task',
+      <p key="cost">
+        On {value.test.label},{' '}
+        <ModelLink name={value.best.name} slug={value.best.slug} makerId={value.best.makerId} />{' '}
+        scores highest ({percent(value.best.score)}) at {dollars(value.best.usage!.cost!)} a task,
+        while{' '}
+        <ModelLink name={value.cheap.name} slug={value.cheap.slug} makerId={value.cheap.makerId} />{' '}
+        comes within five points ({percent(value.cheap.score)}) for{' '}
+        {dollars(value.cheap.usage!.cost!)}.
+      </p>,
+    ]);
+  if (horizon)
+    rows.push([
+      'Task length',
+      <p key="horizon">
+        <ModelLink name={horizon.name} slug={horizon.slug} makerId={horizon.makerId} /> completes
+        half of the software tasks that take a skilled person {duration(horizon.minutes)}, the
+        longest in METR’s measurements.
+      </p>,
+    ]);
   if (busiest)
     rows.push([
       'Most tested agent',
       <p key="busiest">
-        <b>{busiest.agent}</b> has results with {busiest.models} models, more than any other agent.
+        <b>{busiest.agent}</b> has {name} results with {busiest.models} models, more than any other
+        agent.
       </p>,
     ]);
   if (agentic && agentic.rows.length >= 4) {
@@ -121,20 +175,27 @@ function AtAGlance({ coding, findings }: { coding: Coding; findings: Findings })
   );
 }
 
-function questions(coding: Coding, findings: Findings): [string, string][] {
+function questions(
+  coding: Coding,
+  test: CodingAgentTest | undefined,
+  findings: Findings,
+): [string, string][] {
   const { results, groups, own, widest, typical } = findings;
-  const source = coding.agents?.source;
-  const agentic = coding.tests.find((test) => test.id === 'agentic-coding');
+  const source = test?.source;
+  const agentic = coding.tests.find((entry) => entry.id === 'agentic-coding');
+  const value = valueOf(coding.costTests.find((entry) => entry.id === 'deepswe'));
+  const horizon = coding.timeHorizons?.results[0];
+  const costTests = coding.costTests;
   const list: [string, string][] = [
     [
       'What is an AI coding agent?',
       'A coding agent is the program that turns an AI model into something that can work on code: it gives the model tools to read and edit files, run commands and tests, and keep going until the task is done. Codex CLI, Claude Code, Gemini CLI and OpenHands are examples. The same model can do better or worse depending on the agent around it.',
     ],
   ];
-  if (results[0])
+  if (results[0] && source)
     list.push([
       'Which coding agent scores highest?',
-      `On Terminal-Bench 2.0, ${results[0].agent} running ${results[0].name} solves ${percent(results[0].score)} of the tasks, the highest result on the leaderboard.${own ? ` The best agent from a model maker is ${own.agent} with ${own.name}, at ${percent(own.score)}.` : ''}`,
+      `On ${source.name}, ${results[0].agent} running ${results[0].name} solves ${percent(results[0].score)} of the tasks, the highest result.${own ? ` The best agent from a model maker is ${own.agent} with ${own.name}, at ${percent(own.score)}.` : ''}`,
     ]);
   if (widest && typical !== undefined)
     list.push([
@@ -161,28 +222,29 @@ function questions(coding: Coding, findings: Findings): [string, string][] {
           )}.${close ? ` ${first.agent} and ${second.agent} are within their standard errors of each other, so treat them as tied.` : ''}`,
       ]);
   }
-  if (source)
+  if (costTests.length)
     list.push([
-      'What is Terminal-Bench?',
-      `Terminal-Bench 2.0 is a set of ${source.tasks} hard tasks carried out in a computer terminal, from building and debugging software to data and system work. Each task is checked automatically, and leaderboard entries run every task at least five times. The score is the share of tasks solved.`,
+      'How much does an AI coding agent cost per task?',
+      `It depends on the model, its reasoning effort and the task. ${costTests.map((entry) => entry.label).join(', ')} publish the average API cost per task.${value ? ` On ${value.test.label}, ${value.best.name} scores highest at ${dollars(value.best.usage!.cost!)} a task, while ${value.cheap.name} comes within five points for ${dollars(value.cheap.usage!.cost!)}.` : ''} Costs use list prices and differ between tests, so compare them within one test.`,
+    ]);
+  if (horizon)
+    list.push([
+      'How long a task can an AI agent finish?',
+      `METR measures the length of software task, in the time a skilled person needs, that a model completes half the time. ${horizon.name} leads its measurements at ${duration(horizon.minutes)}. The uncertainty is large, and the task length a model completes four times out of five is much shorter.`,
     ]);
   if (source?.latestRun)
     list.push([
       'Why are the newest models missing from the agent results?',
-      `The newest result on the Terminal-Bench 2.0 leaderboard is from ${day(source.latestRun)}. Agent and model pairs appear here after the leaderboard lists them. For newer models, the model tests on this page, such as LiveBench agentic coding, are more current.`,
+      `The newest ${source.name} result is from ${day(source.latestRun)}. Agent and model pairs appear here after the leaderboard lists them. For newer models, the model tests on this page, such as DeepSWE, CursorBench and LiveBench agentic coding, are more current.`,
     ]);
   if (agentic?.rows[0])
     list.push([
       'Which model is best at agentic coding?',
-      `On LiveBench agentic coding, ${agentic.rows[0].name} scores highest at ${percent(agentic.rows[0].score)}${agentic.rows[1] ? `, ahead of ${agentic.rows[1].name} at ${percent(agentic.rows[1].score)}` : ''}.`,
+      `On LiveBench agentic coding, ${agentic.rows[0].name} scores highest at ${percent(agentic.rows[0].score)}${agentic.rows[1] ? `, ahead of ${agentic.rows[1].name} at ${percent(agentic.rows[1].score)}` : ''}. Other agentic tests on this page rank models differently, so check the test closest to your work.`,
     ]);
   list.push([
-    'Do you measure the cost or time of each task?',
-    'Not yet. The results published under open licences do not include the cost or duration of each task, and Artificials does not run these tests itself. The price chart uses each model’s list price per 1M tokens, which is not the cost of a task.',
-  ]);
-  list.push([
     'Where does this data come from?',
-    'Agent results come from the Terminal-Bench 2.0 leaderboard (Apache-2.0), as compiled by Epoch AI (CC BY 4.0). Model tests come from LiveBench (Apache-2.0) and Epoch AI, and prices from models.dev (MIT). Artificials matches results to models and calculates the rankings, the agent gaps and the charts. Everything refreshes automatically.',
+    'Agent results come from the Terminal-Bench 2.0 leaderboard (Apache-2.0, compiled by Epoch AI) and SWE-bench (CC BY-NC 4.0). Model tests come from LiveBench (Apache-2.0), Epoch AI (CC BY 4.0), SWE-bench, and DeepSWE by Datacurve and CursorBench by Cursor as compiled by Epoch AI; task lengths come from METR, also via Epoch AI. Prices are from models.dev (MIT). Artificials does not run these tests; it matches results to models and calculates the rankings, gaps and charts. Everything refreshes automatically.',
   ]);
   return list;
 }
@@ -191,18 +253,29 @@ const SECTIONS: [string, string][] = [
   ['leaderboard', 'Leaderboard'],
   ['agent-effect', 'Agent effect'],
   ['agents', 'Agents'],
+  ['cost', 'Cost per task'],
+  ['task-length', 'Task length'],
   ['models', 'Models'],
   ['price', 'Price'],
   ['faq', 'Questions'],
 ];
 
+const creditOf = (source: CodingAgentTest['source']) =>
+  source.compiledBy
+    ? `${source.name} (${source.license}), compiled by ${source.compiledBy.name} (${source.compiledBy.license})`
+    : `${source.name} (${source.license})`;
+
 function CodingContent({ coding }: { coding: Coding }) {
-  const findings = useMemo(() => findingsOf(coding), [coding]);
-  const faq = useMemo(() => questions(coding, findings), [coding, findings]);
-  const source = coding.agents?.source;
-  const credit = source
-    ? `${source.name} leaderboard (${source.license}), compiled by ${source.compiledBy.name} (${source.compiledBy.license})`
-    : '';
+  const [testId, setTestId] = useState(coding.agentTests[0]?.source.id);
+  const test =
+    coding.agentTests.find((entry) => entry.source.id === testId) ?? coding.agentTests[0];
+  const findings = useMemo(() => findingsOf(test?.results ?? []), [test]);
+  // The summary and questions describe the first agent test, whatever is selected.
+  const primary = coding.agentTests[0];
+  const lead = useMemo(() => findingsOf(primary?.results ?? []), [primary]);
+  const faq = useMemo(() => questions(coding, primary, lead), [coding, primary, lead]);
+  const source = test?.source;
+  const credit = source ? creditOf(source) : '';
   const credits = Object.fromEntries(
     coding.sources.map((entry) => [entry.id, `${entry.name} (${entry.license})`]),
   );
@@ -215,9 +288,28 @@ function CodingContent({ coding }: { coding: Coding }) {
       acceptedAnswer: { '@type': 'Answer', text: answer },
     })),
   }).replace(/</g, '\\u003c');
+  const hasCost = coding.costTests.length > 0;
   const sections = SECTIONS.filter(
-    ([id]) => source || !['leaderboard', 'agent-effect', 'agents'].includes(id),
+    ([id]) =>
+      (source || !['leaderboard', 'agent-effect', 'agents'].includes(id)) &&
+      (id !== 'cost' || hasCost) &&
+      (id !== 'task-length' || coding.timeHorizons),
   );
+  const switcher =
+    coding.agentTests.length > 1 ? (
+      <div className="dash-tabs" role="group" aria-label="Agent benchmark">
+        {coding.agentTests.map((entry) => (
+          <button
+            key={entry.source.id}
+            type="button"
+            aria-pressed={entry.source.id === source?.id}
+            onClick={() => setTestId(entry.source.id)}
+          >
+            {entry.source.name}
+          </button>
+        ))}
+      </div>
+    ) : null;
   return (
     <div className="models-hub">
       <nav className="hub-sections" aria-label="On this page">
@@ -234,40 +326,80 @@ function CodingContent({ coding }: { coding: Coding }) {
             <p>What the published results say about agents and the models inside them.</p>
           </div>
         </div>
-        <AtAGlance coding={coding} findings={findings} />
+        <AtAGlance coding={coding} test={primary} findings={lead} />
       </section>
-      {source && (
+      {test && source && (
         <>
           <section id="leaderboard" aria-labelledby="leaderboard-title" className="hub-section">
             <header className="dash-heading">
               <h2 id="leaderboard-title">Leaderboard</h2>
               <p>
-                Terminal-Bench 2.0 results for {findings.results.length} agent and model pairs, up
-                to {source.latestRun ? day(source.latestRun) : 'the latest listing'}.
+                {source.name} results for {findings.results.length} agent and model pairs, up to{' '}
+                {source.latestRun ? day(source.latestRun) : 'the latest listing'}.{' '}
+                {source.description}
               </p>
             </header>
-            <AgentBoard results={findings.results} tasks={source.tasks} credit={credit} />
+            {switcher}
+            <AgentBoard
+              key={source.id}
+              results={findings.results}
+              test={source.name}
+              tasks={source.tasks}
+              credit={credit}
+            />
           </section>
-          {findings.groups.length > 0 && (
-            <section id="agent-effect" aria-labelledby="effect-title" className="hub-section">
-              <header className="dash-heading">
-                <h2 id="effect-title">How much the agent matters</h2>
-                <p>The same model can solve far more tasks in one agent than in another.</p>
-              </header>
-              <AgentEffect groups={findings.groups} credit={credit} />
-            </section>
-          )}
+          <section id="agent-effect" aria-labelledby="effect-title" className="hub-section">
+            <header className="dash-heading">
+              <h2 id="effect-title">How much the agent matters</h2>
+              <p>The same model can solve far more tasks in one agent than in another.</p>
+            </header>
+            {switcher}
+            {findings.groups.length > 0 ? (
+              <AgentEffect
+                key={source.id}
+                groups={findings.groups}
+                test={source.name}
+                credit={credit}
+              />
+            ) : (
+              <div className="dash-panel dash-state">
+                <p>
+                  No model on {source.name} was run by three or more agents. Choose another
+                  benchmark to compare agents running the same model.
+                </p>
+              </div>
+            )}
+          </section>
           <section id="agents" aria-labelledby="agents-title" className="hub-section">
             <header className="dash-heading">
               <h2 id="agents-title">Agents</h2>
               <p>
-                All {findings.agents.length} agents on the leaderboard, with who built them and
-                their best result.
+                All {findings.agents.length} agents with {source.name} results, with who built them
+                and their best result.
               </p>
             </header>
-            <AgentDirectory agents={findings.agents} />
+            {switcher}
+            <AgentDirectory key={source.id} agents={findings.agents} />
           </section>
         </>
+      )}
+      {hasCost && (
+        <section id="cost" aria-labelledby="cost-title" className="hub-section">
+          <header className="dash-heading">
+            <h2 id="cost-title">Cost per task</h2>
+            <p>What models cost and how much work they do per task, as the tests measured it.</p>
+          </header>
+          <TaskCost tests={coding.costTests} credits={credits} />
+        </section>
+      )}
+      {coding.timeHorizons && (
+        <section id="task-length" aria-labelledby="length-title" className="hub-section">
+          <header className="dash-heading">
+            <h2 id="length-title">How long a task models can finish</h2>
+            <p>METR’s time horizons: longer tasks, measured in human time, that models complete.</p>
+          </header>
+          <TimeHorizons horizons={coding.timeHorizons} />
+        </section>
       )}
       {coding.tests.length > 0 && (
         <>
@@ -310,33 +442,57 @@ function CodingContent({ coding }: { coding: Coding }) {
         <div>
           <p>
             Artificials does not run these tests. Rankings, the agent gaps, the matching of results
-            to models and the charts are calculated by Artificials from published results.
+            to models and the charts are calculated by Artificials from published results. Some
+            sources allow only non-commercial use; Artificials is a free, non-commercial site.
           </p>
           <ul>
-            {source && (
-              <li>
+            {coding.agentTests.map(({ source: entry }) => (
+              <li key={entry.id}>
                 Agent results:{' '}
-                <a href={source.url} target="_blank" rel="noopener noreferrer">
-                  {source.name} leaderboard
+                <a href={entry.url} target="_blank" rel="noopener noreferrer">
+                  {entry.name}
                 </a>{' '}
                 (
-                <a href={source.licenseUrl} target="_blank" rel="noopener noreferrer">
-                  {source.license}
+                <a href={entry.licenseUrl} target="_blank" rel="noopener noreferrer">
+                  {entry.license}
                 </a>
-                ), as compiled by{' '}
-                <a href={source.compiledBy.url} target="_blank" rel="noopener noreferrer">
-                  {source.compiledBy.name}
+                )
+                {entry.compiledBy && (
+                  <>
+                    , as compiled by{' '}
+                    <a href={entry.compiledBy.url} target="_blank" rel="noopener noreferrer">
+                      {entry.compiledBy.name}
+                    </a>{' '}
+                    (
+                    <a href={entry.compiledBy.licenseUrl} target="_blank" rel="noopener noreferrer">
+                      {entry.compiledBy.license}
+                    </a>
+                    )
+                  </>
+                )}
+                . Retrieved {checkedAt(entry.checkedAt)}.
+              </li>
+            ))}
+            {coding.timeHorizons && (
+              <li>
+                Task lengths:{' '}
+                <a href={coding.timeHorizons.source.url} target="_blank" rel="noopener noreferrer">
+                  {coding.timeHorizons.source.name}
                 </a>{' '}
-                (
-                <a href={source.compiledBy.licenseUrl} target="_blank" rel="noopener noreferrer">
-                  {source.compiledBy.license}
+                ({coding.timeHorizons.source.version}), as compiled by Epoch AI (
+                <a
+                  href={coding.timeHorizons.source.licenseUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {coding.timeHorizons.source.license}
                 </a>
-                ). Retrieved {checkedAt(source.checkedAt)}.
+                ). Retrieved {checkedAt(coding.timeHorizons.source.checkedAt)}.
               </li>
             )}
             {coding.sources.map((entry) => (
               <li key={entry.id}>
-                {entry.id === 'epoch-models' ? 'Model records' : 'Model tests'}:{' '}
+                Model tests:{' '}
                 <a href={entry.url} target="_blank" rel="noopener noreferrer">
                   {entry.name}
                 </a>{' '}
@@ -356,9 +512,12 @@ function CodingContent({ coding }: { coding: Coding }) {
             </li>
           </ul>
           <p>
-            Agent names are merged when the source spells one agent several ways, and an entry
-            listed twice keeps its latest run. Whether an agent comes from the model’s maker is
-            worked out from the builder the source names.
+            DeepSWE, CursorBench and METR publish their results without a licence of their own;
+            Epoch AI republishes them under CC BY 4.0, and they are credited to both. Agent names
+            are merged when a source spells one agent several ways, and an entry listed twice keeps
+            its latest run. Whether an agent comes from the model’s maker is worked out from the
+            builder the source names. SWE-bench agent results include only entries that tried each
+            issue once with one model.
           </p>
         </div>
       </details>

@@ -5,10 +5,17 @@ import { parseLiveBench, parseImageBench } from './lib/benchmark-sources.ts';
 import {
   parseEpoch,
   parseTerminalBench,
+  parseDeepSwe,
+  parseCursorBench,
+  parseTimeHorizons,
   EPOCH_DATA_URL,
   EPOCH_URL,
   TERMINAL_BENCH,
+  DEEPSWE,
+  CURSORBENCH,
+  TIME_HORIZONS,
 } from './lib/epoch.ts';
+import { parseSweBench, SWE_BENCH } from './lib/swe-bench.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 // GitHub's API allows few anonymous requests from the shared addresses that
@@ -64,19 +71,80 @@ if (!release) throw Error('Missing benchmark release');
 const base = `https://raw.githubusercontent.com/${repo}/${commit.sha}/public`;
 const tableUrl = `${base}/table_${release}.csv`;
 const imageUrl = 'https://t2i-corebench.github.io/';
-const [csv, groups, images, epochArchive, agentLicence] = await Promise.all([
+// SWE-bench's leaderboard file, pinned to one revision with its licence text.
+async function sweBench() {
+  const latest = JSON.parse(
+    (await get(`https://api.github.com/repos/${SWE_BENCH.repo}/commits/HEAD`)).text,
+  );
+  if (!/^[a-f0-9]{40}$/.test(latest.sha)) throw Error('Missing SWE-bench revision');
+  const raw = `https://raw.githubusercontent.com/${SWE_BENCH.repo}/${latest.sha}`;
+  const [licence, board] = await Promise.all([
+    get(`${raw}/LICENSE`),
+    get(`${raw}/${SWE_BENCH.file}`, 12_000_000),
+  ]);
+  if (!licence.text.includes(SWE_BENCH.licenseText))
+    throw Error('SWE-bench licence changed; review before republishing');
+  return { url: `${raw}/${SWE_BENCH.file}`, updatedAt: latest.commit.committer.date, board };
+}
+const [csv, groups, images, epochArchive, agentLicence, swe] = await Promise.all([
   get(tableUrl),
   get(`${base}/categories_${release}.json`),
   get(imageUrl),
   // The archive is binary; its size cap is larger than the text sources'.
   get(EPOCH_DATA_URL, 12_000_000),
-  // Optional: without it, the coding agent results keep their last version.
+  // Optional sources: without them, their results keep their last version.
   get(TERMINAL_BENCH.licenseApi).catch((error) => error),
+  sweBench().catch((error) => error),
 ]);
 const epoch = parseEpoch(new Uint8Array(epochArchive.bytes));
+const directory = resolve(root, 'public/data');
+const file = resolve(directory, 'benchmarks.json');
+let previous;
+try {
+  previous = JSON.parse(await readFile(file, 'utf8'));
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
+/**
+ * Agent tests from optional sources. A source that fails keeps its previous
+ * results and source entry, so one outage never stops the whole refresh.
+ */
+const carried = [];
+function optional(id, parse) {
+  try {
+    return parse();
+  } catch (error) {
+    const old = previous?.categories.find((category) => category.id === id);
+    console.warn(
+      `${id} not updated${old ? '; keeping the previous results' : ''}: ${error.message}`,
+    );
+    if (old) carried.push(old.sourceId);
+    return old;
+  }
+}
+const archive = new Uint8Array(epochArchive.bytes);
+const sweParsed = swe instanceof Error ? swe : undefined;
+let sweResult;
+if (!(swe instanceof Error)) {
+  try {
+    sweResult = parseSweBench(swe.board.text, swe.url);
+  } catch (error) {
+    sweResult = error;
+  }
+}
+const agentTests = [
+  optional('deepswe', () => parseDeepSwe(archive)),
+  optional('cursorbench', () => parseCursorBench(archive)),
+  optional('swe-bench-bash-only', () => {
+    if (sweParsed) throw sweParsed;
+    if (sweResult instanceof Error) throw sweResult;
+    return sweResult.bashOnly;
+  }),
+].filter(Boolean);
 const categories = [
   ...parseLiveBench(csv.text, JSON.parse(groups.text), tableUrl),
   ...epoch.categories,
+  ...agentTests,
   parseImageBench(images.text, imageUrl + '#leaderboard'),
 ];
 if (categories.length < 17 || categories.some((c) => c.rows.length < 5))
@@ -118,17 +186,51 @@ const snapshot = {
       license: 'CC BY-SA 4.0',
       licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
     },
+    ...[
+      {
+        id: 'deepswe',
+        name: `${DEEPSWE.publisher} ${DEEPSWE.name}, compiled by Epoch AI`,
+        url: DEEPSWE.url,
+        dataUrl: EPOCH_DATA_URL,
+        checkedAt,
+        edition: 'mini-swe-agent harness',
+        sourceUpdatedAt: epoch.latestRun ? `${epoch.latestRun}T00:00:00.000Z` : null,
+        license: 'CC BY 4.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      },
+      {
+        id: 'cursorbench',
+        name: `${CURSORBENCH.publisher} ${CURSORBENCH.name}, compiled by Epoch AI`,
+        url: CURSORBENCH.url,
+        dataUrl: EPOCH_DATA_URL,
+        checkedAt,
+        edition: 'Cursor agent',
+        sourceUpdatedAt: epoch.latestRun ? `${epoch.latestRun}T00:00:00.000Z` : null,
+        license: 'CC BY 4.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      },
+      {
+        id: 'swebench',
+        name: 'SWE-bench',
+        url: SWE_BENCH.url,
+        dataUrl: swe instanceof Error ? SWE_BENCH.url : swe.url,
+        checkedAt,
+        edition: 'Verified, bash only (mini-SWE-agent)',
+        sourceUpdatedAt: swe instanceof Error ? null : swe.updatedAt,
+        license: SWE_BENCH.license,
+        licenseUrl: SWE_BENCH.licenseUrl,
+      },
+    ]
+      // A source whose results were carried over keeps its previous entry.
+      .map((source) =>
+        carried.includes(source.id)
+          ? (previous?.sources.find((entry) => entry.id === source.id) ?? source)
+          : source,
+      )
+      .filter((source) => categories.some((category) => category.sourceId === source.id)),
   ],
   categories,
 };
-const directory = resolve(root, 'public/data');
-const file = resolve(directory, 'benchmarks.json');
-let previous;
-try {
-  previous = JSON.parse(await readFile(file, 'utf8'));
-} catch (error) {
-  if (error.code !== 'ENOENT') throw error;
-}
 if (previous && !process.argv.includes('--accept-shrink')) {
   for (const old of previous.categories) {
     const next = categories.find((c) => c.id === old.id);
@@ -168,30 +270,50 @@ if (epoch.facts.length >= 50 && epoch.facts.length >= previousFacts * 0.75) {
 } else {
   console.warn(`Model facts not updated: ${epoch.facts.length} records (was ${previousFacts}).`);
 }
-// Coding agent results are optional too. They are published only while the
-// leaderboard's dataset card states Apache-2.0; a failed or much smaller read
-// keeps the previous file.
+// Coding agent results and task lengths are optional too. Each part keeps its
+// previous version when its source fails, shrinks sharply or changes licence.
 const agentsFile = resolve(directory, 'coding-agents.json');
-let previousAgents = 0;
+let previousAgents;
 try {
-  previousAgents = JSON.parse(await readFile(agentsFile, 'utf8')).results.length;
+  previousAgents = JSON.parse(await readFile(agentsFile, 'utf8'));
 } catch (error) {
   if (error.code !== 'ENOENT') throw error;
 }
-let agentCount = 0;
-try {
-  if (agentLicence instanceof Error) throw agentLicence;
-  if (JSON.parse(agentLicence.text).cardData?.license !== 'apache-2.0')
-    throw Error('Terminal-Bench leaderboard licence changed; review before republishing');
-  const agents = parseTerminalBench(new Uint8Array(epochArchive.bytes));
-  if (agents.results.length < previousAgents * 0.75)
-    throw Error(`${agents.results.length} results (was ${previousAgents})`);
-  const epochSource = snapshot.sources.find((source) => source.id === 'epoch');
-  const agentsStaging = resolve(root, '.coding-agents.tmp');
-  await writeFile(
-    agentsStaging,
-    JSON.stringify({
-      version: 1,
+// The first version of the file held Terminal-Bench alone.
+const previousBenchmarks =
+  previousAgents?.version === 2
+    ? previousAgents.benchmarks
+    : previousAgents?.results
+      ? [{ source: previousAgents.source, results: previousAgents.results }]
+      : [];
+const previousOf = (id) => previousBenchmarks.find((entry) => entry.source.id === id);
+const epochSource = snapshot.sources.find((source) => source.id === 'epoch');
+const compiledBy = {
+  name: epochSource.name,
+  url: epochSource.url,
+  dataUrl: epochSource.dataUrl,
+  license: epochSource.license,
+  licenseUrl: epochSource.licenseUrl,
+};
+function agentPart(id, read) {
+  const old = previousOf(id);
+  try {
+    const part = read();
+    if (old && part.results.length < old.results.length * 0.75)
+      throw Error(`${part.results.length} results (was ${old.results.length})`);
+    return part;
+  } catch (error) {
+    console.warn(`${id} agent results not updated: ${error.message}`);
+    return old;
+  }
+}
+const agentBenchmarks = [
+  agentPart('terminal-bench', () => {
+    if (agentLicence instanceof Error) throw agentLicence;
+    if (JSON.parse(agentLicence.text).cardData?.license !== 'apache-2.0')
+      throw Error('Terminal-Bench leaderboard licence changed; review before republishing');
+    const agents = parseTerminalBench(archive);
+    return {
       source: {
         id: 'terminal-bench',
         name: TERMINAL_BENCH.name,
@@ -202,21 +324,73 @@ try {
         checkedAt,
         latestRun: agents.latestRun,
         tasks: TERMINAL_BENCH.tasks,
-        compiledBy: {
-          name: epochSource.name,
-          url: epochSource.url,
-          dataUrl: epochSource.dataUrl,
-          license: epochSource.license,
-          licenseUrl: epochSource.licenseUrl,
-        },
+        description:
+          'Hard tasks carried out in a computer terminal, from building and debugging software to data and system work, each checked automatically.',
+        compiledBy,
       },
       results: agents.results,
+    };
+  }),
+  agentPart('swe-bench-agents', () => {
+    if (sweParsed) throw sweParsed;
+    if (sweResult instanceof Error) throw sweResult;
+    return {
+      source: {
+        id: 'swe-bench-agents',
+        name: 'SWE-bench Verified',
+        url: SWE_BENCH.url,
+        dataUrl: swe.url,
+        license: SWE_BENCH.license,
+        licenseUrl: SWE_BENCH.licenseUrl,
+        checkedAt,
+        latestRun: sweResult.agents.latestRun,
+        tasks: SWE_BENCH.tasks,
+        description:
+          'Real GitHub issues from Python projects that engineers confirmed are solvable; the agent must change the code so the project’s tests pass. Entries that tried each issue once, with one model.',
+      },
+      results: sweResult.agents.results,
+    };
+  }),
+].filter(Boolean);
+let timeHorizons = previousAgents?.timeHorizons;
+try {
+  const horizons = parseTimeHorizons(archive);
+  if (timeHorizons && horizons.results.length < timeHorizons.results.length * 0.75)
+    throw Error(`${horizons.results.length} results (was ${timeHorizons.results.length})`);
+  timeHorizons = {
+    source: {
+      id: 'metr',
+      name: TIME_HORIZONS.name,
+      url: TIME_HORIZONS.url,
+      dataUrl: EPOCH_DATA_URL,
+      license: 'CC BY 4.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      checkedAt,
+      latestRun: horizons.latestRelease,
+      tasks: 0,
+      description:
+        'How long a software task, measured in the time a skilled person needs, a model completes half the time.',
+      compiledBy,
+      version: horizons.version,
+    },
+    results: horizons.results,
+  };
+} catch (error) {
+  console.warn(`METR time horizons not updated: ${error.message}`);
+}
+let agentCount = 0;
+if (agentBenchmarks.length) {
+  const agentsStaging = resolve(root, '.coding-agents.tmp');
+  await writeFile(
+    agentsStaging,
+    JSON.stringify({
+      version: 2,
+      benchmarks: agentBenchmarks,
+      ...(timeHorizons ? { timeHorizons } : {}),
     }) + '\n',
   );
   await rename(agentsStaging, agentsFile);
-  agentCount = agents.results.length;
-} catch (error) {
-  console.warn(`Coding agent results not updated: ${error.message}`);
+  agentCount = agentBenchmarks.reduce((total, entry) => total + entry.results.length, 0);
 }
 console.log(
   `Benchmarks refreshed: ${categories.map((c) => `${c.name} ${c.rows.length}`).join(', ')}. Model facts: ${epoch.facts.length}. Coding agent results: ${agentCount}. Checked ${checkedAt}.`,

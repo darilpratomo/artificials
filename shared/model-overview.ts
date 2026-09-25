@@ -1,5 +1,5 @@
 import type { CatalogSnapshot } from './catalog.ts';
-import type { BenchmarkDomain, BenchmarkSnapshot } from './benchmarks.ts';
+import type { BenchmarkDomain, BenchmarkSnapshot, TaskUsage } from './benchmarks.ts';
 import {
   blendedPrice,
   isPaidOffer,
@@ -52,6 +52,8 @@ export interface TestRow {
   maker: string;
   score: number;
   stderr?: number;
+  /** Average cost, tokens or steps per task, for agent tests that publish them. */
+  usage?: TaskUsage;
 }
 
 export interface OverviewTest {
@@ -313,6 +315,7 @@ export function buildOverview(
           ...makerOf(profile, row.providerId, row.provider),
           score: row.score,
           ...(row.stderr !== undefined ? { stderr: row.stderr } : {}),
+          ...(row.usage ? { usage: row.usage } : {}),
         });
       }
       return {

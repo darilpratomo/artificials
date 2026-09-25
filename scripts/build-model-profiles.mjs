@@ -27,6 +27,9 @@ try {
 let agents;
 try {
   agents = JSON.parse(await readFile(resolve(data, 'coding-agents.json'), 'utf8'));
+  // The first version of the file held Terminal-Bench alone.
+  if (agents.version === 1)
+    agents = { version: 2, benchmarks: [{ source: agents.source, results: agents.results }] };
 } catch (error) {
   if (error.code !== 'ENOENT') throw error;
 }
@@ -105,7 +108,16 @@ await writeFile(resolve(staging, 'timeline.json'), JSON.stringify(timeline) + '\
 await writeFile(resolve(staging, 'overview.json'), JSON.stringify(overview) + '\n');
 await writeFile(resolve(staging, 'tests.json'), JSON.stringify(tests) + '\n');
 await writeFile(resolve(staging, 'explorer.json'), JSON.stringify(explorer) + '\n');
-const coding = buildCoding({ profiles, tests: tests.tests, agents, linkModel, sources });
+const coding = buildCoding({
+  profiles,
+  tests: tests.tests,
+  benchmarks,
+  links,
+  agents,
+  linkModel,
+  sources,
+  facts: facts.facts,
+});
 await writeFile(resolve(staging, 'coding.json'), JSON.stringify(coding) + '\n');
 await rm(target, { recursive: true, force: true });
 await rename(staging, target);

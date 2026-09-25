@@ -16,7 +16,14 @@ export type {
   TimelineEntry,
 } from '../../shared/model-overview';
 export { FLAGS } from '../../shared/model-overview';
-export type { Coding, CodingAgentRow, CodingTest, CodingTestRow } from '../../shared/coding';
+export type {
+  Coding,
+  CodingAgentRow,
+  CodingAgentTest,
+  CodingHorizon,
+  CodingTest,
+  CodingTestRow,
+} from '../../shared/coding';
 
 const requests = new Map<string, Promise<unknown>>();
 /** Files already loaded, so returning to a page renders at once instead of loading again. */
@@ -26,7 +33,7 @@ const isOverview = (value: ModelOverview) => value?.version === 1 && Array.isArr
 const isTests = (value: OverviewTests) => value?.version === 1 && Array.isArray(value.tests);
 const isExplorer = (value: Explorer) => value?.version === 1 && Array.isArray(value.models);
 const isTimeline = (value: Timeline) => value?.version === 1 && Array.isArray(value.entries);
-const isCoding = (value: Coding) => value?.version === 1 && Array.isArray(value.tests);
+const isCoding = (value: Coding) => value?.version === 2 && Array.isArray(value.tests);
 
 /**
  * Prerendered pages carry their data inline, so the first view needs no extra

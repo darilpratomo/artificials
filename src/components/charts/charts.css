@@ -607,6 +607,28 @@ a.rank-hit:focus-visible {
     margin-block: -7px;
   }
 }
+/* On phones the bar moves under the name, so names are not cut short. */
+@media (max-width: 560px) {
+  .metric-bars li {
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'logo name value'
+      '. track track';
+    row-gap: 5px;
+  }
+  .metric-bars li img {
+    grid-area: logo;
+  }
+  .metric-bars-name {
+    grid-area: name;
+  }
+  .metric-bars-track {
+    grid-area: track;
+  }
+  .metric-bars li b {
+    grid-area: value;
+  }
+}
 
 /* Price legend and swatches, shared by provider and model price charts */
 .price-legend {

@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react';
 import type { CodingTest } from '../../lib/overview';
 import { RankChart, type RankItem } from '../charts/RankChart';
 import { ShareButton } from '../charts/ShareButton';
+import { Select } from '../Select';
 import { day, price } from '../profile/format';
 import { percent } from './analysis';
 
@@ -44,29 +45,34 @@ export function CodingTests({
           <h3>{test.label}</h3>
           <p>{test.description}</p>
         </div>
-        <ShareButton
-          title={title}
-          render={(tools) =>
-            tools.rankImage(
-              { title, subtitle: test.description, source: credit },
-              items.map((item) => ({ name: item.name, makerId: item.makerId, value: item.value })),
-              'percent',
-              percent,
-            )
-          }
-        />
-      </div>
-      <div className="dash-tabs" role="group" aria-label="Choose a coding test">
-        {tests.map((entry) => (
-          <button
-            key={entry.id}
-            type="button"
-            aria-pressed={entry.id === test.id}
-            onClick={() => setTestId(entry.id)}
+        <div className="dash-controls">
+          <Select
+            value={test.id}
+            onValueChange={setTestId}
+            aria-label="Choose a coding test to rank"
           >
-            {entry.label}
-          </button>
-        ))}
+            {tests.map((entry) => (
+              <option key={entry.id} value={entry.id}>
+                {entry.label}
+              </option>
+            ))}
+          </Select>
+          <ShareButton
+            title={title}
+            render={(tools) =>
+              tools.rankImage(
+                { title, subtitle: test.description, source: credit },
+                items.map((item) => ({
+                  name: item.name,
+                  makerId: item.makerId,
+                  value: item.value,
+                })),
+                'percent',
+                percent,
+              )
+            }
+          />
+        </div>
       </div>
       <RankChart
         items={items}

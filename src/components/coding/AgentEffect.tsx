@@ -10,7 +10,15 @@ const SHOWN = 10;
  * One row per model run by several agents: a line from the weakest to the
  * strongest agent's score, with a dot for every agent. Opening a row lists them.
  */
-export function AgentEffect({ groups, credit }: { groups: AgentSpread[]; credit: string }) {
+export function AgentEffect({
+  groups,
+  test,
+  credit,
+}: {
+  groups: AgentSpread[];
+  test: string;
+  credit: string;
+}) {
   const [expanded, setExpanded] = useState(false);
   const shown = expanded ? groups : groups.slice(0, SHOWN);
   const widest = Math.max(...groups.map((group) => group.spread), 1);
@@ -30,8 +38,7 @@ export function AgentEffect({ groups, credit }: { groups: AgentSpread[]; credit:
             tools.listImage(
               {
                 title: 'How much the coding agent changes a model’s score',
-                subtitle:
-                  'Terminal-Bench 2.0: points between the weakest and strongest agent running each model.',
+                subtitle: `${test}: points between the weakest and strongest agent running each model.`,
                 source: credit,
               },
               groups.slice(0, 30).map((group) => ({

@@ -20,10 +20,13 @@ const SHOWN = 15;
  */
 export function AgentBoard({
   results,
+  test,
   tasks,
   credit,
 }: {
   results: CodingAgentRow[];
+  /** The benchmark's name, such as Terminal-Bench 2.0. */
+  test: string;
   tasks: number;
   credit: string;
 }) {
@@ -43,8 +46,8 @@ export function AgentBoard({
   const shown = expanded ? rows : rows.slice(0, SHOWN);
   const title =
     model === 'all'
-      ? `Terminal-Bench 2.0: ${SCOPES.find(([id]) => id === scope)![1].toLowerCase()}`
-      : `Terminal-Bench 2.0: ${model} in each agent`;
+      ? `${test}: ${SCOPES.find(([id]) => id === scope)![1].toLowerCase()}`
+      : `${test}: ${model} in each agent`;
 
   return (
     <div className="dash-panel">
@@ -52,8 +55,8 @@ export function AgentBoard({
         <div>
           <h3>{model === 'all' ? 'Agent and model pairs' : `${model}, agent by agent`}</h3>
           <p>
-            Share of the {tasks} Terminal-Bench 2.0 tasks solved. Higher is better. Every result
-            pairs one agent with one model.
+            Share of the {tasks} {test} tasks solved. Higher is better. Every result pairs one agent
+            with one model.
           </p>
         </div>
         <div className="dash-controls">

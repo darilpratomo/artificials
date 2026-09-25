@@ -84,7 +84,8 @@ Do not mix scores from different benchmark methods into a single overall ranking
 Capability rankings now live separately in `public/data/benchmarks.json` and appear by default
 on `/leaderboard`. `scripts/sync-benchmarks.mjs` ingests published LiveBench task scores,
 Epoch AI's own benchmark evaluations and capability index, and T2I-CoReBench image-generation
-results, plus Terminal-Bench 2.0 agent results for the coding agents page (see below). The six-hour catalog workflow refreshes both sources,
+results, and the agent tests DeepSWE, CursorBench and SWE-bench Verified (bash only), plus agent
+results and task lengths for the coding agents page (see below). The six-hour catalog workflow refreshes both sources,
 validates them, runs checks, and commits the complete snapshots for native Cloudflare deploy.
 Failed source retrieval/schema checks leave the last successful published deployment intact.
 A benchmark source that is down does not hold back the catalog: the workflow still checks and
@@ -311,43 +312,58 @@ Host listings, including gateways and resellers, stay under "Provider listings"
 
 `/coding-agents` compares coding agents (the program around a model that edits files and runs
 commands) and the models inside them. It is built from `public/data/models/coding.json`,
-generated at build time, and prerendered with that data inline.
+generated at build time from `benchmarks.json` and `coding-agents.json`, and prerendered with
+that data inline. Artificials is non-commercial, so non-commercial licences such as SWE-bench's
+CC BY-NC 4.0 are acceptable; every source is credited beside its chart and in "Sources and
+method".
 
-Agent results come from the Terminal-Bench 2.0 leaderboard: one result per agent and model, as
-the share of the 89 tasks solved, with its standard error and run date. The leaderboard's
-submissions are published under Apache-2.0 on Hugging Face
-(`harborframework/terminal-bench-2-leaderboard`); the scores are read from Epoch AI's
-compilation of the leaderboard (`terminalbench_external.csv` in the Epoch AI archive, CC BY 4.0),
-which is the only `_external` file used. `scripts/sync-benchmarks.mjs` writes them to
-`public/data/coding-agents.json` only while the dataset card states `apache-2.0` (checked through
-the Hugging Face API on every refresh). Like the model records, the file is optional: a failed
-or much smaller read keeps the previous file and never stops the benchmark refresh.
+Sources, all refreshed by `scripts/sync-benchmarks.mjs` every six hours:
 
-Cleaning, in `parseTerminalBench` (`scripts/lib/epoch.ts`): rows must cite the leaderboard;
-agent names are trimmed and merged across spellings ("Terminus 2", "Terminus-2"); an entry
-listed twice (with and without "_unknown", or with an assumed effort at the same score) keeps
-its latest run. Models are matched to profiles the same way as benchmark rows. An agent counts as
+- Terminal-Bench 2.0 (agent results): one result per agent and model, the share of 89 tasks
+  solved, with standard error and run date. The leaderboard's submissions are Apache-2.0 on
+  Hugging Face (`harborframework/terminal-bench-2-leaderboard`); scores are read from Epoch AI's
+  compilation (`terminalbench_external.csv`), and only while the dataset card states
+  `apache-2.0`. Its newest result is from April 2026.
+- SWE-bench Verified (agent results and a model test): SWE-bench's `data/leaderboards.json`
+  (CC BY-NC 4.0), pinned to one revision and used only while its `LICENSE` file carries that
+  licence. Agents' entries count only when they tried each issue once with one model. The
+  bash-only runs (every model in mini-SWE-agent) become the model test "SWE-bench Verified,
+  bash only", with average API cost and model calls per issue.
+- DeepSWE (Datacurve) and CursorBench (Cursor): model tests with average cost, tokens or output
+  tokens, and steps per task, read from Epoch AI's compilations (`deepswe_external.csv`,
+  `cursorbench_external.csv`). Their publishers state no licence of their own; Epoch AI
+  republishes them under CC BY 4.0 and both are credited.
+- METR time horizons: the length of software task, in the time skilled people need, that a
+  model completes half the time, from Epoch AI's compilation. Only the latest method version is
+  kept, since versions use different task suites.
+- LiveBench agentic coding and coding, and Epoch AI's SWE-bench Verified, as elsewhere on the
+  site.
+
+The three model tests with task costs are regular benchmark categories, so they also appear on
+`/leaderboard` and model profiles. Each optional source keeps its previous results when it
+fails, shrinks sharply or changes licence, and never stops the rest of the refresh.
+
+Cleaning: rows must cite their leaderboard; agent names are trimmed and merged across spellings
+("Terminus 2", "Terminus-2"); an entry listed twice (with and without "_unknown", or with an
+assumed effort at the same score) keeps its latest run. Models are matched to profiles the same
+way as benchmark rows; models without a profile take Epoch AI's display name. An agent counts as
 the model maker's own when the builder the source names is the model's maker, such as Codex CLI
 by OpenAI running GPT-5.5.
 
 The page shows, all calculated by Artificials from those results:
 
-- Leaderboard: agent and model pairs on a fixed 0–100% scale with one standard error, filtered
-  by builder (the model's maker or independent) or by model.
-- Agent effect: for models that at least three agents ran, the gap between the best and weakest
-  agent, with every agent's score on opening a row.
-- Agents: each agent's builder, the number of models it ran, its best result and latest run.
-- Models on coding tests: LiveBench agentic coding and coding, and Epoch AI's SWE-bench
-  Verified, one test per chart. Each test runs every model the same way, so these compare
-  models, not agents, and include models newer than the agent results.
-- Coding score against the blended list price, with the best score at each price. The price is
-  not the cost of a task.
+- Leaderboard, agent effect and agents, for one agent benchmark at a time (Terminal-Bench 2.0
+  or SWE-bench Verified): agent and model pairs on a fixed 0–100% scale, filtered by builder or
+  model; for models that at least three agents ran, the gap between the best and weakest agent;
+  and each agent's builder, models run, best result and latest run.
+- Cost per task: score against average cost per task for DeepSWE, CursorBench and SWE-bench
+  bash only, with every configuration a source ran and the best score at each cost, plus
+  tokens and steps per task. Costs are the sources' measurements at list prices and are never
+  compared across tests.
+- Task length: METR's time horizons on a log scale, with their intervals.
+- Models on coding tests (one test per chart) and coding score against the blended list price.
 - Questions answered from the same data, with `FAQPage` structured data, and the sources with
   their licences and retrieval times.
 
-The Terminal-Bench 2.0 leaderboard's newest result is from April 2026; newer agent and model
-pairs appear after it lists them. Cost, time and tokens per task are not shown: the openly
-licensed results do not include them, and Artificials does not run agents itself. Other agent
-leaderboards were checked on 25 September 2026 and are not used: SWE-bench's site data is CC
-BY-NC 4.0 (not for a commercial site); DeepSWE, CursorBench and METR publish no licence for
-their results; Aider's leaderboard stopped updating in October 2025.
+Time per task (wall-clock time) is not shown: no source publishes it under a licence this site
+can use. Aider's leaderboard is not used because it stopped updating in October 2025.

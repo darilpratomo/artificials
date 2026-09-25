@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import type { CodingTest } from '../../lib/overview';
 import { ScatterChart } from '../charts/ScatterChart';
 import { ShareButton } from '../charts/ShareButton';
+import { Select } from '../Select';
 import { compactUsd } from '../charts/scale';
 import { percent } from './analysis';
 
@@ -50,41 +51,42 @@ export function CodingValue({
             joins the models no cheaper model beats.
           </p>
         </div>
-        <ShareButton
-          title={title}
-          render={(tools) =>
-            tools.scatterImage(
-              {
-                title,
-                subtitle:
-                  'Score against blended list price per 1M tokens (three input to one output).',
-                source: credit,
-              },
-              points.map((point) => ({
-                name: point.name,
-                makerId: point.makerId,
-                maker: point.maker,
-                x: point.x,
-                y: point.y,
-              })),
-              PRICE_AXIS,
-              { label: y.label, format: percent },
-              { frontier: 'cheapest', quadrant: true },
-            )
-          }
-        />
-      </div>
-      <div className="dash-tabs" role="group" aria-label="Choose a coding test">
-        {tests.map((entry) => (
-          <button
-            key={entry.id}
-            type="button"
-            aria-pressed={entry.id === test.id}
-            onClick={() => setTestId(entry.id)}
+        <div className="dash-controls">
+          <Select
+            value={test.id}
+            onValueChange={setTestId}
+            aria-label="Choose a coding test to compare with price"
           >
-            {entry.label}
-          </button>
-        ))}
+            {tests.map((entry) => (
+              <option key={entry.id} value={entry.id}>
+                {entry.label}
+              </option>
+            ))}
+          </Select>
+          <ShareButton
+            title={title}
+            render={(tools) =>
+              tools.scatterImage(
+                {
+                  title,
+                  subtitle:
+                    'Score against blended list price per 1M tokens (three input to one output).',
+                  source: credit,
+                },
+                points.map((point) => ({
+                  name: point.name,
+                  makerId: point.makerId,
+                  maker: point.maker,
+                  x: point.x,
+                  y: point.y,
+                })),
+                PRICE_AXIS,
+                { label: y.label, format: percent },
+                { frontier: 'cheapest', quadrant: true },
+              )
+            }
+          />
+        </div>
       </div>
       <ScatterChart
         points={points}

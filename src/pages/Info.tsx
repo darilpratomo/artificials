@@ -93,12 +93,14 @@ export default function Info() {
           </p>
           <h2>How to read the rankings</h2>
           <p>
-            Capability rankings use published results from Epoch AI, LiveBench and T2I-CoReBench,
-            refreshed on a six-hour schedule. Each view identifies its dataset, evaluation scope,
-            aggregation method and source-check time. Missing evaluations are not scored zero.
-            Benchmark results remain separate from specification and price rankings; a larger
-            context window does not establish higher intelligence. See the{' '}
-            <Link to="/leaderboard">leaderboard</Link> for the current metric and coverage.
+            Capability rankings use published results from Epoch AI, LiveBench, T2I-CoReBench,
+            SWE-bench, and DeepSWE and CursorBench as compiled by Epoch AI, refreshed on a six-hour
+            schedule. Coding agent results come from Terminal-Bench 2.0 and SWE-bench. Each view
+            identifies its dataset, evaluation scope, aggregation method and source-check time.
+            Missing evaluations are not scored zero. Benchmark results remain separate from
+            specification and price rankings; a larger context window does not establish higher
+            intelligence. See the <Link to="/leaderboard">leaderboard</Link> for the current metric
+            and coverage.
           </p>
           <p>
             Charts, highlights and the release timeline on the home page are calculated by
