@@ -28,6 +28,10 @@ test.beforeEach(async ({ page, request, baseURL }) => {
   );
   await page.route('https://**.google-analytics.com/**', (route) => route.abort());
 });
+test.afterEach(async ({ page }) => {
+  // A font or image still loading when a test ends must not fail it.
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+});
 async function views(page: import('@playwright/test').Page) {
   return page.evaluate(() =>
     (window as unknown as { dataLayer: unknown[][] }).dataLayer

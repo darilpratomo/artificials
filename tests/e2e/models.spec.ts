@@ -23,6 +23,10 @@ test('the models page compares real models, most capable first', async ({ page }
   await expect(glance).toContainText(data.index[0].name);
   await expect(glance).toContainText('are the most capable models');
   await expect(page.locator('.hub-highlights .metric-bars')).toHaveCount(3);
+  // New releases show before any test covers them.
+  const newest = data.releases.filter((release) => release.notable);
+  await expect(page.locator('#new .new-models li')).toHaveCount(Math.min(12, newest.length));
+  await expect(page.locator('#new .new-models li').first()).toContainText(newest[0].name);
   // The full list starts with the highest capability score, not a host's listing.
   await page.locator('#all-models').scrollIntoViewIfNeeded();
   const first = page

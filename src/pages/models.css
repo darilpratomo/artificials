@@ -239,3 +239,93 @@
     margin-block: -7px;
   }
 }
+
+/* Newest releases: a row per model, labelled cells on narrow screens. */
+.new-models-head,
+.new-models li {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  align-items: center;
+}
+.new-models-head {
+  padding: 0 0 10px;
+  border-bottom: 1px solid #1f2027;
+  color: #9698a3;
+  font-size: 13.5px;
+}
+.new-models {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.new-models li {
+  padding: 12px 0;
+  border-bottom: 1px solid #1a1b21;
+  color: #d5d7de;
+  font-size: 14.5px;
+  font-variant-numeric: tabular-nums;
+}
+.new-models li:last-child {
+  border-bottom: 0;
+}
+.new-models li > span > small {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.new-models li > .is-muted {
+  color: #9698a3;
+}
+.new-models-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.new-models-name img {
+  flex: none;
+}
+.new-models-name > span {
+  display: grid;
+  min-width: 0;
+}
+.new-models-name a {
+  /* A taller tap target without changing the row's layout. */
+  margin-block: -7px;
+  padding-block: 7px;
+  color: #f0f0f3;
+  font-weight: 550;
+  overflow-wrap: anywhere;
+}
+.new-models-name small {
+  color: #9698a3;
+  font-size: 13px;
+}
+@media (max-width: 760px) {
+  .new-models-head {
+    display: none;
+  }
+  .new-models li {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+    padding: 14px 0;
+  }
+  .new-models-name {
+    grid-column: 1 / -1;
+  }
+  .new-models li > span > small {
+    position: static;
+    display: block;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    color: #9698a3;
+    font-size: 12.5px;
+  }
+}

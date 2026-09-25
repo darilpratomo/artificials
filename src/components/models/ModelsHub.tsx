@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { makerLogo } from '../../../shared/makers';
-import { useOverview, type IndexPoint, type ModelOverview } from '../../lib/overview';
+import { useOverview, type IndexPoint, type ModelOverview, type Release } from '../../lib/overview';
 import { MetricBars } from '../charts/MetricBars';
 import { ShareButton } from '../charts/ShareButton';
 import { ModelExplorer } from '../home/ModelExplorer';
@@ -175,6 +175,69 @@ function TopHighlights({ overview }: { overview: ModelOverview }) {
           }}
         />
       </div>
+    </div>
+  );
+}
+
+/**
+ * The newest releases from known makers, with or without a score, so a new
+ * model shows here before any test covers it.
+ */
+function NewModels({ releases }: { releases: Release[] }) {
+  const newest = releases.filter((release) => release.notable).slice(0, 12);
+  if (!newest.length) return null;
+  const cells: [string, (release: Release) => string][] = [
+    ['Released', (release) => day(release.date)],
+    [
+      'Capability index',
+      (release) =>
+        release.index !== undefined
+          ? release.index.toFixed(1)
+          : release.tested
+            ? 'Tested, no index yet'
+            : 'Not tested yet',
+    ],
+    [
+      'Blended price',
+      (release) => (release.price !== undefined ? price(release.price) : 'Not listed'),
+    ],
+    [
+      'Context window',
+      (release) => (release.contextWindow ? tokens(release.contextWindow) : 'Not reported'),
+    ],
+  ];
+  return (
+    <div className="dash-panel">
+      <div className="new-models-head" aria-hidden="true">
+        <span>Model</span>
+        {cells.map(([label]) => (
+          <span key={label}>{label}</span>
+        ))}
+      </div>
+      <ol className="new-models">
+        {newest.map((release) => (
+          <li key={release.slug}>
+            <span className="new-models-name">
+              <img src={makerLogo(release.makerId)} alt="" width="22" height="22" loading="lazy" />
+              <span>
+                <Link to={`/models/${release.slug}`}>{release.name}</Link>
+                <small>{release.maker}</small>
+              </span>
+            </span>
+            {cells.map(([label, value]) => (
+              <span
+                key={label}
+                className={
+                  release.index === undefined && label === 'Capability index' ? 'is-muted' : ''
+                }
+              >
+                <small>{label}</small>
+                {value(release)}
+              </span>
+            ))}
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
@@ -363,6 +426,7 @@ function questions(overview: ModelOverview): [string, string][] {
 }
 
 const SECTIONS: [string, string][] = [
+  ['new', 'New models'],
   ['capability', 'Capability'],
   ['comparisons', 'Score, price and time'],
   ['prices', 'Prices'],
@@ -424,6 +488,16 @@ export function ModelsHub({ initial }: { initial?: ModelOverview }) {
           <p>The ten most capable models, compared on score, price and context window.</p>
         </header>
         <TopHighlights overview={data} />
+      </section>
+      <section id="new" aria-labelledby="new-title" className="hub-section">
+        <header className="dash-heading">
+          <h2 id="new-title">New models</h2>
+          <p>
+            The newest releases from known makers. A capability score follows once a test covers the
+            model.
+          </p>
+        </header>
+        <NewModels releases={data.releases} />
       </section>
       <section id="capability" aria-labelledby="capability-title" className="hub-section">
         <header className="dash-heading">

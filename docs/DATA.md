@@ -291,13 +291,17 @@ the home page, prerendered with that data inline, and shows:
   models; and the newest releases from known makers.
 - Highlights: the ten highest index scores, with the same ten models' reference prices and
   context windows.
+- New models: the twelve newest releases from known makers, with their index score when they
+  have one, otherwise whether any test covers them yet, and their reference price and context
+  window. A new model is listed here before any test covers it.
 - The ranking and score, price and time charts from the home page.
 - Prices: input, cached input and output list prices of the fifteen most capable models with a
   paid listing, from the same listing as the reference price.
 - Context and scale: the largest context windows among models with a score, and Epoch AI's
   training compute estimates on a log scale.
-- Every model, sorted by capability index, and a question list answered from the same data
-  (with `FAQPage` structured data).
+- Every model, sorted by capability index, with models that have no score after them, most
+  widely hosted first; and a question list answered from the same data (with `FAQPage`
+  structured data).
 
 Host listings, including gateways and resellers, stay under "Provider listings"
 (`/models?view=listings`). Links with the old listing filters (`provider`, `modality`, `page`,

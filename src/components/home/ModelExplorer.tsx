@@ -94,15 +94,21 @@ function by<T>(value: (row: ExplorerRow) => T | null, compare: (a: T, b: T) => n
     return compare(left, right);
   };
 }
+const byHosts = by(
+  (row) => row[7],
+  (a, b) => b - a,
+);
+const byIndex = by(
+  (row) => row[8],
+  (a, b) => b - a,
+);
 const SORTERS: Record<Sort, (a: ExplorerRow, b: ExplorerRow) => number> = {
   newest: by(
     (row) => row[4],
     (a, b) => b.localeCompare(a),
   ),
-  index: by(
-    (row) => row[8],
-    (a, b) => b - a,
-  ),
+  // Models without a score follow, most widely hosted first.
+  index: (a, b) => byIndex(a, b) || byHosts(a, b),
   price: by(
     (row) => row[6],
     (a, b) => a - b,
@@ -111,10 +117,7 @@ const SORTERS: Record<Sort, (a: ExplorerRow, b: ExplorerRow) => number> = {
     (row) => row[5],
     (a, b) => b - a,
   ),
-  hosts: by(
-    (row) => row[7],
-    (a, b) => b - a,
-  ),
+  hosts: byHosts,
   name: by(
     (row) => row[1],
     (a, b) => a.localeCompare(b),
