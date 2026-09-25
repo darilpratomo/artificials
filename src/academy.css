@@ -6,7 +6,7 @@
   display: grid;
   grid-template-columns: 1.12fr 1fr;
   gap: 70px;
-  padding-block: 84px 68px;
+  padding-block: 44px 68px;
   align-items: center;
 }
 .academy-intro > .eyebrow,

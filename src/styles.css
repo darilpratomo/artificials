@@ -940,10 +940,10 @@ button {
 }
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 5px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 27px;
-  overflow: auto;
 }
 .tabs button {
   padding: 13px 18px;
@@ -1998,7 +1998,7 @@ button {
   }
   .learn-controls > .search-field {
     width: 100%;
-    margin: -10px 0 25px;
+    margin: 16px 0 0;
   }
   .learn-grid {
     gap: 17px;
@@ -2600,9 +2600,6 @@ button {
   }
   .learn-card p {
     font-size: 14px;
-  }
-  .learn-controls > .search-field {
-    margin-top: 0;
   }
   .article-page {
     padding-block: 35px 55px;
@@ -5803,8 +5800,34 @@ input[type='radio'] {
   align-items: center;
   margin-bottom: 26px;
 }
+/* The controls carry the space below them, so the tabs and the search box
+   centre on each other. */
+.learn-controls .tabs {
+  margin-bottom: 0;
+}
 .learn-controls > .search-field {
   width: 240px;
+}
+/* On phones the topics wrap as chips instead of scrolling out of view. */
+@media (max-width: 560px) {
+  .learn-controls .tabs {
+    gap: 8px;
+    margin-inline: 0;
+    padding-inline: 0;
+    border-bottom: 0;
+  }
+  .learn-controls .tabs button {
+    margin-bottom: 0;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 13px;
+  }
+  .learn-controls .tabs button.active {
+    border-color: #eceef2;
+    background: #eceef2;
+    color: #101115;
+  }
 }
 .learn-card > .article-cover,
 .editorial-card > .article-cover {

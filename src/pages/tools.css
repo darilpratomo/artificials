@@ -8,7 +8,7 @@
   grid-template-columns: 1.45fr 1fr;
   align-items: center;
   gap: 48px;
-  padding: 30px 0 64px;
+  padding: 0 0 64px;
 }
 .tools-hero h1 {
   font-size: clamp(44px, 5.7vw, 78px);

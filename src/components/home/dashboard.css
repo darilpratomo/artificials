@@ -66,7 +66,6 @@
   padding-bottom: clamp(72px, 8vw, 110px);
 }
 .detail-page {
-  padding-top: clamp(112px, 10vw, 150px) !important;
   padding-bottom: 90px;
   overflow-x: clip;
 }
@@ -367,6 +366,10 @@
   border: 1px solid #25262e;
   border-radius: 12px;
   background: #0b0c0f;
+}
+/* Tabs above a panel keep a clear gap from its border. */
+.dash-tabs + .dash-panel {
+  margin-top: 16px;
 }
 .dash-tabs button {
   min-height: 40px;

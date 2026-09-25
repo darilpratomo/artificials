@@ -69,11 +69,12 @@
   display: grid;
   grid-template-columns: minmax(110px, 150px) minmax(0, 1fr);
   gap: 16px;
+  /* The label sits on the same baseline as the first line of its sentence. */
+  align-items: baseline;
   padding: 14px 0;
   border-top: 1px solid #1f2027;
 }
 .glance-sentences dt {
-  padding-top: 3px;
   color: #9698a3;
   font-size: 14px;
 }
@@ -86,17 +87,18 @@
   font-size: 15.5px;
   line-height: 2;
 }
+/* Inline, not inline-flex: the name keeps the sentence's baseline and the
+   logo is centred on the text beside it. */
 .glance-model {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   white-space: nowrap;
 }
 .glance-model img {
   width: 22px;
   height: 22px;
+  margin-right: 6px;
   padding: 3px;
   border-radius: 6px;
+  vertical-align: -0.38em;
 }
 .glance-model a,
 .glance-model b {
