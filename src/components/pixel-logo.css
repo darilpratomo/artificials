@@ -33,22 +33,27 @@
 }
 
 /* Held from the first paint until the assembly starts. The attribute ships in
-   the prerendered HTML, so there is no window where the finished mark shows.
-
-   Both shapes must be covered: the static markup draws plain <rect> elements,
-   and React replaces them with <g class="pixel-block"> wrappers. Hiding only
-   the wrappers leaves the prerendered mark visible for the few frames before
-   React takes over, which is exactly the flash this prevents. */
-.pixel-logo[data-animates] .pixel-block,
-.pixel-logo[data-animates] > rect {
+   the prerendered HTML, so there is no window where the finished mark shows
+   before the blocks fly in. */
+.pixel-logo[data-animates] .pixel-block {
   opacity: 0;
 }
 
-/* Without JavaScript the assembly never runs, so restore the finished mark
-   rather than leaving an empty space where the logo should be. */
+/* The resting mark is the smooth symbol. On an animated mark it appears once
+   every block has landed, beneath them. */
+.pixel-logo[data-animates] .pixel-solid {
+  visibility: hidden;
+}
+.pixel-logo[data-animates].is-settled .pixel-solid,
+.pixel-logo[data-animates].is-lifting .pixel-solid {
+  visibility: visible;
+}
+
+/* Without JavaScript the assembly never runs, so show the finished mark rather
+   than leaving an empty space where the logo should be. */
 @media (scripting: none) {
-  .pixel-logo[data-animates] > rect {
-    opacity: 1;
+  .pixel-logo[data-animates] .pixel-solid {
+    visibility: visible;
   }
 }
 
@@ -74,12 +79,37 @@
   opacity: 1;
 }
 
+/* Landed blocks fade off the smooth symbol beneath them. The shape underneath
+   is already fully drawn, so only the blocks' stepped edges dissolve and the
+   mark never dims. */
+.pixel-logo.is-animated.is-assembled.is-settled .pixel-block {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 360ms ease,
+    visibility 0s linear 360ms;
+}
+
+/* Before the next dispersal the blocks fade back in over the smooth mark, the
+   same move in reverse, and only then leave. */
+.pixel-logo.is-animated.is-assembled.is-lifting .pixel-block {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 200ms ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pixel-logo.is-animated .pixel-block,
   .pixel-logo.is-animated.is-assembled .pixel-block {
     opacity: 1;
     transform: none;
     animation: none;
+  }
+  /* The smooth mark shows at once, with no fade. */
+  .pixel-logo.is-animated.is-assembled.is-settled .pixel-block {
+    opacity: 0;
+    visibility: hidden;
+    transition: none;
   }
 }
 
@@ -105,15 +135,4 @@
   height: 100%;
   /* Invisible but still hit-testable, so the saved file is the real logo. */
   opacity: 0;
-}
-
-/* The resting mark is one solid shape; the blocks only show while moving. */
-.pixel-logo .pixel-solid {
-  visibility: hidden;
-}
-.pixel-logo.is-settled .pixel-solid {
-  visibility: visible;
-}
-.pixel-logo.is-settled .pixel-block {
-  visibility: hidden;
 }

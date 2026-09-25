@@ -1,12 +1,14 @@
 /**
- * Generates the downloadable brand files from the same pixel matrix the site
- * renders, so a saved logo can never drift from the one on screen.
+ * Generates the downloadable brand files from the same smooth symbol the site
+ * renders (src/components/logo-symbol.ts), so a saved logo can never drift from
+ * the one on screen.
  *
  * Outputs to public/brand/:
- *   artificials-logo.svg        mark only, scalable, currentColor-free
- *   artificials-logo.png        mark only, 256px, transparent (linked by the page)
- *   artificials-logo-large.png  mark only, 1024px, for print reuse
- *   artificials-mark.png        mark only, 256px, used as the browser icon
+ *   artificials-logo.svg        mark only, scalable
+ *   artificials-logo.png        mark only, 240px, edge to edge (the page's copy)
+ *   artificials-logo-large.png  mark only, 960px, edge to edge (print reuse and
+ *                               the mark drawn on shared chart images)
+ *   artificials-mark.png        mark only, 252px, used as the browser icon
  *   artificials-lockup.svg      mark plus the ARTIFICIALS wordmark
  * and public/favicon.svg        rounded dark tile, for the browser tab
  *
@@ -17,73 +19,127 @@ import { deflateSync } from 'node:zlib';
 
 const ROOT = new URL('..', import.meta.url);
 const OUT = new URL('public/brand/', ROOT);
+/** The symbol's grid, shared with the pixel matrix the header animates. */
+const COLUMNS = 40;
+const ROWS = 35;
 
-/** Read the matrix from the TypeScript module so there is one source of truth. */
-async function loadMatrix() {
-  const source = await readFile(new URL('src/components/logo-matrix.ts', ROOT), 'utf8');
-  const body = source.slice(source.indexOf('LOGO_MATRIX = ['), source.indexOf('] as const;'));
-  const rows = [...body.matchAll(/'([01]+)'/g)].map((match) => match[1]);
-  if (!rows.length) throw new Error('No matrix rows found in logo-matrix.ts');
-  const width = rows[0].length;
-  if (rows.some((row) => row.length !== width))
-    throw new Error('Matrix rows have inconsistent lengths');
-  return rows;
-}
-
-/** Merge horizontal runs so the SVG holds a few rectangles, not hundreds. */
-function runsOf(row) {
-  const runs = [];
-  let start = -1;
-  for (let index = 0; index <= row.length; index += 1) {
-    const active = row[index] === '1';
-    if (active && start === -1) start = index;
-    if (!active && start !== -1) {
-      runs.push([start, index - start]);
-      start = -1;
-    }
-  }
-  return runs;
+/** Read the symbol from the TypeScript module so there is one source of truth. */
+async function loadSymbol() {
+  const source = await readFile(new URL('src/components/logo-symbol.ts', ROOT), 'utf8');
+  const match = source.match(/SYMBOL_PATH =\s*'([^']+)'/);
+  if (!match) throw new Error('No SYMBOL_PATH found in logo-symbol.ts');
+  return match[1];
 }
 
 /**
- * The mark is wider than it is tall, but icons and saved files are square, so
- * the art is centred in a square of the longer side.
+ * Flattens the path into closed polygons. The symbol uses only M, L, A and Z,
+ * with circular arcs, so that is all this reads.
  */
-function square(matrix) {
-  const columns = matrix[0].length;
-  const rows = matrix.length;
-  const side = Math.max(columns, rows);
-  return { side, offsetX: (side - columns) / 2, offsetY: (side - rows) / 2 };
+function polygons(path, steps = 24) {
+  const tokens = path.match(/[MLAZ]|-?\d*\.?\d+/g);
+  const shapes = [];
+  let shape = [];
+  let x = 0;
+  let y = 0;
+  for (let index = 0; index < tokens.length;) {
+    const command = tokens[index++];
+    const number = () => Number(tokens[index++]);
+    if (command === 'M' || command === 'L') {
+      x = number();
+      y = number();
+      if (command === 'M' && shape.length) shapes.push(shape);
+      if (command === 'M') shape = [];
+      shape.push([x, y]);
+    } else if (command === 'A') {
+      const radius = number();
+      number(); // ry equals rx for these circular corners
+      number(); // no rotation
+      const large = number();
+      const sweep = number();
+      const tx = number();
+      const ty = number();
+      // Endpoint to centre conversion (SVG 1.1, appendix F.6), for a circle.
+      const hx = (x - tx) / 2;
+      const hy = (y - ty) / 2;
+      const r = Math.max(radius, Math.hypot(hx, hy));
+      const root = Math.sqrt(Math.max(0, (r * r - hx * hx - hy * hy) / (hx * hx + hy * hy)));
+      const sign = large === sweep ? -1 : 1;
+      const cx = sign * root * hy + (x + tx) / 2;
+      const cy = -sign * root * hx + (y + ty) / 2;
+      const start = Math.atan2(y - cy, x - cx);
+      let turn = Math.atan2(ty - cy, tx - cx) - start;
+      if (sweep && turn < 0) turn += Math.PI * 2;
+      if (!sweep && turn > 0) turn -= Math.PI * 2;
+      for (let step = 1; step <= steps; step += 1) {
+        const angle = start + (turn * step) / steps;
+        shape.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle)]);
+      }
+      x = tx;
+      y = ty;
+    } else if (command === 'Z') {
+      shapes.push(shape);
+      shape = [];
+    }
+  }
+  if (shape.length) shapes.push(shape);
+  return shapes;
 }
 
-function markSvg(matrix, { color = '#ffffff', padding = 1 } = {}) {
-  const { side, offsetX, offsetY } = square(matrix);
-  const rects = matrix
-    .flatMap((row, y) =>
-      runsOf(row).map(
-        ([x, width]) =>
-          `<rect x="${x + padding + offsetX}" y="${y + padding + offsetY}" width="${width}" height="1"/>`,
-      ),
-    )
-    .join('');
-  const size = side + padding * 2;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size * 24}" height="${size * 24}" fill="${color}" shape-rendering="crispEdges" role="img" aria-label="Artificials"><title>Artificials</title>${rects}</svg>`;
+/**
+ * Coverage of each pixel, 0 to 1: 16 sample rows per pixel, each filled with
+ * exact horizontal coverage, so edges are smooth without any dependency.
+ */
+function rasterize(shapes, width, height, scale, left, top) {
+  const SAMPLES = 16;
+  const coverage = new Float32Array(width * height);
+  const edges = shapes.flatMap((shape) =>
+    shape.map((point, index) => {
+      const next = shape[(index + 1) % shape.length];
+      return [
+        left + point[0] * scale,
+        top + point[1] * scale,
+        left + next[0] * scale,
+        top + next[1] * scale,
+      ];
+    }),
+  );
+  for (let row = 0; row < height; row += 1) {
+    for (let sample = 0; sample < SAMPLES; sample += 1) {
+      const sy = row + (sample + 0.5) / SAMPLES;
+      const crossings = [];
+      for (const [x1, y1, x2, y2] of edges)
+        if (y1 <= sy !== y2 <= sy) crossings.push(x1 + ((sy - y1) * (x2 - x1)) / (y2 - y1));
+      crossings.sort((a, b) => a - b);
+      for (let index = 0; index + 1 < crossings.length; index += 2) {
+        const from = Math.max(0, crossings[index]);
+        const to = Math.min(width, crossings[index + 1]);
+        for (let column = Math.floor(from); column < Math.ceil(to); column += 1) {
+          const share = Math.min(to, column + 1) - Math.max(from, column);
+          if (share > 0) coverage[row * width + column] += share / SAMPLES;
+        }
+      }
+    }
+  }
+  return coverage;
 }
 
-function lockupSvg(matrix, { color = '#ffffff' } = {}) {
-  const columns = matrix[0].length;
-  const rows = matrix.length;
-  const rects = matrix
-    .flatMap((row, y) =>
-      runsOf(row).map(([x, width]) => `<rect x="${x}" y="${y}" width="${width}" height="1"/>`),
-    )
-    .join('');
+/** The art is wider than it is tall, but icons and saved files are square. */
+const SIDE = Math.max(COLUMNS, ROWS);
+const OFFSET_X = (SIDE - COLUMNS) / 2;
+const OFFSET_Y = (SIDE - ROWS) / 2;
+
+function markSvg(symbol, { color = '#ffffff', padding = 1 } = {}) {
+  const size = SIDE + padding * 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size * 24}" height="${size * 24}" fill="${color}" role="img" aria-label="Artificials"><title>Artificials</title><path transform="translate(${padding + OFFSET_X} ${padding + OFFSET_Y})" d="${symbol}"/></svg>`;
+}
+
+function lockupSvg(symbol, { color = '#ffffff' } = {}) {
   // The wordmark is text, so the file stays small and editable. Viewers without
   // the font fall back to a generic sans-serif rather than losing the word.
   const gap = 6;
-  const textX = columns + gap;
+  const textX = COLUMNS + gap;
   const width = textX + 78;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${rows}" width="${width * 16}" height="${rows * 16}" role="img" aria-label="Artificials"><title>Artificials</title><g fill="${color}" shape-rendering="crispEdges">${rects}</g><text x="${textX}" y="${rows / 2}" fill="${color}" font-family="Michroma, Sora, 'Helvetica Neue', Arial, sans-serif" font-size="7.4" letter-spacing="0.18" dominant-baseline="central">ARTIFICIALS</text></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${ROWS}" width="${width * 16}" height="${ROWS * 16}" role="img" aria-label="Artificials"><title>Artificials</title><path fill="${color}" d="${symbol}"/><text x="${textX}" y="${ROWS / 2}" fill="${color}" font-family="Michroma, Sora, 'Helvetica Neue', Arial, sans-serif" font-size="7.4" letter-spacing="0.18" dominant-baseline="central">ARTIFICIALS</text></svg>`;
 }
 
 /**
@@ -91,22 +147,13 @@ function lockupSvg(matrix, { color = '#ffffff' } = {}) {
  * own dark tile rather than relying on a transparent white mark that would
  * vanish against a light tab strip.
  */
-function faviconSvg(matrix, { mark = '#f5f5f7', tile = '#0a0a0d' } = {}) {
-  const { side, offsetX, offsetY } = square(matrix);
+function faviconSvg(symbol, { mark = '#f5f5f7', tile = '#0a0a0d' } = {}) {
   const pad = 4;
-  const size = side + pad * 2;
-  const rects = matrix
-    .flatMap((row, y) =>
-      runsOf(row).map(
-        ([x, width]) =>
-          `<rect x="${x + pad + offsetX}" y="${y + pad + offsetY}" width="${width}" height="1"/>`,
-      ),
-    )
-    .join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" rx="${Math.round(size * 0.2)}" fill="${tile}"/><g fill="${mark}" shape-rendering="crispEdges">${rects}</g></svg>`;
+  const size = SIDE + pad * 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" rx="${Math.round(size * 0.2)}" fill="${tile}"/><path fill="${mark}" transform="translate(${pad + OFFSET_X} ${pad + OFFSET_Y})" d="${symbol}"/></svg>`;
 }
 
-/* --- Minimal PNG writer: no dependency needed for flat pixel art. --- */
+/* --- Minimal PNG writer: no dependency needed for a one-colour mark. --- */
 function crc32(bytes) {
   let crc = ~0;
   for (const byte of bytes) {
@@ -127,56 +174,60 @@ function chunk(type, data) {
 }
 
 /**
- * Renders the matrix as a square, transparent RGBA PNG at the requested pixel
- * scale. The scale must be even when the art is centred on a half cell.
+ * Renders the symbol as a square, transparent PNG. A white mark only varies in
+ * opacity, so each pixel is one palette index: white at one of `levels`
+ * opacities. 32 levels are indistinguishable at the edges and keep the page's
+ * copy to about two kilobytes.
  */
-function markPng(matrix, { scale, color = [255, 255, 255], padding = 1 } = {}) {
-  const { side, offsetX, offsetY } = square(matrix);
-  const width = (side + padding * 2) * scale;
-  const height = width;
-  const left = Math.round((padding + offsetX) * scale);
-  const top = Math.round((padding + offsetY) * scale);
-  const raw = Buffer.alloc((width * 4 + 1) * height);
-  let offset = 0;
-  for (let y = 0; y < height; y += 1) {
-    raw[offset] = 0; // No per-row filter; the art is flat.
-    offset += 1;
-    const sourceRow = y >= top ? matrix[Math.floor((y - top) / scale)] : undefined;
-    for (let x = 0; x < width; x += 1) {
-      const column = x >= left ? Math.floor((x - left) / scale) : -1;
-      const on = sourceRow && sourceRow[column] === '1';
-      raw[offset] = on ? color[0] : 0;
-      raw[offset + 1] = on ? color[1] : 0;
-      raw[offset + 2] = on ? color[2] : 0;
-      raw[offset + 3] = on ? 255 : 0;
-      offset += 4;
-    }
+function markPng(symbol, { scale, padding = 1, levels = 256 } = {}) {
+  const size = (SIDE + padding * 2) * scale;
+  const coverage = rasterize(
+    polygons(symbol),
+    size,
+    size,
+    scale,
+    (padding + OFFSET_X) * scale,
+    (padding + OFFSET_Y) * scale,
+  );
+  const raw = Buffer.alloc((size + 1) * size);
+  for (let y = 0; y < size; y += 1) {
+    const offset = y * (size + 1);
+    raw[offset] = 0; // No filter: flat runs compress best as they are.
+    for (let x = 0; x < size; x += 1)
+      raw[offset + 1 + x] = Math.round(Math.min(1, coverage[y * size + x]) * (levels - 1));
   }
   const header = Buffer.alloc(13);
-  header.writeUInt32BE(width, 0);
-  header.writeUInt32BE(height, 4);
+  header.writeUInt32BE(size, 0);
+  header.writeUInt32BE(size, 4);
   header[8] = 8; // bit depth
-  header[9] = 6; // RGBA
+  header[9] = 3; // palette
+  const palette = Buffer.alloc(levels * 3, 255);
+  const opacity = Buffer.from(
+    Array.from({ length: levels }, (_, index) => Math.round((index * 255) / (levels - 1))),
+  );
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     chunk('IHDR', header),
+    chunk('PLTE', palette),
+    chunk('tRNS', opacity),
     chunk('IDAT', deflateSync(raw, { level: 9 })),
     chunk('IEND', Buffer.alloc(0)),
   ]);
 }
 
-const matrix = await loadMatrix();
+const symbol = await loadSymbol();
 await mkdir(OUT, { recursive: true });
 
 const files = [
-  ['artificials-logo.svg', Buffer.from(markSvg(matrix))],
-  ['artificials-lockup.svg', Buffer.from(lockupSvg(matrix))],
+  ['artificials-logo.svg', Buffer.from(markSvg(symbol))],
+  ['artificials-lockup.svg', Buffer.from(lockupSvg(symbol))],
+  // Edge to edge, like the drawn mark, so the image and the SVG line up.
   // About 1000px for anyone saving the logo to reuse it at print size.
-  ['artificials-logo-large.png', markPng(matrix, { scale: 24 })],
-  // The copy the page links for right-click saving. Pixel art has no detail to
-  // lose, so a small file is indistinguishable and costs far fewer bytes.
-  ['artificials-logo.png', markPng(matrix, { scale: 6 })],
-  ['artificials-mark.png', markPng(matrix, { scale: 6 })],
+  ['artificials-logo-large.png', markPng(symbol, { scale: 24, padding: 0 })],
+  // The copy the page shows and links for right-click saving: sharp at three
+  // times its on-screen size, and small enough to cost almost nothing.
+  ['artificials-logo.png', markPng(symbol, { scale: 6, padding: 0, levels: 32 })],
+  ['artificials-mark.png', markPng(symbol, { scale: 6, levels: 32 })],
 ];
 
 for (const [name, data] of files) {
@@ -185,7 +236,6 @@ for (const [name, data] of files) {
 }
 
 // The tab icon lives at the site root, not under /brand.
-const favicon = Buffer.from(faviconSvg(matrix));
+const favicon = Buffer.from(faviconSvg(symbol));
 await writeFile(new URL('public/favicon.svg', ROOT), favicon);
 console.log(`${'favicon.svg'.padEnd(26)} ${(favicon.length / 1024).toFixed(1)} KB`);
-console.log(`\nGenerated from a ${matrix[0].length}x${matrix.length} matrix.`);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LOGO_MATRIX } from '../src/components/logo-matrix';
-import { SOLID_PATH, rowRuns } from '../src/components/PixelLogo';
+import { SYMBOL_PATH } from '../src/components/logo-symbol';
 
 const ROWS = LOGO_MATRIX.length;
 const COLUMNS = LOGO_MATRIX[0].length;
@@ -70,13 +70,63 @@ describe('assembly timing', () => {
   });
 });
 
-describe('solid resting mark', () => {
-  it('draws exactly the matrix runs as one path', () => {
-    const shapes = SOLID_PATH.match(/M\d+ \d+h\d+v1h-\d+z/g) ?? [];
-    const runs = LOGO_MATRIX.flatMap((row, y) =>
-      rowRuns(row).map(({ start, length }) => `M${start} ${y}h${length}v1h-${length}z`),
+describe('smooth resting mark', () => {
+  // Each shape as a polygon: its line ends, plus the middle of every corner arc,
+  // which is close enough to test where the outline runs.
+  const shapes = SYMBOL_PATH.split('M')
+    .filter(Boolean)
+    .map((part) => {
+      const points: [number, number][] = [];
+      for (const [, command, args] of part.matchAll(/([LAZ]?)([^LAZ]*)/g)) {
+        const numbers = args.trim().split(/[ ,]+/).filter(Boolean).map(Number);
+        if (command === 'Z' || numbers.length < 2) continue;
+        const [x, y] = numbers.slice(-2);
+        if (command === 'A' && points.length) {
+          const [x0, y0] = points[points.length - 1];
+          const [radius, , , , sweep] = numbers;
+          const chord = Math.hypot(x - x0, y - y0);
+          // The arc bulges by its sagitta, to the left of the chord when sweep is set.
+          const sagitta = radius - Math.sqrt(Math.max(0, radius ** 2 - chord ** 2 / 4));
+          const k = ((sweep ? 1 : -1) * sagitta) / chord;
+          points.push([(x0 + x) / 2 + (y - y0) * k, (y0 + y) / 2 - (x - x0) * k]);
+        }
+        points.push([x, y]);
+      }
+      return points;
+    });
+  const inside = ([x, y]: [number, number]) =>
+    shapes.some((shape) => {
+      let hit = false;
+      for (let index = 0, last = shape.length - 1; index < shape.length; last = index++) {
+        const [x1, y1] = shape[index];
+        const [x2, y2] = shape[last];
+        if (y1 > y !== y2 > y && x < ((x2 - x1) * (y - y1)) / (y2 - y1) + x1) hit = !hit;
+      }
+      return hit;
+    });
+
+  it('is three closed shapes of straight edges and round corners', () => {
+    expect(SYMBOL_PATH).toMatch(/^[MLAZ0-9. -]+$/);
+    expect(SYMBOL_PATH.match(/M/g)).toHaveLength(3);
+    expect(SYMBOL_PATH.match(/Z/g)).toHaveLength(3);
+    expect(SYMBOL_PATH.match(/A/g)!.length).toBeGreaterThanOrEqual(20);
+  });
+
+  it('fills the same 40 by 35 grid as the matrix', () => {
+    const points = shapes.flat();
+    expect(Math.min(...points.map(([x]) => x))).toBeGreaterThanOrEqual(0);
+    expect(Math.max(...points.map(([x]) => x))).toBeLessThanOrEqual(COLUMNS);
+    expect(Math.min(...points.map(([, y]) => y))).toBeGreaterThanOrEqual(0);
+    expect(Math.max(...points.map(([, y]) => y))).toBeLessThanOrEqual(ROWS);
+  });
+
+  it('lines up with the pixel matrix, so landing blocks match it', () => {
+    let agree = 0;
+    LOGO_MATRIX.forEach((row, y) =>
+      [...row].forEach((cell, x) => {
+        if (inside([x + 0.5, y + 0.5]) === (cell === '1')) agree += 1;
+      }),
     );
-    expect(shapes).toEqual(runs);
-    expect(shapes.join('')).toBe(SOLID_PATH);
+    expect(agree / (ROWS * COLUMNS)).toBeGreaterThan(0.97);
   });
 });

@@ -70,16 +70,19 @@ test('header mark is drawn from the matrix and assembles into place', async ({ p
 test('the mark disperses and reassembles on its own', async ({ page }) => {
   test.setTimeout(60000);
   await page.goto('/');
-  const block = page.locator('.site-header svg.pixel-logo .pixel-block').first();
+  const mark = page.locator('.site-header svg.pixel-logo');
+  const settled = () => mark.evaluate((el) => el.classList.contains('is-settled'));
+  const block = mark.locator('.pixel-block').first();
   const opacity = async () => Number(await block.evaluate((el) => getComputedStyle(el).opacity));
 
-  // Wait out the first assembly.
-  await expect.poll(opacity, { timeout: 8000 }).toBeGreaterThan(0.99);
-  // The exit animation must dim the blocks again.
-  await expect.poll(opacity, { timeout: 20000, intervals: [100] }).toBeLessThan(0.6);
-  // And the next cycle must bring them back, so the motion is a loop rather
-  // than a one-way fade that leaves the logo missing.
-  await expect.poll(opacity, { timeout: 12000, intervals: [100] }).toBeGreaterThan(0.99);
+  // Wait out the first assembly, which ends on the smooth mark.
+  await expect.poll(settled, { timeout: 8000 }).toBe(true);
+  // The blocks take over again and fly apart.
+  await expect.poll(settled, { timeout: 20000, intervals: [100] }).toBe(false);
+  await expect.poll(opacity, { timeout: 4000, intervals: [50] }).toBeLessThan(0.6);
+  // And the next cycle must land them and restore the mark, so the motion is a
+  // loop rather than a one-way exit that leaves the logo missing.
+  await expect.poll(settled, { timeout: 12000, intervals: [100] }).toBe(true);
 });
 
 test('the mark can be saved like any other logo image', async ({ page }) => {
@@ -119,19 +122,24 @@ test('reduced motion shows the finished mark with no animation', async ({ browse
   const page = await context.newPage();
   await page.route('**/api/**', (route) => route.fulfill({ json: {} }));
   await page.goto('/');
-  const block = page.locator('.site-header svg.pixel-logo .pixel-block').first();
+  const mark = page.locator('.site-header svg.pixel-logo');
+  // The smooth mark shows at once, and no block moves or fades.
+  await expect(mark.locator('.pixel-solid')).toHaveCSS('visibility', 'visible');
+  const block = mark.locator('.pixel-block').first();
   await expect(block).toBeAttached();
   const state = await block.evaluate((el) => {
     const style = getComputedStyle(el);
     return {
-      opacity: Number(style.opacity),
+      visibility: style.visibility,
       transform: style.transform,
       transition: style.transitionProperty,
+      animation: style.animationName,
     };
   });
-  expect(state.opacity).toBe(1);
+  expect(state.visibility).toBe('hidden');
   expect(['none', 'matrix(1, 0, 0, 1, 0, 0)']).toContain(state.transform);
   expect(state.transition).toBe('none');
+  expect(state.animation).toBe('none');
   await context.close();
 });
 
@@ -169,23 +177,18 @@ test('blocks travel from scattered positions rather than only fading', async ({ 
 
 test('the settled mark carries no leftover transform', async ({ page }) => {
   await page.goto('/');
-  const blocks = page.locator('.site-header svg.pixel-logo .pixel-block');
+  const mark = page.locator('.site-header svg.pixel-logo');
+  const blocks = mark.locator('.pixel-block');
   await blocks.first().waitFor({ state: 'attached' });
-
-  // A block left with a transform keeps its own compositing layer, which shows
-  // as hairline seams between rows, so every block must end with none.
   await expect
-    .poll(
-      async () =>
-        blocks.evaluateAll((els) =>
-          els.every((el) => {
-            const style = getComputedStyle(el);
-            return style.transform === 'none' && Number(style.opacity) > 0.99;
-          }),
-        ),
-      { timeout: 8000 },
-    )
+    .poll(() => mark.evaluate((el) => el.classList.contains('is-settled')), { timeout: 8000 })
     .toBe(true);
+
+  // A block left with a transform keeps its own compositing layer, so every
+  // landed block must end with none.
+  expect(
+    await blocks.evaluateAll((els) => els.every((el) => getComputedStyle(el).transform === 'none')),
+  ).toBe(true);
 });
 
 test('no frame shows the finished mark before the assembly starts', async ({ page }) => {
@@ -193,29 +196,36 @@ test('no frame shows the finished mark before the assembly starts', async ({ pag
   // Watch from the very first paint, including the prerendered markup that is
   // on screen before React takes over. That frame caused a visible flash.
   await page.addInitScript(() => {
-    const frames: number[] = [];
-    (window as unknown as { __frames: number[] }).__frames = frames;
+    const frames: [number, number][] = [];
+    (window as unknown as { __frames: [number, number][] }).__frames = frames;
     let ticks = 0;
     const tick = () => {
       const svg = document.querySelector('.site-header svg.pixel-logo');
-      // Before React runs, the mark is plain <rect> elements; afterwards it is
-      // <g class="pixel-block"> wrappers. Both must stay dim until the
-      // assembly begins, so sample whichever is currently on screen.
-      const shape = svg?.querySelector('.pixel-block') ?? svg?.querySelector(':scope > rect');
-      if (shape) frames.push(Number(getComputedStyle(shape).opacity));
+      // The prerendered markup holds only the smooth mark; React adds the
+      // blocks. Record a block's opacity and whether the smooth mark shows.
+      const block = svg?.querySelector('.pixel-block');
+      const solid = svg?.querySelector('.pixel-solid');
+      if (svg)
+        frames.push([
+          block ? Number(getComputedStyle(block).opacity) : 0,
+          solid && getComputedStyle(solid).visibility === 'visible' ? 1 : 0,
+        ]);
       if ((ticks += 1) < 40) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   });
   await page.goto('/');
   await page.waitForTimeout(900);
-  const frames = await page.evaluate(() => (window as unknown as { __frames: number[] }).__frames);
+  const frames = await page.evaluate(
+    () => (window as unknown as { __frames: [number, number][] }).__frames,
+  );
   expect(frames.length).toBeGreaterThan(3);
-  // Nothing may be fully painted until the blocks start arriving. A flash shows
-  // as an opaque frame before the first block has begun to fade in.
-  const firstArrival = frames.findIndex((value) => value > 0.05);
+  // Nothing may be painted until the blocks start arriving. A flash shows as an
+  // opaque block, or the finished mark, before the first block fades in.
+  const firstArrival = frames.findIndex(([opacity]) => opacity > 0.05);
   const beforeArrival = firstArrival < 0 ? frames : frames.slice(0, firstArrival);
-  expect(Math.max(0, ...beforeArrival)).toBeLessThan(0.5);
+  expect(Math.max(0, ...beforeArrival.map(([opacity]) => opacity))).toBeLessThan(0.5);
+  expect(beforeArrival.some(([, solid]) => solid)).toBe(false);
 });
 
 test('prerendered HTML carries the finished mark, not an animation frame', async ({ page }) => {
@@ -224,7 +234,8 @@ test('prerendered HTML carries the finished mark, not an animation frame', async
   const response = await page.request.get('/');
   const html = await response.text();
   expect(html).toContain('is-assembled');
-  // The static markup holds the complete mark, never a mid-animation frame.
+  // The static markup holds the complete smooth mark, never a mid-animation frame.
+  expect(html).toContain('pixel-solid');
   expect(html).not.toContain('is-animated');
   // It is hidden from the first paint so the finished logo never flashes, and
   // a no-JavaScript visitor still sees it through the scripting:none fallback.
@@ -235,11 +246,10 @@ test('the logo still renders with JavaScript unavailable', async ({ browser }) =
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto('/');
-  // The hold-until-ready rule targets elements only React creates, so the
-  // static markup must still paint the complete mark for these visitors.
+  // The scripting: none rule shows the smooth mark the static markup carries.
   const mark = page.locator('.site-header svg.pixel-logo');
   await expect(mark).toBeVisible();
-  await expect(page.locator('.site-header svg.pixel-logo rect')).toHaveCount(RUN_COUNT);
+  await expect(mark.locator('.pixel-solid')).toHaveCSS('visibility', 'visible');
   const box = (await mark.boundingBox())!;
   expect(box.width).toBeGreaterThan(20);
   await context.close();
@@ -306,7 +316,7 @@ test('the brand mark costs very little to download', async ({ page }) => {
   expect(total).toBeLessThan(8000);
 });
 
-test('the resting mark is one solid shape, so no seams show between rows', async ({ page }) => {
+test('the resting mark is the smooth symbol, with the blocks faded away', async ({ page }) => {
   await page.goto('/');
   const mark = page.locator('.site-header svg.pixel-logo');
   const solid = mark.locator('.pixel-solid');
@@ -314,11 +324,17 @@ test('the resting mark is one solid shape, so no seams show between rows', async
   await expect
     .poll(() => mark.evaluate((el) => el.classList.contains('is-settled')), { timeout: 6000 })
     .toBe(true);
-  expect(await solid.evaluate((el) => getComputedStyle(el).visibility)).toBe('visible');
-  expect(
-    await mark
-      .locator('.pixel-block')
-      .first()
-      .evaluate((el) => getComputedStyle(el).visibility),
-  ).toBe('hidden');
+  await expect(solid).toHaveCSS('visibility', 'visible');
+  // Smooth diagonals: the outline is anti-aliased, not stepped.
+  await expect(solid).toHaveAttribute('shape-rendering', 'geometricPrecision');
+  // Once the fade ends, no block is left on screen.
+  await expect
+    .poll(
+      () =>
+        mark
+          .locator('.pixel-block')
+          .evaluateAll((els) => els.every((el) => getComputedStyle(el).visibility === 'hidden')),
+      { timeout: 2000 },
+    )
+    .toBe(true);
 });

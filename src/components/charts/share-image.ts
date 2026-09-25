@@ -17,7 +17,7 @@ const GRID = '#24252c';
 const SURFACE = '#0b0c0f';
 const SANS = '"Inter Variable", Inter, "Helvetica Neue", Arial, sans-serif';
 const BRAND = 'Michroma, Sora, "Helvetica Neue", Arial, sans-serif';
-const BRAND_MARK = '/brand/artificials-symbol-large.png';
+const BRAND_MARK = '/brand/artificials-logo-large.png';
 
 export interface ShareFrame {
   title: string;
