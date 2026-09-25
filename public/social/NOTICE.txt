@@ -4,9 +4,8 @@ x.svg: white X logo from the X brand toolkit (x-logo.zip).
 Source: https://about.x.com/en/who-we-are/brand-toolkit
 Asset archive: https://about.x.com/content/dam/about-twitter/x/brand-toolkit/x-logo.zip
 
-instagram.svg: the glyph shape from IG_brand_asset_pack_2023.zip,
-01 Static Glyph/02 White Glyph/Instagram_Glyph_White.svg, filled with the Instagram
-gradient colours (yellow, orange, red, magenta, violet) as used in the 2022 app icon.
+instagram.svg: white Instagram glyph from IG_brand_asset_pack_2023.zip,
+01 Static Glyph/02 White Glyph/Instagram_Glyph_White.svg.
 Source: https://about.meta.com/brand/resources/instagram/instagram-brand/
 
 These marks identify links to Artificials' respective profiles. Brand assets

@@ -1215,3 +1215,23 @@
     grid-column: 2 / -1;
   }
 }
+/* Recent releases without a capability index score yet. */
+.pending-index {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #262730;
+  border-radius: 12px;
+  background: #0c0d11;
+  color: #b5b8c2;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.pending-index b {
+  color: #eceef2;
+  font-weight: 600;
+}
+.pending-index a {
+  color: #eceef2;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

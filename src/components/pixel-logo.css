@@ -106,3 +106,14 @@
   /* Invisible but still hit-testable, so the saved file is the real logo. */
   opacity: 0;
 }
+
+/* The resting mark is one solid shape; the blocks only show while moving. */
+.pixel-logo .pixel-solid {
+  visibility: hidden;
+}
+.pixel-logo.is-settled .pixel-solid {
+  visibility: visible;
+}
+.pixel-logo.is-settled .pixel-block {
+  visibility: hidden;
+}

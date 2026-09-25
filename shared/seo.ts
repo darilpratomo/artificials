@@ -18,7 +18,7 @@ const pages: Record<string, [string, string]> = {
   ),
   '/': [
     'AI model rankings, prices and new releases',
-    'Compare AI models by test results, price and context window. Rankings, charts and every new release, refreshed automatically every six hours.',
+    'Compare AI models by test results, price and context window. Rankings, charts and every new release, refreshed automatically every two hours.',
   ],
   '/models': [
     'AI model comparison',
@@ -62,11 +62,11 @@ const pages: Record<string, [string, string]> = {
   ],
   '/about': [
     'About Artificials',
-    'Artificials is a free, non-commercial guide to AI models, published benchmark evidence and practical AI education, run by volunteers.',
+    'Artificials is a free, non-commercial guide to AI models, published benchmark evidence and practical AI education.',
   ],
   '/contact': [
     'Contact Artificials',
-    'Contact the Artificials volunteers at support@artificials.net with corrections, questions and feedback.',
+    'Contact Artificials at support@artificials.net with corrections, questions and feedback.',
   ],
   '/privacy': [
     'Privacy policy',

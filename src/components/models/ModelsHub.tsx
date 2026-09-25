@@ -7,6 +7,7 @@ import { ShareButton } from '../charts/ShareButton';
 import { ModelExplorer } from '../home/ModelExplorer';
 import { RankingSection } from '../home/RankingSection';
 import { ValueSection } from '../home/ValueSection';
+import { PendingIndex } from '../home/PendingIndex';
 import { day, price, tokens } from '../profile/format';
 import { flop } from '../profile/Standing';
 
@@ -175,6 +176,7 @@ function TopHighlights({ overview }: { overview: ModelOverview }) {
           }}
         />
       </div>
+      <PendingIndex overview={overview} />
     </div>
   );
 }

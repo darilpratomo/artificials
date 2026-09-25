@@ -5279,6 +5279,99 @@ input[type='radio'] {
 .site-header .site-links a {
   white-space: nowrap;
 }
+/* Header menus of related pages. */
+.nav-group {
+  position: relative;
+}
+.nav-group-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: #aeb0ba;
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.nav-group-button:hover,
+.nav-group-button.active,
+.nav-group.is-open .nav-group-button {
+  color: #fff;
+}
+.nav-group-button svg {
+  transition: transform 0.2s ease;
+}
+.nav-group.is-open .nav-group-button svg {
+  transform: rotate(180deg);
+}
+.nav-group-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  z-index: 60;
+  width: 300px;
+  padding: 8px;
+  border: 1px solid #2a2b33;
+  border-radius: 16px;
+  background: #111217;
+  box-shadow: 0 18px 50px #000000b3;
+  transform: translateX(-50%);
+  animation: nav-group-in 0.16s ease-out;
+}
+/* Bridges the gap to the button, so moving the mouse down keeps it open. */
+.nav-group-panel::before {
+  position: absolute;
+  inset: -14px 0 auto;
+  height: 14px;
+  content: '';
+}
+.nav-group-panel ul {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.site-header .nav-group-panel a {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  white-space: normal;
+}
+.nav-group-panel a span {
+  color: #f0f0f3;
+  font-size: 14px;
+  font-weight: 550;
+}
+.nav-group-panel a small {
+  color: #9698a3;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.nav-group-panel a:hover,
+.nav-group-panel a:focus-visible,
+.nav-group-panel a.active {
+  background: #1c1d24;
+}
+@keyframes nav-group-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-group-panel {
+    animation: none;
+  }
+  .nav-group-button svg {
+    transition: none;
+  }
+}
 @media (min-width: 1101px) and (max-width: 1280px) {
   .site-header .site-links {
     gap: clamp(12px, calc((100vw - 1100px) / 8 + 12px), 22px);
@@ -5346,16 +5439,28 @@ input[type='radio'] {
 }
 .mobile-menu-links {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 8px;
+  gap: 16px;
   padding: 0 22px;
+}
+/* One page per row: lists stay tidy as groups grow. */
+.mobile-menu-links section {
+  display: grid;
+  gap: 6px;
+}
+.mobile-menu-group {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0 4px;
+  color: #9da8bb;
+  font-size: 12.5px;
+  font-weight: 500;
 }
 .site-mobile .mobile-menu-links a {
   display: grid;
   grid-template-columns: 18px minmax(0, 1fr) 15px;
   gap: 10px;
   align-items: center;
-  padding: 17px 13px;
+  padding: 13px 13px;
   background: #ffffff03;
   border: 1px solid #ffffff10;
   border-radius: 10px;

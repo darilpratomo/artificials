@@ -15,7 +15,7 @@ export default function Info() {
         <PageHeading
           eyebrow="THE IDEA BEHIND ARTIFICIALS"
           title="A clearer view of intelligence."
-          text="A free, independent guide to AI models and the technology behind them, run by volunteers."
+          text="A free, independent, non-commercial guide to AI models and the technology behind them."
         />
         <div className="about-quote">
           <span>Understand. Compare. Learn.</span>
@@ -39,9 +39,9 @@ export default function Info() {
               useful, understandable, and traceable to its source.
             </p>
             <p>
-              Artificials is a non-commercial project run by volunteers to help people understand
-              AI. Everything on the site is free, with no paid plans, no advertising and no
-              sponsored listings. No model maker pays to appear or to rank.
+              Artificials is a free, non-commercial project to help people understand AI. Everything
+              on the site is free, with no paid plans, no advertising and no sponsored listings. No
+              model maker pays to appear or to rank.
             </p>
             <p>
               We are independent of the AI providers listed here. Provider names and logos identify
@@ -65,7 +65,7 @@ export default function Info() {
             [
               HeartHandshake,
               'Free for everyone.',
-              'Rankings, guides, lessons and tools are free, without ads or accounts. Volunteers keep it running.',
+              'Rankings, guides, lessons and tools are free, without ads, accounts or paid plans.',
             ],
           ].map(([Icon, title, text]) => {
             const I = Icon as typeof Globe2;
@@ -94,8 +94,7 @@ export default function Info() {
           <h2>How to read the rankings</h2>
           <p>
             Capability rankings use published results from Epoch AI, LiveBench, T2I-CoReBench,
-            SWE-bench, and DeepSWE and CursorBench as compiled by Epoch AI, refreshed on a six-hour
-            schedule. Coding agent results come from Terminal-Bench 2.0 and SWE-bench. Each view
+            SWE-bench, and DeepSWE and CursorBench as compiled by Epoch AI, refreshed every two hours. Coding agent results come from Terminal-Bench 2.0 and SWE-bench. Each view
             identifies its dataset, evaluation scope, aggregation method and source-check time.
             Missing evaluations are not scored zero. Benchmark results remain separate from
             specification and price rankings; a larger context window does not establish higher
@@ -140,9 +139,7 @@ export default function Info() {
               <ArrowUpRight size={16} />
             </a>
           )}
-          <p className="caption">
-            Artificials is run by volunteers, so replies can take a few days.
-          </p>
+          <p className="caption">Replies can take a few days.</p>
         </div>
       </div>
     );
@@ -172,7 +169,7 @@ export default function Info() {
             <h2>2. Information we use</h2>
             <p>
               Artificials is free and non-commercial, and you can use all of it without an account.
-              Only the volunteers who edit the site’s articles sign in; for them we use an email
+              Only the people who edit the site’s articles sign in; for them we use an email
               address, authentication identifiers and security settings. Our infrastructure
               providers may process technical information such as IP addresses, browser information,
               security events and request logs.
@@ -275,9 +272,9 @@ export default function Info() {
               {config.operatorName
                 ? `${config.operatorName}, ${config.operatorAddress}, provides Artificials.`
                 : 'Operator details are being finalized.'}{' '}
-              Artificials is a free, non-commercial website run by volunteers: an AI model
-              directory, comparisons, rankings, editorial guides, lessons and file tools. There are
-              no paid plans. By using the site you agree to these terms.
+              Artificials is a free, non-commercial website: an AI model directory, comparisons,
+              rankings, editorial guides, lessons and file tools. There are no paid plans. By using
+              the site you agree to these terms.
             </p>
             <h2>2. Model information and rankings</h2>
             <p>
@@ -309,10 +306,10 @@ export default function Info() {
             </p>
             <h2>6. Availability and responsibility</h2>
             <p>
-              Volunteers run Artificials on free infrastructure, so we cannot guarantee
-              uninterrupted availability or error-free information. To the extent allowed by law,
-              the site is provided as available. Nothing in these terms excludes rights or liability
-              that cannot legally be excluded.
+              Artificials runs on free infrastructure, so we cannot guarantee uninterrupted
+              availability or error-free information. To the extent allowed by law, the site is
+              provided as available. Nothing in these terms excludes rights or liability that cannot
+              legally be excluded.
             </p>
             <h2>7. Changes and contact</h2>
             <p>

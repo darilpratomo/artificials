@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LOGO_MATRIX } from '../src/components/logo-matrix';
+import { SOLID_PATH, rowRuns } from '../src/components/PixelLogo';
 
 const ROWS = LOGO_MATRIX.length;
 const COLUMNS = LOGO_MATRIX[0].length;
@@ -66,5 +67,16 @@ describe('assembly timing', () => {
 
   it('never produces a negative delay for a very short duration', () => {
     expect(orderedDelay(0, 0, 300)).toBe(0);
+  });
+});
+
+describe('solid resting mark', () => {
+  it('draws exactly the matrix runs as one path', () => {
+    const shapes = SOLID_PATH.match(/M\d+ \d+h\d+v1h-\d+z/g) ?? [];
+    const runs = LOGO_MATRIX.flatMap((row, y) =>
+      rowRuns(row).map(({ start, length }) => `M${start} ${y}h${length}v1h-${length}z`),
+    );
+    expect(shapes).toEqual(runs);
+    expect(shapes.join('')).toBe(SOLID_PATH);
   });
 });

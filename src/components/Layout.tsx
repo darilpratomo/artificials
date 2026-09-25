@@ -3,6 +3,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { ArrowUpRight, ArrowRight, Globe2, Command } from 'lucide-react';
 import { Brand } from './Brand';
+import { NavGroup } from './NavGroup';
+import { NAV_GROUPS, TOP_LINKS } from './navigation';
 export function Layout() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -110,15 +112,13 @@ export function Layout() {
     setOpen(false);
     trigger.current?.focus();
   };
-  const links = [
-    ['/models', 'Models'],
-    ['/coding-agents', 'Coding agents'],
-    ['/leaderboard', 'Rankings'],
-    ['/releases', 'Releases'],
-    ['/compare', 'Compare'],
-    ['/news', 'Insights'],
-    ['/learn', 'Learn AI'],
-    ['/tools', 'Tools'],
+  // The phone menu lists every page, grouped like the header.
+  const mobileGroups = [
+    {
+      label: 'Explore',
+      items: [...TOP_LINKS, { to: '/compare', label: 'Compare models', description: '' }],
+    },
+    ...NAV_GROUPS,
   ];
   return (
     <>
@@ -147,14 +147,14 @@ export function Layout() {
               <Brand animate />
             </Link>
             <nav className="site-links" aria-label="Main navigation">
-              {/* Compare has its own button beside the menu. */}
-              {links
-                .filter(([url]) => url !== '/compare')
-                .map(([url, label]) => (
-                  <NavLink key={url} to={url}>
-                    {label}
-                  </NavLink>
-                ))}
+              {TOP_LINKS.map((item) => (
+                <NavLink key={item.to} to={item.to}>
+                  {item.label}
+                </NavLink>
+              ))}
+              {NAV_GROUPS.map((group) => (
+                <NavGroup key={group.label} group={group} />
+              ))}
             </nav>
             <div className="site-actions">
               <Link className="btn btn-small" to="/compare">
@@ -182,20 +182,32 @@ export function Layout() {
                 <span className="signal-light" />
               </div>
               <div className="mobile-menu-links">
-                {links.map(([url, label], i) => (
-                  <NavLink
-                    key={url}
-                    to={url}
-                    style={{ '--menu-order': i } as import('react').CSSProperties}
-                    onClick={() => setOpen(false)}
-                  >
-                    <span className="menu-link-number" aria-hidden="true">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    <span>{label}</span>
-                    <ArrowUpRight size={16} />
-                  </NavLink>
-                ))}
+                {mobileGroups.map((group, groupIndex) => {
+                  const before = mobileGroups
+                    .slice(0, groupIndex)
+                    .reduce((total, entry) => total + entry.items.length, 0);
+                  return (
+                    <section key={group.label} aria-label={group.label}>
+                      <h2 className="mobile-menu-group">{group.label}</h2>
+                      {group.items.map((item, index) => (
+                        <NavLink
+                          key={item.to}
+                          to={item.to}
+                          style={
+                            { '--menu-order': before + index } as import('react').CSSProperties
+                          }
+                          onClick={() => setOpen(false)}
+                        >
+                          <span className="menu-link-number" aria-hidden="true">
+                            {String(before + index + 1).padStart(2, '0')}
+                          </span>
+                          <span>{item.label}</span>
+                          <ArrowUpRight size={16} />
+                        </NavLink>
+                      ))}
+                    </section>
+                  );
+                })}
               </div>
               <div className="mobile-menu-bottom">
                 <span>Intelligence, in perspective.</span>
@@ -273,9 +285,7 @@ export function Layout() {
         </div>
         <div className="container footer-baseline">
           <span>© {new Date().getFullYear()} Artificials</span>
-          <span>
-            Free and non-commercial, run by volunteers. Provider trademarks belong to their owners.
-          </span>
+          <span>Free and non-commercial. Provider trademarks belong to their owners.</span>
           <span>
             EN / USD <ArrowUpRight size={12} />
           </span>

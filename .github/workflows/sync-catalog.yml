@@ -2,7 +2,8 @@ name: Refresh catalog and capability benchmarks
 
 on:
   schedule:
-    - cron: '17 */6 * * *'
+    # Every two hours: fresh data within the free GitHub Actions and Workers Builds quotas.
+    - cron: '17 */2 * * *'
   workflow_dispatch:
 
 permissions:

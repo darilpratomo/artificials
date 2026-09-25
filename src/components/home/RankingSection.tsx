@@ -6,6 +6,7 @@ import { RankChart, type RankItem } from '../charts/RankChart';
 import { ShareButton } from '../charts/ShareButton';
 import { useTests, type ModelOverview } from '../../lib/overview';
 import { DOMAINS, day, price } from '../profile/format';
+import { PendingIndex } from './PendingIndex';
 
 const INDEX = 'capability-index';
 const COUNTS = ['15', '25', '50', 'all'];
@@ -200,6 +201,7 @@ export function RankingSection({ overview }: { overview: ModelOverview }) {
           }
         />
       )}
+      {metric === INDEX && <PendingIndex overview={overview} />}
       <div className="dash-foot">
         <p>
           {unit === 'index'

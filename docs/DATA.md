@@ -85,7 +85,7 @@ Capability rankings now live separately in `public/data/benchmarks.json` and app
 on `/leaderboard`. `scripts/sync-benchmarks.mjs` ingests published LiveBench task scores,
 Epoch AI's own benchmark evaluations and capability index, and T2I-CoReBench image-generation
 results, and the agent tests DeepSWE, CursorBench and SWE-bench Verified (bash only), plus agent
-results and task lengths for the coding agents page (see below). The six-hour catalog workflow refreshes both sources,
+results and task lengths for the coding agents page (see below). The two-hourly catalog workflow refreshes both sources,
 validates them, runs checks, and commits the complete snapshots for native Cloudflare deploy.
 Failed source retrieval/schema checks leave the last successful published deployment intact.
 A benchmark source that is down does not hold back the catalog: the workflow still checks and
@@ -277,7 +277,7 @@ that the sources' licences require. Phones get the share sheet; other devices ge
 The home page shows no last-updated time; charts credit their data source beside them. Check
 times remain on the rankings page and each model's "Sources and method".
 
-Everything refreshes with the six-hourly workflow: a new model appears in the timeline as soon as
+Everything refreshes with the two-hourly workflow: a new model appears in the timeline as soon as
 the catalog lists it, and its scores follow once a test covers it. No step needs manual input.
 Speed and latency are not shown, because no reliable public source is available to republish.
 
@@ -317,7 +317,7 @@ that data inline. Artificials is non-commercial, so non-commercial licences such
 CC BY-NC 4.0 are acceptable; every source is credited beside its chart and in "Sources and
 method".
 
-Sources, all refreshed by `scripts/sync-benchmarks.mjs` every six hours:
+Sources, all refreshed by `scripts/sync-benchmarks.mjs` every two hours:
 
 - Terminal-Bench 2.0 (agent results): one result per agent and model, the share of 89 tasks
   solved, with standard error and run date. The leaderboard's submissions are Apache-2.0 on

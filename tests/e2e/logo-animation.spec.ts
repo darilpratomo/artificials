@@ -305,3 +305,20 @@ test('the brand mark costs very little to download', async ({ page }) => {
   // the matrix should keep this far below that.
   expect(total).toBeLessThan(8000);
 });
+
+test('the resting mark is one solid shape, so no seams show between rows', async ({ page }) => {
+  await page.goto('/');
+  const mark = page.locator('.site-header svg.pixel-logo');
+  const solid = mark.locator('.pixel-solid');
+  await expect(solid).toHaveCount(1);
+  await expect
+    .poll(() => mark.evaluate((el) => el.classList.contains('is-settled')), { timeout: 6000 })
+    .toBe(true);
+  expect(await solid.evaluate((el) => getComputedStyle(el).visibility)).toBe('visible');
+  expect(
+    await mark
+      .locator('.pixel-block')
+      .first()
+      .evaluate((el) => getComputedStyle(el).visibility),
+  ).toBe('hidden');
+});

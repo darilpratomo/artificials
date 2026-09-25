@@ -118,6 +118,16 @@ function prefersReducedMotion() {
 type Phase = 'assembled' | 'scattered';
 
 /**
+ * The finished mark as one shape. Separate row rectangles leave faint seams
+ * where their anti-aliased edges meet at fractions of a pixel; a single path
+ * is filled in one pass, so the resting logo reads as solid, and it is one
+ * element instead of dozens.
+ */
+export const SOLID_PATH = LOGO_MATRIX.flatMap((row, y) =>
+  rowRuns(row).map(({ start, length }) => `M${start} ${y}h${length}v1h-${length}z`),
+).join('');
+
+/**
  * The Artificials mark, drawn from the pixel matrix as a single inline SVG.
  *
  * SVG rather than a raster file so the mark stays crisp at any size and follows
@@ -164,6 +174,21 @@ export function PixelLogo({
     [duration, run],
   );
   const timers = useRef<number[]>([]);
+  // Once every block has landed, the solid shape takes their place until the
+  // next dispersal; the blocks stay mounted, hidden, so no animation restarts.
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    if (!moving || phase !== 'assembled') {
+      setSettled(false);
+      return;
+    }
+    if (prefersReducedMotion()) {
+      setSettled(true);
+      return;
+    }
+    const timer = window.setTimeout(() => setSettled(true), duration + 120);
+    return () => window.clearTimeout(timer);
+  }, [moving, phase, duration, run]);
 
   useEffect(() => {
     if (!animate || prefersReducedMotion()) {
@@ -194,6 +219,8 @@ export function PixelLogo({
             cycle();
             return;
           }
+          // Blocks take over from the solid shape in the same frame they start to move.
+          setSettled(false);
           setPhase('scattered');
           // Wait for the slowest block to finish leaving before reseeding, so
           // no visible block is ever moved to a new starting offset.
@@ -231,7 +258,7 @@ export function PixelLogo({
 
   const mark = (
     <svg
-      className={`pixel-logo${moving ? ' is-animated' : ''}${phase === 'assembled' ? ' is-assembled' : ''}${pending ? ' is-pending' : ''}${className && !downloadable ? ` ${className}` : ''}`}
+      className={`pixel-logo${moving ? ' is-animated' : ''}${phase === 'assembled' ? ' is-assembled' : ''}${settled ? ' is-settled' : ''}${pending ? ' is-pending' : ''}${className && !downloadable ? ` ${className}` : ''}`}
       // Present in the prerendered HTML so CSS can hold the mark from the very
       // first paint. Waiting for React to add a class leaves the finished logo
       // on screen for a few frames, which reads as a flicker.
@@ -247,6 +274,7 @@ export function PixelLogo({
       focusable="false"
       shapeRendering={soften ? 'geometricPrecision' : 'crispEdges'}
     >
+      {moving && <path className="pixel-solid" d={SOLID_PATH} />}
       {blocks.map((block) =>
         moving ? (
           // The transform lives on a wrapping <g>. Transitioning a 3D transform

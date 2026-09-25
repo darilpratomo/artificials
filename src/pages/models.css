@@ -111,10 +111,15 @@
   color: #9698a3;
   font-variant-numeric: tabular-nums;
 }
+/* The three lists share rows, so their titles and first rows line up. */
 .hub-highlights {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 26px;
+  gap: 12px 26px;
+}
+.hub-highlights > .metric-bars {
+  grid-row: span 2;
+  grid-template-rows: subgrid;
 }
 .hub-pair {
   display: grid;

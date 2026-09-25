@@ -307,7 +307,7 @@ test('editorial search, primary sources and privacy preferences', async ({ page 
   expect(await page.evaluate(() => localStorage.getItem('artificials-compare'))).toBeNull();
   await page.goto('/terms');
   await expect(page.getByRole('heading', { name: '3. Lessons and free tools' })).toBeVisible();
-  await expect(page.getByText(/free, non-commercial website run by volunteers/)).toBeVisible();
+  await expect(page.getByText(/free, non-commercial website/)).toBeVisible();
   await expect(page.getByText(/Studio|subscription|refund/i)).toHaveCount(0);
 });
 
@@ -381,7 +381,7 @@ test('main pages are accessible and fit desktop and mobile', async ({ page }, te
     await page.getByRole('button', { name: 'Open menu', exact: true }).click();
     await page
       .getByRole('navigation', { name: 'Mobile navigation' })
-      .getByRole('link', { name: 'Compare', exact: true })
+      .getByRole('link', { name: 'Compare models', exact: true })
       .click();
     await expect(page).toHaveURL(/\/compare$/);
     await expect(page.getByRole('button', { name: 'Open menu', exact: true })).toHaveAttribute(
@@ -389,4 +389,31 @@ test('main pages are accessible and fit desktop and mobile', async ({ page }, te
       'false',
     );
   }
+});
+
+test('header menus group the analysis and resource pages', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'The header menus show on wide screens');
+  await page.goto('/');
+  const header = page.locator('header.site-header');
+  const analysis = header.getByRole('button', { name: 'Analysis', exact: true });
+  await expect(analysis).toHaveAttribute('aria-expanded', 'false');
+  await analysis.click();
+  await expect(analysis).toHaveAttribute('aria-expanded', 'true');
+  const rankings = header.getByRole('link', { name: /^Model rankings/ });
+  await expect(rankings).toBeVisible();
+  // Escape closes the menu and returns focus to its button.
+  await page.keyboard.press('Escape');
+  await expect(analysis).toHaveAttribute('aria-expanded', 'false');
+  await expect(analysis).toBeFocused();
+  // The keyboard opens it and moves into the list.
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  await expect(rankings).toBeFocused();
+  await header.getByRole('button', { name: 'Resources', exact: true }).click();
+  await expect(analysis).toHaveAttribute('aria-expanded', 'false');
+  await header.getByRole('link', { name: /^Learn AI/ }).click();
+  await expect(page).toHaveURL(/\/learn$/);
+  await expect(header.getByRole('button', { name: 'Resources', exact: true })).toHaveClass(
+    /active/,
+  );
 });

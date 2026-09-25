@@ -178,7 +178,7 @@ export default function BenchmarkRankings() {
                   <strong>
                     {stale
                       ? 'Update delayed. Showing the last valid results.'
-                      : 'Updated automatically every 6 hours.'}
+                      : 'Updated automatically every two hours.'}
                   </strong>
                   <span>
                     Results checked {date(source.checkedAt)}. New scores appear once the test's

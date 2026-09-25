@@ -526,12 +526,16 @@ a.rank-hit:focus-visible {
   gap: 12px;
   min-width: 0;
 }
+/* The download button keeps its place beside the title, however long the caption. */
 .metric-bars-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
   gap: 8px 12px;
+}
+.metric-bars-head small {
+  display: block;
+  margin-top: 3px;
 }
 .metric-bars-head h3 {
   margin: 0;
@@ -547,18 +551,21 @@ a.rank-hit:focus-visible {
   padding: 6px 10px;
   font-size: 13px;
 }
+/* Every row shares the list's columns, so bars and values line up. */
 .metric-bars ol {
   display: grid;
-  gap: 4px;
+  grid-template-columns: 22px minmax(0, 1.2fr) minmax(40px, 1fr) auto;
+  gap: 4px 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 .metric-bars li {
   display: grid;
+  grid-column: 1 / -1;
   grid-template-columns: 22px minmax(0, 1.2fr) minmax(40px, 1fr) auto;
+  grid-template-columns: subgrid;
   align-items: center;
-  gap: 8px;
   padding: 4px 6px;
   border-radius: 8px;
   font-size: 13.5px;
@@ -609,24 +616,29 @@ a.rank-hit:focus-visible {
 }
 /* On phones the bar moves under the name, so names are not cut short. */
 @media (max-width: 560px) {
+  .metric-bars ol {
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+  }
   .metric-bars li {
     grid-template-columns: 22px minmax(0, 1fr) auto;
-    grid-template-areas:
-      'logo name value'
-      '. track track';
+    grid-template-columns: subgrid;
     row-gap: 5px;
   }
   .metric-bars li img {
-    grid-area: logo;
+    grid-column: 1;
+    grid-row: 1;
   }
   .metric-bars-name {
-    grid-area: name;
-  }
-  .metric-bars-track {
-    grid-area: track;
+    grid-column: 2;
+    grid-row: 1;
   }
   .metric-bars li b {
-    grid-area: value;
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .metric-bars-track {
+    grid-column: 2 / 4;
+    grid-row: 2;
   }
 }
 

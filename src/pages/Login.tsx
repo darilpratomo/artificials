@@ -48,8 +48,8 @@ export default function Login() {
           sign-in.
         </h1>
         <p>
-          Artificials is free to use without an account. Sign-in is only for the volunteers who edit
-          the site’s articles.
+          Artificials is free to use without an account. Sign-in is only for the people who edit the
+          site’s articles.
         </p>
         <div className="auth-illustration" aria-hidden="true">
           <div />
