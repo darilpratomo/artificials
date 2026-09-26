@@ -19,6 +19,7 @@ import { buildExplore } from '../shared/explore.ts';
 import { buildComparisons } from '../shared/compare.ts';
 import { buildChanges } from '../shared/changes.ts';
 import { buildMakers } from '../shared/maker-pages.ts';
+import { buildTests } from '../shared/test-pages.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
@@ -186,6 +187,12 @@ await mkdir(resolve(staging, 'makers'), { recursive: true });
 await writeFile(resolve(staging, 'makers.json'), JSON.stringify(makers.directory) + '\n');
 for (const page of makers.pages)
   await writeFile(resolve(staging, 'makers', `${page.slug}.json`), JSON.stringify(page) + '\n');
+// One page per test, and the list of them for /tests, the sitemap and search.
+const testPages = buildTests({ benchmarks, overview, tests, history, makerPages });
+await mkdir(resolve(staging, 'test-pages'), { recursive: true });
+await writeFile(resolve(staging, 'test-pages.json'), JSON.stringify(testPages.directory) + '\n');
+for (const page of testPages.pages)
+  await writeFile(resolve(staging, 'test-pages', `${page.id}.json`), JSON.stringify(page) + '\n');
 // Written last, once each profile knows its maker's page.
 for (const [index, list] of buckets.entries())
   await writeFile(
@@ -205,5 +212,5 @@ const matched = benchmarks.categories
   })
   .join(', ');
 console.log(
-  `Model profiles: ${profiles.length} models, ${withResults} with benchmark results, ${withFacts} with research records, ${PROFILE_BUCKETS} files, ${makers.pages.length} maker pages.\nMatched rows: ${matched}.`,
+  `Model profiles: ${profiles.length} models, ${withResults} with benchmark results, ${withFacts} with research records, ${PROFILE_BUCKETS} files, ${makers.pages.length} maker pages, ${testPages.pages.length} test pages.\nMatched rows: ${matched}.`,
 );

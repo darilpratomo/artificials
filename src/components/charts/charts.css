@@ -53,13 +53,18 @@
 .rank-axis .rank-baseline {
   border-top: 1px dashed #6b7080;
 }
-.rank-axis .rank-baseline b {
-  left: auto;
-  right: 0;
-  width: auto;
-  transform: translateY(-120%);
+.rank-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0 0 14px;
   color: #a3a6b2;
-  font-weight: 450;
+  font-size: 12px;
+}
+.rank-legend i {
+  width: 20px;
+  border-top: 1px dashed #6b7080;
 }
 .rank-columns,
 .rank-rows {

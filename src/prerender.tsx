@@ -17,6 +17,7 @@ import Releases from './pages/Releases';
 import Compare from './pages/Compare';
 import Changes from './pages/Changes';
 import Makers from './pages/Makers';
+import Tests from './pages/Tests';
 import Learn from './pages/Learn';
 import Tools from './pages/Tools';
 import Academy from './pages/Academy';
@@ -33,6 +34,8 @@ import type {
   Changes as ChangesData,
   MakerDirectory,
   MakerPage,
+  TestDirectory,
+  TestPage,
 } from './lib/overview';
 import type { ComparisonData, Comparisons } from './lib/compare';
 
@@ -50,6 +53,8 @@ export interface PageData {
   changes?: ChangesData;
   makers?: MakerDirectory;
   maker?: MakerPage;
+  testList?: TestDirectory;
+  test?: TestPage;
 }
 
 export function renderPage(
@@ -67,6 +72,8 @@ export function renderPage(
     changes,
     makers,
     maker,
+    testList,
+    test,
   }: PageData = {},
 ) {
   return renderToString(
@@ -89,6 +96,8 @@ export function renderPage(
             <Route path="changes" element={<Changes initial={changes} />} />
             <Route path="makers" element={<Makers directory={makers} />} />
             <Route path="makers/:slug" element={<Makers directory={makers} maker={maker} />} />
+            <Route path="tests" element={<Tests directory={testList} />} />
+            <Route path="tests/:id" element={<Tests directory={testList} test={test} />} />
             <Route path="compare" element={<Compare featured={comparisons} />} />
             <Route path="compare/:pair" element={<Compare initial={comparison} />} />
             <Route path="news" element={<Learn />} />

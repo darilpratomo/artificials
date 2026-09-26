@@ -4,14 +4,15 @@ import { staticPages } from './seo';
 import { UTILITIES } from './utilities';
 import { NAV_GROUPS, TOP_LINKS } from '../src/components/navigation';
 import type { MakerSummary } from './maker-pages';
+import type { TestSummary } from './test-pages';
 
 /**
- * What the site search finds besides models: makers, pages, guides, lessons
- * and free tools. `scripts/build-search-index.mjs` writes it to
+ * What the site search finds besides models: makers, tests, pages, guides,
+ * lessons and free tools. `scripts/build-search-index.mjs` writes it to
  * /data/models/search.json, so guide text never reaches the page's own code.
  * Models are searched in explorer.json, which the model search already uses.
  */
-export type SearchKind = 'maker' | 'page' | 'guide' | 'lesson' | 'tool';
+export type SearchKind = 'maker' | 'test' | 'page' | 'guide' | 'lesson' | 'tool';
 
 /** [kind, path, title, description, more words that find it, a maker's id for its logo] */
 export type SearchEntry = [
@@ -38,7 +39,7 @@ const NAMES: Record<string, [title: string, description?: string]> = {
   '/terms': ['Terms and conditions'],
 };
 
-export function searchIndex(makers: MakerSummary[] = []): SearchIndex {
+export function searchIndex(makers: MakerSummary[] = [], tests: TestSummary[] = []): SearchIndex {
   const menu = new Map(
     [...TOP_LINKS, ...NAV_GROUPS.flatMap((group) => group.items)].map((item) => [item.to, item]),
   );
@@ -90,5 +91,16 @@ export function searchIndex(makers: MakerSummary[] = []): SearchIndex {
     maker.id,
     maker.id,
   ]);
-  return { version: 1, entries: [...makerEntries, ...pages, ...guides, ...lessons, ...tools] };
+  // A test is found by its name, its address, its skill area or its publisher.
+  const testEntries: SearchEntry[] = tests.map((test) => [
+    'test',
+    `/tests/${test.id}`,
+    test.label,
+    `${test.models} ${test.models === 1 ? 'model' : 'models'}, from ${test.source}`,
+    `${test.id.replace(/-/g, ' ')} ${test.domain} ${test.source} benchmark`,
+  ]);
+  return {
+    version: 1,
+    entries: [...makerEntries, ...testEntries, ...pages, ...guides, ...lessons, ...tools],
+  };
 }

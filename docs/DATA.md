@@ -419,12 +419,27 @@ The profile build writes `makers.json` (the list, also used by the sitemap and t
 and `makers/<slug>.json` (one per maker). Pages are prerendered with their data inline; an
 unknown maker gets the 404 page. Model pages and the market's maker list link to maker pages.
 
+## Test pages
+
+`/tests` lists every published test by skill area; `/tests/:id` is one test's page
+(`shared/test-pages.ts`): what it measures and how it is scored, in its publisher's words, who
+publishes it and under what licence, the top score, the median, what random guessing would score
+where the publisher gives it, the top 15, the best model from each maker, every model's best
+result, and each new top model since the site began keeping a record (`history.json`). Each model
+appears once, at its best configuration, as in `tests.json`; the capability index reads its own
+list, with Epoch AI's ranges. Models with the same score share a rank. Nothing is recomputed.
+
+The profile build writes `test-pages.json` (the list, also used by the sitemap and the site
+search) and `test-pages/<id>.json`. Pages are prerendered with their data inline. The rankings
+page, maker pages and the "What changed" page link to them. A chart's reference line, such as
+random guessing, is drawn only inside the chart's axis and is named in a key above the plot.
+
 ## Site search
 
 The header's Search button, Ctrl+K, ⌘K or / opens one search across the site. Models come from
 `explorer.json`, the list the model pickers already use: every word must appear in the name, the
 maker or the address; names that start with the search come first, then tested models offered by
-ten or more hosts, newest first, so a new flagship leads its family. Makers, pages, guides, lessons and
+ten or more hosts, newest first, so a new flagship leads its family. Makers, tests, pages, guides, lessons and
 free tools come from `search.json`, which `scripts/build-search-index.mjs` writes at build time
 from the site's own page titles, guide summaries, lesson summaries and tool descriptions
 (`shared/search.ts`), so no guide text reaches the page's code. Pages carry the menus' names, and

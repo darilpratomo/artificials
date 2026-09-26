@@ -53,6 +53,9 @@ export function RankChart({
       ? [0, Math.min(100, niceDomain(0, Math.max(...values), 5)[1])]
       : niceDomain(Math.min(...values) - 2, Math.max(...values), 4);
   const at = (value: number) => Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+  // A reference line outside the axis would sit at its edge and misstate its value.
+  const reference =
+    baseline && baseline.value > min && baseline.value <= max ? baseline : undefined;
   const ticks = linearTicks(min, max, 4).ticks.filter((tick) => tick >= min && tick <= max);
   const tone = (item: RankItem) =>
     highlight ? (item.key === highlight ? ' is-highlight' : ' is-muted') : '';
@@ -68,90 +71,97 @@ export function RankChart({
       onMouseLeave={() => setActive(null)}
     >
       {width === 0 ? null : vertical ? (
-        <div className="rank-plot">
-          <div className="rank-axis" aria-hidden="true">
-            {ticks.map((tick) => (
-              <span key={tick} style={{ bottom: `${at(tick)}%` }}>
-                <b>{unit === 'index' ? tick.toFixed(0) : `${tick}%`}</b>
-              </span>
-            ))}
-            {baseline && baseline.value > min && (
-              <span className="rank-baseline" style={{ bottom: `${at(baseline.value)}%` }}>
-                <b>{baseline.label}</b>
-              </span>
+        <>
+          {/* The reference line's name sits in a key above the plot, where no column covers it. */}
+          {reference && (
+            <p className="rank-legend">
+              <i aria-hidden="true" />
+              {reference.label}
+            </p>
+          )}
+          <div className="rank-plot">
+            <div className="rank-axis" aria-hidden="true">
+              {ticks.map((tick) => (
+                <span key={tick} style={{ bottom: `${at(tick)}%` }}>
+                  <b>{unit === 'index' ? tick.toFixed(0) : `${tick}%`}</b>
+                </span>
+              ))}
+              {reference && (
+                <span className="rank-baseline" style={{ bottom: `${at(reference.value)}%` }} />
+              )}
+            </div>
+            <ol className="rank-columns" aria-label={label}>
+              {items.map((item, index) => {
+                const body = (
+                  <>
+                    <span className="rank-bar" aria-hidden="true">
+                      <i />
+                      <span className="rank-value">{format(item.value)}</span>
+                    </span>
+                    <img
+                      className="rank-logo"
+                      src={makerLogo(item.makerId)}
+                      alt=""
+                      width="24"
+                      height="24"
+                      loading="lazy"
+                    />
+                    <span className="rank-name" aria-hidden="true">
+                      {item.name}
+                    </span>
+                  </>
+                );
+                const events = {
+                  onMouseEnter: () => setActive(index),
+                  onFocus: () => setActive(index),
+                  onBlur: () => setActive(null),
+                  'aria-label': describe(item, index),
+                };
+                return (
+                  <li
+                    key={item.key}
+                    className={`rank-column${tone(item)}`}
+                    style={
+                      {
+                        '--c': makerColor(item.makerId),
+                        '--v': `${at(item.value)}%`,
+                      } as CSSProperties
+                    }
+                  >
+                    {item.href ? (
+                      <Link to={item.href} className="rank-hit" {...events}>
+                        {body}
+                      </Link>
+                    ) : (
+                      <span className="rank-hit" role="img" {...events}>
+                        {body}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+            {shown && active !== null && (
+              <div
+                className="chart-tooltip rank-tooltip"
+                aria-hidden="true"
+                style={{ '--x': (active + 0.5) / items.length } as CSSProperties}
+              >
+                <strong>{shown.name}</strong>
+                {shown.maker && <span>{shown.maker}</span>}
+                <span className="chart-tooltip-value">
+                  {format(shown.value)}
+                  {shown.low !== undefined && shown.high !== undefined
+                    ? ` (range ${format(shown.low)}–${format(shown.high)})`
+                    : ''}
+                </span>
+                {shown.details?.map((line) => (
+                  <span key={line}>{line}</span>
+                ))}
+              </div>
             )}
           </div>
-          <ol className="rank-columns" aria-label={label}>
-            {items.map((item, index) => {
-              const body = (
-                <>
-                  <span className="rank-bar" aria-hidden="true">
-                    <i />
-                    <span className="rank-value">{format(item.value)}</span>
-                  </span>
-                  <img
-                    className="rank-logo"
-                    src={makerLogo(item.makerId)}
-                    alt=""
-                    width="24"
-                    height="24"
-                    loading="lazy"
-                  />
-                  <span className="rank-name" aria-hidden="true">
-                    {item.name}
-                  </span>
-                </>
-              );
-              const events = {
-                onMouseEnter: () => setActive(index),
-                onFocus: () => setActive(index),
-                onBlur: () => setActive(null),
-                'aria-label': describe(item, index),
-              };
-              return (
-                <li
-                  key={item.key}
-                  className={`rank-column${tone(item)}`}
-                  style={
-                    {
-                      '--c': makerColor(item.makerId),
-                      '--v': `${at(item.value)}%`,
-                    } as CSSProperties
-                  }
-                >
-                  {item.href ? (
-                    <Link to={item.href} className="rank-hit" {...events}>
-                      {body}
-                    </Link>
-                  ) : (
-                    <span className="rank-hit" role="img" {...events}>
-                      {body}
-                    </span>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-          {shown && active !== null && (
-            <div
-              className="chart-tooltip rank-tooltip"
-              aria-hidden="true"
-              style={{ '--x': (active + 0.5) / items.length } as CSSProperties}
-            >
-              <strong>{shown.name}</strong>
-              {shown.maker && <span>{shown.maker}</span>}
-              <span className="chart-tooltip-value">
-                {format(shown.value)}
-                {shown.low !== undefined && shown.high !== undefined
-                  ? ` (range ${format(shown.low)}–${format(shown.high)})`
-                  : ''}
-              </span>
-              {shown.details?.map((line) => (
-                <span key={line}>{line}</span>
-              ))}
-            </div>
-          )}
-        </div>
+        </>
       ) : (
         <ol className="rank-rows" aria-label={label}>
           {items.map((item, index) => {

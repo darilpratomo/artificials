@@ -30,8 +30,14 @@ function changesFeed(changes) {
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
 try {
   const { renderPage } = await server.ssrLoadModule('/src/prerender.tsx');
-  const { publicPages, pageMetadata, metadataHtml, comparisonMetadata, makerMetadata } =
-    await server.ssrLoadModule('/shared/seo.ts');
+  const {
+    publicPages,
+    pageMetadata,
+    metadataHtml,
+    comparisonMetadata,
+    makerMetadata,
+    testMetadata,
+  } = await server.ssrLoadModule('/shared/seo.ts');
   const { comparisonPath } = await server.ssrLoadModule('/shared/compare.ts');
   const { profileBucket } = await server.ssrLoadModule('/shared/model-profiles.ts');
   const template = (await readFile('dist/index.html', 'utf8'))
@@ -58,6 +64,7 @@ try {
     releases: 'Releases',
     changes: 'Changes',
     makers: 'Makers',
+    tests: 'Tests',
     compare: 'Compare',
     news: 'Learn',
     tools: 'Tools',
@@ -136,6 +143,11 @@ try {
   const makersInline = `<script type="application/json" id="makers-data">${makersText
     .trim()
     .replace(/</g, '\\u003c')}</script>`;
+  const testsText = await readFile('dist/data/models/test-pages.json', 'utf8');
+  const testList = JSON.parse(testsText);
+  const testsInline = `<script type="application/json" id="tests-data">${testsText
+    .trim()
+    .replace(/</g, '\\u003c')}</script>`;
   const comparisonsText = await readFile('dist/data/models/comparisons.json', 'utf8');
   const comparisons = JSON.parse(comparisonsText);
   const comparisonsInline = `<script type="application/json" id="comparisons-data">${comparisonsText
@@ -156,6 +168,7 @@ try {
     const withComparisons = path === '/compare';
     const withChanges = path === '/changes';
     const withMakers = path === '/makers';
+    const withTests = path === '/tests';
     const html = template
       .replace(
         '</head>',
@@ -174,13 +187,14 @@ try {
           comparisons: withComparisons ? comparisons : undefined,
           changes: withChanges ? changes : undefined,
           makers: withMakers ? makers : undefined,
+          testList: withTests ? testList : undefined,
         })}</div>${withData ? inline : ''}${withCoding ? codingInline : ''}${
           withTrends ? trendsInline : ''
         }${withImages ? imagesInline : ''}${withVideos ? videosInline : ''}${
           withFinder ? finderInline : ''
         }${withComparisons ? comparisonsInline : ''}${withChanges ? changesInline : ''}${
           withMakers ? makersInline : ''
-        }`,
+        }${withTests ? testsInline : ''}`,
       );
     const destination = path === '/' ? 'dist/index.html' : `dist${path}.html`;
     await mkdir(dirname(destination), { recursive: true });
@@ -245,6 +259,25 @@ try {
     await mkdir(dirname(`dist${path}.html`), { recursive: true });
     await writeFile(`dist${path}.html`, html);
   }
+  // Each test's page, with its own results and the list of tests inline.
+  for (const { id } of testList.tests) {
+    const path = `/tests/${id}`;
+    const text = await readFile(`dist/data/models/test-pages/${id}.json`, 'utf8');
+    const test = JSON.parse(text);
+    const html = template
+      .replace(
+        '</head>',
+        metadataHtml(testMetadata(test)) + styles + pagePreloads(path) + '</head>',
+      )
+      .replace(
+        '<div id="root"></div>',
+        `<div id="root">${renderPage(path, { testList, test })}</div>${testsInline}<script type="application/json" id="test-data">${text
+          .trim()
+          .replace(/</g, '\\u003c')}</script>`,
+      );
+    await mkdir(dirname(`dist${path}.html`), { recursive: true });
+    await writeFile(`dist${path}.html`, html);
+  }
   // The "What changed" feed, from the same events as the page.
   await writeFile('dist/changes.xml', changesFeed(changes));
   for (const route of ['login', 'dashboard', '404'])
@@ -253,7 +286,7 @@ try {
       template.replace('</head>', metadataHtml(pageMetadata('/' + route)) + '</head>'),
     );
   console.log(
-    `Prerendered ${publicPages().length} public pages, ${comparisons.featured.length} featured comparisons and ${makers.makers.length} maker pages with unique metadata and crawlable HTML.`,
+    `Prerendered ${publicPages().length} public pages, ${comparisons.featured.length} featured comparisons, ${makers.makers.length} maker pages and ${testList.tests.length} test pages with unique metadata and crawlable HTML.`,
   );
 } finally {
   await server.close();

@@ -51,7 +51,7 @@ function sentence(event: ChangeEvent): { text: ReactNode; chip?: string } {
         text: (
           <>
             <Name model={event.model} /> took the top spot on{' '}
-            <Link to={`/leaderboard?category=${event.test}`}>{event.label}</Link> at{' '}
+            <Link to={`/tests/${event.test}`}>{event.label}</Link> at{' '}
             {score(event.score, event.unit)}, from <Name model={event.previous} />.
           </>
         ),
@@ -61,7 +61,7 @@ function sentence(event: ChangeEvent): { text: ReactNode; chip?: string } {
         text: (
           <>
             <Name model={event.model} /> joined the{' '}
-            <Link to="/leaderboard?category=capability-index">capability index</Link> at{' '}
+            <Link to="/tests/capability-index">capability index</Link> at{' '}
             {score(event.score, 'index')}.
           </>
         ),

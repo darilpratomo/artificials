@@ -9,6 +9,7 @@ import type { Comparisons } from '../../shared/compare';
 import type { Changes } from '../../shared/changes';
 import type { SearchIndex } from '../../shared/search';
 import type { MakerDirectory, MakerPage } from '../../shared/maker-pages';
+import type { TestDirectory, TestPage } from '../../shared/test-pages';
 
 export type {
   Explorer,
@@ -44,6 +45,13 @@ export type {
   MakerResult,
   MakerSummary,
 } from '../../shared/maker-pages';
+export type {
+  TestDirectory,
+  TestLeaderChange,
+  TestPage,
+  TestPageRow,
+  TestSummary,
+} from '../../shared/test-pages';
 export type { Board, BoardCategory, BoardEntry, BoardModel } from '../../shared/arena';
 
 const requests = new Map<string, Promise<unknown>>();
@@ -64,6 +72,8 @@ const isChanges = (value: Changes) => value?.version === 1 && Array.isArray(valu
 const isSearch = (value: SearchIndex) => value?.version === 1 && Array.isArray(value.entries);
 const isMakers = (value: MakerDirectory) => value?.version === 1 && Array.isArray(value.makers);
 const isMaker = (value: MakerPage) => value?.version === 1 && Array.isArray(value.lineup);
+const isTestList = (value: TestDirectory) => value?.version === 1 && Array.isArray(value.tests);
+const isTestPage = (value: TestPage) => value?.version === 1 && Array.isArray(value.rows);
 
 /**
  * Prerendered pages carry their data inline, so the first view needs no extra
@@ -216,5 +226,24 @@ export function useMaker(slug: string, enabled: boolean, attempt = 0, initial?: 
     enabled,
     attempt,
     initial?.slug === slug ? initial : undefined,
+  );
+}
+
+/** Every test with a page of its own, for /tests and each test's page. */
+export function useTestPages(attempt = 0, initial?: TestDirectory) {
+  embedded('test-pages.json', 'tests-data', isTestList);
+  return useFile<TestDirectory>('test-pages.json', isTestList, true, attempt, initial);
+}
+
+/** One test's page. A prerendered page carries its own test inline, and only that one. */
+export function useTestPage(id: string, enabled: boolean, attempt = 0, initial?: TestPage) {
+  const file = `test-pages/${id}.json`;
+  embedded(file, 'test-data', (value: TestPage) => isTestPage(value) && value.id === id);
+  return useFile<TestPage>(
+    file,
+    isTestPage,
+    enabled,
+    attempt,
+    initial?.id === id ? initial : undefined,
   );
 }

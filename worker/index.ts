@@ -15,6 +15,7 @@ import {
 } from '../shared/compare';
 import type { DirectoryEntry, ProfileDirectory } from '../shared/model-profiles';
 import type { MakerDirectory } from '../shared/maker-pages';
+import type { TestDirectory } from '../shared/test-pages';
 import type { Article } from '../shared/content';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
@@ -291,6 +292,17 @@ app.get('/sitemap.xml', async (c) => {
         pages.push({ path: '/makers/' + slug });
   } catch {
     // Nor a missing list of makers.
+  }
+  try {
+    // Every test with a page.
+    const response = await c.env.ASSETS.fetch(
+      new Request(new URL('/data/models/test-pages.json', c.req.url)),
+    );
+    if (response.ok)
+      for (const { id } of ((await response.json()) as TestDirectory).tests)
+        pages.push({ path: '/tests/' + id });
+  } catch {
+    // Nor a missing list of tests.
   }
   return c.body(
     '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +

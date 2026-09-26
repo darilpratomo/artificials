@@ -28,6 +28,7 @@ import {
 import '../domain-colors.css';
 import './model-profile.css';
 import '../components/home/dashboard.css';
+import './data-table.css';
 import './makers.css';
 
 /** How many models the list shows before "Show all". */
@@ -343,7 +344,7 @@ function MakerDetail({ maker, others }: { maker: MakerPage; others: MakerDirecto
               , each with its rank among all {whole(ranking.total)} models.{' '}
               {ranking.top.makerId === maker.id
                 ? `${ranking.top.name} holds the top score, ${indexValue(ranking.top.index)}.`
-                : `The line marks the top score, ${indexValue(ranking.top.index)}, held by ${ranking.top.name} from ${ranking.top.maker}.`}
+                : `The top score is ${indexValue(ranking.top.index)}, held by ${ranking.top.name} from ${ranking.top.maker}.`}
             </p>
           </div>
           <RankChart
@@ -368,7 +369,7 @@ function MakerDetail({ maker, others }: { maker: MakerPage; others: MakerDirecto
             baseline={
               ranking.top.makerId === maker.id
                 ? undefined
-                : { value: ranking.top.index, label: `Top ${indexValue(ranking.top.index)}` }
+                : { value: ranking.top.index, label: `Top score ${indexValue(ranking.top.index)}` }
             }
           />
         </section>
@@ -383,7 +384,7 @@ function MakerDetail({ maker, others }: { maker: MakerPage; others: MakerDirecto
               tested. Scores from different tests are never combined.
             </p>
           </div>
-          <table className="maker-table maker-tests">
+          <table className="data-table maker-tests">
             <thead>
               <tr>
                 <th scope="col">Test</th>
@@ -398,7 +399,7 @@ function MakerDetail({ maker, others }: { maker: MakerPage; others: MakerDirecto
                   <th scope="row">
                     <span className="maker-test">
                       <i className={`domain-${DOMAINS[result.domain].token}`} aria-hidden="true" />
-                      <Link to={`/leaderboard?category=${result.test}`}>{result.label}</Link>
+                      <Link to={`/tests/${result.test}`}>{result.label}</Link>
                     </span>
                   </th>
                   <td data-label="Best model">
@@ -426,7 +427,7 @@ function MakerDetail({ maker, others }: { maker: MakerPage; others: MakerDirecto
             token: {maker.name}’s own listing, or else the middle price across hosts.
           </p>
         </div>
-        <table className="maker-table maker-models">
+        <table className="data-table maker-models">
           <thead>
             <tr>
               <th scope="col">Model</th>

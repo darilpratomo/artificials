@@ -4883,6 +4883,14 @@ textarea::placeholder {
   margin-bottom: 20px;
   max-width: 520px;
 }
+.benchmark-test-link {
+  gap: 7px;
+  color: #e6e7ec;
+}
+.benchmark-test-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .benchmark-leader {
   background: linear-gradient(130deg, #1c1d23, #101115);
   padding: 25px;

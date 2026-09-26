@@ -1,0 +1,83 @@
+/* Tables of figures on the maker and test pages. Phones: each row becomes a block, its first
+   cell on top and the other cells labelled beneath (a page can lay a table out more tightly). */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+}
+.data-table th,
+.data-table td {
+  padding: 12px 14px;
+  border-top: 1px solid var(--profile-line);
+  color: var(--profile-ink-2);
+  font-weight: 400;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+.data-table th:first-child,
+.data-table td:first-child {
+  padding-left: 0;
+}
+.data-table th:last-child,
+.data-table td:last-child {
+  padding-right: 0;
+  text-align: right;
+}
+.data-table thead th {
+  padding-top: 0;
+  border-top: 0;
+  color: var(--profile-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.data-table tbody th,
+.data-table a {
+  color: var(--profile-ink);
+  font-weight: 550;
+}
+@media (max-width: 720px) {
+  .data-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .data-table,
+  .data-table tbody {
+    display: block;
+  }
+  .data-table tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+    padding: 14px 0;
+    border-top: 1px solid var(--profile-line);
+  }
+  .data-table tbody tr:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .data-table th,
+  .data-table td {
+    display: block;
+    padding: 0;
+    border: 0;
+    text-align: left;
+  }
+  .data-table th:last-child,
+  .data-table td:last-child {
+    text-align: left;
+  }
+  .data-table tbody th {
+    grid-column: 1 / -1;
+  }
+  .data-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 2px;
+    color: var(--profile-muted);
+    font-size: 12.5px;
+  }
+}

@@ -76,6 +76,10 @@ const pages: Record<string, [string, string]> = {
     'What changed in AI models',
     'New AI model releases, listed price changes, new leaders on each benchmark and models joining the capability index over the last 30 days, newest first.',
   ],
+  '/tests': [
+    'AI benchmark tests',
+    'Every AI benchmark test on Artificials: what each measures, who publishes it, how many models it covers and which model scores highest.',
+  ],
   '/makers': [
     'AI model makers',
     'Every AI model maker on Artificials: how many models each has, how many are tested, and the best score each reaches on the capability index.',
@@ -140,6 +144,20 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
       title: 'AI model comparison — Artificials',
       description:
         'Published test results, prices, context windows and features of AI models, side by side.',
+    };
+  const test = /^\/tests\/([a-z0-9][a-z0-9-]{0,99})$/.exec(path);
+  // The page names the test once it loads; the prerenderer does it first.
+  if (test)
+    return {
+      ...testMetadata({
+        id: test[1],
+        label: 'AI benchmark test',
+        models: 0,
+        source: '',
+        description: '',
+      }),
+      title: 'AI benchmark test — Artificials',
+      description: 'An AI benchmark test: what it measures and every model’s best score on it.',
     };
   const maker = /^\/makers\/([a-z0-9][a-z0-9-]{0,99})$/.exec(path);
   // The page names the maker once it loads; the prerenderer does it first.
@@ -283,6 +301,42 @@ export function makerMetadata(maker: MakerMetaInput | null, slug = maker?.slug ?
   return {
     title: `${maker.name} AI models: benchmarks, prices and releases — Artificials`,
     description: `Every ${maker.name} model on Artificials: ${maker.models} models, ${tested}. Where its best models rank on each test, with prices, context windows and release dates.`,
+    canonical,
+    image: DEFAULT_IMAGE,
+    known: true,
+    robots: 'index,follow,max-image-preview:large',
+    type: 'website' as const,
+    structured: null,
+  };
+}
+export interface TestMetaInput {
+  id: string;
+  label: string;
+  models: number;
+  source: string;
+  description: string;
+}
+/** Title, description and address of a test's page; `null` when there is no such test. */
+export function testMetadata(test: TestMetaInput | null, id = test?.id ?? '') {
+  const canonical = SITE_URL + '/tests/' + id;
+  if (!test)
+    return {
+      title: 'Test not found — Artificials',
+      description:
+        'This test has no page on Artificials. Browse every AI benchmark test, or the model rankings.',
+      canonical,
+      image: DEFAULT_IMAGE,
+      known: false,
+      robots: 'noindex,follow',
+      type: 'website' as const,
+      structured: null,
+    };
+  // The test's own first sentence says what it measures.
+  const measures = test.description.match(/^[^.]*\./)?.[0] ?? test.description;
+  return {
+    title: `${test.label} leaderboard: every AI model’s score — Artificials`,
+    description:
+      `${test.models} AI models ranked by their best published ${test.label} score${test.source ? `, from ${test.source}` : ''}. ${measures}`.trim(),
     canonical,
     image: DEFAULT_IMAGE,
     known: true,

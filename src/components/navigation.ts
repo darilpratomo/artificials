@@ -29,6 +29,11 @@ export const NAV_GROUPS: NavGroupItem[] = [
         label: 'Model rankings',
         description: 'Scores on every published test',
       },
+      {
+        to: '/tests',
+        label: 'Every test',
+        description: 'What each test measures, and who leads it',
+      },
       { to: '/leaders', label: 'Current leaders', description: 'The best model on each measure' },
       {
         to: '/trends',

@@ -52,8 +52,9 @@ export function findEntries(entries: SearchEntry[], query: string): SearchEntry[
   return entries
     .map((entry) => {
       const title = fold(entry[2]);
-      // A maker's line counts its models, so "models" would find every maker.
-      const all = `${title} ${entry[0] === 'maker' ? '' : fold(entry[3])} ${fold(entry[4])}`;
+      // A maker's or a test's line counts models, so "models" would find every one.
+      const counts = entry[0] === 'maker' || entry[0] === 'test';
+      const all = `${title} ${counts ? '' : fold(entry[3])} ${fold(entry[4])}`;
       if (!terms.every((term) => all.includes(term))) return undefined;
       const weight = title.startsWith(text)
         ? 0

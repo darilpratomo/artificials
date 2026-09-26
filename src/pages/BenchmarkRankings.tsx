@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Clock3, Search } from 'lucide-react';
+import { ArrowRight, Clock3, Search } from 'lucide-react';
 import {
   BENCHMARK_DOMAINS,
   type BenchmarkCategory,
@@ -152,6 +152,9 @@ export default function BenchmarkRankings() {
                   </span>
                   <h2>{testLabel(selected)}</h2>
                   <p>{selected.description}</p>
+                  <Link className="text-link benchmark-test-link" to={`/tests/${selected.id}`}>
+                    Open the {testLabel(selected)} page <ArrowRight size={15} aria-hidden="true" />
+                  </Link>
                 </div>
                 {top && (
                   <div className="benchmark-leader">

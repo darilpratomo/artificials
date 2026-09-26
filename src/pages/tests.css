@@ -1,0 +1,293 @@
+/* Tests: every test by skill area, and each test's page, built from the model page's cards. */
+.test-group {
+  margin-bottom: 30px;
+}
+.test-group h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-size: 18px;
+  letter-spacing: -0.015em;
+}
+.test-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.test-card {
+  display: grid;
+  gap: 14px;
+  height: 100%;
+  padding: 16px 18px;
+  border: 1px solid #23242b;
+  border-radius: 16px;
+  background: #101115;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.test-card:hover {
+  border-color: #3a3c46;
+  background: #131419;
+}
+.test-card-name {
+  display: grid;
+  gap: 3px;
+}
+.test-card-name b {
+  color: #f3f4f7;
+  font-size: 15.5px;
+  font-weight: 600;
+}
+.test-card small {
+  color: #9698a3;
+  font-size: 13px;
+}
+.test-card-top {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #1f2027;
+}
+.test-card-top > img {
+  width: 28px;
+  height: 28px;
+}
+.test-card-top span {
+  display: grid;
+  min-width: 0;
+}
+.test-card-top b {
+  overflow: hidden;
+  color: #d5d7de;
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* One test's page. */
+.test-page > section,
+.test-page > nav {
+  margin-bottom: 20px;
+}
+.test-missing {
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+.test-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  color: var(--profile-ink-2);
+  font-size: 14px;
+  font-weight: 500;
+}
+.test-title {
+  margin: 0;
+  font-size: clamp(2rem, 5.2vw, 3.3rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+.test-source {
+  margin: 0;
+  color: var(--profile-muted);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+.test-source a,
+.test-page .data-footnote a {
+  color: var(--profile-ink-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.test-glance {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.test-glance a {
+  color: inherit;
+}
+.test-glance a:hover,
+.test-leaders a:hover,
+.test-related a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.test-maker {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.test-maker img {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 3px;
+  border-radius: 7px;
+}
+.test-results .test-maker img {
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  border-radius: 6px;
+}
+.test-rank {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.test-rank.is-first {
+  color: var(--profile-ink);
+  font-weight: 600;
+}
+.test-range {
+  display: block;
+  color: var(--profile-muted);
+  font-size: 12.5px;
+}
+.test-page .test-results td[data-label='Rank'] {
+  width: 76px;
+}
+.test-more {
+  margin-top: 16px;
+}
+.test-leaders {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.test-leaders li {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--profile-line);
+  color: var(--profile-ink-2);
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+.test-leaders li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.test-leaders time {
+  color: var(--profile-muted);
+  font-variant-numeric: tabular-nums;
+}
+.test-leaders a {
+  color: var(--profile-ink);
+  font-weight: 550;
+}
+.test-related h2 {
+  margin: 12px 0 14px;
+  font-size: 17.5px;
+  letter-spacing: -0.015em;
+}
+.test-related ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.test-related a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 6px 16px;
+  border: 1px solid var(--profile-line);
+  border-radius: 99px;
+  color: var(--profile-ink-2);
+  font-size: 14px;
+}
+
+@media (max-width: 1100px) {
+  .test-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .test-glance {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .test-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .test-leaders li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+  /* A result in two lines: rank, model and score, then the maker. */
+  .test-page .test-results tr {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'rank model score'
+      '. maker score';
+    gap: 4px 12px;
+  }
+  .test-page .test-results td[data-label='Rank'] {
+    grid-area: rank;
+    width: auto;
+  }
+  .test-page .test-results tbody th {
+    grid-area: model;
+  }
+  .test-page .test-results td[data-label='Maker'] {
+    grid-area: maker;
+    font-size: 13.5px;
+  }
+  .test-page .test-results td[data-label='Score'] {
+    grid-area: score;
+    text-align: right;
+  }
+  .test-page .test-results td::before,
+  .test-page .test-makers td::before {
+    content: none;
+  }
+  /* A maker in two lines: the maker and its rank, then its model and score. */
+  .test-page .test-makers tr {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'maker rank'
+      'model score';
+    gap: 6px 16px;
+  }
+  .test-page .test-makers tbody th {
+    grid-area: maker;
+  }
+  .test-page .test-makers td[data-label='Rank'] {
+    grid-area: rank;
+    text-align: right;
+  }
+  .test-page .test-makers td[data-label='Best model'] {
+    grid-area: model;
+    padding-left: 33px;
+  }
+  .test-page .test-makers td[data-label='Score'] {
+    grid-area: score;
+    text-align: right;
+  }
+}
+@media (max-width: 560px) {
+  .test-glance {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .test-card {
+    transition: none;
+  }
+}

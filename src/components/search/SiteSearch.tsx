@@ -7,6 +7,7 @@ import {
   Compass,
   CornerDownLeft,
   GraduationCap,
+  ListOrdered,
   Search,
   Wrench,
   X,
@@ -31,12 +32,14 @@ const GROUPS: [kind: Result['kind'], label: string, limit: number][] = [
   // A maker's name is an exact match, so its page comes before its models.
   ['maker', 'Makers', 3],
   ['model', 'Models', 5],
+  ['test', 'Tests', 3],
   ['page', 'Pages', 4],
   ['guide', 'Guides', 3],
   ['lesson', 'Lessons', 3],
   ['tool', 'Free tools', 3],
 ];
 const ICONS: Record<Exclude<SearchKind, 'maker'>, LucideIcon> = {
+  test: ListOrdered,
   page: Compass,
   guide: BookOpen,
   lesson: GraduationCap,

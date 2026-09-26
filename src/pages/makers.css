@@ -87,7 +87,7 @@
   color: inherit;
 }
 .maker-glance a:hover,
-.maker-table a:hover,
+.data-table a:hover,
 .maker-others a:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -103,41 +103,6 @@
   white-space: normal;
 }
 
-.maker-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14.5px;
-}
-.maker-table th,
-.maker-table td {
-  padding: 12px 14px;
-  border-top: 1px solid var(--profile-line);
-  color: var(--profile-ink-2);
-  font-weight: 400;
-  text-align: left;
-  font-variant-numeric: tabular-nums;
-}
-.maker-table th:first-child,
-.maker-table td:first-child {
-  padding-left: 0;
-}
-.maker-table th:last-child,
-.maker-table td:last-child {
-  padding-right: 0;
-  text-align: right;
-}
-.maker-table thead th {
-  padding-top: 0;
-  border-top: 0;
-  color: var(--profile-muted);
-  font-size: 13px;
-  font-weight: 500;
-}
-.maker-table tbody th,
-.maker-table a {
-  color: var(--profile-ink);
-  font-weight: 550;
-}
 .maker-test {
   display: inline-flex;
   align-items: center;
@@ -216,108 +181,64 @@
   .maker-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-  .maker-table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-  .maker-table,
-  .maker-table tbody {
-    display: block;
-  }
-  .maker-table tr {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 16px;
-    padding: 14px 0;
-    border-top: 1px solid var(--profile-line);
-  }
-  .maker-table tbody tr:first-child {
-    border-top: 0;
-    padding-top: 0;
-  }
-  .maker-table th,
-  .maker-table td {
-    display: block;
-    padding: 0;
-    border: 0;
-    text-align: left;
-  }
-  .maker-table th:last-child,
-  .maker-table td:last-child {
-    text-align: left;
-  }
-  .maker-table tbody th {
-    grid-column: 1 / -1;
-  }
-  .maker-table td::before {
-    content: attr(data-label);
-    display: block;
-    margin-bottom: 2px;
-    color: var(--profile-muted);
-    font-size: 12.5px;
-  }
   /* A test in two lines: the test and its rank, then the model and its score. */
-  .maker-tests tr {
+  .maker-page .maker-tests tr {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       'test rank'
       'model score';
     gap: 6px 16px;
   }
-  .maker-tests tbody th {
+  .maker-page .maker-tests tbody th {
     grid-area: test;
   }
-  .maker-tests td[data-label='Rank'] {
+  .maker-page .maker-tests td[data-label='Rank'] {
     grid-area: rank;
   }
-  .maker-tests td[data-label='Best model'] {
+  .maker-page .maker-tests td[data-label='Best model'] {
     grid-area: model;
     padding-left: 19px;
   }
-  .maker-tests td[data-label='Score'] {
+  .maker-page .maker-tests td[data-label='Score'] {
     grid-area: score;
   }
-  .maker-tests td[data-label='Rank'],
-  .maker-tests td[data-label='Score'] {
+  .maker-page .maker-tests td[data-label='Rank'],
+  .maker-page .maker-tests td[data-label='Score'] {
     text-align: right;
   }
-  .maker-tests td::before {
+  .maker-page .maker-tests td::before {
     content: none;
   }
   /* A model: its name and price, then its release date, context window and index. */
-  .maker-models tr {
+  .maker-page .maker-models tr {
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.75fr);
     grid-template-areas:
       'name name price'
       'released context index';
   }
-  .maker-models td {
+  .maker-page .maker-models td {
     white-space: nowrap;
   }
-  .maker-models tbody th {
+  .maker-page .maker-models tbody th {
     grid-area: name;
   }
-  .maker-models td[data-label='Price'] {
+  .maker-page .maker-models td[data-label='Price'] {
     grid-area: price;
     text-align: right;
   }
-  .maker-models td[data-label='Price']::before {
+  .maker-page .maker-models td[data-label='Price']::before {
     content: none;
   }
-  .maker-models td[data-label='Released'] {
+  .maker-page .maker-models td[data-label='Released'] {
     grid-area: released;
   }
-  .maker-models td[data-label='Context'] {
+  .maker-page .maker-models td[data-label='Context'] {
     grid-area: context;
   }
-  .maker-models td[data-label='Capability index'] {
+  .maker-page .maker-models td[data-label='Capability index'] {
     grid-area: index;
   }
-  .maker-models td[data-label='Capability index']::before {
+  .maker-page .maker-models td[data-label='Capability index']::before {
     content: 'Index';
   }
 }
