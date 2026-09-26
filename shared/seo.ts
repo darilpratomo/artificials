@@ -105,6 +105,14 @@ const pages: Record<string, [string, string]> = {
     'The terms for using Artificials, a free and non-commercial site: model information, rankings, guides, lessons and free tools.',
   ],
 };
+/** Every fixed page with its title and description, for the site search's index. */
+export function staticPages() {
+  return Object.entries(pages).map(([path, [title, description]]) => ({
+    path,
+    title,
+    description,
+  }));
+}
 export function publicPages(articles: Article[] = ARTICLES) {
   return [
     ...Object.keys(pages).map((path) => ({ path })),

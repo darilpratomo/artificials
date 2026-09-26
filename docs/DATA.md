@@ -395,6 +395,17 @@ feed of the same events, up to 100, newest first. A model's Pricing tab lists it
 changes. Scores and prices read as their sources give them; the percentage on a price change
 compares prices blended as three input tokens for each output token.
 
+## Site search
+
+The header's Search button, Ctrl+K, ⌘K or / opens one search across the site. Models come from
+`explorer.json`, the list the model pickers already use: every word must appear in the name, the
+maker or the address; names that start with the search come first, then tested models offered by
+ten or more hosts, newest first, so a new flagship leads its family. Pages, guides, lessons and
+free tools come from `search.json`, which `scripts/build-search-index.mjs` writes at build time
+from the site's own page titles, guide summaries, lesson summaries and tool descriptions
+(`shared/search.ts`), so no guide text reaches the page's code. Pages carry the menus' names, and
+their page titles still find them. The search and both lists load only when it first opens.
+
 ## Models page
 
 `/models` compares underlying models, not listings. It is built from the same `overview.json` as

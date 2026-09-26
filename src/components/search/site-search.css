@@ -1,0 +1,226 @@
+/* The site search: a panel near the top of the screen over the dimmed page. */
+.site-search {
+  flex-direction: column;
+  width: min(640px, calc(100% - 32px));
+  max-width: none;
+  max-height: min(600px, 76dvh);
+  margin: 12dvh auto auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #2a2b33;
+  border-radius: 18px;
+  background: #0f1014;
+  color: #e8e9ee;
+  box-shadow: 0 30px 80px #000000d9;
+}
+.site-search[open] {
+  display: flex;
+  animation: site-search-in 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.site-search::backdrop {
+  background: #000000a6;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.site-search[open]::backdrop {
+  animation: site-search-fade 0.18s ease-out;
+}
+/* The page stays still behind the panel, and keeps its scrollbar's room. */
+html:has(.site-search[open]) {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+@keyframes site-search-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.985);
+  }
+}
+@keyframes site-search-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.site-search-field {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  padding: 0 10px 0 18px;
+  border-bottom: 1px solid #1f2027;
+  color: #9698a3;
+}
+/* Like the model search, the field drops the site-wide text field frame. */
+.site-search-field input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  height: 58px;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0;
+  outline: 0;
+  background: transparent !important;
+  color: #f3f4f7;
+  font-size: 16px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.site-search-field input::placeholder {
+  color: #7d808c;
+}
+.site-search-close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #25262e;
+  border-radius: 10px;
+  background: transparent;
+  color: #b5b8c2;
+  transition:
+    color 0.2s,
+    background 0.2s;
+}
+.site-search-close:hover {
+  background: #1c1d24;
+  color: #fff;
+}
+
+.site-search-body {
+  flex: 1;
+  min-height: 0;
+  padding: 6px 8px 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.site-search-group {
+  margin: 0;
+  padding: 12px 10px 6px;
+  color: #8e909b;
+  font-size: 12px;
+  font-weight: 550;
+}
+.site-search-option {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.site-search-option[aria-selected='true'] {
+  background: #1c1d24;
+}
+.site-search-option > img {
+  width: 32px;
+  height: 32px;
+}
+.site-search-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #25262e;
+  border-radius: 8px;
+  background: #14151a;
+  color: #b5b8c2;
+}
+.site-search-text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.site-search-text b,
+.site-search-text small {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.site-search-text b {
+  color: #f3f4f7;
+  font-size: 14.5px;
+  font-weight: 550;
+}
+.site-search-text small {
+  color: #9698a3;
+  font-size: 12.5px;
+}
+.site-search-option em {
+  color: #b5b8c2;
+  font-size: 12.5px;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+.site-search-note {
+  margin: 0;
+  padding: 18px 10px;
+  color: #a3a6b2;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.site-search-note button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #f3f4f7;
+  font-weight: 550;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.site-search-keys {
+  display: flex;
+  flex: none;
+  gap: 18px;
+  margin: 0;
+  padding: 10px 18px;
+  border-top: 1px solid #1f2027;
+  color: #8e909b;
+  font-size: 12px;
+}
+.site-search-keys span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.site-search-keys kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid #2a2b33;
+  border-radius: 5px;
+  background: #16171c;
+  color: #c3c6cf;
+  font:
+    500 11px/1 'Inter Variable',
+    sans-serif;
+}
+
+/* Phones: the panel sits under the top edge, and touch needs no key hints. */
+@media (max-width: 639px) {
+  .site-search {
+    width: calc(100% - 24px);
+    max-height: calc(100dvh - 24px);
+    margin-top: 12px;
+  }
+}
+@media (hover: none) {
+  .site-search-keys {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-search[open],
+  .site-search[open]::backdrop {
+    animation: none;
+  }
+  .site-search-close {
+    transition: none;
+  }
+}

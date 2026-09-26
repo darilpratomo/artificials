@@ -2,7 +2,8 @@ import { useId, useMemo, useState, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { makerLogo } from '../../../shared/makers';
-import { FLAGS, useExplorer, type ExplorerRow } from '../../lib/overview';
+import { useExplorer, type ExplorerRow } from '../../lib/overview';
+import { findModels } from '../../lib/search';
 
 const NONE: string[] = [];
 
@@ -36,28 +37,10 @@ export function ModelSearch({
   const navigate = useNavigate();
   const id = useId();
 
-  const results = useMemo(() => {
-    const text = query.trim().toLowerCase();
-    if (!text || !data) return [];
-    const words = text.split(/\s+/);
-    return data.models
-      .filter(
-        (row) =>
-          !exclude.includes(row[0]) &&
-          words.every((word) => `${row[1]} ${row[3]} ${row[0]}`.toLowerCase().includes(word)),
-      )
-      .map((row) => ({
-        row,
-        // Names that start with the search first, then tested and widely hosted models.
-        weight:
-          (row[1].toLowerCase().startsWith(text) ? 0 : 4) +
-          (row[9] & FLAGS.tested ? 0 : 2) -
-          Math.min(row[7], 40) / 40,
-      }))
-      .sort((a, b) => a.weight - b.weight || b.row[4].localeCompare(a.row[4]))
-      .slice(0, 8)
-      .map((entry) => entry.row);
-  }, [query, data, exclude]);
+  const results = useMemo(
+    () => (data ? findModels(data.models, query, 8, exclude) : []),
+    [query, data, exclude],
+  );
 
   const choose = (row: ExplorerRow) => {
     setOpen(false);

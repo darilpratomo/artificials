@@ -23,6 +23,7 @@ Everything public works without accounts or credentials. Only editor sign-in and
 - Hono on Cloudflare Workers with static assets; Supabase Auth/Postgres with RLS for editor sign-in and articles.
 - Source-attributed models.dev snapshot; complete paginated provider offerings, precomputed search index and record shards. No artificial 50-model limit. Counts represent offerings, not unique underlying models.
 - `/models`, `/coding-agents`, `/trends`, `/image-models`, `/video-models`, `/model-finder`, `/leaderboard`, `/compare`, `/compare/:a-vs-:b`, `/changes` (with the `/changes.xml` feed), `/news`, `/learn`, `/learn/:slug`, `/tools`, `/about`, `/privacy`, `/terms`, `/contact`; `/login` and `/dashboard` are for editors only.
+- Site search (header button, Ctrl+K, ⌘K or /) across models, pages, guides, lessons and free tools; it loads on first use. See [data methodology](docs/DATA.md#site-search).
 - CMS at a server-configured unpredictable path; server admin role + MFA remain mandatory. No public admin link.
 
 ## Learn AI

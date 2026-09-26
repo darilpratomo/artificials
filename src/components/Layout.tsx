@@ -1,7 +1,16 @@
 import { AnalyticsPreferencesButton } from './Analytics';
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { ArrowUpRight, ArrowRight, Globe2, Command } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, Globe2, Command, Search } from 'lucide-react';
 import { Brand } from './Brand';
 import { NavGroup } from './NavGroup';
 import { NAV_GROUPS, TOP_LINKS } from './navigation';
@@ -23,8 +32,27 @@ const INTELLIGENCE: [to: string, label: string][] = [
   ['/market', 'Market overview'],
 ];
 
+const SiteSearch = lazy(() => import('./search/SiteSearch'));
+/** Starts loading the search when a visitor is about to open it. */
+const preloadSearch = () => void import('./search/SiteSearch');
+
+/** The search shortcut as this device writes it; nothing before the page runs. */
+function useShortcut() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => {
+      const agent = navigator as Navigator & { userAgentData?: { platform?: string } };
+      const platform = agent.userAgentData?.platform || navigator.platform || navigator.userAgent;
+      return /mac|iphone|ipad|ipod/i.test(platform) ? '⌘K' : 'Ctrl K';
+    },
+    () => '',
+  );
+}
+
 export function Layout() {
   const [open, setOpen] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const shortcut = useShortcut();
   const [scrolled, setScrolled] = useState(false);
   const header = useRef<HTMLElement>(null);
   const surface = useRef<HTMLDivElement>(null);
@@ -33,6 +61,7 @@ export function Layout() {
   const previousPath = useRef(location.pathname);
   useEffect(() => {
     setOpen(false);
+    setSearching(false);
     // The visitor can already scroll prerendered HTML before React activates.
     // Reset only for an actual in-app route change, never the initial mount.
     if (previousPath.current !== location.pathname) {
@@ -126,6 +155,27 @@ export function Layout() {
       window.removeEventListener('keydown', onKey);
     };
   }, [open]);
+  // Ctrl+K or ⌘K opens and closes the search anywhere; / opens it outside text fields.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.isComposing || event.altKey) return;
+      const toggle =
+        event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey) && !event.shiftKey;
+      const slash =
+        event.key === '/' &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !(event.target as Element | null)?.closest?.(
+          'input, textarea, select, [contenteditable]:not([contenteditable="false"])',
+        );
+      if (!toggle && !slash) return;
+      event.preventDefault();
+      setOpen(false);
+      setSearching((value) => (toggle ? !value : true));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   const closeMenu = () => {
     setOpen(false);
     trigger.current?.focus();
@@ -175,6 +225,25 @@ export function Layout() {
               ))}
             </nav>
             <div className="site-actions">
+              <button
+                type="button"
+                className="search-trigger"
+                aria-label="Search"
+                aria-haspopup="dialog"
+                aria-keyshortcuts="Control+K Meta+K /"
+                onClick={() => {
+                  setOpen(false);
+                  setSearching(true);
+                }}
+                onPointerEnter={preloadSearch}
+                onFocus={preloadSearch}
+              >
+                <Search size={16} aria-hidden="true" />
+                <span className="search-trigger-label" aria-hidden="true">
+                  Search
+                </span>
+                <kbd aria-hidden="true">{shortcut}</kbd>
+              </button>
               <Link className="btn btn-small" to="/compare">
                 Compare models <ArrowUpRight size={14} />
               </Link>
@@ -237,6 +306,11 @@ export function Layout() {
           </div>
         </div>
       </header>
+      {searching && (
+        <Suspense fallback={null}>
+          <SiteSearch onClose={() => setSearching(false)} />
+        </Suspense>
+      )}
       <main id="main" tabIndex={-1} inert={open}>
         <Outlet />
       </main>

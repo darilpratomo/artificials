@@ -7,6 +7,7 @@ import type { Videos } from '../../shared/videos';
 import type { Finder } from '../../shared/finder';
 import type { Comparisons } from '../../shared/compare';
 import type { Changes } from '../../shared/changes';
+import type { SearchIndex } from '../../shared/search';
 
 export type {
   Explorer,
@@ -52,6 +53,7 @@ const isVideos = (value: Videos) => value?.version === 1 && Array.isArray(value.
 const isFinder = (value: Finder) => value?.version === 1 && Array.isArray(value.tasks);
 const isComparisons = (value: Comparisons) => value?.version === 1 && Array.isArray(value.featured);
 const isChanges = (value: Changes) => value?.version === 1 && Array.isArray(value.events);
+const isSearch = (value: SearchIndex) => value?.version === 1 && Array.isArray(value.entries);
 
 /**
  * Prerendered pages carry their data inline, so the first view needs no extra
@@ -181,4 +183,9 @@ export function useComparisons(enabled = true, attempt = 0, initial?: Comparison
 export function useChanges(attempt = 0, initial?: Changes) {
   embedded('changes.json', 'changes-data', isChanges);
   return useFile<Changes>('changes.json', isChanges, true, attempt, initial);
+}
+
+/** Pages, guides, lessons and tools for the site search. Loaded when the search opens. */
+export function useSearchIndex(enabled: boolean, attempt = 0) {
+  return useFile<SearchIndex>('search.json', isSearch, enabled, attempt);
 }

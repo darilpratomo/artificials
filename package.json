@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/build-model-profiles.mjs && vite --host 127.0.0.1",
-    "build": "npm run check:private && tsc -b && node scripts/build-model-profiles.mjs && vite build && node scripts/prerender.mjs && node scripts/build-og-images.mjs",
+    "dev": "node scripts/build-model-profiles.mjs && node scripts/build-search-index.mjs && vite --host 127.0.0.1",
+    "build": "npm run check:private && tsc -b && node scripts/build-model-profiles.mjs && node scripts/build-search-index.mjs && vite build && node scripts/prerender.mjs && node scripts/build-og-images.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "dev:api": "wrangler dev --port 8787",
     "deploy": "npm run build && wrangler deploy --env production",
@@ -19,7 +19,7 @@
     "check:private": "node scripts/check-private.mjs",
     "sync:benchmarks": "node scripts/sync-benchmarks.mjs",
     "sync:arena": "node scripts/sync-arena.mjs",
-    "profiles": "node scripts/build-model-profiles.mjs",
+    "profiles": "node scripts/build-model-profiles.mjs && node scripts/build-search-index.mjs",
     "check:academy": "python3 scripts/check-academy.py"
   },
   "dependencies": {

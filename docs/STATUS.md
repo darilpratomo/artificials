@@ -31,6 +31,7 @@ Verified locally in this implementation:
 - Native GitHub-to-Cloudflare deployment succeeded for commit c28240d (Workers Builds run 00b0cd9c-0499-4bdf-9dda-ede41e795663). The production route artificials.net/* serves the Worker using the existing proxied DNS; request-limit fail-open is disabled. No DNS records were deleted.
 - https://artificials.net returns HTTP 200 with HSTS and CSP. The sitemap uses the production domain. Live-source smoke tests pass on that domain: 7,842 offerings / 220 providers, desktop/mobile rendering without browser errors or horizontal overflow, private routes returning 404, and foreign-origin writes returning 403.
 - HTTP now redirects to HTTPS with status 301, preserving path and query parameters. Keep the zone's Always Use HTTPS setting enabled.
+- The header search (Ctrl+K, ⌘K or /) finds models, pages, guides, lessons and free tools from anywhere, loading only when first opened.
 - Each refresh records what changed (the makers' listed prices, models joining the capability index and new leaders on each test) in `public/data/history.json`; `/changes` and its RSS feed show the last 30 days, and each model's Pricing tab shows its price changes.
 - The catalog workflow refreshes every three hours, started on time by the `artificials-refresh` Cloudflare Cron Trigger once its GitHub token is set, with GitHub's schedule as a fallback and a daily safety net. Publishing future changes uses the native Workers Builds connection.
 

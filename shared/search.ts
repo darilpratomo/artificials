@@ -1,0 +1,83 @@
+import academy from './academy-index.json';
+import { ARTICLES } from './content';
+import { staticPages } from './seo';
+import { UTILITIES } from './utilities';
+import { NAV_GROUPS, TOP_LINKS } from '../src/components/navigation';
+
+/**
+ * What the site search finds besides models: pages, guides, lessons and free
+ * tools. `scripts/build-search-index.mjs` writes it to
+ * /data/models/search.json, so guide text never reaches the page's own code.
+ * Models are searched in explorer.json, which the model search already uses.
+ */
+export type SearchKind = 'page' | 'guide' | 'lesson' | 'tool';
+
+/** [kind, path, title, description, more words that find it] */
+export type SearchEntry = [
+  kind: SearchKind,
+  path: string,
+  title: string,
+  description: string,
+  keywords: string,
+];
+
+export interface SearchIndex {
+  version: 1;
+  entries: SearchEntry[];
+}
+
+/** Pages the menus do not name, called what a visitor would call them. */
+const NAMES: Record<string, [title: string, description?: string]> = {
+  '/': ['Home', 'Leaders, prices and new releases at a glance'],
+  '/compare': ['Compare models', 'Two or three models side by side, with a link to share'],
+  '/about': ['About Artificials'],
+  '/contact': ['Contact'],
+  '/privacy': ['Privacy policy'],
+  '/terms': ['Terms and conditions'],
+};
+
+export function searchIndex(): SearchIndex {
+  const menu = new Map(
+    [...TOP_LINKS, ...NAV_GROUPS.flatMap((group) => group.items)].map((item) => [item.to, item]),
+  );
+  const pages: SearchEntry[] = staticPages()
+    .filter(({ path }) => !path.startsWith('/tools/'))
+    .map(({ path, title, description }) => {
+      const item = menu.get(path);
+      const [name, summary] = NAMES[path] ?? [];
+      // The menus' shorter name and line read best; the page's own title still finds it.
+      return [
+        'page',
+        path,
+        item?.label ?? name ?? title,
+        item?.description ?? summary ?? description,
+        `${title} ${description}`,
+      ];
+    });
+  const guides: SearchEntry[] = ARTICLES.filter((article) => article.published).map((article) => [
+    'guide',
+    `/news/${article.slug}`,
+    article.title,
+    article.excerpt,
+    article.category,
+  ]);
+  const modules = new Map(academy.modules.map((module) => [module.id, module]));
+  const lessons: SearchEntry[] = academy.lessons.map((lesson) => {
+    const module = modules.get(lesson.module);
+    return [
+      'lesson',
+      `/learn/${lesson.slug}`,
+      lesson.title,
+      lesson.summary,
+      `${module?.label ?? ''} ${module?.title ?? ''} ${lesson.level}`,
+    ];
+  });
+  const tools: SearchEntry[] = UTILITIES.map((tool) => [
+    'tool',
+    `/tools/${tool.id}`,
+    tool.title,
+    tool.description,
+    `${tool.category} ${tool.formats}`,
+  ]);
+  return { version: 1, entries: [...pages, ...guides, ...lessons, ...tools] };
+}

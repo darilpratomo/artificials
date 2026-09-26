@@ -5379,6 +5379,68 @@ input[type='radio'] {
 .site-header .site-actions > .btn {
   border-radius: 24px;
 }
+/* The site search: a quiet pill beside Compare models, an icon beside the menu on narrow screens. */
+.site-header .search-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 39px;
+  padding: 0 7px 0 14px;
+  border: 1px solid #ffffff20;
+  border-radius: 24px;
+  background: transparent;
+  color: #aeb0ba;
+  font-size: 13px;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+.site-header .search-trigger:hover {
+  border-color: #ffffff3d;
+  color: #fff;
+}
+.search-trigger kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 42px;
+  height: 25px;
+  padding: 0 7px;
+  border: 1px solid #ffffff1c;
+  border-radius: 14px;
+  background: #ffffff0a;
+  color: #9698a3;
+  font:
+    500 11px/1 'Inter Variable',
+    sans-serif;
+}
+/* The prerendered page does not know the device yet: the hint keeps its room until it does. */
+.search-trigger kbd:empty {
+  visibility: hidden;
+}
+@media (max-width: 1100px) {
+  .site-header .search-trigger {
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border-radius: 50%;
+  }
+  .search-trigger-label,
+  .search-trigger kbd {
+    display: none;
+  }
+}
+@media (max-width: 639px) {
+  .site-header .search-trigger {
+    width: 38px;
+    height: 38px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header .search-trigger {
+    transition: none;
+  }
+}
 .menu-scrim {
   position: fixed;
   inset: 0;
@@ -5590,7 +5652,7 @@ input[type='radio'] {
     gap: 8px;
   }
   .site-header .site-actions {
-    gap: 4px;
+    gap: 8px;
   }
 
   .site-header .site-actions > .btn {
