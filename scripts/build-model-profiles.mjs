@@ -16,6 +16,7 @@ import { buildTrends } from '../shared/trends.ts';
 import { buildImages } from '../shared/images.ts';
 import { buildVideos } from '../shared/videos.ts';
 import { buildExplore } from '../shared/explore.ts';
+import { buildComparisons } from '../shared/compare.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
@@ -151,6 +152,12 @@ await writeFile(resolve(staging, 'videos.json'), JSON.stringify(videos) + '\n');
 // The home page carries one current result from each of those pages.
 overview.explore = buildExplore({ overview, tests, finder, coding, trends, images, videos });
 await writeFile(resolve(staging, 'overview.json'), JSON.stringify(overview) + '\n');
+// Featured model comparisons, prerendered and listed in the sitemap.
+const comparisons = buildComparisons(
+  overview,
+  profiles.map((profile) => profile.slug),
+);
+await writeFile(resolve(staging, 'comparisons.json'), JSON.stringify(comparisons) + '\n');
 await rm(target, { recursive: true, force: true });
 await rename(staging, target);
 

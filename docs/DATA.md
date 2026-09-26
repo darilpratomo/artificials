@@ -86,7 +86,7 @@ on `/leaderboard`. `scripts/sync-benchmarks.mjs` ingests published LiveBench tas
 Epoch AI's own benchmark evaluations and capability index, T2I-CoReBench image-generation
 results, the agent tests DeepSWE, CursorBench and SWE-bench Verified (bash only), and Arena's
 blind-vote tests for language models (see "Arena tests for language models" below), plus agent
-results and task lengths for the coding agents page (see below). The two-hourly catalog workflow refreshes both sources,
+results and task lengths for the coding agents page (see below). The three-hourly catalog workflow refreshes both sources,
 validates them, runs checks, and commits the complete snapshots for native Cloudflare deploy.
 Failed source retrieval/schema checks leave the last successful published deployment intact.
 A benchmark source that is down does not hold back the catalog: the workflow still checks and
@@ -346,9 +346,29 @@ No page shows update, check or retrieval times (owner decision, 25 September 202
 credit their data source beside them, and each source keeps its check time in the data files.
 The rankings page says so only when a refresh is more than two days late.
 
-Everything refreshes with the two-hourly workflow: a new model appears in the timeline as soon as
+Everything refreshes with the three-hourly workflow: a new model appears in the timeline as soon as
 the catalog lists it, and its scores follow once a test covers it. No step needs manual input.
 Speed and latency are not shown, because no reliable public source is available to republish.
+
+## Model comparisons
+
+`/compare/a-vs-b` (or `a-vs-b-vs-c`) compares two or three models by profile slug, in the order
+the address gives; every comparison has its own link to share. The canonical address lists the
+models alphabetically, so each set has one page for search engines. `shared/compare.ts` parses
+and builds the addresses; the Worker gives any valid one its title and canonical URL and answers
+unknown models with a real 404.
+
+- At a glance: the capability index, the reference price per 1M tokens (the maker's own paid
+  listing, or else the middle paid listing across hosts, blended 3:1), the context window and the
+  release date, each with a plain sentence, such as "B is 5 times cheaper."
+- Where each scores higher: only the tests every compared model has taken, each on its own
+  scale, with the gap to the next model. Values that read the same are level. Scores from
+  different tests are never combined, and there is no overall winner.
+- Everything side by side: the same table as the shortlist on `/compare`. On phones a row's
+  label spans the row above its values, so the table never scrolls sideways.
+- Featured comparisons (`comparisons.json`): every pair among the best models of the ten makers
+  that score highest on the capability index, 45 pairs. They are prerendered with both profiles
+  inline and listed in the sitemap.
 
 ## Models page
 
@@ -386,7 +406,7 @@ that data inline. Artificials is non-commercial, so non-commercial licences such
 CC BY-NC 4.0 are acceptable; every source is credited beside its chart and in "Sources and
 method".
 
-Sources, all refreshed by `scripts/sync-benchmarks.mjs` every two hours:
+Sources, all refreshed by `scripts/sync-benchmarks.mjs` every three hours:
 
 - Terminal-Bench 2.0 (agent results): one result per agent and model, the share of 89 tasks
   solved, with standard error and run date. The leaderboard's submissions are Apache-2.0 on

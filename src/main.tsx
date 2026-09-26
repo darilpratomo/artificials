@@ -121,6 +121,7 @@ const app = (
               <Route path="leaderboard" element={<Leaderboard />} />
               <Route path="releases" element={<Releases />} />
               <Route path="compare" element={<Compare />} />
+              <Route path="compare/:pair" element={<Compare />} />
               <Route path="learn" element={<Academy />} />
               <Route path="learn/:slug" element={<AcademyLesson />} />
               <Route path="news" element={<Learn />} />

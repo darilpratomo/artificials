@@ -4,7 +4,10 @@ import { dirname } from 'node:path';
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
 try {
   const { renderPage } = await server.ssrLoadModule('/src/prerender.tsx');
-  const { publicPages, pageMetadata, metadataHtml } = await server.ssrLoadModule('/shared/seo.ts');
+  const { publicPages, pageMetadata, metadataHtml, comparisonMetadata } =
+    await server.ssrLoadModule('/shared/seo.ts');
+  const { comparisonPath } = await server.ssrLoadModule('/shared/compare.ts');
+  const { profileBucket } = await server.ssrLoadModule('/shared/model-profiles.ts');
   const template = (await readFile('dist/index.html', 'utf8'))
     .replace(/<title>.*?<\/title>/s, '')
     .replace(/<meta name="description"[^>]*>/, '');
@@ -95,6 +98,11 @@ try {
   const finderInline = `<script type="application/json" id="finder-data">${finderText
     .trim()
     .replace(/</g, '\\u003c')}</script>`;
+  const comparisonsText = await readFile('dist/data/models/comparisons.json', 'utf8');
+  const comparisons = JSON.parse(comparisonsText);
+  const comparisonsInline = `<script type="application/json" id="comparisons-data">${comparisonsText
+    .trim()
+    .replace(/</g, '\\u003c')}</script>`;
   for (const { path } of publicPages()) {
     const lesson = path.startsWith('/learn/')
       ? JSON.parse(
@@ -107,6 +115,7 @@ try {
     const withImages = path === '/image-models';
     const withVideos = path === '/video-models';
     const withFinder = path === '/model-finder';
+    const withComparisons = path === '/compare';
     const html = template
       .replace(
         '</head>',
@@ -114,24 +123,63 @@ try {
       )
       .replace(
         '<div id="root"></div>',
-        `<div id="root">${renderPage(
-          path,
+        `<div id="root">${renderPage(path, {
           lesson,
-          withData ? overview : undefined,
-          withCoding ? coding : undefined,
-          withTrends ? trends : undefined,
-          withImages ? images : undefined,
-          withVideos ? videos : undefined,
-          withFinder ? finder : undefined,
-        )}</div>${withData ? inline : ''}${withCoding ? codingInline : ''}${
+          overview: withData ? overview : undefined,
+          coding: withCoding ? coding : undefined,
+          trends: withTrends ? trends : undefined,
+          images: withImages ? images : undefined,
+          videos: withVideos ? videos : undefined,
+          finder: withFinder ? finder : undefined,
+          comparisons: withComparisons ? comparisons : undefined,
+        })}</div>${withData ? inline : ''}${withCoding ? codingInline : ''}${
           withTrends ? trendsInline : ''
         }${withImages ? imagesInline : ''}${withVideos ? videosInline : ''}${
           withFinder ? finderInline : ''
-        }`,
+        }${withComparisons ? comparisonsInline : ''}`,
       );
     const destination = path === '/' ? 'dist/index.html' : `dist${path}.html`;
     await mkdir(dirname(destination), { recursive: true });
     await writeFile(destination, html);
+  }
+  // Featured comparisons: each at its canonical address, with both profiles inline so
+  // the page shows at once and search engines read the whole comparison.
+  const buckets = new Map();
+  const profileOf = async (slug) => {
+    const index = profileBucket(slug);
+    if (!buckets.has(index))
+      buckets.set(index, JSON.parse(await readFile(`dist/data/models/${index}.json`, 'utf8')));
+    const bucket = buckets.get(index);
+    const profile = bucket.profiles.find((entry) => entry.slug === slug);
+    if (!profile) throw Error(`A featured comparison names ${slug}, which has no profile.`);
+    return { profile, sources: bucket.sources };
+  };
+  for (const { slugs } of comparisons.featured) {
+    const path = comparisonPath(slugs);
+    const found = await Promise.all(slugs.map(profileOf));
+    const comparison = {
+      version: 1,
+      profiles: found.map(({ profile }) => profile),
+      sources: [
+        ...new Map(
+          found.flatMap(({ sources }) => sources).map((source) => [source.id, source]),
+        ).values(),
+      ],
+    };
+    const meta = comparisonMetadata(
+      comparison.profiles.map(({ slug, name, maker }) => ({ slug, name, maker })),
+      slugs,
+    );
+    const html = template
+      .replace('</head>', metadataHtml(meta) + styles + pagePreloads(path) + '</head>')
+      .replace(
+        '<div id="root"></div>',
+        `<div id="root">${renderPage(path, { comparison })}</div><script type="application/json" id="compare-data">${JSON.stringify(
+          comparison,
+        ).replace(/</g, '\\u003c')}</script>`,
+      );
+    await mkdir(dirname(`dist${path}.html`), { recursive: true });
+    await writeFile(`dist${path}.html`, html);
   }
   for (const route of ['login', 'dashboard', '404'])
     await writeFile(
@@ -139,7 +187,7 @@ try {
       template.replace('</head>', metadataHtml(pageMetadata('/' + route)) + '</head>'),
     );
   console.log(
-    `Prerendered ${publicPages().length} public pages with unique metadata and crawlable HTML.`,
+    `Prerendered ${publicPages().length} public pages and ${comparisons.featured.length} featured comparisons with unique metadata and crawlable HTML.`,
   );
 } finally {
   await server.close();

@@ -22,7 +22,7 @@ Everything public works without accounts or credentials. Only editor sign-in and
 - React, TypeScript, Vite, locally hosted fonts and Lucide SVG icons. No animation or 3D runtime dependency.
 - Hono on Cloudflare Workers with static assets; Supabase Auth/Postgres with RLS for editor sign-in and articles.
 - Source-attributed models.dev snapshot; complete paginated provider offerings, precomputed search index and record shards. No artificial 50-model limit. Counts represent offerings, not unique underlying models.
-- `/models`, `/coding-agents`, `/trends`, `/image-models`, `/video-models`, `/model-finder`, `/leaderboard`, `/compare`, `/news`, `/learn`, `/learn/:slug`, `/tools`, `/about`, `/privacy`, `/terms`, `/contact`; `/login` and `/dashboard` are for editors only.
+- `/models`, `/coding-agents`, `/trends`, `/image-models`, `/video-models`, `/model-finder`, `/leaderboard`, `/compare`, `/compare/:a-vs-:b`, `/news`, `/learn`, `/learn/:slug`, `/tools`, `/about`, `/privacy`, `/terms`, `/contact`; `/login` and `/dashboard` are for editors only.
 - CMS at a server-configured unpredictable path; server admin role + MFA remain mandatory. No public admin link.
 
 ## Learn AI
@@ -35,7 +35,7 @@ The free Academy has nine modules, 36 original lessons, four runnable Python pro
 npm run sync:catalog
 ```
 
-The scheduled GitHub workflow refreshes the snapshot every two hours. Scheduled jobs can be delayed; the rankings page says so when a refresh is more than two days late. The website does not claim guaranteed real-time coverage. Rankings compare reported context windows or base token prices, not invented intelligence scores. Read [data methodology](docs/DATA.md).
+The data refreshes every three hours, started on time by a Cloudflare Cron Trigger (see [launch notes](docs/LAUNCH.md#data-updates)). Upstream sources can lag; the rankings page says so when a refresh is more than two days late. The website does not claim guaranteed real-time coverage. Rankings compare reported context windows or base token prices, not invented intelligence scores. Read [data methodology](docs/DATA.md).
 
 ## Verification and deployment
 

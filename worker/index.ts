@@ -4,8 +4,15 @@ import {
   metadataHtml,
   escapeHtml,
   modelMetadata,
+  comparisonMetadata,
   SITE_URL,
 } from '../shared/seo';
+import {
+  canonicalComparison,
+  comparisonPath,
+  parseComparison,
+  type Comparisons,
+} from '../shared/compare';
 import type { DirectoryEntry, ProfileDirectory } from '../shared/model-profiles';
 import type { Article } from '../shared/content';
 import { Hono } from 'hono';
@@ -251,6 +258,17 @@ app.get('/sitemap.xml', async (c) => {
   } catch {
     // A missing directory must not take the rest of the sitemap down.
   }
+  try {
+    // The featured comparisons are prerendered with their data.
+    const response = await c.env.ASSETS.fetch(
+      new Request(new URL('/data/models/comparisons.json', c.req.url)),
+    );
+    if (response.ok)
+      for (const { slugs } of ((await response.json()) as Comparisons).featured)
+        pages.push({ path: comparisonPath(slugs) });
+  } catch {
+    // Neither may a missing comparisons file.
+  }
   return c.body(
     '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
       pages
@@ -348,6 +366,37 @@ app.get('/models/:slug', async (c) => {
   const policy = shell.headers.get('Content-Security-Policy');
   if (policy) c.header('Content-Security-Policy', policy);
   return c.html(html, entry ? 200 : 404);
+});
+// Comparisons work like profiles: the Worker gives any valid address its title and
+// canonical URL, and a real 404 for unknown models. Featured comparisons, at their
+// canonical address, are served as prerendered pages with their data.
+app.get('/compare/:pair', async (c) => {
+  const slugs = parseComparison(c.req.param('pair'));
+  let entries: DirectoryEntry[] = [];
+  if (slugs) {
+    try {
+      const directory = await profileEntries(c.env, c.req.url);
+      entries = slugs
+        .map((slug) => directory.get(slug))
+        .filter((entry): entry is DirectoryEntry => entry !== undefined);
+    } catch {
+      // Fall through to the not-found response.
+    }
+  }
+  const known = Boolean(slugs && entries.length === slugs.length);
+  if (known && c.req.path === canonicalComparison(slugs!)) {
+    const prerendered = await c.env.ASSETS.fetch(c.req.raw);
+    if (prerendered.ok) return prerendered;
+  }
+  const shell = await c.env.ASSETS.fetch(new Request(new URL('/app-shell', c.req.url)));
+  const meta = comparisonMetadata(
+    known ? entries.map(([slug, name, maker]) => ({ slug, name, maker })) : null,
+    slugs ?? [],
+  );
+  const html = (await shell.text()).replace('</head>', metadataHtml(meta) + '</head>');
+  const policy = shell.headers.get('Content-Security-Policy');
+  if (policy) c.header('Content-Security-Policy', policy);
+  return c.html(html, known ? 200 : 404);
 });
 app.get('/_private/:token', async (c) => {
   c.header('X-Robots-Tag', 'noindex, nofollow');

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Gauge, Minus } from 'lucide-react';
+import { ArrowRight, Check, Gauge, GitCompareArrows, Minus } from 'lucide-react';
 import { BENCHMARK_DOMAINS, type BenchmarkDomain } from '../../../shared/benchmarks';
 import {
   isNoChargeOffer,
@@ -14,6 +14,7 @@ import { ResearchRecord, Standing } from './Standing';
 import { Specs } from './Specs';
 import { ComparisonSummary, Faq, ModelSummary, PeerHighlights } from './Summary';
 import { ShareButton } from '../charts/ShareButton';
+import { comparisonPath } from '../../lib/compare';
 
 export type ProfileTab = 'overview' | 'performance' | 'pricing' | 'providers' | 'tokens';
 
@@ -239,6 +240,14 @@ export default function Overview({
                     ? 'No price'
                     : `${money(peer.inputPrice)} / ${money(peer.outputPrice)}`}
                 </span>
+                <Link
+                  className="peer-compare"
+                  to={comparisonPath([profile.slug, peer.slug])}
+                  aria-label={`Compare ${profile.name} with ${peer.name}`}
+                >
+                  <GitCompareArrows size={15} aria-hidden="true" />
+                  <span>Compare</span>
+                </Link>
               </li>
             ))}
           </ul>

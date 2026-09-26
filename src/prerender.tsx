@@ -29,15 +29,34 @@ import type {
   ModelOverview,
   Trends as TrendsData,
 } from './lib/overview';
+import type { ComparisonData, Comparisons } from './lib/compare';
+
+/** The data a page renders from, written into its HTML as well. */
+export interface PageData {
+  lesson?: Lesson;
+  overview?: ModelOverview;
+  coding?: Coding;
+  trends?: TrendsData;
+  images?: ImagesData;
+  videos?: VideosData;
+  finder?: FinderData;
+  comparison?: ComparisonData;
+  comparisons?: Comparisons;
+}
+
 export function renderPage(
   path: string,
-  lesson?: Lesson,
-  overview?: ModelOverview,
-  coding?: Coding,
-  trends?: TrendsData,
-  images?: ImagesData,
-  videos?: VideosData,
-  finder?: FinderData,
+  {
+    lesson,
+    overview,
+    coding,
+    trends,
+    images,
+    videos,
+    finder,
+    comparison,
+    comparisons,
+  }: PageData = {},
 ) {
   return renderToString(
     <StaticRouter location={path}>
@@ -56,7 +75,8 @@ export function renderPage(
             <Route path="market" element={<Market />} />
             <Route path="leaderboard" element={<Leaderboard />} />
             <Route path="releases" element={<Releases />} />
-            <Route path="compare" element={<Compare />} />
+            <Route path="compare" element={<Compare featured={comparisons} />} />
+            <Route path="compare/:pair" element={<Compare initial={comparison} />} />
             <Route path="news" element={<Learn />} />
             <Route path="news/:slug" element={<Learn />} />
             <Route path="tools" element={<Tools />} />

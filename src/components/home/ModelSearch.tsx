@@ -2,13 +2,32 @@ import { useId, useMemo, useState, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { makerLogo } from '../../../shared/makers';
-import { FLAGS, useExplorer } from '../../lib/overview';
+import { FLAGS, useExplorer, type ExplorerRow } from '../../lib/overview';
+
+const NONE: string[] = [];
 
 /**
- * Jump straight to any model's page. The list of every model loads on first
- * focus, so visitors who never search never download it.
+ * Jump straight to any model's page, or, with `onChoose`, pick a model. The
+ * list of every model loads on first focus, so visitors who never search never
+ * download it.
  */
-export function ModelSearch({ total }: { total: number }) {
+export function ModelSearch({
+  total,
+  label = 'Find a model',
+  placeholder = `Find any of ${total.toLocaleString('en-US')} models`,
+  onChoose,
+  exclude = NONE,
+  autoFocus = false,
+}: {
+  total: number;
+  label?: string;
+  placeholder?: string;
+  onChoose?: (model: ExplorerRow) => void;
+  /** Slugs to leave out, such as models already chosen. */
+  exclude?: string[];
+  /** Focuses the field when it appears after a click, such as "Change". */
+  autoFocus?: boolean;
+}) {
   const [enabled, setEnabled] = useState(false);
   const { data, error } = useExplorer(enabled);
   const [query, setQuery] = useState('');
@@ -22,8 +41,10 @@ export function ModelSearch({ total }: { total: number }) {
     if (!text || !data) return [];
     const words = text.split(/\s+/);
     return data.models
-      .filter((row) =>
-        words.every((word) => `${row[1]} ${row[3]} ${row[0]}`.toLowerCase().includes(word)),
+      .filter(
+        (row) =>
+          !exclude.includes(row[0]) &&
+          words.every((word) => `${row[1]} ${row[3]} ${row[0]}`.toLowerCase().includes(word)),
       )
       .map((row) => ({
         row,
@@ -36,11 +57,13 @@ export function ModelSearch({ total }: { total: number }) {
       .sort((a, b) => a.weight - b.weight || b.row[4].localeCompare(a.row[4]))
       .slice(0, 8)
       .map((entry) => entry.row);
-  }, [query, data]);
+  }, [query, data, exclude]);
 
-  const choose = (slug: string) => {
+  const choose = (row: ExplorerRow) => {
     setOpen(false);
-    navigate(`/models/${slug}`);
+    if (!onChoose) return navigate(`/models/${row[0]}`);
+    setQuery('');
+    onChoose(row);
   };
   const onKey = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
@@ -53,7 +76,7 @@ export function ModelSearch({ total }: { total: number }) {
         );
     } else if (event.key === 'Enter' && open && results[active]) {
       event.preventDefault();
-      choose(results[active][0]);
+      choose(results[active]);
     } else if (event.key === 'Escape') setOpen(false);
   };
   const expanded = open && query.trim().length > 0;
@@ -64,13 +87,14 @@ export function ModelSearch({ total }: { total: number }) {
       <input
         type="search"
         role="combobox"
-        aria-label="Find a model"
+        aria-label={label}
         aria-expanded={expanded}
         aria-controls={`${id}-list`}
         aria-autocomplete="list"
         aria-activedescendant={expanded && results[active] ? `${id}-${active}` : undefined}
-        placeholder={`Find any of ${total.toLocaleString('en-US')} models`}
+        placeholder={placeholder}
         autoComplete="off"
+        autoFocus={autoFocus}
         value={query}
         onFocus={() => {
           setEnabled(true);
@@ -95,7 +119,7 @@ export function ModelSearch({ total }: { total: number }) {
               onMouseEnter={() => setActive(index)}
               onMouseDown={(event) => {
                 event.preventDefault();
-                choose(row[0]);
+                choose(row);
               }}
             >
               <img src={makerLogo(row[2])} alt="" width="28" height="28" loading="lazy" />

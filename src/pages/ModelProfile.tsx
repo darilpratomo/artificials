@@ -19,10 +19,11 @@ import {
 import { EmptyState } from '../components/Layout';
 import { applyPageMetadata } from '../components/Metadata';
 import { modelMetadata } from '../../shared/seo';
-import { useComparison, type ModelRecord } from '../lib/catalog';
+import { useComparison } from '../lib/catalog';
+import { comparisonRecord } from '../lib/compare';
 import { makerLogo } from '../../shared/makers';
 import { useModelProfile, type ModelProfile as Profile } from '../lib/profiles';
-import Overview, { cheapestOffering, type ProfileTab } from '../components/profile/Overview';
+import Overview, { type ProfileTab } from '../components/profile/Overview';
 import Performance from '../components/profile/Performance';
 import Pricing from '../components/profile/Pricing';
 import Providers from '../components/profile/Providers';
@@ -39,31 +40,6 @@ const TABS: { id: ProfileTab; label: string; icon: LucideIcon }[] = [
   { id: 'providers', label: 'Providers', icon: Server },
   { id: 'tokens', label: 'Context', icon: Ruler },
 ];
-
-function comparisonRecord(profile: Profile): ModelRecord {
-  const offer =
-    profile.offerings.find((entry) => entry.id === profile.official) ??
-    cheapestOffering(profile) ??
-    profile.offerings[0];
-  return {
-    id: offer.id,
-    modelId: offer.id.slice(offer.providerId.length + 1),
-    name: profile.name,
-    provider: offer.provider,
-    providerId: offer.providerId,
-    contextWindow: offer.contextWindow,
-    inputPrice: offer.inputPrice,
-    outputPrice: offer.outputPrice,
-    releaseDate: profile.releaseDate,
-    modalities: [...new Set([...profile.inputModalities, ...profile.outputModalities])].sort(),
-    inputModalities: profile.inputModalities,
-    outputModalities: profile.outputModalities,
-    reasoning: profile.reasoning,
-    openWeights: profile.openWeights,
-    sourceUrl: 'https://models.dev',
-    providerUrl: offer.providerUrl,
-  };
-}
 
 function Chips({ profile }: { profile: Profile }) {
   const chips: [boolean, LucideIcon, string, string][] = [

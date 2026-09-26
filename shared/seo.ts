@@ -1,6 +1,7 @@
 import { ARTICLES, type Article } from './content';
 import academy from './academy-index.json';
 import { UTILITIES } from './utilities';
+import { canonicalComparison, parseComparison } from './compare';
 export const SITE_URL = 'https://artificials.net';
 const pages: Record<string, [string, string]> = {
   '/tools': [
@@ -104,6 +105,19 @@ export function publicPages(articles: Article[] = ARTICLES) {
 }
 export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
   const path = pathname.replace(/\/$/, '') || '/';
+  const comparison = /^\/compare\/([a-z0-9-]+)$/.exec(path);
+  const compared = comparison && parseComparison(comparison[1]);
+  // The page names the models once they load; the Worker and the prerenderer do it first.
+  if (compared)
+    return {
+      ...comparisonMetadata(
+        compared.map((slug) => ({ slug, name: slug, maker: '' })),
+        compared,
+      ),
+      title: 'AI model comparison — Artificials',
+      description:
+        'Published test results, prices, context windows and features of AI models, side by side.',
+    };
   const profile = /^\/models\/([a-z0-9][a-z0-9-]{0,99})$/.exec(path);
   if (profile)
     return {
@@ -202,6 +216,43 @@ export function modelMetadata(model: ModelMetaInput | null, slug = model?.slug ?
     description: `${model.name}${by}. ${model.hasResults ? 'How it ranks on benchmarks, ' : 'Capabilities, '}prices from ${hosts}, context window and a cost calculator. Updated automatically.`,
     canonical,
     image: SITE_URL + '/editorial/hero-brand-orbit.webp',
+    known: true,
+    robots: 'index,follow,max-image-preview:large',
+    type: 'website' as const,
+    structured: null,
+  };
+}
+export interface ComparisonMetaModel {
+  slug: string;
+  name: string;
+  maker: string;
+}
+/** Title, description and canonical address of a comparison; null when a model is unknown. */
+export function comparisonMetadata(models: ComparisonMetaModel[] | null, slugs: string[]) {
+  const canonical = SITE_URL + (slugs.length ? canonicalComparison(slugs) : '/compare');
+  const image = SITE_URL + '/editorial/hero-brand-orbit.webp';
+  if (!models)
+    return {
+      title: 'Comparison not found — Artificials',
+      description:
+        'One of these models is not in the Artificials catalog. Pick two or three models to compare side by side.',
+      canonical,
+      image,
+      known: false,
+      robots: 'noindex,follow',
+      type: 'website' as const,
+      structured: null,
+    };
+  const named = models.map((model) =>
+    model.maker ? `${model.name} (${model.maker})` : model.name,
+  );
+  const list =
+    named.length > 2 ? `${named.slice(0, -1).join(', ')} and ${named.at(-1)}` : named.join(' and ');
+  return {
+    title: `${models.map((model) => model.name).join(' vs ')}: benchmarks, price and context — Artificials`,
+    description: `${list} side by side: published test results, prices per million tokens, context windows and features.`,
+    canonical,
+    image,
     known: true,
     robots: 'index,follow,max-image-preview:large',
     type: 'website' as const,

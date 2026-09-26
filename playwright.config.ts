@@ -29,6 +29,7 @@ export default defineConfig({
         'video-models.spec.ts',
         'model-finder.spec.ts',
         'model-profile.spec.ts',
+        'compare.spec.ts',
       ],
       use: { ...devices['iPhone 13'], defaultBrowserType: 'webkit' },
     },

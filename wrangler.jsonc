@@ -20,6 +20,7 @@
       "/news",
       "/news/*",
       "/models/*",
+      "/compare/*",
       "/studio",
       "/pricing",
       "/checkout",

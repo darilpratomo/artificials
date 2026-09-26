@@ -2,8 +2,12 @@ name: Refresh catalog and capability benchmarks
 
 on:
   schedule:
-    # Every two hours: fresh data within the free GitHub Actions and Workers Builds quotas.
-    - cron: '17 */2 * * *'
+    # Every three hours: a Cloudflare Cron Trigger (wrangler.refresh.jsonc) starts this
+    # workflow on time. GitHub's own schedule runs late or not at all when it is busy,
+    # so it covers only until the Cloudflare trigger takes over; see the job's `if`.
+    - cron: '41 */3 * * *'
+    # A daily safety net, whichever trigger is in charge.
+    - cron: '11 7 * * *'
   workflow_dispatch:
 
 permissions:
@@ -15,6 +19,12 @@ concurrency:
 
 jobs:
   refresh:
+    # Once the Cloudflare trigger has taken over (it sets REFRESH_TRIGGER), GitHub's
+    # three-hourly schedule stands down; a skipped job uses no minutes.
+    if: >-
+      github.event_name != 'schedule' ||
+      github.event.schedule == '11 7 * * *' ||
+      vars.REFRESH_TRIGGER != 'cloudflare'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

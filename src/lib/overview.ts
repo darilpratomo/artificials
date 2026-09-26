@@ -5,6 +5,7 @@ import type { Trends } from '../../shared/trends';
 import type { Images } from '../../shared/images';
 import type { Videos } from '../../shared/videos';
 import type { Finder } from '../../shared/finder';
+import type { Comparisons } from '../../shared/compare';
 
 export type {
   Explorer,
@@ -47,6 +48,7 @@ const isTrends = (value: Trends) => value?.version === 1 && Array.isArray(value.
 const isImages = (value: Images) => value?.version === 1 && Array.isArray(value.boards);
 const isVideos = (value: Videos) => value?.version === 1 && Array.isArray(value.boards);
 const isFinder = (value: Finder) => value?.version === 1 && Array.isArray(value.tasks);
+const isComparisons = (value: Comparisons) => value?.version === 1 && Array.isArray(value.featured);
 
 /**
  * Prerendered pages carry their data inline, so the first view needs no extra
@@ -164,4 +166,10 @@ export function useVideos(attempt = 0, initial?: Videos) {
 export function useFinder(attempt = 0, initial?: Finder) {
   embedded('finder.json', 'finder-data', isFinder);
   return useFile<Finder>('finder.json', isFinder, true, attempt, initial);
+}
+
+/** The featured comparisons: pairs of each leading maker's best model. */
+export function useComparisons(enabled = true, attempt = 0, initial?: Comparisons) {
+  embedded('comparisons.json', 'comparisons-data', isComparisons);
+  return useFile<Comparisons>('comparisons.json', isComparisons, enabled, attempt, initial);
 }

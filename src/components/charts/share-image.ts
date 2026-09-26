@@ -349,6 +349,67 @@ export async function listImage(frame: ShareFrame, rows: ShareRow[]) {
   return element;
 }
 
+export interface ShareModel {
+  name: string;
+  maker: string;
+  makerId: string;
+}
+
+export interface ShareCompareRow {
+  label: string;
+  values: string[];
+  /** Models whose value is the better one in this row. */
+  best: number[];
+}
+
+/** Two or three models side by side: one column each, the better value in each row bold. */
+export async function compareImage(
+  frame: ShareFrame,
+  models: ShareModel[],
+  rows: ShareCompareRow[],
+) {
+  await fontsReady();
+  const shown = rows.slice(0, 14);
+  const rowHeight = 58;
+  const headerGuess = 190 + (frame.subtitle ? 64 : 0);
+  const height = Math.max(720, headerGuess + 96 + shown.length * rowHeight + 150);
+  const { element, context } = canvas(height);
+  let y = (await drawHeader(context, frame, height)) + 6;
+  const left = 64 + 420;
+  const column = (WIDTH - 64 - left) / models.length;
+  context.textBaseline = 'alphabetic';
+  for (const [index, model] of models.entries()) {
+    const x = left + column * index;
+    await drawLogo(context, model.makerId, x, y, 48);
+    context.fillStyle = INK;
+    context.font = `600 25px ${SANS}`;
+    context.fillText(clip(context, model.name, column - 88), x + 64, y + 22);
+    context.fillStyle = MUTED;
+    context.font = `400 19px ${SANS}`;
+    context.fillText(clip(context, model.maker, column - 88), x + 64, y + 46);
+  }
+  y += 80;
+  for (const row of shown) {
+    context.strokeStyle = GRID;
+    context.beginPath();
+    context.moveTo(64, y);
+    context.lineTo(WIDTH - 64, y);
+    context.stroke();
+    context.fillStyle = MUTED;
+    context.font = `500 21px ${SANS}`;
+    context.fillText(clip(context, row.label, 400), 64, y + 37);
+    for (const [index, value] of row.values.entries()) {
+      const best = row.best.includes(index);
+      context.fillStyle = best ? INK : '#c3c6cf';
+      context.font = `${best ? 700 : 400} 23px ${SANS}`;
+      context.fillText(clip(context, value, column - 24), left + column * index, y + 37);
+    }
+    y += rowHeight;
+  }
+  drawFooter(context, frame, height);
+  return element;
+}
+
 /** Points by maker, with the frontier and shaded region the page shows. */
 export async function scatterImage(
   frame: ShareFrame,
