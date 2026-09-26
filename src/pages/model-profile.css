@@ -684,6 +684,49 @@
   color: var(--profile-ink);
 }
 
+/* The maker's listed price, each time it changed. */
+.price-history {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.price-history li {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--profile-line);
+  color: var(--profile-ink-2);
+  font-size: 14.5px;
+}
+.price-history li:first-child {
+  border-top: 0;
+}
+.price-history time {
+  color: var(--profile-muted);
+  font-variant-numeric: tabular-nums;
+}
+.price-history b {
+  padding: 3px 10px;
+  border: 1px solid var(--profile-line);
+  border-radius: 99px;
+  color: var(--profile-ink);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 640px) {
+  .price-history li {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+  }
+  .price-history span {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
 /* Performance */
 .index-card {
   display: grid;

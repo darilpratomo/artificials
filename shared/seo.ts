@@ -72,6 +72,10 @@ const pages: Record<string, [string, string]> = {
     'AI model release timeline',
     'Every AI model release, newest first: release dates, prices, context windows, capabilities and makers, updated automatically.',
   ],
+  '/changes': [
+    'What changed in AI models',
+    'New AI model releases, listed price changes, new leaders on each benchmark and models joining the capability index over the last 30 days, newest first.',
+  ],
   '/compare': [
     'Compare AI models',
     'Compare AI model context windows, input and output pricing, capabilities, and provider specifications side by side.',

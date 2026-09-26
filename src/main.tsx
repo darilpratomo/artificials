@@ -36,6 +36,7 @@ const VideoModels = page(() => import('./pages/VideoModels'));
 const ModelFinder = page(() => import('./pages/ModelFinder'));
 const ModelProfile = page(() => import('./pages/ModelProfile'));
 const Compare = page(() => import('./pages/Compare'));
+const Changes = page(() => import('./pages/Changes'));
 const Leaderboard = page(() => import('./pages/Leaderboard'));
 const Leaders = page(() => import('./pages/Leaders'));
 const ScorePriceTime = page(() => import('./pages/ScorePriceTime'));
@@ -66,6 +67,7 @@ function pageAt(path: string) {
     ['market', Market],
     ['leaderboard', Leaderboard],
     ['releases', Releases],
+    ['changes', Changes],
     ['compare', Compare],
     ['news', Learn],
     ['tools', Tools],
@@ -120,6 +122,7 @@ const app = (
               <Route path="market" element={<Market />} />
               <Route path="leaderboard" element={<Leaderboard />} />
               <Route path="releases" element={<Releases />} />
+              <Route path="changes" element={<Changes />} />
               <Route path="compare" element={<Compare />} />
               <Route path="compare/:pair" element={<Compare />} />
               <Route path="learn" element={<Academy />} />

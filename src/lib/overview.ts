@@ -6,6 +6,7 @@ import type { Images } from '../../shared/images';
 import type { Videos } from '../../shared/videos';
 import type { Finder } from '../../shared/finder';
 import type { Comparisons } from '../../shared/compare';
+import type { Changes } from '../../shared/changes';
 
 export type {
   Explorer,
@@ -33,6 +34,7 @@ export type { Trends, TrendModel, TrendPoint, TrendSeries } from '../../shared/t
 export type { Images } from '../../shared/images';
 export type { Videos } from '../../shared/videos';
 export type { Finder, FinderRow, FinderTest } from '../../shared/finder';
+export type { Changes, ChangeEvent, ChangeModel } from '../../shared/changes';
 export type { Board, BoardCategory, BoardEntry, BoardModel } from '../../shared/arena';
 
 const requests = new Map<string, Promise<unknown>>();
@@ -49,6 +51,7 @@ const isImages = (value: Images) => value?.version === 1 && Array.isArray(value.
 const isVideos = (value: Videos) => value?.version === 1 && Array.isArray(value.boards);
 const isFinder = (value: Finder) => value?.version === 1 && Array.isArray(value.tasks);
 const isComparisons = (value: Comparisons) => value?.version === 1 && Array.isArray(value.featured);
+const isChanges = (value: Changes) => value?.version === 1 && Array.isArray(value.events);
 
 /**
  * Prerendered pages carry their data inline, so the first view needs no extra
@@ -172,4 +175,10 @@ export function useFinder(attempt = 0, initial?: Finder) {
 export function useComparisons(enabled = true, attempt = 0, initial?: Comparisons) {
   embedded('comparisons.json', 'comparisons-data', isComparisons);
   return useFile<Comparisons>('comparisons.json', isComparisons, enabled, attempt, initial);
+}
+
+/** The last 30 days of releases, price changes, new leaders and index entries. */
+export function useChanges(attempt = 0, initial?: Changes) {
+  embedded('changes.json', 'changes-data', isChanges);
+  return useFile<Changes>('changes.json', isChanges, true, attempt, initial);
 }

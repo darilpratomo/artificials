@@ -17,6 +17,7 @@ import { buildImages } from '../shared/images.ts';
 import { buildVideos } from '../shared/videos.ts';
 import { buildExplore } from '../shared/explore.ts';
 import { buildComparisons } from '../shared/compare.ts';
+import { buildChanges } from '../shared/changes.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
@@ -40,6 +41,16 @@ try {
   if (error.code !== 'ENOENT') throw error;
 }
 const { profiles, links, linkModel } = buildProfiles(catalog, benchmarks, facts.facts);
+// What changed, kept by the data refresh (scripts/sync-history.mjs). Optional:
+// profiles build without it.
+let history;
+try {
+  history = JSON.parse(await readFile(resolve(data, 'history.json'), 'utf8'));
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
+for (const profile of profiles)
+  if (history?.prices[profile.slug]) profile.priceHistory = history.prices[profile.slug];
 if (profiles.length < 100)
   throw Error('Unexpectedly few model profiles; check the catalog snapshot.');
 
@@ -158,6 +169,16 @@ const comparisons = buildComparisons(
   profiles.map((profile) => profile.slug),
 );
 await writeFile(resolve(staging, 'comparisons.json'), JSON.stringify(comparisons) + '\n');
+// The last 30 days of changes, for the "What changed" page and its feed.
+const changes = buildChanges({
+  history,
+  profiles,
+  timeline,
+  tests,
+  sources,
+  until: updatedAt.slice(0, 10),
+});
+await writeFile(resolve(staging, 'changes.json'), JSON.stringify(changes) + '\n');
 await rm(target, { recursive: true, force: true });
 await rename(staging, target);
 

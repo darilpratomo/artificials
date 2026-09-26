@@ -52,6 +52,11 @@ jobs:
         id: arena
         continue-on-error: true
         run: npm run sync:arena
+      # What changed since the last snapshot: listed prices, index entries and leaders.
+      - name: Record what changed
+        id: history
+        continue-on-error: true
+        run: node scripts/sync-history.mjs
       - name: Check code, database, data integrity and build
         run: npm run check
         env:
@@ -66,8 +71,8 @@ jobs:
             git commit -m 'Refresh verified model catalog and benchmark snapshots'
             git push origin HEAD:main
           fi
-      - name: Report benchmark results that could not be refreshed
-        if: steps.benchmarks.outcome == 'failure' || steps.arena.outcome == 'failure'
+      - name: Report data that could not be refreshed
+        if: steps.benchmarks.outcome == 'failure' || steps.arena.outcome == 'failure' || steps.history.outcome == 'failure'
         run: |
-          echo '::error::Benchmark results or Arena leaderboards were not refreshed this run. The catalog was, and the last valid snapshots stay published.'
+          echo '::error::Benchmark results, Arena leaderboards or the change history were not refreshed this run. The catalog was, and the last valid snapshots stay published.'
           exit 1

@@ -22,7 +22,7 @@ Everything public works without accounts or credentials. Only editor sign-in and
 - React, TypeScript, Vite, locally hosted fonts and Lucide SVG icons. No animation or 3D runtime dependency.
 - Hono on Cloudflare Workers with static assets; Supabase Auth/Postgres with RLS for editor sign-in and articles.
 - Source-attributed models.dev snapshot; complete paginated provider offerings, precomputed search index and record shards. No artificial 50-model limit. Counts represent offerings, not unique underlying models.
-- `/models`, `/coding-agents`, `/trends`, `/image-models`, `/video-models`, `/model-finder`, `/leaderboard`, `/compare`, `/compare/:a-vs-:b`, `/news`, `/learn`, `/learn/:slug`, `/tools`, `/about`, `/privacy`, `/terms`, `/contact`; `/login` and `/dashboard` are for editors only.
+- `/models`, `/coding-agents`, `/trends`, `/image-models`, `/video-models`, `/model-finder`, `/leaderboard`, `/compare`, `/compare/:a-vs-:b`, `/changes` (with the `/changes.xml` feed), `/news`, `/learn`, `/learn/:slug`, `/tools`, `/about`, `/privacy`, `/terms`, `/contact`; `/login` and `/dashboard` are for editors only.
 - CMS at a server-configured unpredictable path; server admin role + MFA remain mandatory. No public admin link.
 
 ## Learn AI

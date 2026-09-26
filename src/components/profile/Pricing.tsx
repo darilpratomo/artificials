@@ -7,7 +7,7 @@ import {
   type ModelProfile,
   type ProfileBucket,
 } from '../../lib/profiles';
-import { approxWords, cost, money, tokens, whole } from './format';
+import { approxWords, cost, day, money, tokens, whole } from './format';
 import { Explainer, Sources } from './parts';
 
 const PRESETS = [
@@ -76,6 +76,7 @@ export default function Pricing({
 
   const perRequest = (input * selected.inputPrice! + output * selected.outputPrice!) / 1_000_000;
   const tiers = selected.longContextPricing?.[0];
+  const history = profile.priceHistory;
   const choose = (id: (typeof PRESETS)[number]['id']) => {
     setPreset(id);
     const next = PRESETS.find((entry) => entry.id === id)!;
@@ -159,6 +160,40 @@ export default function Pricing({
             ` ${whole(noCharge.length)} ${noCharge.length === 1 ? 'provider lists' : 'providers list'} it with no per-token charge, usually a free tier with limits or access included in a subscription.`}
         </p>
       </section>
+
+      {history && history.length > 1 && (
+        <section className="profile-card" aria-labelledby="history-heading">
+          <div className="profile-card-head">
+            <h2 id="history-heading">Price changes</h2>
+            <p>
+              {`${profile.maker ? `${profile.maker}’s` : 'The maker’s'} own listed price, each time it changed, newest first.`}
+            </p>
+          </div>
+          <ol className="price-history">
+            {history
+              .slice(1)
+              .map(([date, input, output], index) => {
+                const [, fromInput, fromOutput] = history[index];
+                const change =
+                  blendedPrice(input, output)! / blendedPrice(fromInput, fromOutput)! - 1;
+                return (
+                  <li key={date}>
+                    <time dateTime={date}>{day(date)}</time>
+                    <span>
+                      {`Input ${money(fromInput)} to ${money(input)}, output ${money(fromOutput)} to ${money(output)}`}
+                    </span>
+                    <b>{`${change > 0 ? '+' : '−'}${Math.abs(Math.round(change * 100))}%`}</b>
+                  </li>
+                );
+              })
+              .reverse()}
+          </ol>
+          <p className="price-footnote">
+            Per million tokens. The percentage compares blended prices. Changes count from when the
+            site began keeping this record.
+          </p>
+        </section>
+      )}
 
       <section className="profile-card" aria-labelledby="calc-heading">
         <div className="profile-card-head">

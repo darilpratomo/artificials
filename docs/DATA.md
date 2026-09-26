@@ -370,6 +370,31 @@ unknown models with a real 404.
   that score highest on the capability index, 45 pairs. They are prerendered with both profiles
   inline, listed in the sitemap, and each has its own link preview (see `docs/SEO.md`).
 
+## What changed
+
+Each data refresh runs `scripts/sync-history.mjs` after the new snapshots arrive. It compares
+them with the last snapshot it saw and adds what changed to `public/data/history.json`, dated by
+the day the refresh saw it, which can be a few hours after the source changed:
+
+- Listed prices: the maker's own paid listing only. The middle price across hosts moves whenever
+  a host comes or goes, so it is not tracked. A listing missing from one snapshot keeps its last
+  price, so its return is not a change.
+- The capability index: models newly in Epoch AI's index. More than 20 at once means a source or
+  matching change, which sets a new baseline without listing them.
+- Leaders: the top row of each test. The same result under a better-matched name, or a tie
+  changing places, is not a new leader: a new leader has a different score.
+
+`node scripts/sync-history.mjs --backfill` rebuilds the file from every catalog and benchmark
+snapshot in git history. Nothing before the first snapshot is known, and the site says so
+without naming the day the record began.
+
+The profile build turns the history into `changes.json`: the last 30 days up to the catalog's
+own day, with the notable releases from the timeline. `/changes` shows them by day, filtered by
+kind and by the last 7 or 30 days, prerendered with the data inline. `/changes.xml` is an RSS 2.0
+feed of the same events, up to 100, newest first. A model's Pricing tab lists its own listed-price
+changes. Scores and prices read as their sources give them; the percentage on a price change
+compares prices blended as three input tokens for each output token.
+
 ## Models page
 
 `/models` compares underlying models, not listings. It is built from the same `overview.json` as

@@ -12,6 +12,7 @@ const INTELLIGENCE: [to: string, label: string][] = [
   ['/leaders', 'Current leaders'],
   ['/leaderboard', 'Model rankings'],
   ['/releases', 'Model releases'],
+  ['/changes', 'What changed'],
   ['/compare', 'Compare models'],
   ['/model-finder', 'Model finder'],
   ['/coding-agents', 'Coding agents'],

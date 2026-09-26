@@ -15,6 +15,7 @@ import ScorePriceTime from './pages/ScorePriceTime';
 import Market from './pages/Market';
 import Releases from './pages/Releases';
 import Compare from './pages/Compare';
+import Changes from './pages/Changes';
 import Learn from './pages/Learn';
 import Tools from './pages/Tools';
 import Academy from './pages/Academy';
@@ -28,6 +29,7 @@ import type {
   Finder as FinderData,
   ModelOverview,
   Trends as TrendsData,
+  Changes as ChangesData,
 } from './lib/overview';
 import type { ComparisonData, Comparisons } from './lib/compare';
 
@@ -42,6 +44,7 @@ export interface PageData {
   finder?: FinderData;
   comparison?: ComparisonData;
   comparisons?: Comparisons;
+  changes?: ChangesData;
 }
 
 export function renderPage(
@@ -56,6 +59,7 @@ export function renderPage(
     finder,
     comparison,
     comparisons,
+    changes,
   }: PageData = {},
 ) {
   return renderToString(
@@ -75,6 +79,7 @@ export function renderPage(
             <Route path="market" element={<Market />} />
             <Route path="leaderboard" element={<Leaderboard />} />
             <Route path="releases" element={<Releases />} />
+            <Route path="changes" element={<Changes initial={changes} />} />
             <Route path="compare" element={<Compare featured={comparisons} />} />
             <Route path="compare/:pair" element={<Compare initial={comparison} />} />
             <Route path="news" element={<Learn />} />

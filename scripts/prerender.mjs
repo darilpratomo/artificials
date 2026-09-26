@@ -1,6 +1,32 @@
 import { createServer } from 'vite';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
+import { price, score } from '../shared/format.ts';
+
+const xml = (value) =>
+  value.replace(
+    /[&<>"']/g,
+    (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[char],
+  );
+/** One RSS item per change, in the page's words, newest first. */
+function changesFeed(changes) {
+  const site = 'https://artificials.net';
+  const items = changes.events.slice(0, 100).map((event) => {
+    const { name, slug, maker } = event.model;
+    const link = site + (slug ? `/models/${slug}` : '/changes');
+    const title =
+      event.kind === 'release'
+        ? `${name} was released${maker ? ` by ${maker}` : ''}`
+        : event.kind === 'leader'
+          ? `${name} took the top spot on ${event.label} at ${score(event.score, event.unit)}, from ${event.previous.name}`
+          : event.kind === 'index'
+            ? `${name} joined the capability index at ${score(event.score, 'index')}`
+            : `${maker ? `${maker}’s` : 'The'} listed price for ${name} went from ${price(event.from[0])} in and ${price(event.from[1])} out to ${price(event.to[0])} in and ${price(event.to[1])} out per 1M tokens`;
+    return `<item><title>${xml(title)}</title><link>${xml(link)}</link><guid isPermaLink="false">${xml(`${event.kind}:${event.day}:${slug ?? name}${event.kind === 'leader' ? `:${event.test}` : ''}`)}</guid><pubDate>${new Date(`${event.day}T00:00:00Z`).toUTCString()}</pubDate></item>`;
+  });
+  return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>What changed in AI models — Artificials</title><link>${site}/changes</link><atom:link href="${site}/changes.xml" rel="self" type="application/rss+xml"/><description>New AI model releases, listed price changes, new leaders on each benchmark and models joining the capability index.</description><language>en</language>${items.join('')}</channel></rss>\n`;
+}
+
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
 try {
   const { renderPage } = await server.ssrLoadModule('/src/prerender.tsx');
@@ -30,6 +56,7 @@ try {
     market: 'Market',
     leaderboard: 'Leaderboard',
     releases: 'Releases',
+    changes: 'Changes',
     compare: 'Compare',
     news: 'Learn',
     tools: 'Tools',
@@ -98,6 +125,11 @@ try {
   const finderInline = `<script type="application/json" id="finder-data">${finderText
     .trim()
     .replace(/</g, '\\u003c')}</script>`;
+  const changesText = await readFile('dist/data/models/changes.json', 'utf8');
+  const changes = JSON.parse(changesText);
+  const changesInline = `<script type="application/json" id="changes-data">${changesText
+    .trim()
+    .replace(/</g, '\\u003c')}</script>`;
   const comparisonsText = await readFile('dist/data/models/comparisons.json', 'utf8');
   const comparisons = JSON.parse(comparisonsText);
   const comparisonsInline = `<script type="application/json" id="comparisons-data">${comparisonsText
@@ -116,6 +148,7 @@ try {
     const withVideos = path === '/video-models';
     const withFinder = path === '/model-finder';
     const withComparisons = path === '/compare';
+    const withChanges = path === '/changes';
     const html = template
       .replace(
         '</head>',
@@ -132,11 +165,12 @@ try {
           videos: withVideos ? videos : undefined,
           finder: withFinder ? finder : undefined,
           comparisons: withComparisons ? comparisons : undefined,
+          changes: withChanges ? changes : undefined,
         })}</div>${withData ? inline : ''}${withCoding ? codingInline : ''}${
           withTrends ? trendsInline : ''
         }${withImages ? imagesInline : ''}${withVideos ? videosInline : ''}${
           withFinder ? finderInline : ''
-        }${withComparisons ? comparisonsInline : ''}`,
+        }${withComparisons ? comparisonsInline : ''}${withChanges ? changesInline : ''}`,
       );
     const destination = path === '/' ? 'dist/index.html' : `dist${path}.html`;
     await mkdir(dirname(destination), { recursive: true });
@@ -182,6 +216,8 @@ try {
     await mkdir(dirname(`dist${path}.html`), { recursive: true });
     await writeFile(`dist${path}.html`, html);
   }
+  // The "What changed" feed, from the same events as the page.
+  await writeFile('dist/changes.xml', changesFeed(changes));
   for (const route of ['login', 'dashboard', '404'])
     await writeFile(
       `dist/${route}.html`,

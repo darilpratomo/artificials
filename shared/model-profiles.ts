@@ -1,3 +1,4 @@
+import type { PricePoint } from './history.ts';
 import type { CatalogSnapshot, LongContextPrice, ModelRecord } from './catalog.ts';
 import type {
   BenchmarkDomain,
@@ -122,6 +123,11 @@ export interface ModelProfile {
   categories: ProfileCategory[];
   peers: ProfilePeer[];
   facts?: ProfileFacts;
+  /**
+   * The maker's listed price over time, when it has changed since the data
+   * history began: [day, input, output], oldest first (shared/history.ts).
+   */
+  priceHistory?: PricePoint[];
 }
 
 export interface ProfileBucket {

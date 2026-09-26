@@ -30,6 +30,7 @@ export default defineConfig({
         'model-finder.spec.ts',
         'model-profile.spec.ts',
         'compare.spec.ts',
+        'changes.spec.ts',
       ],
       use: { ...devices['iPhone 13'], defaultBrowserType: 'webkit' },
     },
