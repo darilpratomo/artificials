@@ -54,6 +54,9 @@ jobs:
         run: npm run sync:arena
       - name: Check code, database, data integrity and build
         run: npm run check
+        env:
+          # Link previews change nothing this checks; Workers Builds draws them on deploy.
+          SKIP_OG_IMAGES: '1'
       - name: Commit the verified snapshot
         run: |
           git config user.name 'github-actions[bot]'

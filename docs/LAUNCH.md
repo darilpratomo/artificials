@@ -51,7 +51,7 @@ GitHub runs scheduled workflows late, often by hours, or drops them when it is b
 
 Budget on the free plans, both of which stop rather than charge when used up (GitHub blocks further runs when a private repository's 2,000 monthly minutes are gone and no payment method is on file):
 
-- Refresh: about 40–60 seconds, billed as one minute. Eight a day plus the safety net is about 270 of GitHub's 2,000 minutes a month. Each refresh that changes data triggers one Workers Builds deploy of one to two minutes, about 270–540 of the 3,000 free build minutes.
+- Refresh: about 40–60 seconds, billed as one minute. It skips drawing the link previews (`SKIP_OG_IMAGES=1`), which would add about ten seconds; Workers Builds draws them on deploy. Eight a day plus the safety net is about 270 of GitHub's 2,000 minutes a month. Each refresh that changes data triggers one Workers Builds deploy of one to two minutes, about 270–540 of the 3,000 free build minutes.
 - CI (`.github/workflows/ci.yml`): each push runs the checks and the desktop browser suite, about five minutes; the full suite with mobile Chrome and Safari, about 12 minutes, runs weekly and on demand (Actions → Verify Artificials → Run workflow). Pushes that change only documentation skip CI. At about 150 pushes a month this stays near 1,100 minutes in total, leaving room.
 
 Upstream publication can still lag, so this is periodic updating, not an instantaneous feed. The UI credits each source; retrieval times stay in the data files. Catalog metric rankings are not independent intelligence benchmark scores. On refresh failure, investigate the failed workflow while retaining the last valid snapshot.

@@ -10,6 +10,28 @@ The sitemap includes the featured model comparisons (`/compare/a-vs-b`, canonica
 
 When Supabase CMS is configured, the published article query controls the news index, article HTML and sitemap; unpublished/deleted articles return 404. This currently follows the same latest-100-articles scope as the public articles API. Increase/paginate both together before exceeding that editorial volume. A database failure returns an error instead of silently publishing stale drafts. HTML and JSON-LD escape CMS text. The CMS stays behind its path token, authentication, MFA and authorization controls.
 
+## Link previews
+
+Shared links show a 1200 × 630 PNG card drawn at build time by `scripts/build-og-images.mjs`
+(drawing in `scripts/lib/og.ts`, with `@napi-rs/canvas`, the site's Inter and Michroma fonts and
+the maker logos in `public/providers`). Every card credits the data it shows, as the licences
+require, and none states a date.
+
+- `/og/default.png`: the headline and the top five on the capability index. Every page without
+  a card of its own uses it; articles keep their cover images.
+- `/og/models/{slug}.png`: one per model with test results (the directory's `hasResults`),
+  with its headline result, reference price and context window. Other models use the default.
+- `/og/compare/{a}-vs-{b}.png`: one per featured comparison, in canonical order, also used when
+  the same models are linked in the other order. `/og/compare.png` serves `/compare` and every
+  other comparison.
+
+`shared/seo.ts` picks the card by the same rules the build draws them, so no manifest is
+needed. Cards on `/og/` carry `og:image:width`, `og:image:height` and `og:image:type`; every
+page also has `og:image:alt` and `twitter:image:alt`. Drawing all of them takes about ten
+seconds. The data refresh skips it (`SKIP_OG_IMAGES=1`), and Workers Builds draws them on every
+deploy. Platforms cache previews for days, so a shared card can show figures from when it was
+first fetched.
+
 ## Owner setup in Google and Bing
 
 1. Add a Domain property for `artificials.net` in [Google Search Console](https://search.google.com/search-console).

@@ -88,6 +88,15 @@ describe('comparison metadata', () => {
     ).toMatch(/^GPT-6 Astra \(OpenAI\), Claude Fable 5\.1 \(Anthropic\) and X side by side/);
   });
 
+  it("uses a featured comparison's own link preview, and the page's for others", () => {
+    expect(comparisonMetadata(models, ['gpt-6-astra', 'claude-fable-5-1'], true).image).toBe(
+      'https://artificials.net/og/compare/claude-fable-5-1-vs-gpt-6-astra.png',
+    );
+    expect(comparisonMetadata(models, ['gpt-6-astra', 'claude-fable-5-1']).image).toBe(
+      'https://artificials.net/og/compare.png',
+    );
+  });
+
   it('keeps unknown models and invalid addresses out of search', () => {
     expect(comparisonMetadata(null, ['a', 'b']).robots).toBe('noindex,follow');
     expect(pageMetadata('/compare/a-vs-a').robots).toContain('noindex');
@@ -143,6 +152,17 @@ describe('comparison pages from the Worker', () => {
     expect(html).toContain(
       '<link rel="canonical" href="https://artificials.net/compare/gpt-6-astra-vs-kimi-k3">',
     );
+    expect(html).toContain('content="https://artificials.net/og/compare.png"');
+  });
+
+  it('shares the featured preview when the same models come in another order', async () => {
+    const html = await (
+      await app.request('/compare/gpt-6-astra-vs-claude-fable-5-1', {}, env)
+    ).text();
+    expect(html).toContain(
+      '<meta property="og:image" content="https://artificials.net/og/compare/claude-fable-5-1-vs-gpt-6-astra.png">',
+    );
+    expect(html).toContain('<meta property="og:image:width" content="1200">');
   });
 
   it('answers unknown models and invalid addresses with a real 404', async () => {

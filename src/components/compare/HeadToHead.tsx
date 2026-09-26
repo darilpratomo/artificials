@@ -10,6 +10,7 @@ import { ModelSearch } from '../home/ModelSearch';
 import { score } from '../profile/format';
 import {
   MAX_COMPARED,
+  canonicalComparison,
   comparisonPath,
   comparisonRecord,
   useComparedProfiles,
@@ -34,16 +35,19 @@ export function HeadToHead({ slugs, initial }: { slugs: string[]; initial?: Comp
   const key = slugs.join();
 
   useEffect(() => setPicking(null), [key]);
+  const canonical = canonicalComparison(slugs);
+  const isFeatured = featured.some((pair) => comparisonPath(pair.slugs) === canonical);
   useEffect(() => {
     if (done)
       applyPageMetadata(
         comparisonMetadata(
           found ? models.map(({ slug, name, maker }) => ({ slug, name, maker })) : null,
           slugs,
+          isFeatured,
         ),
       );
     // The models follow from the address, so the address is the dependency.
-  }, [done, found, key]);
+  }, [done, found, key, isFeatured]);
 
   if (!done)
     return (

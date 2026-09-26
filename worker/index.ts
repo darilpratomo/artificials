@@ -247,6 +247,22 @@ async function profileEntries(env: Env, requestUrl: string) {
   };
   return profileDirectory.bySlug;
 }
+// The featured comparisons, by canonical address, kept per isolate like the directory.
+let featuredCache: { loadedAt: number; paths: Set<string> } | null = null;
+async function featuredComparisons(env: Env, requestUrl: string) {
+  if (featuredCache && Date.now() - featuredCache.loadedAt < 5 * 60 * 1000)
+    return featuredCache.paths;
+  const response = await env.ASSETS.fetch(
+    new Request(new URL('/data/models/comparisons.json', requestUrl)),
+  );
+  if (!response.ok) throw new Error('featured comparisons');
+  const { featured } = (await response.json()) as Comparisons;
+  featuredCache = {
+    loadedAt: Date.now(),
+    paths: new Set(featured.map(({ slugs }) => comparisonPath(slugs))),
+  };
+  return featuredCache.paths;
+}
 app.get('/sitemap.xml', async (c) => {
   const pages = publicPages(await publishedArticles(c.env));
   try {
@@ -260,12 +276,7 @@ app.get('/sitemap.xml', async (c) => {
   }
   try {
     // The featured comparisons are prerendered with their data.
-    const response = await c.env.ASSETS.fetch(
-      new Request(new URL('/data/models/comparisons.json', c.req.url)),
-    );
-    if (response.ok)
-      for (const { slugs } of ((await response.json()) as Comparisons).featured)
-        pages.push({ path: comparisonPath(slugs) });
+    for (const path of await featuredComparisons(c.env, c.req.url)) pages.push({ path });
   } catch {
     // Neither may a missing comparisons file.
   }
@@ -388,10 +399,19 @@ app.get('/compare/:pair', async (c) => {
     const prerendered = await c.env.ASSETS.fetch(c.req.raw);
     if (prerendered.ok) return prerendered;
   }
+  // The same models in another order share the featured comparison's link preview.
+  let featured = false;
+  if (known)
+    try {
+      featured = (await featuredComparisons(c.env, c.req.url)).has(canonicalComparison(slugs!));
+    } catch {
+      // Without the list, the comparison page's own preview serves.
+    }
   const shell = await c.env.ASSETS.fetch(new Request(new URL('/app-shell', c.req.url)));
   const meta = comparisonMetadata(
     known ? entries.map(([slug, name, maker]) => ({ slug, name, maker })) : null,
     slugs ?? [],
+    featured,
   );
   const html = (await shell.text()).replace('</head>', metadataHtml(meta) + '</head>');
   const policy = shell.headers.get('Content-Security-Policy');

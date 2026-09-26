@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import type { BenchmarkDomain } from '../../../shared/benchmarks';
 
+export { indexValue, price, score, tokens } from '../../../shared/format';
+
 /** Plain-language labels and a fixed colour per skill area. Colour follows the area, never the rank. */
 export const DOMAINS: Record<
   BenchmarkDomain,
@@ -81,16 +83,6 @@ export function money(value: number | null | undefined) {
   }).format(value);
 }
 
-/** A list price with at least cents shown: $0.20, $0.175, $0.0875, $15.00. */
-export function price(value: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: value >= 1 ? 2 : value >= 0.1 ? 3 : 4,
-  }).format(value);
-}
-
 /** Costs from the calculator can be fractions of a cent. */
 export function cost(value: number) {
   if (value === 0) return '$0';
@@ -100,13 +92,6 @@ export function cost(value: number) {
     currency: 'USD',
     maximumFractionDigits: value >= 100 ? 0 : 2,
   }).format(value);
-}
-
-export function tokens(value: number | null | undefined) {
-  if (value === null || value === undefined) return 'Not reported';
-  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(
-    value,
-  );
 }
 
 export function whole(value: number) {
@@ -135,19 +120,6 @@ export function day(value: string | null | undefined) {
     year: 'numeric',
     timeZone: 'UTC',
   });
-}
-
-/**
- * Open-ended scores: ratings in the hundreds and thousands, such as Arena's,
- * read as whole numbers, the way their sources show them; a small index, such
- * as the capability index, keeps one decimal.
- */
-export function indexValue(value: number) {
-  return Math.abs(value) >= 500 ? `${Math.round(value)}` : value.toFixed(1);
-}
-
-export function score(value: number, unit: 'percent' | 'index') {
-  return unit === 'index' ? indexValue(value) : `${value.toFixed(1)}%`;
 }
 
 /** 100 for first place, 0 for last. A single entry counts as first. */

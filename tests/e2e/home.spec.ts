@@ -308,6 +308,18 @@ test('model data is in the initial HTML for search engines', async ({ request })
   expect(html).toContain(data.highlights[0].title);
   expect(html).toContain('id="overview-data"');
   expect(html).toContain('AI model rankings, prices and new releases');
+  // Link previews point at a card drawn at build time, which exists.
+  expect(html).toContain(
+    '<meta property="og:image" content="https://artificials.net/og/default.png">',
+  );
+  const card = await request.get('/og/default.png');
+  expect(card.ok()).toBe(true);
+  expect(card.headers()['content-type']).toBe('image/png');
+  const directory = JSON.parse(readFileSync('public/data/models/directory.json', 'utf8')) as {
+    models: [string, string, string, number, number][];
+  };
+  const tested = directory.models.find((entry) => entry[4] === 1)!;
+  expect((await request.get(`/og/models/${tested[0]}.png`)).ok()).toBe(true);
   expect(html).not.toContain('id="home-tools"');
   // Inline data can never close its own script element early.
   const inline = html.slice(html.indexOf('id="overview-data"'));

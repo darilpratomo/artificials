@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { pageMetadata, metadataHtml, publicPages } from '../shared/seo';
+import { pageMetadata, metadataHtml, modelMetadata, publicPages } from '../shared/seo';
 import { ARTICLES } from '../shared/content';
 import { app } from '../worker/index';
 import type { Env } from '../worker/types';
@@ -34,6 +34,22 @@ describe('public search metadata', () => {
       headline: ARTICLES[0].title,
     });
   });
+  it('points every page at a drawn link preview, sized for the platforms', () => {
+    expect(pageMetadata('/').image).toBe('https://artificials.net/og/default.png');
+    expect(pageMetadata('/trends').image).toBe('https://artificials.net/og/default.png');
+    expect(pageMetadata('/compare').image).toBe('https://artificials.net/og/compare.png');
+    expect(pageMetadata('/news/' + ARTICLES[0].slug).image).toMatch(/\/editorial\/\w+\.webp$/);
+    const tested = { slug: 'x', name: 'X', maker: 'Maker', offerings: 3, hasResults: true };
+    expect(modelMetadata(tested).image).toBe('https://artificials.net/og/models/x.png');
+    expect(modelMetadata({ ...tested, hasResults: false }).image).toBe(
+      'https://artificials.net/og/default.png',
+    );
+    const html = metadataHtml(pageMetadata('/'));
+    expect(html).toContain('<meta property="og:image:width" content="1200">');
+    expect(html).toContain('<meta property="og:image:height" content="630">');
+    expect(html).toContain('<meta property="og:image:alt" content="');
+    expect(metadataHtml(pageMetadata('/news/' + ARTICLES[0].slug))).not.toContain('og:image:width');
+  });
   it('escapes user-edited CMS text in metadata and structured data', () => {
     const article = {
       ...ARTICLES[0],
@@ -50,14 +66,12 @@ describe('public search metadata', () => {
 it('CMS publication state controls HTML metadata, sitemap and missing article status', async () => {
   const { vi } = await import('vitest');
   const article = { ...ARTICLES[0], slug: 'cms-new-guide', title: 'CMS published guide' };
-  const fetchMock = vi
-    .spyOn(globalThis, 'fetch')
-    .mockImplementation(
-      async () =>
-        new Response(JSON.stringify([article]), {
-          headers: { 'Content-Type': 'application/json' },
-        }),
-    );
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(
+    async () =>
+      new Response(JSON.stringify([article]), {
+        headers: { 'Content-Type': 'application/json' },
+      }),
+  );
   const env = {
     APP_URL: 'https://artificials.net',
     SUPABASE_URL: 'https://example.supabase.co',

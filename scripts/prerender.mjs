@@ -169,6 +169,7 @@ try {
     const meta = comparisonMetadata(
       comparison.profiles.map(({ slug, name, maker }) => ({ slug, name, maker })),
       slugs,
+      true,
     );
     const html = template
       .replace('</head>', metadataHtml(meta) + styles + pagePreloads(path) + '</head>')

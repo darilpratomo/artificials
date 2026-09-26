@@ -166,6 +166,12 @@ test('featured comparisons are in the initial HTML', async ({ request }) => {
   const html = await (await request.get(path(pairs[0].slugs))).text();
   expect(html).toContain('id="compare-data"');
   expect(html).toContain(`<h1>${pairs[0].names.join(' vs ')}</h1>`);
+  // The comparison's own link preview, drawn at build time.
+  const image = `/og${path(pairs[0].slugs)}.png`;
+  expect(html).toContain(`<meta property="og:image" content="https://artificials.net${image}">`);
+  const card = await request.get(image);
+  expect(card.ok()).toBe(true);
+  expect(card.headers()['content-type']).toBe('image/png');
   const landing = await (await request.get('/compare')).text();
   expect(landing).toContain('id="comparisons-data"');
   expect(landing).toContain(`href="${path(pairs[0].slugs)}"`);

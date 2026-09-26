@@ -3,6 +3,13 @@ import academy from './academy-index.json';
 import { UTILITIES } from './utilities';
 import { canonicalComparison, parseComparison } from './compare';
 export const SITE_URL = 'https://artificials.net';
+/**
+ * Link previews drawn at build time (scripts/build-og-images.mjs): the site's
+ * default card, one per model with test results and one per featured
+ * comparison. The rules here pick the same files the build draws.
+ */
+const DEFAULT_IMAGE = SITE_URL + '/og/default.png';
+const COMPARE_IMAGE = SITE_URL + '/og/compare.png';
 const pages: Record<string, [string, string]> = {
   '/tools': [
     'Free image, PDF and Word tools',
@@ -154,8 +161,11 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
       : article?.category === 'AI models'
         ? 'context'
         : 'engineering';
-  const image =
-    SITE_URL + (article ? `/editorial/${kind}.webp` : '/editorial/hero-brand-orbit.webp');
+  const image = article
+    ? `${SITE_URL}/editorial/${kind}.webp`
+    : path === '/compare'
+      ? COMPARE_IMAGE
+      : DEFAULT_IMAGE;
   const structured = article
     ? {
         '@context': 'https://schema.org',
@@ -203,7 +213,7 @@ export function modelMetadata(model: ModelMetaInput | null, slug = model?.slug ?
       description:
         'This model is not in the Artificials catalog. Browse AI models by capability, price and provider.',
       canonical,
-      image: SITE_URL + '/editorial/hero-brand-orbit.webp',
+      image: DEFAULT_IMAGE,
       known: false,
       robots: 'noindex,follow',
       type: 'website' as const,
@@ -215,7 +225,7 @@ export function modelMetadata(model: ModelMetaInput | null, slug = model?.slug ?
     title: `${model.name}: benchmarks, pricing and providers — Artificials`,
     description: `${model.name}${by}. ${model.hasResults ? 'How it ranks on benchmarks, ' : 'Capabilities, '}prices from ${hosts}, context window and a cost calculator. Updated automatically.`,
     canonical,
-    image: SITE_URL + '/editorial/hero-brand-orbit.webp',
+    image: model.hasResults ? `${SITE_URL}/og/models/${slug}.png` : DEFAULT_IMAGE,
     known: true,
     robots: 'index,follow,max-image-preview:large',
     type: 'website' as const,
@@ -227,10 +237,18 @@ export interface ComparisonMetaModel {
   name: string;
   maker: string;
 }
-/** Title, description and canonical address of a comparison; null when a model is unknown. */
-export function comparisonMetadata(models: ComparisonMetaModel[] | null, slugs: string[]) {
+/**
+ * Title, description and canonical address of a comparison; null when a model
+ * is unknown. A featured comparison has a link preview of its own.
+ */
+export function comparisonMetadata(
+  models: ComparisonMetaModel[] | null,
+  slugs: string[],
+  featured = false,
+) {
   const canonical = SITE_URL + (slugs.length ? canonicalComparison(slugs) : '/compare');
-  const image = SITE_URL + '/editorial/hero-brand-orbit.webp';
+  const image =
+    models && featured ? `${SITE_URL}/og${canonicalComparison(slugs)}.png` : COMPARE_IMAGE;
   if (!models)
     return {
       title: 'Comparison not found — Artificials',
@@ -267,5 +285,5 @@ export function escapeHtml(value: string) {
 }
 export function metadataHtml(meta: ReturnType<typeof pageMetadata>) {
   const e = escapeHtml;
-  return `<title>${e(meta.title)}</title><meta name="description" content="${e(meta.description)}"><meta name="robots" content="${meta.robots}"><link rel="canonical" href="${e(meta.canonical)}"><meta property="og:site_name" content="Artificials"><meta property="og:title" content="${e(meta.title)}"><meta property="og:description" content="${e(meta.description)}"><meta property="og:url" content="${e(meta.canonical)}"><meta property="og:type" content="${meta.type}"><meta property="og:image" content="${e(meta.image)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${e(meta.title)}"><meta name="twitter:description" content="${e(meta.description)}"><meta name="twitter:image" content="${e(meta.image)}">${meta.structured ? `<script id="page-schema" type="application/ld+json">${JSON.stringify(meta.structured).replace(/</g, '\\u003c')}</script>` : ''}`;
+  return `<title>${e(meta.title)}</title><meta name="description" content="${e(meta.description)}"><meta name="robots" content="${meta.robots}"><link rel="canonical" href="${e(meta.canonical)}"><meta property="og:site_name" content="Artificials"><meta property="og:title" content="${e(meta.title)}"><meta property="og:description" content="${e(meta.description)}"><meta property="og:url" content="${e(meta.canonical)}"><meta property="og:type" content="${meta.type}"><meta property="og:image" content="${e(meta.image)}">${meta.image.startsWith(SITE_URL + '/og/') ? '<meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">' : ''}<meta property="og:image:alt" content="${e(meta.title)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${e(meta.title)}"><meta name="twitter:description" content="${e(meta.description)}"><meta name="twitter:image" content="${e(meta.image)}"><meta name="twitter:image:alt" content="${e(meta.title)}">${meta.structured ? `<script id="page-schema" type="application/ld+json">${JSON.stringify(meta.structured).replace(/</g, '\\u003c')}</script>` : ''}`;
 }

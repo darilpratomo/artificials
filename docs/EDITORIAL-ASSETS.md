@@ -90,6 +90,7 @@ matrix through `node scripts/build-logo.mjs`.
 ## Home hero without artwork (26 September 2026)
 
 The home hero no longer shows the planet: the owner chose a data-led hero with a live board of
-the top models (see "Home dashboard" in `docs/DATA.md`). `hero-brand-orbit.webp` remains the
-default social preview image (`shared/seo.ts`). The other planet files are kept, unused, so the
-scene can return from `scripts/build-hero-logo.py` without regenerating it.
+the top models (see "Home dashboard" in `docs/DATA.md`). Since then, link previews are data
+cards drawn at build time (see "Link previews" in `docs/SEO.md`), so no page uses the planet
+files. They are kept so the scene can return from `scripts/build-hero-logo.py` without
+regenerating it.

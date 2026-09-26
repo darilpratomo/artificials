@@ -368,7 +368,7 @@ unknown models with a real 404.
   label spans the row above its values, so the table never scrolls sideways.
 - Featured comparisons (`comparisons.json`): every pair among the best models of the ten makers
   that score highest on the capability index, 45 pairs. They are prerendered with both profiles
-  inline and listed in the sitemap.
+  inline, listed in the sitemap, and each has its own link preview (see `docs/SEO.md`).
 
 ## Models page
 
