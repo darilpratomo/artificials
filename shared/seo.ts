@@ -32,6 +32,10 @@ const pages: Record<string, [string, string]> = {
     'AI image model rankings',
     'The best AI image generators and image editors, ranked by blind votes in the Arena: every category, open-weights models, each maker’s best and how scores have moved.',
   ],
+  '/model-finder': [
+    'AI model finder',
+    'Find the best AI model for your task and budget: coding, writing, math, agents and more, ranked on published tests, with prices, context windows and open-weights options.',
+  ],
   '/video-models': [
     'AI video model rankings',
     'The best AI video generators, ranked by blind votes in the Arena: text to video, image to video and video editing, open-weights models, each maker’s best and how scores have moved.',

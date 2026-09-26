@@ -61,6 +61,11 @@ export const NAV_GROUPS: NavGroupItem[] = [
   {
     label: 'Resources',
     items: [
+      {
+        to: '/model-finder',
+        label: 'Model finder',
+        description: 'The best model for your task and budget',
+      },
       { to: '/news', label: 'Insights and guides', description: 'Articles on reading AI results' },
       { to: '/learn', label: 'Learn AI', description: 'A free course with Python projects' },
       {

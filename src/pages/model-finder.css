@@ -1,0 +1,344 @@
+/* Model finder. Panels, tabs and selects reuse the dashboard styles. */
+.finder-form {
+  gap: 24px;
+}
+.finder-form fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.finder-form legend {
+  margin-bottom: 12px;
+  padding: 0;
+  color: #f3f4f7;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Ten tasks: five across and two rows on wide screens, two across on phones. */
+.finder-tasks > div {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+.finder-tasks label {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid #25262e;
+  border-radius: 14px;
+  background: #0c0d11;
+  color: #c3c6cf;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.finder-tasks label:hover {
+  border-color: #3a3c46;
+}
+.finder-tasks label.is-checked {
+  border-color: #d9dbe2;
+  background: #17181e;
+  color: #f3f4f7;
+}
+.finder-tasks label:has(input:focus-visible) {
+  outline: 2px solid #eceef2;
+  outline-offset: 2px;
+}
+/* The radio covers its card, unseen: keyboards, screen readers and pointers all use it,
+   and the card shows its state. */
+.finder-tasks input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.finder-tasks b {
+  color: #f3f4f7;
+  font-size: 15px;
+  font-weight: 600;
+}
+.finder-tasks small {
+  color: #8e909b;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* The four needs in one even row, the two selects beneath them. */
+.finder-needs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  align-items: end;
+}
+.finder-needs > fieldset {
+  grid-column: 1 / -1;
+}
+.finder-needs legend,
+.finder-select > span {
+  margin-bottom: 10px;
+  color: #9698a3;
+  font-size: 13.5px;
+  font-weight: 400;
+}
+.finder-checks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.finder-checks label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 1px solid #25262e;
+  border-radius: 999px;
+  color: #d9dbe2;
+  font-size: 14px;
+  cursor: pointer;
+}
+.finder-checks label:has(input:checked) {
+  border-color: #d9dbe2;
+  background: #17181e;
+  color: #f3f4f7;
+}
+.finder-checks input {
+  accent-color: #eceef2;
+}
+.finder-select {
+  display: grid;
+}
+
+.finder-results {
+  display: grid;
+  gap: 16px;
+  margin-top: 40px;
+}
+.finder-results-head {
+  display: grid;
+  gap: 14px;
+}
+.finder-results-head h2 {
+  margin: 0 0 6px;
+  color: #f3f4f7;
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.finder-results-head p {
+  max-width: 70ch;
+  margin: 0;
+  color: #a3a6b2;
+  line-height: 1.6;
+}
+.finder-count {
+  margin: 0;
+  color: #8e909b;
+  font-size: 14px;
+}
+
+/* One, two or three picks share the row evenly. */
+.finder-picks {
+  display: grid;
+  grid-template-columns: repeat(var(--picks, 3), minmax(0, 1fr));
+  gap: 12px;
+}
+.finder-pick {
+  align-content: start;
+  gap: 14px;
+}
+.finder-pick h3 {
+  margin: 0;
+  color: #f3f4f7;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.finder-pick.is-best {
+  border-color: #3a3c46;
+}
+.finder-reason {
+  margin: 0;
+  color: #a3a6b2;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.finder-model {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.finder-model img {
+  flex: none;
+}
+.finder-model > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.finder-model a {
+  color: #f3f4f7;
+  font-size: 19px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.finder-model a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.finder-model small {
+  color: #8e909b;
+  font-size: 13px;
+}
+.finder-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid #1f2027;
+}
+.finder-facts div {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+}
+.finder-facts dt {
+  color: #8e909b;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.finder-facts dd {
+  display: grid;
+  margin: 0;
+  color: #f3f4f7;
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.finder-facts dd small {
+  color: #8e909b;
+  font-size: 12.5px;
+  font-weight: 400;
+}
+.finder-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.finder-tags li {
+  padding: 3px 9px;
+  border: 1px solid #2c2d35;
+  border-radius: 999px;
+  color: #c3c6cf;
+  font-size: 12.5px;
+}
+
+.finder-more h3 {
+  margin: 0;
+  color: #f3f4f7;
+  font-size: 16px;
+  font-weight: 600;
+}
+.finder-more ol {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.finder-more li {
+  display: grid;
+  grid-template-columns: 34px 22px minmax(0, 1fr) auto minmax(180px, auto);
+  gap: 12px;
+  align-items: center;
+  padding: 11px 0;
+  border-top: 1px solid #1a1b21;
+  color: #d9dbe2;
+  font-size: 14.5px;
+}
+.finder-more li a {
+  color: #f3f4f7;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.finder-more li b {
+  color: #f3f4f7;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.finder-more li small {
+  color: #8e909b;
+  font-size: 13px;
+  text-align: right;
+}
+.finder-rank {
+  color: #8e909b;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.finder-more .text-link {
+  justify-self: start;
+}
+.finder-empty {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+
+@media (max-width: 1100px) {
+  .finder-tasks > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1000px) {
+  .finder-picks {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .finder-tasks label {
+    padding: 12px;
+  }
+  .finder-tasks small {
+    display: none;
+  }
+  .finder-needs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .finder-checks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .finder-checks label {
+    padding-inline: 12px;
+    line-height: 1.3;
+  }
+  /* Test tabs fill even rows: two across, or stacked when there are three. */
+  .finder-results-head .dash-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: auto;
+  }
+  .finder-results-head .dash-tabs:has(> button:nth-child(3):last-child) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .finder-more li {
+    grid-template-columns: 26px 22px minmax(0, 1fr) auto;
+  }
+  .finder-more li small {
+    grid-column: 3 / -1;
+    text-align: left;
+  }
+}

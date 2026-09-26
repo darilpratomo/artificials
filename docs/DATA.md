@@ -255,6 +255,25 @@ attaches to that exact model, unless another source recorded the model at a max 
 organisation names are mapped to the site's makers; "thinky", Arena's name for the maker of
 Inkling, is shown as Thinking Machines, as the catalog names it.
 
+## Model finder
+
+`/model-finder` suggests models for a task. A visitor picks a task (chat and writing, coding, web
+apps, agents, math, hard problems, facts, data analysis, following instructions, all-round) and
+what the model must have: open weights, tool calling, image input, a reasoning mode, a budget
+per million tokens (blended three input to one output) and a minimum context window.
+
+`buildFinder` (`shared/finder.ts`) writes `public/data/models/finder.json` at build time from the
+home page's test rows (best configuration per model), the capability index and the model
+explorer's prices, context windows and flags; the page is prerendered with it inline. Each task
+lists the published tests that measure it, the most fitting first (`FINDER_TASKS`), and the
+visitor can switch between them. Models are ranked by **one test at a time**: scores from
+different tests are never combined, as the rankings rule above requires.
+
+The page shows the best match, the best value (the cheapest model within 5 points of the best
+match on the same test, or 25 on Arena's rating scale) and the best open-weights model, then the
+next models, each with its rank on the whole test. The choices live in the address, so a result
+can be shared.
+
 ## Home dashboard
 
 The home page is built from three more generated files in `public/data/models/`:

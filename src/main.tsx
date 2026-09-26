@@ -33,6 +33,7 @@ const CodingAgents = page(() => import('./pages/CodingAgents'));
 const Trends = page(() => import('./pages/Trends'));
 const ImageModels = page(() => import('./pages/ImageModels'));
 const VideoModels = page(() => import('./pages/VideoModels'));
+const ModelFinder = page(() => import('./pages/ModelFinder'));
 const ModelProfile = page(() => import('./pages/ModelProfile'));
 const Compare = page(() => import('./pages/Compare'));
 const Leaderboard = page(() => import('./pages/Leaderboard'));
@@ -59,6 +60,7 @@ function pageAt(path: string) {
     ['trends', Trends],
     ['image-models', ImageModels],
     ['video-models', VideoModels],
+    ['model-finder', ModelFinder],
     ['leaders', Leaders],
     ['score-price-time', ScorePriceTime],
     ['market', Market],
@@ -112,6 +114,7 @@ const app = (
               <Route path="trends" element={<Trends />} />
               <Route path="image-models" element={<ImageModels />} />
               <Route path="video-models" element={<VideoModels />} />
+              <Route path="model-finder" element={<ModelFinder />} />
               <Route path="leaders" element={<Leaders />} />
               <Route path="score-price-time" element={<ScorePriceTime />} />
               <Route path="market" element={<Market />} />

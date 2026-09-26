@@ -4,6 +4,7 @@ import type { Coding } from '../../shared/coding';
 import type { Trends } from '../../shared/trends';
 import type { Images } from '../../shared/images';
 import type { Videos } from '../../shared/videos';
+import type { Finder } from '../../shared/finder';
 
 export type {
   Explorer,
@@ -30,6 +31,7 @@ export type {
 export type { Trends, TrendModel, TrendPoint, TrendSeries } from '../../shared/trends';
 export type { Images } from '../../shared/images';
 export type { Videos } from '../../shared/videos';
+export type { Finder, FinderRow, FinderTest } from '../../shared/finder';
 export type { Board, BoardCategory, BoardEntry, BoardModel } from '../../shared/arena';
 
 const requests = new Map<string, Promise<unknown>>();
@@ -44,6 +46,7 @@ const isCoding = (value: Coding) => value?.version === 2 && Array.isArray(value.
 const isTrends = (value: Trends) => value?.version === 1 && Array.isArray(value.frontier);
 const isImages = (value: Images) => value?.version === 1 && Array.isArray(value.boards);
 const isVideos = (value: Videos) => value?.version === 1 && Array.isArray(value.boards);
+const isFinder = (value: Finder) => value?.version === 1 && Array.isArray(value.tasks);
 
 /**
  * Prerendered pages carry their data inline, so the first view needs no extra
@@ -155,4 +158,10 @@ export function useImages(attempt = 0, initial?: Images) {
 export function useVideos(attempt = 0, initial?: Videos) {
   embedded('videos.json', 'videos-data', isVideos);
   return useFile<Videos>('videos.json', isVideos, true, attempt, initial);
+}
+
+/** Tasks, tests and models for the model finder. */
+export function useFinder(attempt = 0, initial?: Finder) {
+  embedded('finder.json', 'finder-data', isFinder);
+  return useFile<Finder>('finder.json', isFinder, true, attempt, initial);
 }

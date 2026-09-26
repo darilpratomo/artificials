@@ -10,6 +10,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildProfiles, profileBucket, PROFILE_BUCKETS } from '../shared/model-profiles.ts';
 import { buildOverview } from '../shared/model-overview.ts';
+import { buildFinder } from '../shared/finder.ts';
 import { buildCoding } from '../shared/coding.ts';
 import { buildTrends } from '../shared/trends.ts';
 import { buildImages } from '../shared/images.ts';
@@ -111,6 +112,8 @@ await writeFile(resolve(staging, 'timeline.json'), JSON.stringify(timeline) + '\
 await writeFile(resolve(staging, 'overview.json'), JSON.stringify(overview) + '\n');
 await writeFile(resolve(staging, 'tests.json'), JSON.stringify(tests) + '\n');
 await writeFile(resolve(staging, 'explorer.json'), JSON.stringify(explorer) + '\n');
+const finder = buildFinder({ overview, tests, explorer });
+await writeFile(resolve(staging, 'finder.json'), JSON.stringify(finder) + '\n');
 const coding = buildCoding({
   profiles,
   tests: tests.tests,

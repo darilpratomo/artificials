@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowDown, ArrowUpRight, BarChart3, GitCompareArrows } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, BarChart3, Compass } from 'lucide-react';
 import { makerLogo } from '../../shared/makers';
 import { ARTICLES } from '../../shared/content';
 import { ArticleCover } from '../components/ArticleCover';
@@ -79,8 +79,8 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
               <a className="btn" href="#rankings">
                 <BarChart3 size={16} aria-hidden="true" /> See the rankings
               </a>
-              <Link className="btn btn-outline" to="/compare">
-                <GitCompareArrows size={16} aria-hidden="true" /> Compare models
+              <Link className="btn btn-outline" to="/model-finder">
+                <Compass size={16} aria-hidden="true" /> Find a model
               </Link>
             </div>
           </div>

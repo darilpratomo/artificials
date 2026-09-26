@@ -21,6 +21,7 @@ try {
     trends: 'Trends',
     'image-models': 'ImageModels',
     'video-models': 'VideoModels',
+    'model-finder': 'ModelFinder',
     leaders: 'Leaders',
     'score-price-time': 'ScorePriceTime',
     market: 'Market',
@@ -89,6 +90,11 @@ try {
   const videosInline = `<script type="application/json" id="videos-data">${videosText
     .trim()
     .replace(/</g, '\\u003c')}</script>`;
+  const finderText = await readFile('dist/data/models/finder.json', 'utf8');
+  const finder = JSON.parse(finderText);
+  const finderInline = `<script type="application/json" id="finder-data">${finderText
+    .trim()
+    .replace(/</g, '\\u003c')}</script>`;
   for (const { path } of publicPages()) {
     const lesson = path.startsWith('/learn/')
       ? JSON.parse(
@@ -100,6 +106,7 @@ try {
     const withTrends = path === '/trends';
     const withImages = path === '/image-models';
     const withVideos = path === '/video-models';
+    const withFinder = path === '/model-finder';
     const html = template
       .replace(
         '</head>',
@@ -115,9 +122,12 @@ try {
           withTrends ? trends : undefined,
           withImages ? images : undefined,
           withVideos ? videos : undefined,
+          withFinder ? finder : undefined,
         )}</div>${withData ? inline : ''}${withCoding ? codingInline : ''}${
           withTrends ? trendsInline : ''
-        }${withImages ? imagesInline : ''}${withVideos ? videosInline : ''}`,
+        }${withImages ? imagesInline : ''}${withVideos ? videosInline : ''}${
+          withFinder ? finderInline : ''
+        }`,
       );
     const destination = path === '/' ? 'dist/index.html' : `dist${path}.html`;
     await mkdir(dirname(destination), { recursive: true });

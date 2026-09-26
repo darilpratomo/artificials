@@ -263,6 +263,7 @@ export function Layout() {
             <Link to="/trends">AI trends</Link>
             <Link to="/image-models">Image models</Link>
             <Link to="/video-models">Video models</Link>
+            <Link to="/model-finder">Model finder</Link>
             <Link to="/score-price-time">Score, price & time</Link>
             <Link to="/market">Market overview</Link>
             <Link to="/releases">Model releases</Link>

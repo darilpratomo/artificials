@@ -27,6 +27,7 @@ export default defineConfig({
         'trends.spec.ts',
         'image-models.spec.ts',
         'video-models.spec.ts',
+        'model-finder.spec.ts',
         'model-profile.spec.ts',
       ],
       use: { ...devices['iPhone 13'], defaultBrowserType: 'webkit' },
