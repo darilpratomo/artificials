@@ -14,6 +14,7 @@ import {
   Trophy,
   type LucideIcon,
 } from 'lucide-react';
+import { cheaper, pickModels } from '../../shared/finder';
 import { makerLogo } from '../../shared/makers';
 import { FLAGS } from '../../shared/model-overview';
 import { PageHeading } from '../components/Layout';
@@ -59,14 +60,6 @@ const CONTEXTS: [value: string, label: string][] = [
 
 const scoreOf = (test: FinderTest, value: number) =>
   test.unit === 'index' ? indexValue(value) : `${value.toFixed(1)}%`;
-/** How close counts as "about as good" on a test's own scale. */
-const marginOf = (test: FinderTest, best: number) =>
-  test.unit === 'percent' ? 5 : best >= 500 ? 25 : 5;
-/** "20% cheaper", "3.2 times cheaper". */
-const cheaper = (times: number) =>
-  times < 1.95
-    ? `${Math.round((1 - 1 / times) * 100)}% cheaper`
-    : `${Number(times.toFixed(times < 10 ? 1 : 0))} times cheaper`;
 
 interface Pick {
   kind: string;
@@ -149,47 +142,28 @@ function Results({ finder }: { finder: Finder }) {
     return needs.every(([, , flag]) => flags & flag);
   });
 
-  const picks: Pick[] = [];
-  const [best] = rows;
-  if (best) {
-    picks.push({
-      kind: 'best',
-      title: 'Best match',
-      reason: `The highest ${test.label} score among the models that meet your needs.`,
-      row: best,
-    });
-    // The cheapest model scoring about as well, on the same test.
-    const bestPrice = finder.models[best[0]][4];
-    const margin = marginOf(test, best[1]);
-    const value = rows
-      .filter(
-        (row) => row !== best && row[1] >= best[1] - margin && finder.models[row[0]][4] !== null,
-      )
-      .sort((a, b) => finder.models[a[0]][4]! - finder.models[b[0]][4]!)[0];
-    if (value && bestPrice !== null && finder.models[value[0]][4]! < bestPrice) {
-      picks.push({
-        kind: 'value',
-        title: 'Best value',
-        reason: `Within ${margin} points of the best match, and ${cheaper(
-          bestPrice / finder.models[value[0]][4]!,
-        )}.`,
-        row: value,
-      });
-    }
-    if (!needs.some(([key]) => key === 'open')) {
-      const open = rows.find(
-        (row) =>
-          finder.models[row[0]][6] & FLAGS.openWeights && !picks.some((pick) => pick.row === row),
-      );
-      if (open)
-        picks.push({
-          kind: 'open',
-          title: 'Best open weights',
-          reason: 'The best model here that you can download and run yourself.',
-          row: open,
-        });
-    }
-  }
+  // The best match, the cheapest model scoring about as well on the same test,
+  // and the best open-weights model.
+  const picks: Pick[] = pickModels(finder, test, rows, {
+    open: !needs.some(([key]) => key === 'open'),
+  }).map((pick) => ({
+    kind: pick.kind,
+    row: pick.row,
+    ...(pick.kind === 'best'
+      ? {
+          title: 'Best match',
+          reason: `The highest ${test.label} score among the models that meet your needs.`,
+        }
+      : pick.kind === 'value'
+        ? {
+            title: 'Best value',
+            reason: `Within ${pick.margin} points of the best match, and ${cheaper(pick.times)}.`,
+          }
+        : {
+            title: 'Best open weights',
+            reason: 'The best model here that you can download and run yourself.',
+          }),
+  }));
   const shown = picks.map((pick) => pick.row);
   const more = rows.filter((row) => !shown.includes(row)).slice(0, 10);
   const credit = finder.sources.find((source) => source.id === test.sourceId);

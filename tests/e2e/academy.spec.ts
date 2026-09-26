@@ -92,11 +92,7 @@ test('brand profiles use icons and public articles omit the byline and captions'
     'https://x.com/artificialsnet',
   );
   await page.goto('/');
-  await expect
-    .poll(() =>
-      page.locator('.hero-banner-art img').evaluate((el) => (el as HTMLImageElement).naturalWidth),
-    )
-    .toBeGreaterThan(0);
+  await expect(page.locator('.hero-board-list li')).toHaveCount(5);
   // The home page credits each chart's data beside the chart, with no separate sources block.
   await expect(page.locator('.dash-method')).toHaveCount(0);
 });

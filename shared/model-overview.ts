@@ -1,5 +1,6 @@
 import type { CatalogSnapshot } from './catalog.ts';
 import type { BenchmarkDomain, BenchmarkSnapshot, TaskUsage } from './benchmarks.ts';
+import type { Explore } from './explore.ts';
 import {
   blendedPrice,
   isPaidOffer,
@@ -165,6 +166,8 @@ export interface ModelOverview {
   releases: Release[];
   highlights: Highlight[];
   market: Market;
+  /** A current result from each page the home page links to, added once those pages are built. */
+  explore?: Explore;
 }
 
 /** Every published test, loaded only when a chart or profile needs it. */

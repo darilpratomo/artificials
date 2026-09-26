@@ -153,6 +153,14 @@ describe('AI trends data', () => {
     expect(trends.leaders[0]).toMatchObject({ name: 'Alpha 3', slug: 'alpha-3', value: 140 });
   });
 
+  it('keeps the overall record, with the maker of each model that set it', () => {
+    expect(trends.overall.map((point) => [point.name, point.makerId, point.value])).toEqual([
+      ['Alpha 1', 'openai', 120],
+      ['Beta 2', 'deepseek', 130],
+      ['Alpha 3', 'openai', 140],
+    ]);
+  });
+
   it('splits open-weights and closed records', () => {
     const open = trends.openClosed.find((series) => series.id === 'open')!;
     expect(open.points.map((point) => point.value)).toEqual([110, 130]);

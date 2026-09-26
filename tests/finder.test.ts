@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FINDER_TASKS, buildFinder } from '../shared/finder';
+import { FINDER_TASKS, buildFinder, cheaper, marginOf, pickModels } from '../shared/finder';
 import type { ExplorerRow, ModelOverview, OverviewTests } from '../shared/model-overview';
 
 const explorer: { models: ExplorerRow[] } = {
@@ -92,5 +92,45 @@ describe('model finder data', () => {
     const beta = finder.models.find((model) => model[0] === 'beta')!;
     expect(beta).toEqual(['beta', 'Beta', 'deepseek', 'DeepSeek', 0.5, 128_000, 1 | 64]);
     expect(finder.sources.map((source) => source.id)).toEqual(['epoch', 'livebench']);
+  });
+});
+
+describe('model finder picks', () => {
+  const finder = {
+    models: [
+      ['best', 'Best', 'openai', 'OpenAI', 10, null, 0],
+      ['close', 'Close', 'deepseek', 'DeepSeek', 0.5, null, 1],
+      ['closest', 'Closest', 'google', 'Google', 12, null, 0],
+      ['open', 'Open', 'alibaba', 'Alibaba', 0.2, null, 1],
+    ],
+  } as unknown as Parameters<typeof pickModels>[0];
+  const rows: [number, number, number][] = [
+    [0, 90, 1],
+    [2, 89, 2],
+    [1, 86, 3],
+    [3, 70, 4],
+  ];
+
+  it('picks the best match, the cheapest model close to it and the best open model', () => {
+    const picks = pickModels(finder, { unit: 'percent' }, rows);
+    expect(picks.map((pick) => [pick.kind, pick.row[0]])).toEqual([
+      ['best', 0],
+      ['value', 1],
+      ['open', 3],
+    ]);
+    expect(picks[1]).toMatchObject({ margin: 5, times: 20 });
+  });
+
+  it('skips a value pick that costs no less, and the open pick when open weights are required', () => {
+    const picks = pickModels(finder, { unit: 'percent' }, [rows[0], rows[1]], { open: false });
+    expect(picks.map((pick) => pick.kind)).toEqual(['best']);
+  });
+
+  it('measures closeness on each test’s own scale', () => {
+    expect(marginOf({ unit: 'percent' }, 90)).toBe(5);
+    expect(marginOf({ unit: 'index' }, 1500)).toBe(25);
+    expect(marginOf({ unit: 'index' }, 160)).toBe(5);
+    expect(cheaper(1.5)).toBe('33% cheaper');
+    expect(cheaper(13.3)).toBe('13 times cheaper');
   });
 });

@@ -1,63 +1,4 @@
-/* Home dashboard: live readings, leaders, charts, releases and the full list. */
-.live-band {
-  border-block: 1px solid #1f2027;
-  background: #0b0c0f;
-}
-.live-band > .container {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-.live-band > .container > div {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  min-width: 0;
-  padding: 22px 22px 22px 0;
-}
-.live-band > .container > div + div {
-  padding-left: 22px;
-  border-left: 1px solid #1f2027;
-}
-.live-band span {
-  color: #9698a3;
-  font-size: 13px;
-}
-.live-band p {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 10px;
-  margin: 0;
-  color: #f0f0f3;
-  font-size: 16px;
-  line-height: 1.35;
-}
-.live-band p img {
-  width: 28px;
-  height: 28px;
-  padding: 4px;
-}
-.live-band p a {
-  font-weight: 600;
-}
-.live-band p a:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-.live-band p strong {
-  font-size: 20px;
-  font-weight: 550;
-}
-.live-band p b {
-  color: #a3a6b2;
-  font-size: 14px;
-  font-weight: 450;
-  font-variant-numeric: tabular-nums;
-}
-.live-band .live-pending {
-  color: #6b7080;
-}
-
+/* Home dashboard: leaders, charts, releases and the full list. */
 .dash-section {
   padding-block: 76px 0;
   scroll-margin-top: 96px;
@@ -873,16 +814,6 @@
 }
 
 @media (max-width: 1100px) {
-  .live-band > .container {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .live-band > .container > div:nth-child(3) {
-    padding-left: 0;
-    border-left: 0;
-  }
-  .live-band > .container > div:nth-child(n + 3) {
-    border-top: 1px solid #1f2027;
-  }
   .timeline-entry {
     grid-template-columns: 40px minmax(0, 1fr);
   }
@@ -989,17 +920,6 @@
   }
 }
 @media (max-width: 520px) {
-  .live-band > .container {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .live-band > .container > div,
-  .live-band > .container > div + div {
-    padding: 16px 0;
-    border-left: 0;
-  }
-  .live-band > .container > div + div {
-    border-top: 1px solid #1f2027;
-  }
   .timeline-days {
     padding-left: 18px;
   }
@@ -1033,7 +953,7 @@
 /* Standalone model links: a taller hit area without moving the layout. */
 @media (max-width: 799px) {
   .highlight-link,
-  .live-band p a,
+  .hero-board-model a,
   .timeline-link,
   .explorer-model a,
   .market-list li > div > a,

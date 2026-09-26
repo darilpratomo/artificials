@@ -24,7 +24,14 @@ test('the home page leads with model data, not the other sections', async ({ pag
   page.on('pageerror', (error) => errors.push(error.message));
   const data = await overview(page);
   await page.goto('/');
-  for (const name of ['Leaders right now', 'Rankings', 'Score, price and time', 'New releases'])
+  for (const name of [
+    'Top of the capability index',
+    'Explore the data',
+    'Leaders right now',
+    'Rankings',
+    'Score, price and time',
+    'New releases',
+  ])
     await expect(page.getByRole('heading', { level: 2, name, exact: true })).toBeVisible();
   // Learn AI and Tools stay in the header only.
   for (const id of ['#home-tools', '#home-academy', '.journey', '.studio-home'])
@@ -42,9 +49,28 @@ test('the home page leads with model data, not the other sections', async ({ pag
   await expect(cards).toHaveCount(data.highlights.length);
   await expect(cards.first()).toContainText(data.highlights[0].detail);
   await expect(cards.first().locator('.highlight-kind')).toHaveText('Test result');
-  // The newest release is in the live band and at the top of the timeline.
+  // The hero board lists the top five on the capability index, highest first.
+  const top = [...data.index].sort((a, b) => b.index - a.index).slice(0, 5);
+  const board = page.locator('.hero-board-list li');
+  await expect(board).toHaveCount(5);
+  for (const [position, point] of top.entries())
+    await expect(board.nth(position)).toContainText(point.index.toFixed(1));
+  await expect(board.first()).toContainText(top[0].name);
+  // Each explore card links to its page and leads with that page's current result.
+  const explore = page.locator('#explore');
+  await expect(explore.locator('.explore-card')).toHaveCount(6);
+  for (const [name, href, result] of [
+    ['Image models', '/image-models', data.explore?.results.images],
+    ['Video models', '/video-models', data.explore?.results.videos],
+    ['Model finder', '/model-finder', data.explore?.results.finder],
+  ] as const) {
+    await expect(explore.getByRole('link', { name, exact: true })).toHaveAttribute('href', href);
+    if (result)
+      await expect(explore.locator('.explore-card', { hasText: name })).toContainText(result.name);
+  }
+  await expect(explore.locator('.explore-credits')).toContainText('Arena (CC BY 4.0)');
+  // The newest release is at the top of the timeline.
   const newest = data.releases.find((release) => release.notable)!;
-  await expect(page.locator('.live-band')).toContainText(newest.name);
   await expect(page.locator('.timeline-link').first()).toHaveText(newest.name);
   expect(errors).toEqual([]);
 });
@@ -184,7 +210,14 @@ test('home sections are accessible and stay inside narrow screens', async ({ pag
   await page.goto('/');
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
-    for (const selector of ['.signal-hero', '#leaders', '#rankings', '#value', '#releases']) {
+    for (const selector of [
+      '.signal-hero',
+      '#explore',
+      '#leaders',
+      '#rankings',
+      '#value',
+      '#releases',
+    ]) {
       await page.locator(selector).scrollIntoViewIfNeeded();
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
@@ -270,6 +303,8 @@ test('model data is in the initial HTML for search engines', async ({ request })
   ) as ModelOverview;
   const html = await (await request.get('/')).text();
   expect(html).toContain('Leaders right now');
+  expect(html).toContain('Top of the capability index');
+  expect(html).toContain('Explore the data');
   expect(html).toContain(data.highlights[0].title);
   expect(html).toContain('id="overview-data"');
   expect(html).toContain('AI model rankings, prices and new releases');

@@ -1,14 +1,14 @@
 import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowDown, ArrowUpRight, BarChart3, Compass } from 'lucide-react';
-import { makerLogo } from '../../shared/makers';
 import { ARTICLES } from '../../shared/content';
 import { ArticleCover } from '../components/ArticleCover';
+import { Explore } from '../components/home/Explore';
+import { HeroBoard } from '../components/home/HeroBoard';
 import { Highlights, highlightValue } from '../components/home/Highlights';
 import { ShareButton } from '../components/charts/ShareButton';
 import { ModelSearch } from '../components/home/ModelSearch';
 import { ReleaseTimeline } from '../components/home/ReleaseTimeline';
-import { day } from '../components/profile/format';
 import { useOverview, type ModelOverview } from '../lib/overview';
 import '../components/home/dashboard.css';
 import './home.css';
@@ -31,34 +31,13 @@ function Pending({ tall = false }: { tall?: boolean }) {
 export default function Home({ initial }: { initial?: ModelOverview }) {
   const [attempt, setAttempt] = useState(0);
   const { data, error } = useOverview(attempt, initial);
-  const leader = data?.index[0];
-  const newest = data?.releases.find((release) => release.notable);
-  const openLeader = data?.index.find((point) => point.openWeights);
   const total = data?.counts.models ?? 0;
 
   return (
     <div className="home-page">
       <div className="hero-banner-shell">
-        <div className="hero-banner-art" aria-hidden="true">
-          <picture>
-            <source
-              media="(max-width: 760px)"
-              srcSet="/editorial/hero-brand-mobile-orbit-small.webp 640w, /editorial/hero-brand-mobile-orbit.webp 1024w"
-              sizes="100vw"
-            />
-            <img
-              src="/editorial/hero-brand-orbit.webp"
-              srcSet="/editorial/hero-brand-orbit-small.webp 960w, /editorial/hero-brand-orbit.webp 1920w"
-              sizes="100vw"
-              width="1920"
-              height="820"
-              alt=""
-              fetchPriority="high"
-            />
-          </picture>
-        </div>
+        <div className="hero-grid" aria-hidden="true" />
         <section className="signal-hero container">
-          <div className="hero-grid" aria-hidden="true" />
           <div className="hero-label mono">
             <span className="signal-light" /> A LITTLE CURIOSITY GOES A LONG WAY
             <span className="hero-edition">MODELS / SCORES / PRICES</span>
@@ -84,8 +63,9 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
               </Link>
             </div>
           </div>
+          <HeroBoard overview={data} />
           <div className="hero-bottom mono">
-            <a href="#leaders">
+            <a href="#explore">
               SCROLL TO EXPLORE <ArrowDown size={14} aria-hidden="true" />
             </a>
             <span>HUMAN CURIOSITY. ARTIFICIAL INTELLIGENCE.</span>
@@ -101,64 +81,17 @@ export default function Home({ initial }: { initial?: ModelOverview }) {
         </div>
       ) : (
         <>
-          <section className="live-band" aria-label="Right now">
-            <div className="container">
+          <section id="explore" className="dash-section container" aria-labelledby="explore-title">
+            <header className="dash-heading">
               <div>
-                <span>Top of the capability index</span>
-                {leader ? (
-                  <p>
-                    <img src={makerLogo(leader.makerId)} alt="" width="28" height="28" />
-                    {leader.slug ? (
-                      <Link to={`/models/${leader.slug}`}>{leader.name}</Link>
-                    ) : (
-                      <strong>{leader.name}</strong>
-                    )}
-                    <b>{leader.index.toFixed(1)}</b>
-                  </p>
-                ) : (
-                  <p className="live-pending">Loading…</p>
-                )}
+                <h2 id="explore-title">Explore the data</h2>
+                <p>
+                  Each page goes deep on one question. Every card shows the current answer and the
+                  test behind it.
+                </p>
               </div>
-              <div>
-                <span>Newest release</span>
-                {newest ? (
-                  <p>
-                    <img src={makerLogo(newest.makerId)} alt="" width="28" height="28" />
-                    <Link to={`/models/${newest.slug}`}>{newest.name}</Link>
-                    <b>{day(newest.date)}</b>
-                  </p>
-                ) : (
-                  <p className="live-pending">Loading…</p>
-                )}
-              </div>
-              <div>
-                <span>Models tracked</span>
-                {data ? (
-                  <p>
-                    <strong>{data.counts.models.toLocaleString('en-US')}</strong>
-                    <b>{`${data.counts.tested} tested, ${data.counts.providers} providers`}</b>
-                  </p>
-                ) : (
-                  <p className="live-pending">Loading…</p>
-                )}
-              </div>
-              <div>
-                <span>Best open-weights model</span>
-                {openLeader ? (
-                  <p>
-                    <img src={makerLogo(openLeader.makerId)} alt="" width="28" height="28" />
-                    {openLeader.slug ? (
-                      <Link to={`/models/${openLeader.slug}`}>{openLeader.name}</Link>
-                    ) : (
-                      <strong>{openLeader.name}</strong>
-                    )}
-                    <b>{openLeader.index.toFixed(1)}</b>
-                  </p>
-                ) : (
-                  <p className="live-pending">Loading…</p>
-                )}
-              </div>
-            </div>
+            </header>
+            <Explore explore={data?.explore} />
           </section>
 
           <section id="leaders" className="dash-section container" aria-labelledby="leaders-title">

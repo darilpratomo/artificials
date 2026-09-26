@@ -1,4 +1,9 @@
-import type { ExplorerRow, ModelOverview, OverviewTests } from './model-overview.ts';
+import {
+  FLAGS,
+  type ExplorerRow,
+  type ModelOverview,
+  type OverviewTests,
+} from './model-overview.ts';
 
 /**
  * The model finder: for each task, the published tests that measure it, and
@@ -111,6 +116,54 @@ export const FINDER_TASKS: FinderTask[] = [
     tests: ['capability-index', 'overall', 'arena-text'],
   },
 ];
+
+/** How close counts as "about as good" on a test's own scale. */
+export const marginOf = (test: Pick<FinderTest, 'unit'>, best: number) =>
+  test.unit === 'percent' ? 5 : best >= 500 ? 25 : 5;
+
+/** "20% cheaper", "3.2 times cheaper". */
+export const cheaper = (times: number) =>
+  times < 1.95
+    ? `${Math.round((1 - 1 / times) * 100)}% cheaper`
+    : `${Number(times.toFixed(times < 10 ? 1 : 0))} times cheaper`;
+
+export type FinderPick =
+  | { kind: 'best' | 'open'; row: FinderRow }
+  /** Within `margin` points of the best match, at 1/`times` of its price. */
+  | { kind: 'value'; row: FinderRow; margin: number; times: number };
+
+/**
+ * The finder's picks among rows already narrowed to the reader's needs: the
+ * best match; the cheapest model within a margin of it, when that costs less;
+ * and the best open-weights model not already picked, unless the reader
+ * asked for open weights, when every pick has them.
+ */
+export function pickModels(
+  finder: Pick<Finder, 'models'>,
+  test: Pick<FinderTest, 'unit'>,
+  rows: FinderRow[],
+  { open = true }: { open?: boolean } = {},
+): FinderPick[] {
+  const [best] = rows;
+  if (!best) return [];
+  const picks: FinderPick[] = [{ kind: 'best', row: best }];
+  const priceOf = (row: FinderRow) => finder.models[row[0]][4];
+  const bestPrice = priceOf(best);
+  const margin = marginOf(test, best[1]);
+  const value = rows
+    .filter((row) => row !== best && row[1] >= best[1] - margin && priceOf(row) !== null)
+    .sort((a, b) => priceOf(a)! - priceOf(b)!)[0];
+  if (value && bestPrice !== null && priceOf(value)! < bestPrice)
+    picks.push({ kind: 'value', row: value, margin, times: bestPrice / priceOf(value)! });
+  if (open) {
+    const found = rows.find(
+      (row) =>
+        finder.models[row[0]][6] & FLAGS.openWeights && !picks.some((pick) => pick.row === row),
+    );
+    if (found) picks.push({ kind: 'open', row: found });
+  }
+  return picks;
+}
 
 export function buildFinder({
   overview,

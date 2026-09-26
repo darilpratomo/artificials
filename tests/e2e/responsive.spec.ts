@@ -107,22 +107,14 @@ test('benchmark categories search source data and recover from a failed load', a
   );
 });
 
-test('hero uses portrait artwork on mobile and footer branding stays centered', async ({
-  page,
-}) => {
+test('the hero leads with live data and footer branding stays centered', async ({ page }) => {
   await page.goto('/');
-  const width = page.viewportSize()!.width;
-  const artwork = page.locator('.hero-banner-art img');
-  await expect
-    .poll(() => artwork.evaluate((img) => (img as HTMLImageElement).naturalWidth))
-    .toBeGreaterThan(0);
-  expect(await artwork.evaluate((img) => (img as HTMLImageElement).currentSrc)).toContain(
-    width <= 760 ? 'hero-brand-mobile' : 'hero-brand',
-  );
-  if (width <= 430) {
-    const hero = await page.locator('.signal-hero').boundingBox();
-    expect(hero!.height).toBeLessThanOrEqual(620);
-  }
+  // The hero shows data, not artwork: the top five on the index sit beside the headline.
+  await expect(page.locator('.hero-banner-shell img[src*="/editorial/"]')).toHaveCount(0);
+  await expect(page.locator('.hero-board-list li')).toHaveCount(5);
+  // The headline, search and both buttons fit on the first screen, even on a phone.
+  const actions = await page.locator('.hero-actions').boundingBox();
+  expect(actions!.y + actions!.height).toBeLessThanOrEqual(page.viewportSize()!.height);
   for (const name of ['Artificials on Instagram', 'Artificials on X']) {
     const profile = page.getByRole('link', { name, exact: true });
     await expect(profile).toHaveText('');
@@ -188,18 +180,25 @@ test('scroll morphs the header and mobile navigation manages focus and closes on
   }
 });
 
-test('portrait art fills the entire hero width at phone and tablet breakpoints', async ({
+test('the hero board sits beside the copy on wide screens and under it on narrow ones', async ({
   page,
 }) => {
   await page.goto('/');
-  for (const width of [320, 375, 430, 500, 639, 640, 760]) {
+  for (const width of [320, 375, 430, 500, 640, 760, 999, 1000, 1280]) {
     await page.setViewportSize({ width, height: 900 });
-    const artwork = page.locator('.hero-banner-art img');
-    await expect(artwork).toHaveCSS('object-fit', 'cover');
-    const picture = await page.locator('.hero-banner-art picture').boundingBox();
-    expect(picture!.x, `${width}px left edge`).toBeCloseTo(0, 0);
-    expect(picture!.width, `${width}px full width`).toBeGreaterThanOrEqual(width);
-    await expect(page.locator('.hero-banner-art picture')).toHaveCSS('mask-image', 'none');
+    const [copy, search, board] = await Promise.all(
+      ['.signal-copy', '.home-page .model-search', '.hero-board'].map((selector) =>
+        page.locator(selector).boundingBox(),
+      ),
+    );
+    if (width >= 1000) {
+      expect(board!.x, `${width}px beside`).toBeGreaterThan(copy!.x + copy!.width);
+    } else {
+      expect(board!.y, `${width}px below`).toBeGreaterThan(copy!.y + copy!.height);
+      // One column: the board shares the search field's edges.
+      expect(Math.abs(board!.x - search!.x), `${width}px left edge`).toBeLessThan(1);
+      expect(Math.abs(board!.width - search!.width), `${width}px width`).toBeLessThan(1);
+    }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,
     );

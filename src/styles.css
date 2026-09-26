@@ -5167,32 +5167,6 @@ textarea::placeholder {
   overflow: clip;
   background: #090b0e;
 }
-.hero-banner-art {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-}
-.hero-banner-art img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 65% 50%;
-  opacity: 0.66;
-}
-.hero-banner-art picture {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.hero-banner-art::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, #090b0eed 0%, #090b0e98 35%, #090b0e05 77%),
-    linear-gradient(0deg, #0a0b0f 0%, transparent 35%, #090b0e25 100%);
-}
 .hero-banner-shell .signal-copy h1 > span {
   background-image: linear-gradient(105deg, #e0e2e9, #a0a4b0);
 }
@@ -5649,9 +5623,6 @@ input[type='radio'] {
 
 /* Entrance motion runs once; decorative story motion follows scroll progress. */
 @media (prefers-reduced-motion: no-preference) {
-  .hero-banner-art img {
-    animation: hero-arrive 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
   .signal-copy > h1 {
     animation: copy-arrive 0.85s 0.05s both;
   }
@@ -5664,12 +5635,6 @@ input[type='radio'] {
   .reveal-ready {
     transition-duration: 0.8s;
     transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  }
-}
-@keyframes hero-arrive {
-  from {
-    opacity: 0;
-    transform: scale(1.025);
   }
 }
 @keyframes copy-arrive {
@@ -5691,54 +5656,6 @@ input[type='radio'] {
   }
   .reveal-ready.revealed {
     transform: none;
-  }
-}
-
-/* Full-bleed portrait art has no capped-width strip or side mask. */
-@media (max-width: 760px) {
-  .hero-banner-shell .signal-hero {
-    min-height: clamp(600px, calc(120px + 115vw), 840px);
-    padding-top: 22px;
-    padding-bottom: 64px;
-  }
-  .hero-banner-art picture {
-    position: absolute;
-    inset: 96px 0 -96px;
-    width: 100%;
-    height: auto;
-  }
-  .hero-banner-art img {
-    object-fit: cover;
-    object-position: 50% 65%;
-    opacity: 0.85;
-  }
-  .hero-banner-art::after {
-    background: linear-gradient(
-      180deg,
-      #090b0e55 0%,
-      #090b0e22 36%,
-      transparent 62%,
-      #090b0e55 100%
-    );
-  }
-  .hero-banner-shell .signal-copy {
-    padding-top: 36px;
-  }
-  .hero-banner-shell .signal-copy h1 {
-    font-size: clamp(44px, 10.8vw, 68px);
-    margin-bottom: 18px;
-  }
-  .hero-banner-shell .hero-edition {
-    display: none;
-  }
-  .hero-banner-shell .hero-bottom {
-    bottom: 20px;
-    padding-top: 14px;
-  }
-}
-@media (max-width: 430px) {
-  .hero-banner-shell .hero-actions {
-    margin-top: 22px;
   }
 }
 

@@ -15,6 +15,7 @@ import { buildCoding } from '../shared/coding.ts';
 import { buildTrends } from '../shared/trends.ts';
 import { buildImages } from '../shared/images.ts';
 import { buildVideos } from '../shared/videos.ts';
+import { buildExplore } from '../shared/explore.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
@@ -109,7 +110,6 @@ const { overview, tests, explorer, timeline } = buildOverview(
   sources,
 );
 await writeFile(resolve(staging, 'timeline.json'), JSON.stringify(timeline) + '\n');
-await writeFile(resolve(staging, 'overview.json'), JSON.stringify(overview) + '\n');
 await writeFile(resolve(staging, 'tests.json'), JSON.stringify(tests) + '\n');
 await writeFile(resolve(staging, 'explorer.json'), JSON.stringify(explorer) + '\n');
 const finder = buildFinder({ overview, tests, explorer });
@@ -148,6 +148,9 @@ const images = buildImages({ arena: await optionalSnapshot('image-arena.json'), 
 await writeFile(resolve(staging, 'images.json'), JSON.stringify(images) + '\n');
 const videos = buildVideos({ arena: await optionalSnapshot('video-arena.json') });
 await writeFile(resolve(staging, 'videos.json'), JSON.stringify(videos) + '\n');
+// The home page carries one current result from each of those pages.
+overview.explore = buildExplore({ overview, tests, finder, coding, trends, images, videos });
+await writeFile(resolve(staging, 'overview.json'), JSON.stringify(overview) + '\n');
 await rm(target, { recursive: true, force: true });
 await rename(staging, target);
 

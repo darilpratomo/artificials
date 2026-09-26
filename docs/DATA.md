@@ -278,17 +278,40 @@ can be shared.
 
 The home page is built from three more generated files in `public/data/models/`:
 
-- `overview.json` (about 17 KB compressed): every model on the capability index with its
+- `overview.json` (about 20 KB compressed): every model on the capability index with its
   maker, confidence range, release date, weight access, reference price and context window;
-  the list of tests; up to 210 recent releases; the leaders; and counts. It is also written
-  inline into the prerendered home page, so the first view needs no extra request and search
-  engines see the leaders and releases.
+  the list of tests; up to 210 recent releases; the leaders; counts; and `explore`, one current
+  result from each page the home page links to (below). It is also written inline into the
+  prerendered home page, so the first view needs no extra request and search engines see the
+  leaders and releases.
 - `tests.json`: every test's rows, best configuration per model. Loaded only when a visitor
   picks a single test in the ranking chart.
 - `explorer.json`: one row per model for search and the full list. Loaded when the list comes
   near the screen or the search box is used.
 - `timeline.json` (about 66 KB compressed): every dated release with its prices, limits,
   capabilities and research record, for the release timeline page at `/releases`.
+
+The hero shows data rather than artwork (owner decision, 26 September 2026): the top five on the
+capability index, and the highest index score over the last three years as a step line. Each
+step is coloured by the maker whose model held the record, with a key of maker logos and names,
+and pointing at the line names the model behind each step. The line comes from the same record
+calculation as the AI trends page (`overall` in `trends.json`): the record standing three years
+before the data's date, then each model that beat it.
+
+Below the hero, "Explore the data" has one card per page without a home section, each leading
+with that page's current result, worked out when the site is built (`shared/explore.ts`):
+
+- Model rankings: the highest Arena text rating.
+- Coding agents: the agent and model pair with the highest Terminal-Bench 2.0 score.
+- Model finder: its first answer, the best value for its first task on that task's first test,
+  using the finder's own pick rules (`pickModels` in `shared/finder.ts`).
+- Image models and Video models: the highest rating on Arena's text-to-image and text-to-video
+  boards. A rating, not a rank: Arena can list close ratings as a tie.
+- AI trends: the cheapest model at the highest price band's index level, against the first model
+  to reach that level, both at today's list prices, as on the trends page.
+
+Each card names its test, and the section credits every source it uses. A card whose source has
+no results says the page has the latest results instead.
 
 Definitions, all calculated by Artificials:
 

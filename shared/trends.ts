@@ -33,6 +33,8 @@ export interface Trends {
   version: 1;
   /** The day the data describes, from the catalog snapshot. */
   asOf: string;
+  /** Highest capability index to date across every model, with the maker of each record. */
+  overall: (TrendPoint & { makerId: string; maker: string })[];
   /** Highest capability index to date, per maker. */
   frontier: TrendSeries[];
   /** Each maker's best model on the index. */
@@ -104,11 +106,11 @@ const median = (values: number[]) => {
 };
 
 /** Points where a series set a new record: higher for scores, lower for prices. */
-export function records(rows: TrendPoint[], lower = false): TrendPoint[] {
+export function records<T extends TrendPoint>(rows: T[], lower = false): T[] {
   const sorted = [...rows].sort(
     (a, b) => a.date.localeCompare(b.date) || (lower ? a.value - b.value : b.value - a.value),
   );
-  const points: TrendPoint[] = [];
+  const points: T[] = [];
   let best = lower ? Infinity : -Infinity;
   for (const row of sorted) {
     if (lower ? row.value >= best : row.value <= best) continue;
@@ -168,6 +170,10 @@ export function buildTrends({
     name: row.name,
     ...(row.slug ? { slug: row.slug } : {}),
   });
+
+  const overall = records(
+    scored.map((row) => ({ ...point(row), makerId: row.makerId, maker: row.maker })),
+  );
 
   // Makers with at least three models on the index, strongest first.
   const byMaker = new Map<string, typeof scored>();
@@ -307,6 +313,7 @@ export function buildTrends({
   return {
     version: 1,
     asOf,
+    overall,
     frontier,
     leaders,
     openClosed,
