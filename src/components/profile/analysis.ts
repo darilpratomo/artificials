@@ -221,9 +221,9 @@ export function faqOf(profile: ModelProfile, standing: ModelStanding): [string, 
   questions.push([
     `How capable is ${name}?`,
     standing.index
-      ? `${name} scores ${standing.index.value.toFixed(1)} on the Epoch Capabilities Index, #${standing.index.rank} of ${standing.index.total} models (median ${standing.index.median.toFixed(1)}). Results on individual tests are on the Performance tab.`
+      ? `${name} scores ${standing.index.value.toFixed(1)} on the Epoch Capabilities Index, #${standing.index.rank} of ${standing.index.total} models (median ${standing.index.median.toFixed(1)}). Results on individual tests are on the Scores tab.`
       : profile.results.length
-        ? `${name} has results on ${profile.categories.length} tests but is not on the capability index yet. See the Performance tab.`
+        ? `${name} has results on ${profile.categories.length} tests but is not on the capability index yet. See the Scores tab.`
         : `No published test covers ${name} yet.`,
   ]);
   questions.push([
@@ -245,7 +245,7 @@ export function faqOf(profile: ModelProfile, standing: ModelStanding): [string, 
   if (paid.length > 1)
     questions.push([
       `Which provider is cheapest for ${name}?`,
-      `${paid[0].provider} lists the lowest blended price: ${money(paid[0].inputPrice)} in and ${money(paid[0].outputPrice)} out per 1M tokens. Limits and reliability differ between providers, so compare them on the API providers tab.`,
+      `${paid[0].provider} lists the lowest blended price: ${money(paid[0].inputPrice)} in and ${money(paid[0].outputPrice)} out per 1M tokens. Limits and reliability differ between providers, so compare them on the Providers tab.`,
     ]);
   questions.push([
     `Is ${name} a reasoning model?`,

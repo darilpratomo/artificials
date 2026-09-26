@@ -4,9 +4,14 @@ import {
   ArrowLeft,
   Braces,
   Brain,
+  ChartColumn,
   Check,
+  CircleDollarSign,
+  LayoutGrid,
   Plus,
+  Ruler,
   ScanEye,
+  Server,
   Unlock,
   Wrench,
   type LucideIcon,
@@ -26,12 +31,13 @@ import { day } from '../components/profile/format';
 import '../domain-colors.css';
 import './model-profile.css';
 
-const TABS: { id: ProfileTab; label: string }[] = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'performance', label: 'Performance' },
-  { id: 'pricing', label: 'Pricing' },
-  { id: 'providers', label: 'API providers' },
-  { id: 'tokens', label: 'Tokens & context' },
+/** Short labels, so all five tabs share one row even on a 320px phone. */
+const TABS: { id: ProfileTab; label: string; icon: LucideIcon }[] = [
+  { id: 'overview', label: 'Overview', icon: LayoutGrid },
+  { id: 'performance', label: 'Scores', icon: ChartColumn },
+  { id: 'pricing', label: 'Pricing', icon: CircleDollarSign },
+  { id: 'providers', label: 'Providers', icon: Server },
+  { id: 'tokens', label: 'Context', icon: Ruler },
 ];
 
 function comparisonRecord(profile: Profile): ModelRecord {
@@ -216,7 +222,8 @@ export default function ModelProfile() {
             tabIndex={tab === entry.id ? 0 : -1}
             onClick={() => select(entry.id)}
           >
-            {entry.label}
+            <entry.icon size={17} aria-hidden="true" />
+            <span>{entry.label}</span>
           </button>
         ))}
       </div>

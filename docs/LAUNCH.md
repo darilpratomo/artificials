@@ -25,6 +25,8 @@ The Cloudflare Free zone for `artificials.net` was verified Active on 17 Septemb
 
 The initial Custom Domain attachment failed with error 100117 because existing apex web records conflict. The Worker route avoids deleting those records. If migrating to a Worker-managed Custom Domain later, first inspect and replace only the confirmed conflicting apex web records, change `env.production.routes` to `custom_domain: true` with the exact hostname, and verify HTTPS after deployment. Never delete MX, TXT or unrelated subdomain records. Wrangler login may have Worker deployment permission without DNS-edit permission.
 
+`www.artificials.net` redirects to `artificials.net` (26 September 2026). Its proxied DNS record had no Worker route, so Cloudflare forwarded www requests to the record’s origin, which does not answer: error 522. A separate small Worker, `artificials-www` (`wrangler.www.jsonc`, `worker/www.ts`), is routed at `www.artificials.net/*` and answers every request with a 301 to the same path and query on the apex. It is separate because the main Worker serves static files before its code runs, whatever the host. Workers Builds deploys only the main Worker; deploy this one with `npx wrangler deploy -c wrangler.www.jsonc` when it changes, and CI checks that it bundles. Keep the www DNS record proxied (orange cloud): the route requires it.
+
 ## GitHub deployment connection
 
 Native Cloudflare Workers Builds must be connected once in the dashboard. Open Workers & Pages → `artificials` → Settings → Builds → Connect → GitHub. Authorize the Cloudflare GitHub App for only the Artificials repository, then select:

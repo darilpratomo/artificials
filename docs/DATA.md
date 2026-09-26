@@ -220,7 +220,7 @@ Model page analysis (`src/components/profile/analysis.ts`), all calculated by Ar
   parameter counts are said to be unmeasured or unlisted. The questions are also published as
   schema.org FAQPage data.
 - Highlights compare the model with the nine models closest to it on the capability index.
-- API providers: blended prices for three workloads, chat (3 input : 1 output), agents with
+- Providers tab: blended prices for three workloads, chat (3 input : 1 output), agents with
   caching (7 cached : 2 input : 1 output, using the input price when a listing has no cache
   price) and long answers (1 input : 3 output); the cheapest listing on each price and the
   largest context and reply length; and each listing's own tool-calling and JSON support.

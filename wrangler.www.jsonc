@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Redirects www.artificials.net to artificials.net. Deploy with
+  // `npx wrangler deploy -c wrangler.www.jsonc`; it rarely changes.
+  "name": "artificials-www",
+  "main": "worker/www.ts",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": false,
+  "routes": [{ "pattern": "www.artificials.net/*", "zone_name": "artificials.net" }],
+  "observability": { "enabled": false },
+}

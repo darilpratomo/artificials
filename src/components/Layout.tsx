@@ -1,10 +1,27 @@
 import { AnalyticsPreferencesButton } from './Analytics';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { ArrowUpRight, ArrowRight, Globe2, Command } from 'lucide-react';
 import { Brand } from './Brand';
 import { NavGroup } from './NavGroup';
 import { NAV_GROUPS, TOP_LINKS } from './navigation';
+
+/** The footer's Intelligence links: the model pages, then the analysis pages, in two columns. */
+const INTELLIGENCE: [to: string, label: string][] = [
+  ['/models', 'Model directory'],
+  ['/leaders', 'Current leaders'],
+  ['/leaderboard', 'Model rankings'],
+  ['/releases', 'Model releases'],
+  ['/compare', 'Compare models'],
+  ['/model-finder', 'Model finder'],
+  ['/coding-agents', 'Coding agents'],
+  ['/trends', 'AI trends'],
+  ['/image-models', 'Image models'],
+  ['/video-models', 'Video models'],
+  ['/score-price-time', 'Score, price & time'],
+  ['/market', 'Market overview'],
+];
+
 export function Layout() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -254,37 +271,39 @@ export function Layout() {
               <Globe2 size={13} /> INDEPENDENT. GLOBAL. CURIOUS.
             </span>
           </div>
-          <div>
+          <div className="footer-group is-wide">
             <h3>Intelligence</h3>
-            <Link to="/models">Model directory</Link>
-            <Link to="/leaders">Current leaders</Link>
-            <Link to="/leaderboard">Model rankings</Link>
-            <Link to="/coding-agents">Coding agents</Link>
-            <Link to="/trends">AI trends</Link>
-            <Link to="/image-models">Image models</Link>
-            <Link to="/video-models">Video models</Link>
-            <Link to="/model-finder">Model finder</Link>
-            <Link to="/score-price-time">Score, price & time</Link>
-            <Link to="/market">Market overview</Link>
-            <Link to="/releases">Model releases</Link>
-            <Link to="/compare">Compare models</Link>
+            <div
+              className="footer-links is-split"
+              style={{ '--rows': Math.ceil(INTELLIGENCE.length / 2) } as CSSProperties}
+            >
+              {INTELLIGENCE.map(([to, label]) => (
+                <Link key={to} to={to}>
+                  {label}
+                </Link>
+              ))}
+            </div>
           </div>
-          <div>
+          <div className="footer-group">
             <h3>Learn</h3>
-            <Link to="/news">Insights & guides</Link>
-            <Link to="/learn">Learn AI</Link>
-            <Link to="/tools">Free file tools</Link>
-            <Link to="/about">About Artificials</Link>
+            <div className="footer-links">
+              <Link to="/news">Insights & guides</Link>
+              <Link to="/learn">Learn AI</Link>
+              <Link to="/tools">Free file tools</Link>
+              <Link to="/about">About Artificials</Link>
+            </div>
           </div>
-          <div>
+          <div className="footer-group">
             <h3>Information</h3>
-            <Link to="/about#source-methodology">Data & methodology</Link>
-            <Link to="/privacy">Privacy policy</Link>
-            <AnalyticsPreferencesButton />
-            <Link to="/terms">Terms & conditions</Link>
-            <Link to="/contact">
-              Contact <ArrowUpRight size={12} />
-            </Link>
+            <div className="footer-links">
+              <Link to="/about#source-methodology">Data & methodology</Link>
+              <Link to="/privacy">Privacy policy</Link>
+              <AnalyticsPreferencesButton />
+              <Link to="/terms">Terms & conditions</Link>
+              <Link to="/contact">
+                Contact <ArrowUpRight size={12} />
+              </Link>
+            </div>
           </div>
         </div>
         <div className="container footer-baseline">

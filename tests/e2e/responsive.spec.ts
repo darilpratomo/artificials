@@ -122,6 +122,18 @@ test('the hero leads with live data and footer branding stays centered', async (
       .poll(() => profile.locator('img').evaluate((img) => (img as HTMLImageElement).naturalWidth))
       .toBeGreaterThan(0);
   }
+  // Intelligence runs down two equal columns, so the footer stays short.
+  const halves = await page
+    .locator('.footer-links.is-split > a')
+    .evaluateAll((links) => [
+      ...new Set(links.map((link) => Math.round(link.getBoundingClientRect().left))),
+    ]);
+  expect(halves).toHaveLength(2);
+  // The analytics button reads like the links around it.
+  await expect(page.locator('.site-footer .analytics-settings-link')).toHaveCSS(
+    'text-decoration-line',
+    'none',
+  );
   // The oversized footer watermark was removed; one mark in the footer lockup
   // is enough, so nothing should render a second copy down there.
   await expect(page.locator('.footer-wordmark')).toHaveCount(0);

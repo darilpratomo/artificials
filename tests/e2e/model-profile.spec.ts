@@ -37,15 +37,21 @@ test('a tested model shows its standing, prices and every analysis tab', async (
   await expect(page).toHaveTitle(new RegExp(`${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
   await expect(page.getByRole('tab')).toHaveCount(5);
   await expect(page.locator('.skill-rows li').first()).toBeVisible();
+  // All five tabs share one row, equally wide, with nothing scrolled out of view.
+  const tabs = await page
+    .getByRole('tab')
+    .evaluateAll((items) => items.map((item) => item.getBoundingClientRect()));
+  expect(new Set(tabs.map((box) => Math.round(box.top))).size).toBe(1);
+  expect(new Set(tabs.map((box) => Math.round(box.width))).size).toBe(1);
+  expect(
+    await page.locator('.profile-tabs').evaluate((bar) => bar.scrollWidth <= bar.clientWidth),
+  ).toBe(true);
 
   // Tabs follow the ARIA pattern: arrow keys move between them and update the URL.
   await page.getByRole('tab', { name: 'Overview' }).focus();
   await page.keyboard.press('ArrowRight');
-  await expect(page.getByRole('tab', { name: 'Performance' })).toHaveAttribute(
-    'aria-selected',
-    'true',
-  );
-  await expect(page.getByRole('tab', { name: 'Performance' })).toBeFocused();
+  await expect(page.getByRole('tab', { name: 'Scores' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab', { name: 'Scores' })).toBeFocused();
   await expect(page).toHaveURL(/tab=performance/);
   await expect(page.locator('.result-card').first()).toBeVisible();
 
@@ -77,7 +83,7 @@ test('a tested model shows its standing, prices and every analysis tab', async (
     await expect(rows).toHaveCount(total);
   }
 
-  await page.getByRole('tab', { name: 'Tokens & context' }).click();
+  await page.getByRole('tab', { name: 'Context' }).click();
   await expect(page.locator('.fit-list li')).toHaveCount(4);
 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -106,7 +112,7 @@ test('a profile compares the model with the whole field and its providers', asyn
   await questions.first().locator('summary').click();
   await expect(questions.first().locator('p')).toBeVisible();
 
-  await page.getByRole('tab', { name: 'API providers' }).click();
+  await page.getByRole('tab', { name: 'Providers' }).click();
   await expect(page.locator('.provider-leader').first()).toContainText('Lowest blended price');
   const agents = page.getByRole('button', { name: /Agents with caching/ });
   if (await agents.count()) {
@@ -116,7 +122,7 @@ test('a profile compares the model with the whole field and its providers', asyn
   }
   await expect(page.getByRole('heading', { name: 'Choosing a provider' })).toBeVisible();
 
-  await page.getByRole('tab', { name: 'Performance' }).click();
+  await page.getByRole('tab', { name: 'Scores' }).click();
   await expect(page.locator('.glance-table tbody tr').first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

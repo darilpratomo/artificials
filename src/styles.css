@@ -3183,7 +3183,7 @@ textarea::placeholder {
 }
 .footer-top {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 1.5fr 2fr 1fr 1fr;
   gap: 50px;
   padding-bottom: 55px;
 }
@@ -3194,16 +3194,28 @@ textarea::placeholder {
   font-weight: 500;
   letter-spacing: 0;
 }
-.footer-top > div:not(:first-child) > a {
+.footer-links {
+  display: grid;
+  justify-items: start;
+  row-gap: 13px;
+}
+/* Intelligence runs down two columns, so no group towers over the others. */
+.footer-links.is-split {
+  grid-template-rows: repeat(var(--rows), auto);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  column-gap: 32px;
+}
+.footer-links > :is(a, button) {
   display: flex;
   align-items: center;
   gap: 5px;
   font-size: 13px;
   color: #999ba7;
   line-height: 1.7;
-  margin: 13px 0;
+  text-decoration: none;
 }
-.footer-top > div > a:hover {
+.footer-links > :is(a, button):hover {
   color: white;
 }
 .footer-identity > p {
@@ -4287,11 +4299,22 @@ textarea::placeholder {
   .editorial-grid {
     gap: 17px;
   }
+  /* The identity takes its own row; Intelligence spans two of the four columns below. */
   .footer-top {
-    grid-template-columns: 1.6fr 1fr 1fr 1fr;
-    gap: 25px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 40px 25px;
   }
-  .footer-top > div:not(:first-child) > a {
+  .footer-identity {
+    grid-column: 1 / -1;
+  }
+  /* Its two halves line up with the columns around it. */
+  .footer-group.is-wide {
+    grid-column: span 2;
+  }
+  .footer-links.is-split {
+    column-gap: 25px;
+  }
+  .footer-links > :is(a, button) {
     font-size: 12.5px;
   }
   .footer-identity .mono {
@@ -4501,9 +4524,6 @@ textarea::placeholder {
     gap: 35px 25px;
     padding-bottom: 30px;
   }
-  .footer-identity {
-    grid-column: 1/-1;
-  }
   .footer-identity img {
     width: 165px;
   }
@@ -4518,9 +4538,11 @@ textarea::placeholder {
     font-size: 14px;
     margin-bottom: 18px;
   }
-  .footer-top > div:not(:first-child) > a {
+  .footer-links {
+    row-gap: 12px;
+  }
+  .footer-links > :is(a, button) {
     font-size: 13px;
-    margin: 12px 0;
   }
   .footer-baseline {
     flex-wrap: wrap;

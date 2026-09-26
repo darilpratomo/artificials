@@ -30,5 +30,7 @@ jobs:
       - run: npm run test:e2e
         env:
           E2E_PRODUCTION: 1
-      - name: Check Worker bundle without deployment
-        run: npx wrangler deploy --dry-run
+      - name: Check Worker bundles without deployment
+        run: |
+          npx wrangler deploy --dry-run
+          npx wrangler deploy --dry-run -c wrangler.www.jsonc
