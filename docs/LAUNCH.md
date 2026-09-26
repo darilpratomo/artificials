@@ -41,7 +41,7 @@ This native connection was verified with a successful deployment of commit `c282
 
 ## Data updates
 
-`.github/workflows/sync-catalog.yml` refreshes the data every three hours. It fetches the catalog with `scripts/sync-catalog.mjs`, published capability results with `scripts/sync-benchmarks.mjs` and Arena's image and video leaderboards with `scripts/sync-arena.mjs`, validates them, runs `npm run check`, and commits only verified `public/data/` changes to `main`. The native Cloudflare connection then deploys those commits. GitHub's built-in workflow token is used for the snapshot commit.
+`.github/workflows/sync-catalog.yml` refreshes the data every three hours. It fetches the catalog with `scripts/sync-catalog.mjs`, published capability results with `scripts/sync-benchmarks.mjs` and Arena's image and video leaderboards with `scripts/sync-arena.mjs`, validates them, runs `npm run check`, and commits only verified `public/data/` changes to `main`. The native Cloudflare connection then deploys those commits. GitHub's built-in workflow token is used for the snapshot commit. Each source is read up to three times when it times out, drops the connection or answers with a server error (`scripts/lib/retry.ts`), and a failure names the source that failed.
 
 GitHub runs scheduled workflows late, often by hours, or drops them when it is busy: with a six-hourly schedule, runs started 2.5 to 5 hours late, and after a switch to every two hours, 2 of 6 ran in the next 12 hours. So the refresh has three triggers (26 September 2026):
 

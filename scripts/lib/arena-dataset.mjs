@@ -4,6 +4,7 @@
  * is read at the revision that check saw.
  */
 import { parquetReadObjects } from 'hyparquet';
+import { retrying, statusError } from './retry.ts';
 
 export const DATASET = 'lmarena-ai/leaderboard-dataset';
 export const DATASET_URL = `https://huggingface.co/datasets/${DATASET}`;
@@ -13,9 +14,12 @@ const HOSTS = /(^|\.)(huggingface\.co|hf\.co)$/;
 
 /**
  * Downloads a file, following redirects only to Hugging Face's own hosts, and
- * refuses anything larger than `maxBytes`.
+ * refuses anything larger than `maxBytes`. A timeout, dropped connection or
+ * server error is tried again.
  */
-export async function download(url, maxBytes, hops = 4) {
+export const download = (url, maxBytes) => retrying(url, () => downloadOnce(url, maxBytes));
+
+async function downloadOnce(url, maxBytes, hops = 4) {
   const response = await fetch(url, {
     signal: AbortSignal.timeout(30000),
     redirect: 'manual',
@@ -25,9 +29,10 @@ export async function download(url, maxBytes, hops = 4) {
     const next = new URL(response.headers.get('location') ?? '', url);
     if (next.protocol !== 'https:' || !HOSTS.test(next.hostname) || hops === 0)
       throw Error(`Refused a redirect to ${next.hostname}`);
-    return download(next.href, maxBytes, hops - 1);
+    return downloadOnce(next.href, maxBytes, hops - 1);
   }
-  if (!response.ok) throw Error(`Arena dataset returned ${response.status}: ${url}`);
+  if (!response.ok)
+    throw statusError(`Arena dataset returned ${response.status}: ${url}`, response.status);
   const reader = response.body.getReader();
   const chunks = [];
   let size = 0;

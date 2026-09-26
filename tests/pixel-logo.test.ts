@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LOGO_MATRIX } from '../src/components/logo-matrix';
 import { SYMBOL_PATH } from '../src/components/logo-symbol';
+import { buildBlocks } from '../src/components/PixelLogo';
 
 const ROWS = LOGO_MATRIX.length;
 const COLUMNS = LOGO_MATRIX[0].length;
@@ -128,5 +129,45 @@ describe('smooth resting mark', () => {
       }),
     );
     expect(agree / (ROWS * COLUMNS)).toBeGreaterThan(0.97);
+  });
+});
+
+describe('assembly stagger', () => {
+  /** A seeded random source, so the jitter repeats exactly. */
+  const seeded = (start: number) => {
+    let value = start;
+    return () => (value = (value * 16807) % 2147483647) / 2147483647;
+  };
+
+  it('spreads arrivals evenly, with no pause after the first block', () => {
+    for (const seed of [1, 7, 42, 99, 2024]) {
+      const delays = buildBlocks(1400, seeded(seed))
+        .map((block) => block.inDelay)
+        .sort((a, b) => a - b);
+      const gaps = delays.slice(1).map((delay, index) => delay - delays[index]);
+      // Under three frames between any two arrivals, the first two included.
+      expect(Math.max(...gaps), `seed ${seed}`).toBeLessThan(50);
+      // The last block still lands within the requested time.
+      expect(delays.at(-1)! + 620).toBeLessThanOrEqual(1400 + 20);
+    }
+  });
+
+  it('assembles from the centre out and disperses from the edges in', () => {
+    const blocks = buildBlocks(1400, seeded(3));
+    const distance = (block: (typeof blocks)[number]) =>
+      Math.hypot(block.x + block.width / 2 - 20, block.y - 17);
+    const byDistance = [...blocks].sort((a, b) => distance(a) - distance(b));
+    const half = Math.floor(blocks.length / 2);
+    const mean = (list: typeof blocks, read: (block: (typeof blocks)[number]) => number) =>
+      list.reduce((total, block) => total + read(block), 0) / list.length;
+    const inner = byDistance.slice(0, half);
+    const outer = byDistance.slice(half);
+    expect(mean(inner, (block) => block.inDelay)).toBeLessThan(
+      mean(outer, (block) => block.inDelay),
+    );
+    expect(mean(inner, (block) => block.outDelay)).toBeGreaterThan(
+      mean(outer, (block) => block.outDelay),
+    );
+    expect(blocks.every((block) => block.inDelay >= 0 && block.outDelay >= 0)).toBe(true);
   });
 });

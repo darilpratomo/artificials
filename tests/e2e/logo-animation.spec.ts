@@ -257,22 +257,18 @@ test('the logo still renders with JavaScript unavailable', async ({ browser }) =
 
 test('blocks arrive in a continuous flow, with no lone flash', async ({ page }) => {
   await page.route('**/api/**', (route) => route.fulfill({ json: {} }));
-  // Record how many blocks are visible on each frame. An uneven stagger lets
-  // one block land far ahead of the rest, which reads as a blink followed by a
-  // pause before the animation appears to start.
+  // Record how many blocks are visible on each frame, to see them arrive over time.
   await page.addInitScript(() => {
-    const samples: number[][] = [];
-    (window as unknown as { __arrivals: number[][] }).__arrivals = samples;
-    const start = performance.now();
+    const samples: number[] = [];
+    (window as unknown as { __arrivals: number[] }).__arrivals = samples;
     const tick = () => {
       const svg = document.querySelector('.site-header svg.pixel-logo');
-      if (svg) {
-        const shapes = [...svg.querySelectorAll('.pixel-block, :scope > rect')];
-        const visible = shapes.filter(
-          (shape) => Number(getComputedStyle(shape).opacity) > 0.5,
-        ).length;
-        samples.push([Math.round(performance.now() - start), visible]);
-      }
+      if (svg)
+        samples.push(
+          [...svg.querySelectorAll('.pixel-block, :scope > rect')].filter(
+            (shape) => Number(getComputedStyle(shape).opacity) > 0.5,
+          ).length,
+        );
       if (samples.length < 70) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
@@ -280,19 +276,28 @@ test('blocks arrive in a continuous flow, with no lone flash', async ({ page }) 
   await page.goto('/');
   await page.waitForTimeout(1600);
   const samples = await page.evaluate(
-    () => (window as unknown as { __arrivals: number[][] }).__arrivals,
+    () => (window as unknown as { __arrivals: number[] }).__arrivals,
   );
+  // Blocks land over several frames rather than all at once.
+  expect(
+    samples.filter((visible, index) => index > 0 && visible > samples[index - 1]).length,
+  ).toBeGreaterThan(3);
 
-  const arriving = samples.filter(([, visible]) => visible > 0);
-  expect(arriving.length).toBeGreaterThan(3);
-  let longestPause = 0;
-  for (let index = 1; index < arriving.length; index += 1) {
-    if (arriving[index][1] > arriving[index - 1][1]) {
-      longestPause = Math.max(longestPause, arriving[index][0] - arriving[index - 1][0]);
-    }
-  }
-  // Blocks should keep arriving every frame or two, never stall for ~5 frames.
-  expect(longestPause).toBeLessThan(60);
+  // The stagger itself, read from each block's delay. An uneven one lets one block
+  // land far ahead of the rest, which reads as a blink followed by a pause before
+  // the animation appears to start. Reading the schedule, not timing frames, keeps
+  // the check exact on a busy machine.
+  const delays = (
+    await page
+      .locator('.site-header svg.pixel-logo .pixel-block')
+      .evaluateAll((blocks) =>
+        blocks.map((block) => parseFloat(getComputedStyle(block).getPropertyValue('--in-delay'))),
+      )
+  ).sort((a, b) => a - b);
+  expect(delays.length).toBeGreaterThan(20);
+  const gaps = delays.slice(1).map((delay, index) => delay - delays[index]);
+  // Blocks keep arriving every few frames and never stall for five (about 83 ms).
+  expect(Math.max(...gaps)).toBeLessThan(83);
 });
 
 test('the brand mark costs very little to download', async ({ page }) => {

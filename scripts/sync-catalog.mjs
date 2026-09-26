@@ -2,6 +2,7 @@
 import { mkdir, readFile, writeFile, rename, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { retrying, statusError } from './lib/retry.ts';
 import {
   normalizeCatalog,
   catalogSummary,
@@ -11,34 +12,41 @@ import {
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const directory = resolve(root, 'public/data');
 const maxBytes = 16 * 1024 * 1024;
-const response = await fetch(CATALOG_SOURCE_URL, {
-  signal: AbortSignal.timeout(25000),
-  redirect: 'error',
-  headers: {
-    accept: 'application/json',
-    'user-agent': 'Artificials-catalog/1.0 (+https://artificials.net/about)',
-  },
-});
-if (!response.ok || !response.headers.get('content-type')?.includes('application/json'))
-  throw new Error(
-    `Source returned unsupported response (${response.status}). Existing snapshot retained.`,
-  );
-if (Number(response.headers.get('content-length') || 0) > maxBytes)
-  throw new Error('Catalog response too large.');
-const reader = response.body.getReader();
-const chunks = [];
-let length = 0;
-try {
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    length += value.byteLength;
-    if (length > maxBytes) throw new Error('Catalog response too large.');
-    chunks.push(value);
+// A timeout, dropped connection or server error is tried again before the
+// refresh gives up and keeps the existing snapshot.
+async function readCatalog() {
+  const response = await fetch(CATALOG_SOURCE_URL, {
+    signal: AbortSignal.timeout(25000),
+    redirect: 'error',
+    headers: {
+      accept: 'application/json',
+      'user-agent': 'Artificials-catalog/1.0 (+https://artificials.net/about)',
+    },
+  });
+  if (!response.ok || !response.headers.get('content-type')?.includes('application/json'))
+    throw statusError(
+      `Source returned unsupported response (${response.status}). Existing snapshot retained.`,
+      response.status,
+    );
+  if (Number(response.headers.get('content-length') || 0) > maxBytes)
+    throw new Error('Catalog response too large.');
+  const reader = response.body.getReader();
+  const chunks = [];
+  let length = 0;
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      length += value.byteLength;
+      if (length > maxBytes) throw new Error('Catalog response too large.');
+      chunks.push(value);
+    }
+  } finally {
+    await reader.cancel();
   }
-} finally {
-  await reader.cancel();
+  return chunks;
 }
+const chunks = await retrying(CATALOG_SOURCE_URL, readCatalog);
 const source = JSON.parse(Buffer.concat(chunks).toString('utf8'));
 const snapshot = normalizeCatalog(source);
 if (snapshot.models.length < 100 || snapshot.providers.length < 5)

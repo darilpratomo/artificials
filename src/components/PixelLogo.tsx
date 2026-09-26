@@ -62,7 +62,6 @@ interface Block {
 
 const CENTER_X = (LOGO_COLUMNS - 1) / 2;
 const CENTER_Y = (LOGO_ROWS - 1) / 2;
-const MAX_DISTANCE = Math.hypot(CENTER_X, CENTER_Y);
 /** Flight time for a single block, in each direction. */
 const TRAVEL_IN_MS = 620;
 const TRAVEL_OUT_MS = 520;
@@ -76,38 +75,44 @@ const LIFT_MS = 220;
  * motion rather than the same move played twice.
  */
 export function buildBlocks(duration: number, seed = Math.random): Block[] {
-  const blocks: Block[] = [];
   const inBudget = Math.max(0, duration - TRAVEL_IN_MS);
   const outBudget = Math.max(0, Math.round(duration * 0.55) - TRAVEL_OUT_MS);
-  for (let row = 0; row < LOGO_ROWS; row += 1) {
-    for (const run of rowRuns(LOGO_MATRIX[row])) {
-      const midX = run.start + run.length / 2 - 0.5;
-      const dx = midX - CENTER_X;
-      const dy = row - CENTER_Y;
-      const distance = Math.hypot(dx, dy);
-      const angle = Math.atan2(dy, dx);
-      // Distances are in matrix units, so the scatter scales with any size.
-      const radius = 5 + seed() * 7;
-      const ordered = MAX_DISTANCE ? distance / MAX_DISTANCE : 0;
-      blocks.push({
-        key: `${row}-${run.start}`,
-        x: run.start,
-        y: row,
-        width: run.length,
-        tx: Math.cos(angle) * radius + (seed() - 0.5) * 4,
-        ty: Math.sin(angle) * radius + (seed() - 0.5) * 4,
-        // Jitter is kept small and centred on the ordered position. A large
-        // random share lets one block land far ahead of the rest, which shows
-        // as a single flash followed by a pause before the others arrive.
-        inDelay: Math.round(Math.max(0, ordered * inBudget + (seed() - 0.5) * inBudget * 0.12)),
-        // Reversed ordering: the outer blocks leave first.
-        outDelay: Math.round(
-          Math.max(0, (1 - ordered) * outBudget + (seed() - 0.5) * outBudget * 0.12),
-        ),
-      });
-    }
-  }
-  return blocks;
+  const runs = LOGO_MATRIX.flatMap((line, row) =>
+    rowRuns(line).map((run) => ({
+      row,
+      run,
+      dx: run.start + run.length / 2 - 0.5 - CENTER_X,
+      dy: row - CENTER_Y,
+    })),
+  );
+  // Blocks go from the centre out by rank, not by raw distance: distances bunch
+  // up and leave gaps, and a gap right after the first block reads as a single
+  // flash followed by a pause. Ranks spread the arrivals evenly over the stagger.
+  const rank = new Array<number>(runs.length);
+  runs
+    .map(({ dx, dy }, index) => [Math.hypot(dx, dy), index] as const)
+    .sort((a, b) => a[0] - b[0])
+    .forEach(([, index], position) => (rank[index] = position));
+  return runs.map(({ row, run, dx, dy }, index) => {
+    const angle = Math.atan2(dy, dx);
+    // Distances are in matrix units, so the scatter scales with any size.
+    const radius = 5 + seed() * 7;
+    const ordered = runs.length > 1 ? rank[index] / (runs.length - 1) : 0;
+    return {
+      key: `${row}-${run.start}`,
+      x: run.start,
+      y: row,
+      width: run.length,
+      tx: Math.cos(angle) * radius + (seed() - 0.5) * 4,
+      ty: Math.sin(angle) * radius + (seed() - 0.5) * 4,
+      // A little jitter keeps the flow organic without opening gaps in it.
+      inDelay: Math.round(Math.max(0, ordered * inBudget + (seed() - 0.5) * inBudget * 0.04)),
+      // Reversed ordering: the outer blocks leave first.
+      outDelay: Math.round(
+        Math.max(0, (1 - ordered) * outBudget + (seed() - 0.5) * outBudget * 0.04),
+      ),
+    };
+  });
 }
 
 function prefersReducedMotion() {

@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { retrying, statusError } from './lib/retry.ts';
 import { parseLiveBench, parseImageBench } from './lib/benchmark-sources.ts';
 import {
   parseEpoch,
@@ -24,7 +25,9 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 // scheduled workflows run on, so the workflow passes its own token. The token
 // is only ever sent to api.github.com, and redirects are refused.
 const githubToken = process.env.GITHUB_TOKEN;
-async function get(url, maxBytes = 2_000_000) {
+/** Reads a source, trying again when it times out, drops the connection or has a server error. */
+const get = (url, maxBytes = 2_000_000) => retrying(url, () => getOnce(url, maxBytes));
+async function getOnce(url, maxBytes) {
   const headers = { 'user-agent': 'Artificials-benchmarks/1.0 (+https://artificials.net/about)' };
   if (githubToken && new URL(url).origin === 'https://api.github.com')
     headers.authorization = `Bearer ${githubToken}`;
@@ -33,7 +36,8 @@ async function get(url, maxBytes = 2_000_000) {
     redirect: 'error',
     headers,
   });
-  if (!response.ok) throw Error(`Benchmark source returned ${response.status}: ${url}`);
+  if (!response.ok)
+    throw statusError(`Benchmark source returned ${response.status}: ${url}`, response.status);
   const reader = response.body.getReader();
   const chunks = [];
   let size = 0;
