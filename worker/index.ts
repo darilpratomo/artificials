@@ -14,6 +14,7 @@ import {
   type Comparisons,
 } from '../shared/compare';
 import type { DirectoryEntry, ProfileDirectory } from '../shared/model-profiles';
+import type { MakerDirectory } from '../shared/maker-pages';
 import type { Article } from '../shared/content';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
@@ -279,6 +280,17 @@ app.get('/sitemap.xml', async (c) => {
     for (const path of await featuredComparisons(c.env, c.req.url)) pages.push({ path });
   } catch {
     // Neither may a missing comparisons file.
+  }
+  try {
+    // Every maker with a page, prerendered like the comparisons.
+    const response = await c.env.ASSETS.fetch(
+      new Request(new URL('/data/models/makers.json', c.req.url)),
+    );
+    if (response.ok)
+      for (const { slug } of ((await response.json()) as MakerDirectory).makers)
+        pages.push({ path: '/makers/' + slug });
+  } catch {
+    // Nor a missing list of makers.
   }
   return c.body(
     '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +

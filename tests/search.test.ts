@@ -109,6 +109,31 @@ describe('search index', () => {
     );
   });
 
+  it('finds a maker by its name, not by the line under it', () => {
+    const index = searchIndex([
+      {
+        slug: 'anthropic',
+        id: 'anthropic',
+        name: 'Anthropic',
+        models: 38,
+        tested: 21,
+        openWeights: 0,
+        leads: 15,
+      },
+    ]);
+    const maker = index.entries.find(([kind]) => kind === 'maker')!;
+    expect(maker).toEqual([
+      'maker',
+      '/makers/anthropic',
+      'Anthropic',
+      '38 models, 21 tested',
+      'anthropic',
+      'anthropic',
+    ]);
+    expect(findEntries(index.entries, 'anthropic')[0]).toBe(maker);
+    expect(findEntries(index.entries, 'models').some(([kind]) => kind === 'maker')).toBe(false);
+  });
+
   it('carries no guide text, only titles and summaries', () => {
     expect(JSON.stringify(searchIndex()).length).toBeLessThan(40_000);
   });

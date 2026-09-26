@@ -8,6 +8,7 @@ import type { Finder } from '../../shared/finder';
 import type { Comparisons } from '../../shared/compare';
 import type { Changes } from '../../shared/changes';
 import type { SearchIndex } from '../../shared/search';
+import type { MakerDirectory, MakerPage } from '../../shared/maker-pages';
 
 export type {
   Explorer,
@@ -36,6 +37,13 @@ export type { Images } from '../../shared/images';
 export type { Videos } from '../../shared/videos';
 export type { Finder, FinderRow, FinderTest } from '../../shared/finder';
 export type { Changes, ChangeEvent, ChangeModel } from '../../shared/changes';
+export type {
+  MakerDirectory,
+  MakerModel,
+  MakerPage,
+  MakerResult,
+  MakerSummary,
+} from '../../shared/maker-pages';
 export type { Board, BoardCategory, BoardEntry, BoardModel } from '../../shared/arena';
 
 const requests = new Map<string, Promise<unknown>>();
@@ -54,6 +62,8 @@ const isFinder = (value: Finder) => value?.version === 1 && Array.isArray(value.
 const isComparisons = (value: Comparisons) => value?.version === 1 && Array.isArray(value.featured);
 const isChanges = (value: Changes) => value?.version === 1 && Array.isArray(value.events);
 const isSearch = (value: SearchIndex) => value?.version === 1 && Array.isArray(value.entries);
+const isMakers = (value: MakerDirectory) => value?.version === 1 && Array.isArray(value.makers);
+const isMaker = (value: MakerPage) => value?.version === 1 && Array.isArray(value.lineup);
 
 /**
  * Prerendered pages carry their data inline, so the first view needs no extra
@@ -188,4 +198,23 @@ export function useChanges(attempt = 0, initial?: Changes) {
 /** Pages, guides, lessons and tools for the site search. Loaded when the search opens. */
 export function useSearchIndex(enabled: boolean, attempt = 0) {
   return useFile<SearchIndex>('search.json', isSearch, enabled, attempt);
+}
+
+/** Every maker with a page of its own, for /makers and each maker's page. */
+export function useMakers(attempt = 0, initial?: MakerDirectory) {
+  embedded('makers.json', 'makers-data', isMakers);
+  return useFile<MakerDirectory>('makers.json', isMakers, true, attempt, initial);
+}
+
+/** One maker's page. A prerendered page carries its own maker inline, and only that one. */
+export function useMaker(slug: string, enabled: boolean, attempt = 0, initial?: MakerPage) {
+  const file = `makers/${slug}.json`;
+  embedded(file, 'maker-data', (value: MakerPage) => isMaker(value) && value.slug === slug);
+  return useFile<MakerPage>(
+    file,
+    isMaker,
+    enabled,
+    attempt,
+    initial?.slug === slug ? initial : undefined,
+  );
 }

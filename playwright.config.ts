@@ -32,6 +32,7 @@ export default defineConfig({
         'compare.spec.ts',
         'changes.spec.ts',
         'search.spec.ts',
+        'makers.spec.ts',
       ],
       use: { ...devices['iPhone 13'], defaultBrowserType: 'webkit' },
     },

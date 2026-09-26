@@ -28,13 +28,15 @@ interface Result {
 
 /** Each kind of result, in the order they show, with how many of each. */
 const GROUPS: [kind: Result['kind'], label: string, limit: number][] = [
+  // A maker's name is an exact match, so its page comes before its models.
+  ['maker', 'Makers', 3],
   ['model', 'Models', 5],
   ['page', 'Pages', 4],
   ['guide', 'Guides', 3],
   ['lesson', 'Lessons', 3],
   ['tool', 'Free tools', 3],
 ];
-const ICONS: Record<SearchKind, LucideIcon> = {
+const ICONS: Record<Exclude<SearchKind, 'maker'>, LucideIcon> = {
   page: Compass,
   guide: BookOpen,
   lesson: GraduationCap,
@@ -43,11 +45,12 @@ const ICONS: Record<SearchKind, LucideIcon> = {
 /** What the search offers before anything is typed. */
 const SUGGESTED = ['/leaderboard', '/compare', '/changes', '/model-finder', '/releases', '/learn'];
 
-const fromEntry = ([kind, path, title, description]: SearchEntry): Result => ({
+const fromEntry = ([kind, path, title, description, , logo]: SearchEntry): Result => ({
   kind,
   path,
   title,
   detail: description,
+  ...(logo ? { makerId: logo } : {}),
 });
 
 /**
@@ -85,25 +88,24 @@ export default function SiteSearch({ onClose }: { onClose: () => void }) {
       return SUGGESTED.flatMap((path) => entries.filter((entry) => entry[1] === path)).map(
         fromEntry,
       );
-    const found: Result[] = models.data
-      ? findModels(models.data.models, query, GROUPS[0][2]).map((row) => ({
-          kind: 'model',
-          path: `/models/${row[0]}`,
-          title: row[1],
-          detail: row[3] || 'Maker not reported',
-          makerId: row[2],
-          index: row[8],
-        }))
-      : [];
     const matches = findEntries(entries, query);
-    for (const [kind, , limit] of GROUPS.slice(1))
-      found.push(
-        ...matches
-          .filter((entry) => entry[0] === kind)
-          .slice(0, limit)
-          .map(fromEntry),
-      );
-    return found;
+    return GROUPS.flatMap(([kind, , limit]): Result[] =>
+      kind === 'model'
+        ? models.data
+          ? findModels(models.data.models, query, limit).map((row) => ({
+              kind: 'model',
+              path: `/models/${row[0]}`,
+              title: row[1],
+              detail: row[3] || 'Maker not reported',
+              makerId: row[2],
+              index: row[8],
+            }))
+          : []
+        : matches
+            .filter((entry) => entry[0] === kind)
+            .slice(0, limit)
+            .map(fromEntry),
+    );
   }, [typed, query, models.data, index.data]);
   const selected = active < results.length ? active : 0;
   const groups: [key: string, label: string, items: Result[]][] = typed
@@ -155,12 +157,12 @@ export default function SiteSearch({ onClose }: { onClose: () => void }) {
           ref={input}
           type="text"
           role="combobox"
-          aria-label="Search models, pages, guides and lessons"
+          aria-label="Search models, makers and pages"
           aria-expanded={results.length > 0}
           aria-controls={`${id}-list`}
           aria-autocomplete="list"
           aria-activedescendant={results.length ? `${id}-${selected}` : undefined}
-          placeholder="Search models, pages, guides and lessons"
+          placeholder="Search models, makers and pages"
           autoComplete="off"
           autoCapitalize="off"
           spellCheck={false}
@@ -194,7 +196,10 @@ export default function SiteSearch({ onClose }: { onClose: () => void }) {
                   </p>
                   {items.map((result, offset) => {
                     const at = start + offset;
-                    const Icon = result.kind === 'model' ? undefined : ICONS[result.kind];
+                    const Icon =
+                      result.kind === 'model' || result.kind === 'maker'
+                        ? undefined
+                        : ICONS[result.kind];
                     return (
                       <div
                         key={result.path}

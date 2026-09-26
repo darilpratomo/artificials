@@ -175,7 +175,9 @@ display name, each gets the part of its id that tells it apart, such as "Claude 
 
 Maker: a name pattern (`MAKERS`) identifies the maker. Failing that, a listing by a lab that
 only sells its own models counts; any other host is never presented as the maker, and the
-profile says "Maker not reported" until a research record names one.
+profile says "Maker not reported" until a research record names one. Patterns look past a
+host's prefix and a base model's name: Mistral lists Z.ai's GLM-5.3 as "zai-glm-5-3", and
+NVIDIA's Llama Nemotron models start with "llama"; both go to their real makers.
 
 Profile facts prefer the maker's own listing. Otherwise the release date is the earliest
 plausible date across hosts (placeholders such as 1970-01-01 are ignored) and the context
@@ -395,12 +397,34 @@ feed of the same events, up to 100, newest first. A model's Pricing tab lists it
 changes. Scores and prices read as their sources give them; the percentage on a price change
 compares prices blended as three input tokens for each output token.
 
+## Maker pages
+
+`/makers` lists every maker with at least three models that it sells, that several hosts list or
+that a test covers, or with one tested model (`shared/maker-pages.ts`); `/makers/:slug` is one
+maker's page, its address taken from the maker's name ("Z.ai" is `/makers/z-ai`). Each page
+gathers figures the site already shows elsewhere, by maker, and combines none of them:
+
+- At a glance: its best model on the capability index and that model's rank, how many tests its
+  models hold the top score on, its newest release, and how many models it has, tested and with
+  open weights.
+- Where it stands: its best model's rank on each skill area's main test, the same tests model
+  pages use (`PRIMARY` in `shared/model-profiles.ts`), so a maker and its models read alike.
+- On the capability index: up to twelve of its models, each with its rank among every model on
+  the index, and a line at the top score when another maker holds it.
+- Every test: its best result on each published test and that result's rank; ties share a rank.
+- Every model: its counted models, newest first, with release date, context window, reference
+  price and capability index.
+
+The profile build writes `makers.json` (the list, also used by the sitemap and the site search)
+and `makers/<slug>.json` (one per maker). Pages are prerendered with their data inline; an
+unknown maker gets the 404 page. Model pages and the market's maker list link to maker pages.
+
 ## Site search
 
 The header's Search button, Ctrl+K, ⌘K or / opens one search across the site. Models come from
 `explorer.json`, the list the model pickers already use: every word must appear in the name, the
 maker or the address; names that start with the search come first, then tested models offered by
-ten or more hosts, newest first, so a new flagship leads its family. Pages, guides, lessons and
+ten or more hosts, newest first, so a new flagship leads its family. Makers, pages, guides, lessons and
 free tools come from `search.json`, which `scripts/build-search-index.mjs` writes at build time
 from the site's own page titles, guide summaries, lesson summaries and tool descriptions
 (`shared/search.ts`), so no guide text reaches the page's code. Pages carry the menus' names, and

@@ -128,6 +128,8 @@ export interface ModelProfile {
    * history began: [day, input, output], oldest first (shared/history.ts).
    */
   priceHistory?: PricePoint[];
+  /** The address of the maker's own page, /makers/:slug, when it has one. */
+  makerPage?: string;
 }
 
 export interface ProfileBucket {
@@ -232,15 +234,17 @@ const MAKERS: [RegExp, string, string][] = [
   [/^(?:qwen|qwq|qvq|wan)/, 'Alibaba', 'alibaba'],
   [/^grok/, 'xAI', 'xai'],
   [/^(?:kimi|moonshot)/, 'Moonshot AI', 'moonshotai'],
-  [/^(?:glm|chatglm|cogview)/, 'Z.ai', 'zai'],
+  // A host can prefix the maker: Mistral lists Z.ai's GLM-5.3 as "zai-glm-5-3".
+  [/^(?:zai-)?(?:glm|chatglm|cogview)/, 'Z.ai', 'zai'],
   [/^minimax/, 'MiniMax', 'minimax'],
   [/^(?:mistral|magistral|codestral|devstral|pixtral|ministral|voxtral)/, 'Mistral AI', 'mistral'],
+  // NVIDIA's Nemotron models built on Llama carry Llama's name first.
+  [/^(?:nemotron|llama-[\d-]+-nemotron)/, 'NVIDIA', 'nvidia'],
   [/^(?:llama|meta-llama)/, 'Meta', 'meta'],
   [/^(?:phi-|phi\d)/, 'Microsoft', 'azure'],
   [/^(?:command|aya|c4ai)/, 'Cohere', 'cohere'],
   [/^jamba/, 'AI21 Labs', 'ai21'],
   [/^nova-/, 'Amazon', 'amazon-bedrock'],
-  [/^(?:nemotron|llama-3-1-nemotron)/, 'NVIDIA', 'nvidia'],
   [/^sonar/, 'Perplexity', 'perplexity'],
   [/^mercury/, 'Inception', 'inception'],
   [/^(?:seed|seedream|seedance|doubao)/, 'ByteDance', 'bytedance'],
@@ -375,7 +379,7 @@ function cleanName(name: string) {
 
 /** Preferred benchmark per skill area, independent of how well a model scored. */
 /** Each skill area's headline test, in order of preference; Arena's votes come last. */
-const PRIMARY: Record<BenchmarkDomain, string[]> = {
+export const PRIMARY: Record<BenchmarkDomain, string[]> = {
   overall: ['capability-index', 'overall', 'arena-text'],
   coding: ['coding', 'swe-bench-verified', 'arena-coding', 'arena-webdev'],
   math: ['mock-aime', 'math', 'frontiermath', 'math-level-5', 'arena-math'],

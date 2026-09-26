@@ -145,6 +145,8 @@ export interface Market {
     maker: string;
     models: number;
     best?: { name: string; slug?: string; index: number };
+    /** The maker's page, /makers/:page, when it has one. */
+    page?: string;
   }[];
   widest: { slug: string; name: string; makerId: string; maker: string; hosts: number }[];
   gap?: {
@@ -250,7 +252,7 @@ export function configurationOf(configuration: string, slug?: string): string {
   return /^\d{4}-\d{2}-\d{2}$/.test(rest) ? rest : rest.replace(/-/g, ' ');
 }
 
-function isNotable(profile: ModelProfile) {
+export function isNotable(profile: ModelProfile) {
   return (
     profile.makerId !== 'unknown' &&
     (!!profile.official || profile.offerings.length >= 2 || profile.results.length > 0)

@@ -44,6 +44,11 @@
   color: var(--profile-muted);
   font-size: 0.92rem;
 }
+.profile-maker a:hover {
+  color: var(--profile-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .profile-identity h1 {
   margin: 0;
   font-size: clamp(2rem, 5.2vw, 3.3rem);

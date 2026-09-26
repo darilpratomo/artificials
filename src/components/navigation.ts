@@ -55,6 +55,11 @@ export const NAV_GROUPS: NavGroupItem[] = [
         label: 'Market overview',
         description: 'Makers, hosts, prices and open weights',
       },
+      {
+        to: '/makers',
+        label: 'Model makers',
+        description: 'Each maker’s models, results and prices',
+      },
       { to: '/releases', label: 'Model releases', description: 'Every new model, newest first' },
       {
         to: '/changes',

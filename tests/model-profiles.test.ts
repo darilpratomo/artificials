@@ -60,6 +60,10 @@ describe('model identity', () => {
     expect(makerOf('o3-mini').makerId).toBe('openai');
     expect(makerOf('gemma-3-27b-it').makerId).toBe('google');
     expect(makerOf('olmo-2-13b')).toEqual({ maker: '', makerId: 'unknown' });
+    // A host's prefix or a base model's name does not make the host or base maker the maker.
+    expect(makerOf('zai-glm-5-3').makerId).toBe('zai');
+    expect(makerOf('llama-3-3-nemotron-super-49b-v1-5').makerId).toBe('nvidia');
+    expect(makerOf('llama-4-scout-17b-16e-instruct').makerId).toBe('meta');
   });
 
   it('spreads profiles across a fixed number of files, identically everywhere', () => {

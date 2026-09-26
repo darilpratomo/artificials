@@ -41,7 +41,7 @@ export function findModels(
 }
 
 /**
- * Pages, guides, lessons or tools holding every word of the search: titles
+ * Makers, pages, guides, lessons or tools holding every word of the search: titles
  * that start with it first, then titles with a word that does, then titles
  * holding every word, then the rest.
  */
@@ -52,7 +52,8 @@ export function findEntries(entries: SearchEntry[], query: string): SearchEntry[
   return entries
     .map((entry) => {
       const title = fold(entry[2]);
-      const all = `${title} ${fold(entry[3])} ${fold(entry[4])}`;
+      // A maker's line counts its models, so "models" would find every maker.
+      const all = `${title} ${entry[0] === 'maker' ? '' : fold(entry[3])} ${fold(entry[4])}`;
       if (!terms.every((term) => all.includes(term))) return undefined;
       const weight = title.startsWith(text)
         ? 0

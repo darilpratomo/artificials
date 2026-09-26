@@ -151,7 +151,13 @@ export default function ModelProfile() {
         <div className="profile-identity">
           <img src={makerLogo(profile.makerId)} width="48" height="48" alt="" />
           <div>
-            <p className="profile-maker">{profile.maker || 'Maker not reported'}</p>
+            <p className="profile-maker">
+              {profile.makerPage ? (
+                <Link to={`/makers/${profile.makerPage}`}>{profile.maker}</Link>
+              ) : (
+                profile.maker || 'Maker not reported'
+              )}
+            </p>
             <h1>{profile.name}</h1>
           </div>
         </div>

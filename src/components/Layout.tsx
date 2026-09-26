@@ -30,6 +30,7 @@ const INTELLIGENCE: [to: string, label: string][] = [
   ['/video-models', 'Video models'],
   ['/score-price-time', 'Score, price & time'],
   ['/market', 'Market overview'],
+  ['/makers', 'Model makers'],
 ];
 
 const SiteSearch = lazy(() => import('./search/SiteSearch'));

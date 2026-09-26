@@ -68,7 +68,13 @@ export function MarketSection({ overview }: { overview: ModelOverview }) {
               <li key={entry.makerId}>
                 <img src={makerLogo(entry.makerId)} alt="" width="32" height="32" loading="lazy" />
                 <div>
-                  <b>{entry.maker}</b>
+                  <b>
+                    {entry.page ? (
+                      <Link to={`/makers/${entry.page}`}>{entry.maker}</Link>
+                    ) : (
+                      entry.maker
+                    )}
+                  </b>
                   <small>
                     {entry.best ? (
                       <>

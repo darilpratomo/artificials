@@ -21,7 +21,7 @@ async function someModel(page: Page) {
 
 const dialog = (page: Page) => page.getByRole('dialog', { name: 'Search Artificials' });
 const field = (page: Page) =>
-  dialog(page).getByRole('combobox', { name: 'Search models, pages, guides and lessons' });
+  dialog(page).getByRole('combobox', { name: 'Search models, makers and pages' });
 
 test('the header search finds a model and opens it from the keyboard', async ({ page }) => {
   const [, name] = await someModel(page);

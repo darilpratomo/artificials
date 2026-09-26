@@ -18,6 +18,7 @@ import { buildVideos } from '../shared/videos.ts';
 import { buildExplore } from '../shared/explore.ts';
 import { buildComparisons } from '../shared/compare.ts';
 import { buildChanges } from '../shared/changes.ts';
+import { buildMakers } from '../shared/maker-pages.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
@@ -85,12 +86,6 @@ const staging = resolve(root, '.profiles-staging');
 const target = resolve(data, 'models');
 await rm(staging, { recursive: true, force: true });
 await mkdir(staging, { recursive: true });
-for (const [index, list] of buckets.entries())
-  await writeFile(
-    resolve(staging, `${index}.json`),
-    JSON.stringify({ version: 1, updatedAt, sources, catalog: catalogSource, profiles: list }) +
-      '\n',
-  );
 const models = profiles
   .map((profile) => [
     profile.slug,
@@ -121,6 +116,13 @@ const { overview, tests, explorer, timeline } = buildOverview(
   benchmarks,
   sources,
 );
+// One page per maker; each profile and the market's maker list link to their maker's page.
+const makers = buildMakers({ profiles, overview, tests });
+const makerPages = new Map(makers.pages.map((page) => [page.id, page.slug]));
+for (const profile of profiles)
+  if (makerPages.has(profile.makerId)) profile.makerPage = makerPages.get(profile.makerId);
+for (const entry of overview.market.makers)
+  if (makerPages.has(entry.makerId)) entry.page = makerPages.get(entry.makerId);
 await writeFile(resolve(staging, 'timeline.json'), JSON.stringify(timeline) + '\n');
 await writeFile(resolve(staging, 'tests.json'), JSON.stringify(tests) + '\n');
 await writeFile(resolve(staging, 'explorer.json'), JSON.stringify(explorer) + '\n');
@@ -179,6 +181,18 @@ const changes = buildChanges({
   until: updatedAt.slice(0, 10),
 });
 await writeFile(resolve(staging, 'changes.json'), JSON.stringify(changes) + '\n');
+// The list of makers for /makers, the sitemap and search, and each maker's page.
+await mkdir(resolve(staging, 'makers'), { recursive: true });
+await writeFile(resolve(staging, 'makers.json'), JSON.stringify(makers.directory) + '\n');
+for (const page of makers.pages)
+  await writeFile(resolve(staging, 'makers', `${page.slug}.json`), JSON.stringify(page) + '\n');
+// Written last, once each profile knows its maker's page.
+for (const [index, list] of buckets.entries())
+  await writeFile(
+    resolve(staging, `${index}.json`),
+    JSON.stringify({ version: 1, updatedAt, sources, catalog: catalogSource, profiles: list }) +
+      '\n',
+  );
 await rm(target, { recursive: true, force: true });
 await rename(staging, target);
 
@@ -191,5 +205,5 @@ const matched = benchmarks.categories
   })
   .join(', ');
 console.log(
-  `Model profiles: ${profiles.length} models, ${withResults} with benchmark results, ${withFacts} with research records, ${PROFILE_BUCKETS} files.\nMatched rows: ${matched}.`,
+  `Model profiles: ${profiles.length} models, ${withResults} with benchmark results, ${withFacts} with research records, ${PROFILE_BUCKETS} files, ${makers.pages.length} maker pages.\nMatched rows: ${matched}.`,
 );

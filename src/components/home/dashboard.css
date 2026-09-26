@@ -1044,6 +1044,10 @@
   font-weight: 600;
   overflow-wrap: anywhere;
 }
+.market-list b a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .market-list small {
   color: #9698a3;
   font-size: 13px;

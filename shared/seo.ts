@@ -76,6 +76,10 @@ const pages: Record<string, [string, string]> = {
     'What changed in AI models',
     'New AI model releases, listed price changes, new leaders on each benchmark and models joining the capability index over the last 30 days, newest first.',
   ],
+  '/makers': [
+    'AI model makers',
+    'Every AI model maker on Artificials: how many models each has, how many are tested, and the best score each reaches on the capability index.',
+  ],
   '/compare': [
     'Compare AI models',
     'Compare AI model context windows, input and output pricing, capabilities, and provider specifications side by side.',
@@ -136,6 +140,14 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
       title: 'AI model comparison — Artificials',
       description:
         'Published test results, prices, context windows and features of AI models, side by side.',
+    };
+  const maker = /^\/makers\/([a-z0-9][a-z0-9-]{0,99})$/.exec(path);
+  // The page names the maker once it loads; the prerenderer does it first.
+  if (maker)
+    return {
+      ...makerMetadata({ slug: maker[1], name: 'AI model maker', models: 0, tested: 0 }),
+      title: 'AI model maker — Artificials',
+      description: 'An AI model maker’s models, test results, prices and releases.',
     };
   const profile = /^\/models\/([a-z0-9][a-z0-9-]{0,99})$/.exec(path);
   if (profile)
@@ -238,6 +250,41 @@ export function modelMetadata(model: ModelMetaInput | null, slug = model?.slug ?
     description: `${model.name}${by}. ${model.hasResults ? 'How it ranks on benchmarks, ' : 'Capabilities, '}prices from ${hosts}, context window and a cost calculator. Updated automatically.`,
     canonical,
     image: model.hasResults ? `${SITE_URL}/og/models/${slug}.png` : DEFAULT_IMAGE,
+    known: true,
+    robots: 'index,follow,max-image-preview:large',
+    type: 'website' as const,
+    structured: null,
+  };
+}
+export interface MakerMetaInput {
+  slug: string;
+  name: string;
+  models: number;
+  tested: number;
+}
+/** Title, description and address of a maker's page; `null` when there is no such maker. */
+export function makerMetadata(maker: MakerMetaInput | null, slug = maker?.slug ?? '') {
+  const canonical = SITE_URL + '/makers/' + slug;
+  if (!maker)
+    return {
+      title: 'Maker not found — Artificials',
+      description:
+        'This maker has no page on Artificials. Browse every AI model maker, or search the model directory.',
+      canonical,
+      image: DEFAULT_IMAGE,
+      known: false,
+      robots: 'noindex,follow',
+      type: 'website' as const,
+      structured: null,
+    };
+  const tested = maker.tested
+    ? `${maker.tested} with published test results`
+    : 'none with published test results yet';
+  return {
+    title: `${maker.name} AI models: benchmarks, prices and releases — Artificials`,
+    description: `Every ${maker.name} model on Artificials: ${maker.models} models, ${tested}. Where its best models rank on each test, with prices, context windows and release dates.`,
+    canonical,
+    image: DEFAULT_IMAGE,
     known: true,
     robots: 'index,follow,max-image-preview:large',
     type: 'website' as const,
