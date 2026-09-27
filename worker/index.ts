@@ -14,6 +14,8 @@ import {
   type Comparisons,
 } from '../shared/compare';
 import type { DirectoryEntry, ProfileDirectory } from '../shared/model-profiles';
+import { aboutModel, type Changes } from '../shared/changes';
+import { changesFeed, modelChannel } from '../shared/feeds';
 import type { MakerDirectory } from '../shared/maker-pages';
 import type { TestDirectory } from '../shared/test-pages';
 import type { WeekDirectory } from '../shared/weekly';
@@ -250,6 +252,20 @@ async function profileEntries(env: Env, requestUrl: string) {
   };
   return profileDirectory.bySlug;
 }
+// The last 30 days of changes, kept per isolate like the directory.
+let changesCache: { loadedAt: number; changes: Changes } | null = null;
+async function recentChanges(env: Env, requestUrl: string) {
+  if (changesCache && Date.now() - changesCache.loadedAt < 5 * 60 * 1000)
+    return changesCache.changes;
+  const response = await env.ASSETS.fetch(
+    new Request(new URL('/data/models/changes.json', requestUrl)),
+  );
+  if (!response.ok) throw new Error('changes');
+  const changes = (await response.json()) as Changes;
+  if (!Array.isArray(changes?.events)) throw new Error('changes');
+  changesCache = { loadedAt: Date.now(), changes };
+  return changes;
+}
 // The featured comparisons, by canonical address, kept per isolate like the directory.
 let featuredCache: { loadedAt: number; paths: Set<string> } | null = null;
 async function featuredComparisons(env: Env, requestUrl: string) {
@@ -383,6 +399,30 @@ app.on('GET', ['/news', '/news/:slug'], async (c) => {
   const policy = shell.headers.get('Content-Security-Policy');
   if (policy) c.header('Content-Security-Policy', policy);
   return c.html(html, listing || article ? 200 : 404);
+});
+// Each model's own RSS feed, from the same record as "What changed": its changes
+// and the top spots other models took from it. Unknown models have no feed.
+app.get('/models/:slug/changes.xml', async (c) => {
+  const slug = c.req.param('slug');
+  if (!/^[a-z0-9][a-z0-9-]{0,99}$/.test(slug)) return c.text('Not found', 404);
+  let entry: DirectoryEntry | undefined;
+  let changes: Changes;
+  try {
+    entry = (await profileEntries(c.env, c.req.url)).get(slug);
+    if (!entry) return c.text('Not found', 404);
+    changes = await recentChanges(c.env, c.req.url);
+  } catch {
+    return c.text('This feed could not load. Please try again.', 503);
+  }
+  c.header('Content-Type', 'application/rss+xml; charset=utf-8');
+  // Feed readers ask often; the data changes at most every few hours.
+  c.header('Cache-Control', 'public, max-age=1800');
+  return c.body(
+    changesFeed(
+      changes.events.filter((event) => aboutModel(event, slug)),
+      modelChannel(slug, entry[1]),
+    ),
+  );
 });
 // Model profiles render in the browser; the Worker supplies the right title and
 // description on first paint, and a real 404 status for unknown models.

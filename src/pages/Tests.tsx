@@ -6,6 +6,8 @@ import { makerLogo } from '../../shared/makers';
 import { testMetadata } from '../../shared/seo';
 import { applyPageMetadata } from '../components/Metadata';
 import { PageHeading } from '../components/Layout';
+import { FollowButton } from '../components/Follow';
+import { testFiguresOf } from '../lib/following';
 import { RankChart } from '../components/charts/RankChart';
 import { DomainKey } from '../components/profile/parts';
 import { DOMAINS, day, score, whole } from '../components/profile/format';
@@ -213,6 +215,12 @@ function TestDetail({ test, others }: { test: TestPage; others: TestDirectory['t
           </a>
           . <Link to={`/leaderboard?category=${test.id}`}>Compare it with other tests</Link>
         </p>
+        <div className="profile-actions">
+          <FollowButton
+            kind="tests"
+            entry={{ slug: test.id, name: test.label, seen: testFiguresOf(test) }}
+          />
+        </div>
       </header>
 
       <section className="test-glance" aria-label={`${test.label} at a glance`}>

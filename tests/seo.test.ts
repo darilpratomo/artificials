@@ -30,7 +30,7 @@ describe('public search metadata', () => {
       '/news/missing',
     ])
       expect(pageMetadata(path).robots).toContain('noindex');
-    expect(pageMetadata('/following').title).toBe('Models you follow — Artificials');
+    expect(pageMetadata('/following').title).toBe('What you follow — Artificials');
     expect(pageMetadata('/news/' + ARTICLES[0].slug).structured).toMatchObject({
       '@type': 'Article',
       headline: ARTICLES[0].title,

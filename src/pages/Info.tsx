@@ -207,12 +207,12 @@ export default function Info() {
             <h2>5. Cookies and device storage</h2>
             <p>
               Essential HTTP-only cookies keep an editor signed in. Your selected model comparisons,
-              the models you follow (with the figures each had when you last looked) and Academy
-              lesson completion are saved in your browser’s local storage so they remain available
-              as you navigate. The list of models you follow is not sent to Artificials. Academy
-              progress stays on this device and is not synchronized to an account. Sign-in and
-              security providers may use their own essential storage. With your permission, Google
-              Analytics uses first-party cookies to measure visits to public pages, including
+              the models, makers and tests you follow (with the figures each had when you last
+              looked) and Academy lesson completion are saved in your browser’s local storage so
+              they remain available as you navigate. What you follow is not sent to Artificials.
+              Academy progress stays on this device and is not synchronized to an account. Sign-in
+              and security providers may use their own essential storage. With your permission,
+              Google Analytics uses first-party cookies to measure visits to public pages, including
               device/browser information and approximate location. Google processes this information
               under its own privacy policy. Google Analytics is optional and stays off until you
               accept; advertising features are disabled. We do not include email addresses, query
@@ -236,8 +236,8 @@ export default function Info() {
             </p>
             <AnalyticsPreferencesButton />
             <p>
-              You can clear the model comparison and the models you follow, saved on this device,
-              below. You can also clear site storage through your browser settings.
+              You can clear the model comparison and what you follow, saved on this device, below.
+              You can also clear site storage through your browser settings.
             </p>
             <div className="privacy-actions">
               <button
@@ -257,7 +257,7 @@ export default function Info() {
                   setUnfollowed(true);
                 }}
               >
-                {unfollowed ? 'Followed models cleared' : 'Clear followed models'}
+                {unfollowed ? 'Everything you follow is cleared' : 'Clear what you follow'}
               </button>
             </div>
             <h2>7. Retention and deletion</h2>

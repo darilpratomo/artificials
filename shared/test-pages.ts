@@ -68,6 +68,8 @@ export interface TestPage extends TestSummary {
 export interface TestDirectory {
   version: 1;
   tests: TestSummary[];
+  /** Each publisher behind the tests, with its licence, for pages that credit several at once. */
+  sources: (TestPage['sourceInfo'] & { id: string })[];
 }
 
 const rankAll = <T extends { score: number }>(rows: T[]) => {
@@ -184,6 +186,10 @@ export function buildTests({
         .reverse(),
     });
   }
+  const sources = new Map<string, TestDirectory['sources'][number]>();
+  for (const page of pages)
+    if (!sources.has(page.sourceId))
+      sources.set(page.sourceId, { id: page.sourceId, ...page.sourceInfo });
   return {
     directory: {
       version: 1,
@@ -197,6 +203,7 @@ export function buildTests({
         models,
         ...(top ? { top } : {}),
       })),
+      sources: [...sources.values()],
     },
     pages,
   };

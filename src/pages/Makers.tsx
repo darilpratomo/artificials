@@ -5,6 +5,8 @@ import { makerColor, makerLogo } from '../../shared/makers';
 import { makerMetadata } from '../../shared/seo';
 import { applyPageMetadata } from '../components/Metadata';
 import { PageHeading } from '../components/Layout';
+import { FollowButton } from '../components/Follow';
+import { makerFiguresOf } from '../lib/following';
 import { RankChart } from '../components/charts/RankChart';
 import { DomainKey, Meter } from '../components/profile/parts';
 import {
@@ -228,6 +230,20 @@ function MakerDetail({ maker, others }: { maker: MakerPage; others: MakerDirecto
             : ''}
           .
         </p>
+        <div className="profile-actions">
+          <FollowButton
+            kind="makers"
+            entry={{
+              slug: maker.slug,
+              name: maker.name,
+              makerId: maker.id,
+              seen: makerFiguresOf(
+                maker,
+                maker.lineup.map((model) => model.slug),
+              ),
+            }}
+          />
+        </div>
       </header>
 
       <section className="maker-glance" aria-label={`${maker.name} at a glance`}>

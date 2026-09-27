@@ -9,6 +9,7 @@ import {
   CircleDollarSign,
   LayoutGrid,
   Plus,
+  Rss,
   Ruler,
   ScanEye,
   Server,
@@ -189,17 +190,24 @@ export default function ModelProfile() {
             </Link>
           )}
           <FollowButton
-            slug={profile.slug}
-            name={profile.name}
-            makerId={profile.makerId}
-            figures={{
-              price: referencePrice(profile)?.blended ?? null,
-              index:
-                profile.results.find((result) => result.category === 'capability-index')?.score ??
-                null,
-              hosts: profile.offerings.length,
+            kind="models"
+            entry={{
+              slug: profile.slug,
+              name: profile.name,
+              makerId: profile.makerId,
+              seen: {
+                price: referencePrice(profile)?.blended ?? null,
+                index:
+                  profile.results.find((result) => result.category === 'capability-index')?.score ??
+                  null,
+                hosts: profile.offerings.length,
+              },
             }}
           />
+          <a className="text-link profile-feed" href={`/models/${profile.slug}/changes.xml`}>
+            <Rss size={14} aria-hidden="true" />
+            RSS feed
+          </a>
         </div>
       </header>
 

@@ -225,9 +225,9 @@ export function useSearchIndex(enabled: boolean, attempt = 0) {
 }
 
 /** Every maker with a page of its own, for /makers and each maker's page. */
-export function useMakers(attempt = 0, initial?: MakerDirectory) {
+export function useMakers(attempt = 0, initial?: MakerDirectory, enabled = true) {
   embedded('makers.json', 'makers-data', isMakers);
-  return useFile<MakerDirectory>('makers.json', isMakers, true, attempt, initial);
+  return useFile<MakerDirectory>('makers.json', isMakers, enabled, attempt, initial);
 }
 
 /** One maker's page. A prerendered page carries its own maker inline, and only that one. */
@@ -244,9 +244,9 @@ export function useMaker(slug: string, enabled: boolean, attempt = 0, initial?: 
 }
 
 /** Every test with a page of its own, for /tests and each test's page. */
-export function useTestPages(attempt = 0, initial?: TestDirectory) {
+export function useTestPages(attempt = 0, initial?: TestDirectory, enabled = true) {
   embedded('test-pages.json', 'tests-data', isTestList);
-  return useFile<TestDirectory>('test-pages.json', isTestList, true, attempt, initial);
+  return useFile<TestDirectory>('test-pages.json', isTestList, enabled, attempt, initial);
 }
 
 /** One test's page. A prerendered page carries its own test inline, and only that one. */

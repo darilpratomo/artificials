@@ -13,6 +13,31 @@
   color: var(--profile-ink-2);
   font-size: 15px;
 }
+.following-section {
+  margin-bottom: 28px;
+}
+.following-page .following-section > h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  color: var(--profile-ink);
+  font-size: 19px;
+  letter-spacing: -0.01em;
+}
+.following-section-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--profile-line);
+  border-radius: 99px;
+  color: var(--profile-ink-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
 .following-list,
 .following-events {
   display: grid;
@@ -45,10 +70,16 @@
   padding: 6px;
   border-radius: 10px;
 }
+/* A test's mark: its skill area's key, the size of a maker's logo. */
+.following-head > .domain-key {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
 .following-head > div {
   min-width: 0;
 }
-.following-page .following-head h2 {
+.following-page .following-head h3 {
   margin: 0;
   color: var(--profile-ink);
   font-size: 18px;
@@ -56,10 +87,10 @@
   letter-spacing: -0.01em;
   overflow-wrap: anywhere;
 }
-.following-head h2 a {
+.following-head h3 a {
   color: inherit;
 }
-.following-head h2 a:hover {
+.following-head h3 a:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -107,6 +138,7 @@
   font-size: 13px;
 }
 .following-figure strong {
+  overflow-wrap: anywhere;
   color: var(--profile-ink);
   font-family: 'Plus Jakarta Sans Variable', sans-serif;
   font-size: 1.2rem;
@@ -129,6 +161,64 @@
 .following-figure.is-changed small {
   color: var(--profile-ink);
   font-weight: 600;
+}
+/* A maker's new models, each with its own way to be followed. */
+.following-new {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #4a4d57;
+  border-radius: 14px;
+  background: #16171c;
+}
+.following-page .following-new h4 {
+  margin: 0;
+  color: var(--profile-ink);
+  font-size: 14px;
+  font-weight: 650;
+}
+.following-new ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.following-new li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+.following-new li > img {
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  border-radius: 7px;
+}
+.following-new li > span {
+  display: grid;
+  min-width: 0;
+}
+.following-new li a {
+  overflow-wrap: anywhere;
+  color: var(--profile-ink);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.following-new li a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.following-new li small {
+  color: var(--profile-muted);
+  font-size: 12.5px;
+}
+.follow-button.is-compact {
+  min-height: 32px;
+  padding: 6px 11px;
+  font-size: 12.5px;
+  gap: 6px;
 }
 .following-page .following-more {
   justify-self: start;
@@ -172,6 +262,9 @@
   color: var(--profile-ink-2);
   line-height: 1.6;
 }
+.following-licence {
+  white-space: nowrap;
+}
 /* Focus moves here after a change the visitor made, so it only shows when it helps. */
 .following-page [tabindex='-1']:focus:not(:focus-visible) {
   outline: none;
@@ -205,8 +298,9 @@
     gap: 8px;
   }
   /* A figure as a row: its name, then its value with how it moved beneath. */
+  /* The name keeps at least a third of the row, so a long top model wraps instead. */
   .following-figure {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(34%, 1fr) minmax(0, auto);
     grid-template-areas:
       'label value'
       'label change';
@@ -225,5 +319,6 @@
   .following-figure small {
     grid-area: change;
     justify-self: end;
+    text-align: right;
   }
 }

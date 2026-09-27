@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { pageMetadata } from '../../shared/seo';
+import { pageMetadata, type FeedLink } from '../../shared/seo';
 export function Metadata() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -9,7 +9,7 @@ export function Metadata() {
   return null;
 }
 
-export function applyPageMetadata(meta: ReturnType<typeof pageMetadata>) {
+export function applyPageMetadata(meta: ReturnType<typeof pageMetadata> & { feed?: FeedLink }) {
   document.title = meta.title;
   const values = {
     description: meta.description,
@@ -42,6 +42,20 @@ export function applyPageMetadata(meta: ReturnType<typeof pageMetadata>) {
     document.head.appendChild(canonical);
   }
   canonical.href = meta.canonical;
+  // A page with an RSS feed of its own names it for feed readers, beside the
+  // site's feed that every page names; other pages name only the site's.
+  let feed = document.getElementById('page-feed') as HTMLLinkElement | null;
+  if (meta.feed) {
+    if (!feed) {
+      feed = document.createElement('link');
+      feed.id = 'page-feed';
+      feed.rel = 'alternate';
+      feed.type = 'application/rss+xml';
+      document.head.appendChild(feed);
+    }
+    feed.title = meta.feed.title;
+    feed.href = meta.feed.href;
+  } else feed?.remove();
   document.getElementById('page-schema')?.remove();
   if (meta.structured) {
     const script = document.createElement('script');

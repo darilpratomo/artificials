@@ -83,6 +83,10 @@
   align-items: center;
   gap: 7px;
 }
+/* A model's RSS feed, beside the ways to compare and follow it. */
+.profile-actions .profile-feed {
+  gap: 6px;
+}
 .profile-chips {
   display: flex;
   flex-wrap: wrap;

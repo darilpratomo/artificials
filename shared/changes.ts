@@ -55,6 +55,21 @@ export interface Changes {
 type Source = Omit<ProfileBucket['sources'][number], 'checkedAt'>;
 
 export const CHANGE_DAYS = 30;
+
+/** A model's own changes, and the top spots other models took from it. */
+export const aboutModel = (event: ChangeEvent, slug: string) =>
+  event.model.slug === slug || (event.kind === 'leader' && event.previous.slug === slug);
+
+/** Changes to a maker's models, and the top spots other makers took from them. */
+export const aboutMaker = (event: ChangeEvent, makerId: string) =>
+  event.model.makerId === makerId ||
+  (event.kind === 'leader' && event.previous.makerId === makerId);
+
+/** New leaders on a test; on the capability index, models joining it as well. */
+export const aboutTest = (event: ChangeEvent, id: string) =>
+  (event.kind === 'leader' && event.test === id) ||
+  (id === 'capability-index' && event.kind === 'index');
+
 const ORDER: ChangeEvent['kind'][] = ['release', 'leader', 'index', 'price'];
 
 export function buildChanges({

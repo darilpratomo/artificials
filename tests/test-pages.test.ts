@@ -136,6 +136,23 @@ describe('test pages', () => {
       models: 4,
       top: { name: 'Alpha (high)', slug: 'alpha', makerId: 'openai', maker: 'OpenAI', score: 90 },
     });
+    // Each publisher once, with its licence, for pages that credit several tests together.
+    expect(directory.sources).toEqual([
+      {
+        id: 'epoch',
+        name: 'Epoch AI',
+        url: 'https://epoch.example',
+        license: 'CC BY 4.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      },
+      {
+        id: 'arena',
+        name: 'Arena',
+        url: 'https://arena.example',
+        license: 'CC BY 4.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      },
+    ]);
   });
 
   it('ranks every model once, ties sharing a rank, with the median and random guessing', () => {

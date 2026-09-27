@@ -1,45 +1,51 @@
 import { Link, NavLink } from 'react-router-dom';
 import { Star } from 'lucide-react';
-import { MAX_FOLLOWED, today, useFollowing, type Figures } from '../lib/following';
+import { MAX_FOLLOWED, today, useFollowing, type Followed, type Kind } from '../lib/following';
 
 /**
- * Follows a model from its page, starting from the figures the visitor sees
- * there: the same ones the list of every model gives, which the "Following"
- * page compares with later.
+ * Follows a model, maker or test from its page, starting from the figures the
+ * visitor sees there: the same ones the "Following" page compares with later.
+ * `compact` is the small toggle in a list, named with what it follows.
  */
-export function FollowButton({
-  slug,
-  name,
-  makerId,
-  figures,
+export function FollowButton<K extends Kind>({
+  kind,
+  entry,
+  compact = false,
 }: {
-  slug: string;
-  name: string;
-  makerId: string;
-  figures: Figures;
+  kind: K;
+  entry: Omit<Followed<K>, 'since'>;
+  compact?: boolean;
 }) {
-  const { models, isFollowing, follow, unfollow } = useFollowing();
-  const following = isFollowing(slug);
-  const full = !following && models.length >= MAX_FOLLOWED;
+  const following = useFollowing();
+  const on = following.isFollowing(kind, entry.slug);
+  const full = !on && following[kind].length >= MAX_FOLLOWED;
+  const label = on
+    ? 'Following'
+    : full
+      ? compact
+        ? 'List full'
+        : 'Follow list is full'
+      : 'Follow';
   return (
     <>
       <button
         type="button"
-        className={`btn btn-small follow-button ${following ? '' : 'btn-outline'}`}
-        aria-pressed={following}
+        className={`btn btn-small follow-button${on ? '' : ' btn-outline'}${compact ? ' is-compact' : ''}`}
+        aria-pressed={on}
+        aria-label={compact ? `${label}: ${entry.name}` : undefined}
         disabled={full}
         onClick={() =>
-          following
-            ? unfollow(slug)
-            : follow({ slug, name, makerId, since: today(), seen: figures })
+          on
+            ? following.unfollow(kind, entry.slug)
+            : following.follow(kind, { ...entry, since: today() } as Followed<K>)
         }
       >
-        <Star size={15} aria-hidden="true" fill={following ? 'currentColor' : 'none'} />
-        {following ? 'Following' : full ? 'Follow list is full' : 'Follow'}
+        <Star size={compact ? 14 : 15} aria-hidden="true" fill={on ? 'currentColor' : 'none'} />
+        {label}
       </button>
-      {full && (
+      {full && !compact && (
         <Link to="/following" className="text-link">
-          Manage followed models
+          Manage what you follow
         </Link>
       )}
     </>
@@ -47,24 +53,23 @@ export function FollowButton({
 }
 
 /**
- * The header's way to the models a visitor follows. It is always there, so the
- * header keeps its place; the number appears once they follow one.
+ * The header's way to what a visitor follows. It is always there, so the
+ * header keeps its place; the number appears once they follow something.
  */
 export function FollowingLink({ onClick }: { onClick?: () => void }) {
-  const { models } = useFollowing();
-  const count = models.length;
+  const { total } = useFollowing();
   return (
     <NavLink
       to="/following"
       className="following-link"
-      aria-label={count ? `Models you follow: ${count}` : 'Models you follow'}
-      title="Models you follow"
+      aria-label={total ? `Following: ${total}` : 'Following'}
+      title="What you follow"
       onClick={onClick}
     >
       <Star size={16} aria-hidden="true" />
-      {count > 0 && (
+      {total > 0 && (
         <span className="following-count" aria-hidden="true">
-          {count}
+          {total}
         </span>
       )}
     </NavLink>

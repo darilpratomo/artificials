@@ -301,7 +301,8 @@ The home page is built from three more generated files in `public/data/models/`:
 - `tests.json`: every test's rows, best configuration per model. Loaded only when a visitor
   picks a single test in the ranking chart.
 - `explorer.json`: one row per model for search and the full list. Loaded when the list comes
-  near the screen or the search box is used.
+  near the screen or the search box is used. Its flags include `notable`: the model is in its
+  maker's lineup (sold by the maker, listed by several hosts or tested), as maker pages list it.
 - `timeline.json` (about 66 KB compressed): every dated release with its prices, limits,
   capabilities and research record, for the release timeline page at `/releases`.
 
@@ -413,7 +414,10 @@ without naming the day the record began.
 The profile build turns the history into `changes.json`: the last 30 days up to the catalog's
 own day, with the notable releases from the timeline. `/changes` shows them by day, filtered by
 kind and by the last 7 or 30 days, prerendered with the data inline. `/changes.xml` is an RSS 2.0
-feed of the same events, up to 100, newest first. A model's Pricing tab lists its own listed-price
+feed of the same events, up to 100, newest first. Each model has its own feed at
+`/models/{slug}/changes.xml`: the Worker filters the same events to the model's own and the top
+spots other models took from it (`shared/feeds.ts` writes both feeds the same way), answers 404
+for unknown models and lets readers cache it for 30 minutes. A model's Pricing tab lists its own listed-price
 changes. Scores and prices read as their sources give them; the percentage on a price change
 compares prices blended as three input tokens for each output token.
 
@@ -451,7 +455,8 @@ appears once, at its best configuration, as in `tests.json`; the capability inde
 list, with Epoch AI's ranges. Models with the same score share a rank. Nothing is recomputed.
 
 The profile build writes `test-pages.json` (the list, also used by the sitemap and the site
-search) and `test-pages/<id>.json`. Pages are prerendered with their data inline. The rankings
+search, with each publisher once and its licence for pages that credit several tests) and
+`test-pages/<id>.json`. Pages are prerendered with their data inline. The rankings
 page, maker pages and the "What changed" page link to them. A chart's reference line, such as
 random guessing, is drawn only inside the chart's axis and is named in a key above the plot.
 
@@ -468,17 +473,30 @@ figures are calculated by Artificials and say so; batch discounts, free tiers, t
 fees are not included. The workload lives in the address (`?in=1500&out=500&day=100&cache=0`),
 so a calculation can be shared, and a model's own calculator links to it with its numbers.
 
-## Followed models
+## Following
 
-Following a model saves it in the visitor's browser only (`localStorage`,
-`artificials-following-v1`, up to 50 models; `src/lib/following.ts`); nothing is sent to the
-server, and there is no account. Each entry keeps the figures the model page showed when it was
-followed or last marked as seen: the blended reference price, the capability index and the
-number of hosts, which are the same figures `explorer.json` gives. `/following` compares them
-with `explorer.json` and lists the model's events from `changes.json` dated after that day: its
-own, and new leaders that took a top spot from it. "Mark as seen" takes the figures as they are
-now. A model no longer in the catalog says so and can only be unfollowed. `/following` is a
-noindex page drawn in the browser, left out of the sitemap and the site search.
+Following a model, maker or test saves it in the visitor's browser only (`localStorage`,
+`artificials-following-v1`, up to 50 of each; `src/lib/following.ts`); nothing is sent to the
+server, and there is no account. Each entry keeps the figures its page showed when it was
+followed or last marked as seen, which are the same figures the lists give:
+
+- a model: the blended reference price, the capability index and the number of hosts, as in
+  `explorer.json`;
+- a maker: its number of models, its best capability index, the tests where it scores highest
+  and its lineup, as in `makers.json` and the `notable` models in `explorer.json`;
+- a test: its top model (by page, or by name where it has none, so a new name for the same
+  configuration is not a new leader), its top score and how many models it covers, as in
+  `test-pages.json`.
+
+`/following` compares them with those files and lists each entry's events from `changes.json`
+dated after that day: a model's own and the top spots other models took from it; a maker's
+models' and the top spots other makers took from them; a test's new leaders, and for the
+capability index its new entries too. A maker's new models are the ones in its lineup now that
+were not in it then, each with a way to follow it, and their releases are not repeated as news.
+"Mark as seen" takes the figures as they are now. An entry that no longer has a page says so and
+can only be unfollowed. The page credits models.dev, Epoch AI and the publisher of each test
+whose results it shows. `/following` is a noindex page drawn in the browser, left out of the
+sitemap and the site search.
 
 ## Weekly recap
 

@@ -36,6 +36,7 @@ export default defineConfig({
         'test-pages.spec.ts',
         'weekly.spec.ts',
         'cost.spec.ts',
+        'following.spec.ts',
       ],
       use: { ...devices['iPhone 13'], defaultBrowserType: 'webkit' },
     },

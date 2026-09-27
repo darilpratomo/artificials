@@ -205,6 +205,8 @@ export const FLAGS = {
   imageOutput: 16,
   audio: 32,
   toolCall: 64,
+  /** In its maker's lineup: sold by the maker, listed by several hosts or tested. */
+  notable: 128,
 } as const;
 export interface Explorer {
   version: 1;
@@ -620,7 +622,8 @@ export function buildOverview(
     ([...profile.inputModalities, ...profile.outputModalities].includes('audio')
       ? FLAGS.audio
       : 0) |
-    (profile.toolCall ? FLAGS.toolCall : 0);
+    (profile.toolCall ? FLAGS.toolCall : 0) |
+    (isNotable(profile) ? FLAGS.notable : 0);
   const models: ExplorerRow[] = profiles.map((profile) => [
     profile.slug,
     profile.name,

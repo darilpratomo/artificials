@@ -1,31 +1,7 @@
 import { createServer } from 'vite';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { price, score } from '../shared/format.ts';
-
-const xml = (value) =>
-  value.replace(
-    /[&<>"']/g,
-    (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[char],
-  );
-/** One RSS item per change, in the page's words, newest first. */
-function changesFeed(changes) {
-  const site = 'https://artificials.net';
-  const items = changes.events.slice(0, 100).map((event) => {
-    const { name, slug, maker } = event.model;
-    const link = site + (slug ? `/models/${slug}` : '/changes');
-    const title =
-      event.kind === 'release'
-        ? `${name} was released${maker ? ` by ${maker}` : ''}`
-        : event.kind === 'leader'
-          ? `${name} took the top spot on ${event.label} at ${score(event.score, event.unit)}, from ${event.previous.name}${event.withinMargin ? ', within the published margin' : ''}`
-          : event.kind === 'index'
-            ? `${name} joined the capability index at ${score(event.score, 'index')}`
-            : `${maker ? `${maker}’s` : 'The'} listed price for ${name} went from ${price(event.from[0])} in and ${price(event.from[1])} out to ${price(event.to[0])} in and ${price(event.to[1])} out per 1M tokens`;
-    return `<item><title>${xml(title)}</title><link>${xml(link)}</link><guid isPermaLink="false">${xml(`${event.kind}:${event.day}:${slug ?? name}${event.kind === 'leader' ? `:${event.test}` : ''}`)}</guid><pubDate>${new Date(`${event.day}T00:00:00Z`).toUTCString()}</pubDate></item>`;
-  });
-  return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>What changed in AI models — Artificials</title><link>${site}/changes</link><atom:link href="${site}/changes.xml" rel="self" type="application/rss+xml"/><description>New AI model releases, listed price changes, new leaders on each benchmark and models joining the capability index.</description><language>en</language>${items.join('')}</channel></rss>\n`;
-}
+import { SITE_CHANNEL, WEEKLY_CHANNEL, changesFeed, xml } from '../shared/feeds.ts';
 
 /** One RSS item per finished week, newest first. */
 function weeklyFeed(weeks, weekRange, weekSentence) {
@@ -34,7 +10,7 @@ function weeklyFeed(weeks, weekRange, weekSentence) {
     const range = weekRange(week.week, week.end);
     return `<item><title>${xml(`The week in AI models: ${range}`)}</title><link>${site}/weekly/${week.week}</link><guid isPermaLink="false">weekly:${week.week}</guid><pubDate>${new Date(`${week.end}T00:00:00Z`).toUTCString()}</pubDate><description>${xml(`${weekSentence(week.counts)}.`)}</description></item>`;
   });
-  return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>The week in AI models — Artificials</title><link>${site}/weekly</link><atom:link href="${site}/weekly.xml" rel="self" type="application/rss+xml"/><description>Each week’s new AI model releases, new leaders on benchmark tests and listed price changes.</description><language>en</language>${items.join('')}</channel></rss>\n`;
+  return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>${xml(WEEKLY_CHANNEL.title)}</title><link>${site}${WEEKLY_CHANNEL.path}</link><atom:link href="${site}${WEEKLY_CHANNEL.feed}" rel="self" type="application/rss+xml"/><description>${xml(WEEKLY_CHANNEL.description)}</description><language>en</language>${items.join('')}</channel></rss>\n`;
 }
 
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
@@ -347,7 +323,7 @@ try {
     ),
   );
   // The "What changed" feed, from the same events as the page.
-  await writeFile('dist/changes.xml', changesFeed(changes));
+  await writeFile('dist/changes.xml', changesFeed(changes.events, SITE_CHANNEL));
   // Pages that belong to a visitor, not to search: the app draws them in the browser.
   for (const route of ['login', 'dashboard', 'following', '404'])
     await writeFile(
