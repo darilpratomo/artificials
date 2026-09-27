@@ -6,8 +6,12 @@ import {
   compareCard,
   comparisonCard,
   homeCard,
+  makerCard,
+  makersCard,
   modelCard,
   setup,
+  testCard,
+  testsCard,
 } from '../scripts/lib/og';
 
 setup(fileURLToPath(new URL('../', import.meta.url)));
@@ -43,6 +47,28 @@ describe('link previews', () => {
       ),
       homeCard(1938, [{ name: 'GPT-6 Astra', makerId: 'openai', value: '166.6' }], 'Data: X.'),
       compareCard([{ names: ['A', 'B'], makerIds: ['openai', 'anthropic'] }]),
+      makerCard(
+        { name: 'OpenAI', makerId: 'openai', line: '103 models, 52 tested' },
+        [
+          { label: 'Best on the capability index', value: '166.6', note: 'GPT-6 Astra, #1 of 268' },
+          { label: 'Open weights', value: '4 of 103', note: 'Models you can download' },
+          { label: 'Newest release', value: 'GPT-6 Luna', note: 'Sep 22, 2026' },
+        ],
+        'Data: Epoch AI (CC BY 4.0), models.dev (MIT).',
+      ),
+      makersCard(27, [{ name: 'OpenAI', makerId: 'openai', value: '166.6' }], 'Data: X.'),
+      testCard(
+        {
+          label: 'GPQA Diamond',
+          area: 'Reasoning',
+          color: '#9085e9',
+          line: 'Published by Epoch AI, 216 models',
+          text: 'Graduate-level questions in biology, chemistry and physics.',
+        },
+        [{ name: 'GPT-6 Astra (max)', makerId: 'openai', value: '95.8%' }],
+        'Data: Epoch AI (CC BY 4.0).',
+      ),
+      testsCard(28, [{ name: 'GPQA Diamond', makerId: 'openai', value: '95.8%' }], 'Data: X.'),
     ]);
     for (const card of cards) {
       expect(png(card)).toEqual({ signature: 'PNG', width: WIDTH, height: HEIGHT });
@@ -57,5 +83,20 @@ describe('link previews', () => {
       'Data: models.dev (MIT).',
     );
     expect(png(card).width).toBe(WIDTH);
+  });
+
+  it('wraps a long test name and cuts a long description instead of spilling', async () => {
+    const card = await testCard(
+      {
+        label: 'An Unusually Long Benchmark Name With Several Qualifying Words, Tier Four',
+        area: 'Agents',
+        color: '#c98500',
+        line: 'Published by a publisher with a very long name indeed, 1,234 models',
+        text: 'A description long enough to need more than three lines on the card, so that the last line it keeps ends with an ellipsis rather than running into the footer or off the edge of the image.',
+      },
+      [],
+      'Data: X.',
+    );
+    expect(png(card)).toEqual({ signature: 'PNG', width: WIDTH, height: HEIGHT });
   });
 });

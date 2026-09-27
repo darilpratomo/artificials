@@ -11,7 +11,7 @@ import {
   Workflow,
   type LucideIcon,
 } from 'lucide-react';
-import type { BenchmarkDomain } from '../../../shared/benchmarks';
+import { DOMAIN_LABELS, type BenchmarkDomain } from '../../../shared/benchmarks';
 
 export { indexValue, price, score, tokens } from '../../../shared/format';
 
@@ -21,45 +21,55 @@ export const DOMAINS: Record<
   { label: string; plain: string; icon: LucideIcon; token: string }
 > = {
   overall: {
-    label: 'Overall',
+    label: DOMAIN_LABELS.overall,
     plain: 'General ability across many kinds of tasks',
     icon: Sparkles,
     token: 'overall',
   },
-  coding: { label: 'Coding', plain: 'Writing and fixing code', icon: Code2, token: 'coding' },
-  math: { label: 'Math', plain: 'Solving math problems step by step', icon: Sigma, token: 'math' },
+  coding: {
+    label: DOMAIN_LABELS.coding,
+    plain: 'Writing and fixing code',
+    icon: Code2,
+    token: 'coding',
+  },
+  math: {
+    label: DOMAIN_LABELS.math,
+    plain: 'Solving math problems step by step',
+    icon: Sigma,
+    token: 'math',
+  },
   knowledge: {
-    label: 'Knowledge',
+    label: DOMAIN_LABELS.knowledge,
     plain: 'Recalling facts accurately',
     icon: Library,
     token: 'knowledge',
   },
   agentic: {
-    label: 'Agents',
+    label: DOMAIN_LABELS.agentic,
     plain: 'Finishing multi-step coding tasks on its own',
     icon: Workflow,
     token: 'agentic',
   },
   language: {
-    label: 'Language',
+    label: DOMAIN_LABELS.language,
     plain: 'Understanding text and following instructions',
     icon: Languages,
     token: 'language',
   },
   data: {
-    label: 'Data analysis',
+    label: DOMAIN_LABELS.data,
     plain: 'Working with tables and structured data',
     icon: Database,
     token: 'data',
   },
   reasoning: {
-    label: 'Reasoning',
+    label: DOMAIN_LABELS.reasoning,
     plain: 'Thinking through hard science and logic problems',
     icon: Brain,
     token: 'reasoning',
   },
   image: {
-    label: 'Image generation',
+    label: DOMAIN_LABELS.image,
     plain: 'Creating images that follow a prompt',
     icon: ImageIcon,
     token: 'image',

@@ -17,7 +17,13 @@ import { buildProfiles } from '../shared/model-profiles.ts';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const target = resolve(root, 'public/data/history.json');
 const git = (...args) =>
-  execFileSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
+  execFileSync('git', args, {
+    cwd: root,
+    encoding: 'utf8',
+    maxBuffer: 256 * 1024 * 1024,
+    // An early snapshot without a file is expected; git's own message about it is noise.
+    stdio: ['ignore', 'pipe', 'ignore'],
+  });
 
 /** The state of one snapshot: its catalog, benchmark results and research records. */
 function stateOf(catalog, benchmarks, facts, day) {

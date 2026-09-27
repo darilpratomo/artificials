@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildChanges } from '../shared/changes';
+import { buildChanges, type ChangeEvent } from '../shared/changes';
 import type { History } from '../shared/history';
 import type { OverviewTests, Timeline } from '../shared/model-overview';
 import type { ModelProfile } from '../shared/model-profiles';
@@ -71,6 +71,19 @@ const history: History = {
       score: 81.5,
       previous: { name: 'alpha-max', makerId: 'openai', score: 80 },
     },
+    // A new leader whose lead is inside its published range.
+    {
+      day: '2026-09-24',
+      test: 'capability-index',
+      slug: 'alpha',
+      name: 'Alpha',
+      makerId: 'openai',
+      score: 160,
+      ciLow: 157,
+      ciHigh: 163,
+      next: 158,
+      previous: { slug: 'beta', name: 'Beta', makerId: 'deepseek', score: 159 },
+    },
     // A test the site no longer shows is left out.
     {
       day: '2026-09-23',
@@ -101,6 +114,7 @@ describe('what changed', () => {
   it('lists notable releases, price changes, new leaders and index entries, newest first', () => {
     expect(changes.events.map((event) => [event.day, event.kind, event.model.name])).toEqual([
       ['2026-09-25', 'release', 'fresh'],
+      ['2026-09-24', 'leader', 'Alpha'],
       ['2026-09-23', 'leader', 'Beta'],
       ['2026-09-22', 'index', 'Beta'],
       ['2026-09-20', 'price', 'Alpha'],
@@ -113,7 +127,9 @@ describe('what changed', () => {
       from: [10, 40],
       to: [8, 32],
     });
-    expect(changes.events.find((event) => event.kind === 'leader')).toMatchObject({
+    expect(
+      changes.events.find((event) => event.kind === 'leader' && event.test === 'coding'),
+    ).toMatchObject({
       test: 'coding',
       label: 'Coding',
       unit: 'percent',
@@ -121,6 +137,16 @@ describe('what changed', () => {
       model: { slug: 'beta', name: 'Beta', maker: 'DeepSeek' },
       previous: { name: 'alpha-max', maker: '', makerId: 'openai' },
     });
+  });
+
+  it('marks a new leader whose lead is inside its published range', () => {
+    const leaders = changes.events.filter(
+      (event): event is Extract<ChangeEvent, { kind: 'leader' }> => event.kind === 'leader',
+    );
+    expect(leaders.map((event) => [event.model.name, event.withinMargin ?? false])).toEqual([
+      ['Alpha', true],
+      ['Beta', false],
+    ]);
   });
 
   it('credits only the sources behind the changes, without the time they were fetched', () => {

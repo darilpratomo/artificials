@@ -141,6 +141,21 @@
   padding: 2px;
   border-radius: 6px;
 }
+.test-glance .test-near {
+  color: var(--profile-ink-2);
+}
+/* A new leader whose lead is inside its published range. */
+.test-margin {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 9px;
+  border: 1px solid var(--profile-line);
+  border-radius: 99px;
+  color: var(--profile-ink);
+  font-size: 12.5px;
+  font-weight: 550;
+  white-space: nowrap;
+}
 .test-rank {
   display: inline-flex;
   align-items: center;

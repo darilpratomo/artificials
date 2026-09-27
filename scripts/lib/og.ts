@@ -1,8 +1,8 @@
 /**
  * Link previews: 1200 × 630 cards drawn at build time, one per model with test
- * results and one per featured comparison, plus the site's default card. They
- * use the site's type, colours and maker logos, and every figure carries its
- * source, as the licences require. Nothing is fetched while drawing.
+ * results, featured comparison, maker and test, plus cards for the site and its
+ * lists. They use the site's type, colours and maker logos, and every figure
+ * carries its source, as the licences require. Nothing is fetched while drawing.
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -184,17 +184,22 @@ function accent(ctx: SKRSContext2D, makerId: string, x: number, y: number, heigh
   ctx.fill();
 }
 
-/** One model: logo, name, maker and three figures. */
-export async function modelCard(model: CardModel, stats: Stat[], credit: string) {
-  const { canvas, ctx } = frame('AI model profile');
-  await tile(ctx, model.makerId, LEFT, 128, 112);
-  accent(ctx, model.makerId, LEFT + 136, 134, 100);
+/** A model or a maker: logo, name, a line under it and three figures. */
+async function profileCard(
+  label: string,
+  subject: { name: string; line: string; makerId: string },
+  stats: Stat[],
+  credit: string,
+) {
+  const { canvas, ctx } = frame(label);
+  await tile(ctx, subject.makerId, LEFT, 128, 112);
+  accent(ctx, subject.makerId, LEFT + 136, 134, 100);
   ctx.fillStyle = INK;
-  fit(ctx, model.name, 600, 64, RIGHT - (LEFT + 164), 36);
-  ctx.fillText(clip(ctx, model.name, RIGHT - (LEFT + 164)), LEFT + 164, 194);
+  fit(ctx, subject.name, 600, 64, RIGHT - (LEFT + 164), 36);
+  ctx.fillText(clip(ctx, subject.name, RIGHT - (LEFT + 164)), LEFT + 164, 194);
   ctx.fillStyle = MUTED;
   ctx.font = `400 28px ${SANS}`;
-  ctx.fillText(clip(ctx, model.maker || 'Maker not reported', 700), LEFT + 164, 236);
+  ctx.fillText(clip(ctx, subject.line, 700), LEFT + 164, 236);
   const width = (RIGHT - LEFT - 2 * 20) / 3;
   for (const [index, stat] of stats.slice(0, 3).entries()) {
     const x = LEFT + index * (width + 20);
@@ -218,6 +223,25 @@ export async function modelCard(model: CardModel, stats: Stat[], credit: string)
   }
   footer(ctx, credit);
   return canvas.toBuffer('image/png');
+}
+
+/** One model: logo, name, maker and three figures. */
+export function modelCard(model: CardModel, stats: Stat[], credit: string) {
+  return profileCard(
+    'AI model profile',
+    { name: model.name, line: model.maker || 'Maker not reported', makerId: model.makerId },
+    stats,
+    credit,
+  );
+}
+
+/** One maker: logo, name, how many models it has and three figures. */
+export function makerCard(
+  maker: { name: string; makerId: string; line: string },
+  stats: Stat[],
+  credit: string,
+) {
+  return profileCard('AI model maker', maker, stats, credit);
 }
 
 /** Two models head to head, each figure on its own row, the better value bright. */
@@ -284,7 +308,7 @@ async function headlineCard(
   label: string,
   headline: [string, string],
   text: string,
-  panel: { title: string; rows: { makerIds: string[]; name: string; value?: string }[] },
+  panel: { title: string; rows: PanelRow[] },
   credit: string,
 ) {
   const { canvas, ctx } = frame(label);
@@ -303,6 +327,19 @@ async function headlineCard(
   for (const [index, line] of wrap(ctx, text, 500).slice(0, 3).entries())
     ctx.fillText(line, LEFT, 380 + index * 38);
 
+  await rankPanel(ctx, panel);
+  footer(ctx, credit);
+  return canvas.toBuffer('image/png');
+}
+
+interface PanelRow {
+  makerIds: string[];
+  name: string;
+  value?: string;
+}
+
+/** A ranked panel on the right: a title and up to five rows of logos, a name and a value. */
+async function rankPanel(ctx: SKRSContext2D, panel: { title: string; rows: PanelRow[] }) {
   const x = 640;
   const width = RIGHT - x;
   ctx.fillStyle = PANEL;
@@ -313,7 +350,7 @@ async function headlineCard(
   ctx.stroke();
   ctx.fillStyle = INK;
   ctx.font = `600 22px ${SANS}`;
-  ctx.fillText(panel.title, x + 26, 164);
+  ctx.fillText(clip(ctx, panel.title, width - 52), x + 26, 164);
   for (const [index, row] of panel.rows.slice(0, 5).entries()) {
     const y = 190 + index * 64;
     if (index) {
@@ -328,10 +365,11 @@ async function headlineCard(
       await tile(ctx, makerId, left, y + 13, 38);
       left += 44;
     }
+    ctx.font = `600 24px ${SANS}`;
+    const room = row.value ? ctx.measureText(row.value).width + 24 : 0;
     ctx.fillStyle = INK;
     ctx.font = `600 22px ${SANS}`;
-    const space = RIGHT - 26 - (left + 8) - (row.value ? 90 : 0);
-    ctx.fillText(clip(ctx, row.name, space), left + 8, y + 40);
+    ctx.fillText(clip(ctx, row.name, RIGHT - 26 - (left + 8) - room), left + 8, y + 40);
     if (row.value) {
       ctx.textAlign = 'right';
       ctx.font = `600 24px ${SANS}`;
@@ -339,8 +377,6 @@ async function headlineCard(
       ctx.textAlign = 'left';
     }
   }
-  footer(ctx, credit);
-  return canvas.toBuffer('image/png');
 }
 
 /** The site's default card: the headline and the top of the capability index. */
@@ -373,4 +409,103 @@ export function compareCard(pairs: { names: string[]; makerIds: string[] }[]) {
     },
     'Published test results and list prices, side by side.',
   );
+}
+
+/** The makers list's card: the headline and the makers highest on the capability index. */
+export function makersCard(
+  makers: number,
+  top: { name: string; makerId: string; value: string }[],
+  credit: string,
+) {
+  return headlineCard(
+    'AI model makers',
+    ['Every maker.', 'Every model.'],
+    `The models, test results and prices of ${makers} AI model makers, one page each.`,
+    {
+      title: 'Best on the capability index',
+      rows: top.map(({ name, makerId, value }) => ({ makerIds: [makerId], name, value })),
+    },
+    credit,
+  );
+}
+
+/** The tests list's card: the headline and who holds the top score on each main test. */
+export function testsCard(
+  tests: number,
+  leads: { name: string; makerId: string; value: string }[],
+  credit: string,
+) {
+  return headlineCard(
+    'AI benchmark tests',
+    ['Every test.', 'Every score.'],
+    `What ${tests} AI tests measure, who publishes them and every model’s best result.`,
+    {
+      title: 'Top score on the main tests',
+      rows: leads.map(({ name, makerId, value }) => ({ makerIds: [makerId], name, value })),
+    },
+    credit,
+  );
+}
+
+export interface CardTest {
+  label: string;
+  /** The skill area's name, and its colour from the site's validated palette. */
+  area: string;
+  color: string;
+  /** Who publishes it and how many models it covers. */
+  line: string;
+  /** What it measures, in its publisher's words. */
+  text: string;
+}
+
+/** One test: its skill area, name, publisher and what it measures, beside its top five. */
+export async function testCard(
+  test: CardTest,
+  top: { name: string; makerId: string; value: string }[],
+  credit: string,
+) {
+  const { canvas, ctx } = frame('AI benchmark test');
+  const width = 536;
+  // The skill area's colour sits beside its name.
+  ctx.fillStyle = test.color;
+  ctx.beginPath();
+  ctx.arc(LEFT + 8, 146, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = MUTED;
+  ctx.font = `500 24px ${SANS}`;
+  ctx.fillText(test.area, LEFT + 28, 154);
+  // The name at the largest size that fits two lines.
+  let size = 68;
+  let lines: string[] = [];
+  for (; size >= 40; size -= 4) {
+    ctx.font = `600 ${size}px ${SANS}`;
+    lines = wrap(ctx, test.label, width);
+    if (lines.length <= 2 && lines.every((line) => ctx.measureText(line).width <= width)) break;
+  }
+  size = Math.max(size, 40);
+  ctx.font = `600 ${size}px ${SANS}`;
+  if (lines.length > 2) lines = [lines[0], clip(ctx, lines.slice(1).join(' '), width)];
+  ctx.fillStyle = INK;
+  let y = 232;
+  for (const line of lines) {
+    ctx.fillText(clip(ctx, line, width), LEFT, y);
+    y += Math.round(size * 1.12);
+  }
+  ctx.fillStyle = MUTED;
+  ctx.font = `400 24px ${SANS}`;
+  ctx.fillText(clip(ctx, test.line, width), LEFT, y + 6);
+  ctx.fillStyle = '#bbc0cc';
+  ctx.font = `400 23px ${SANS}`;
+  const text = wrap(ctx, test.text, width);
+  // As many lines of the description as fit above the footer, the last one cut if needed.
+  const room = Math.max(1, Math.min(3, Math.floor((526 - (y + 56)) / 34) + 1));
+  const shown = text.slice(0, room);
+  if (text.length > room) shown[room - 1] = clip(ctx, `${shown[room - 1]}…`, width);
+  for (const [index, line] of shown.entries()) ctx.fillText(line, LEFT, y + 56 + index * 34);
+  await rankPanel(ctx, {
+    title: 'Top scores',
+    rows: top.map(({ name, makerId, value }) => ({ makerIds: [makerId], name, value })),
+  });
+  footer(ctx, credit);
+  return canvas.toBuffer('image/png');
 }

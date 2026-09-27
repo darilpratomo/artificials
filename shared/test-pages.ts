@@ -1,5 +1,5 @@
 import type { BenchmarkDomain, BenchmarkSnapshot } from './benchmarks.ts';
-import type { History } from './history.ts';
+import { withinMargin, type History } from './history.ts';
 import { testLabel } from './model-profiles.ts';
 import type { ModelOverview, OverviewTests } from './model-overview.ts';
 
@@ -29,6 +29,8 @@ export interface TestLeaderChange {
   makerId: string;
   score: number;
   previous: { name: string; slug?: string; makerId: string; score: number };
+  /** The next model's score was inside the range the publisher gives for the new top score. */
+  withinMargin?: true;
 }
 
 export interface TestSummary {
@@ -48,6 +50,11 @@ export interface TestPage extends TestSummary {
   methodology: string;
   randomBaseline?: number;
   median: number;
+  /**
+   * How many other models score inside the range the publisher gives for the
+   * top score, where it gives one: none of them is clearly behind the leader.
+   */
+  nearTop?: number;
   sourceInfo: { name: string; url: string; license: string; licenseUrl: string };
   /** Every model's best result, best first. */
   rows: TestPageRow[];
@@ -124,6 +131,10 @@ export function buildTests({
         makerPages.has(row.makerId) ? { ...row, page: makerPages.get(row.makerId) } : row,
       );
     const [top] = rows;
+    // Other models inside the range the publisher gives for the top score.
+    const low = top.ciLow;
+    const nearTop =
+      low !== undefined ? rows.slice(1).filter((row) => row.score >= low).length : undefined;
     pages.push({
       version: 1,
       id: category.id,
@@ -144,6 +155,7 @@ export function buildTests({
       methodology: category.methodology,
       ...(category.randomBaseline !== undefined ? { randomBaseline: category.randomBaseline } : {}),
       median: Number(median.toFixed(2)),
+      ...(nearTop !== undefined ? { nearTop } : {}),
       sourceInfo: {
         name: source.name,
         url: source.url,
@@ -154,18 +166,19 @@ export function buildTests({
       makers,
       leaders: (history?.leaders ?? [])
         .filter((change) => change.test === category.id)
-        .map(({ day, name, slug, makerId, score, previous }) => ({
-          day,
-          name,
-          ...(slug ? { slug } : {}),
-          makerId,
-          score,
+        .map((change) => ({
+          day: change.day,
+          name: change.name,
+          ...(change.slug ? { slug: change.slug } : {}),
+          makerId: change.makerId,
+          score: change.score,
           previous: {
-            name: previous.name,
-            ...(previous.slug ? { slug: previous.slug } : {}),
-            makerId: previous.makerId,
-            score: previous.score,
+            name: change.previous.name,
+            ...(change.previous.slug ? { slug: change.previous.slug } : {}),
+            makerId: change.previous.makerId,
+            score: change.previous.score,
           },
+          ...(withinMargin(change) ? { withinMargin: true as const } : {}),
         }))
         .reverse(),
     });

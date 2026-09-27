@@ -130,4 +130,14 @@ test('maker pages are in the initial HTML', async ({ request }) => {
   const index = await (await request.get('/makers')).text();
   expect(index).toContain('id="makers-data"');
   expect(index).toContain(`href="/makers/${list[0].slug}"`);
+  // Each maker and the list have link previews of their own.
+  for (const [page, image] of [
+    [html, `/og/makers/${list[0].slug}.png`],
+    [index, '/og/makers.png'],
+  ]) {
+    expect(page).toContain(`<meta property="og:image" content="https://artificials.net${image}">`);
+    const card = await request.get(image);
+    expect(card.ok(), image).toBe(true);
+    expect(card.headers()['content-type']).toBe('image/png');
+  }
 });

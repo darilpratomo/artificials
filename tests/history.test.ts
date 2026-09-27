@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { recordHistory, type HistoryState } from '../shared/history';
+import { historyState, recordHistory, withinMargin, type HistoryState } from '../shared/history';
+import type { BenchmarkSnapshot } from '../shared/benchmarks';
+import type { ModelProfile } from '../shared/model-profiles';
 
 const state = (overrides: Partial<HistoryState> = {}): HistoryState => ({
   prices: { alpha: [10, 50, 'x'], beta: [1, 2, 'x'] },
@@ -83,5 +85,73 @@ describe('change history', () => {
     expect(recordHistory(without, state({ index: { alpha: 160 } }), '2026-09-18').indexed).toEqual(
       [],
     );
+  });
+
+  it('keeps the top score’s published range and the next model’s score', () => {
+    const profile = (slug: string, name: string) =>
+      ({ slug, name, makerId: 'anthropic', offerings: [] }) as unknown as ModelProfile;
+    const row = (id: string, score: number, range?: [number, number]) => ({
+      id,
+      model: id,
+      provider: 'Anthropic',
+      providerId: 'anthropic',
+      score,
+      rank: 0,
+      sourceUrl: '',
+      ...(range ? { ciLow: range[0], ciHigh: range[1] } : {}),
+    });
+    const snapshot = {
+      version: 1,
+      sources: [],
+      categories: [
+        {
+          id: 'arena-text',
+          name: 'Text',
+          sourceId: 'arena',
+          description: '',
+          methodology: '',
+          unit: 'index',
+          rows: [
+            row('alpha-high', 1510, [1500, 1520]),
+            // The same model in another setting is not the next model.
+            row('alpha', 1508, [1498, 1518]),
+            row('beta', 1502, [1495, 1509]),
+          ],
+        },
+        {
+          id: 'coding',
+          name: 'Coding',
+          sourceId: 'livebench',
+          description: '',
+          methodology: '',
+          rows: [row('alpha-high', 80), row('beta', 70)],
+        },
+      ],
+    } as unknown as BenchmarkSnapshot;
+    const links = {
+      'arena-text:alpha-high': 'alpha',
+      'arena-text:alpha': 'alpha',
+      'arena-text:beta': 'beta',
+    };
+    const { leaders } = historyState(
+      [profile('alpha', 'Alpha'), profile('beta', 'Beta')],
+      links,
+      snapshot,
+      '2026-09-26',
+    );
+    expect(leaders['arena-text']).toEqual({
+      slug: 'alpha',
+      name: 'Alpha',
+      makerId: 'anthropic',
+      score: 1510,
+      ciLow: 1500,
+      ciHigh: 1520,
+      next: 1502,
+    });
+    expect(withinMargin(leaders['arena-text'])).toBe(true);
+    expect(withinMargin({ ...leaders['arena-text'], next: 1499 })).toBe(false);
+    // A test without published ranges never reads as within the margin.
+    expect(leaders.coding).toMatchObject({ score: 80, next: 70 });
+    expect(withinMargin(leaders.coding)).toBe(false);
   });
 });

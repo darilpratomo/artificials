@@ -1,8 +1,9 @@
 /**
  * Draws the link previews into dist/og after the site is built: the site's
- * default card, the comparison page's card, one card per featured comparison
- * and one per model with test results. shared/seo.ts points each page at its
- * card by the same rules. The data refresh skips this (SKIP_OG_IMAGES=1): the
+ * default card, the comparison page's card, one card per featured comparison,
+ * one per model with test results, one per maker and per test, and cards for
+ * the makers and tests lists. shared/seo.ts points each page at its card by the
+ * same rules. The data refresh skips this (SKIP_OG_IMAGES=1): the
  * previews change nothing it checks, and Workers Builds draws them on deploy.
  *
  * Run with: node scripts/build-og-images.mjs
@@ -10,11 +11,22 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { compareCard, comparisonCard, homeCard, modelCard, setup } from './lib/og.ts';
+import {
+  compareCard,
+  comparisonCard,
+  homeCard,
+  makerCard,
+  makersCard,
+  modelCard,
+  setup,
+  testCard,
+  testsCard,
+} from './lib/og.ts';
+import { DOMAIN_LABELS } from '../shared/benchmarks.ts';
 import { comparisonPath } from '../shared/compare.ts';
 import { indexValue, price, score, tokens } from '../shared/format.ts';
 import { referencePrice } from '../shared/model-overview.ts';
-import { PROFILE_BUCKETS, primaryResult } from '../shared/model-profiles.ts';
+import { PRIMARY, PROFILE_BUCKETS, primaryResult } from '../shared/model-profiles.ts';
 
 if (process.env.SKIP_OG_IMAGES === '1') {
   console.log('Link previews skipped (SKIP_OG_IMAGES=1).');
@@ -151,6 +163,118 @@ for (const profile of profiles.values()) {
   models += 1;
 }
 
+// Makers: the maker's best on the index, its open-weights models and its newest release,
+// figures from two sources so the card can credit both in full.
+const day = (value) =>
+  new Date(`${value}T00:00:00Z`).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+const plural = (count, one, many) => `${count.toLocaleString('en-US')} ${count === 1 ? one : many}`;
+const { makers } = await read('makers.json');
+for (const summary of makers) {
+  const maker = await read(`makers/${summary.slug}.json`);
+  const index = maker.results.find((result) => result.test === 'capability-index');
+  const png = await makerCard(
+    {
+      name: maker.name,
+      makerId: maker.id,
+      line: `${plural(maker.models, 'model', 'models')}, ${maker.tested.toLocaleString('en-US')} tested`,
+    },
+    [
+      index
+        ? {
+            label: 'Best on the capability index',
+            value: indexValue(index.score),
+            note: `${index.name}, #${index.rank} of ${index.total}`,
+          }
+        : { label: 'Capability index', value: null, note: 'Not on the index yet' },
+      {
+        label: 'Open weights',
+        value: `${maker.openWeights.toLocaleString('en-US')} of ${maker.models.toLocaleString('en-US')}`,
+        note: 'Models you can download',
+      },
+      maker.newest
+        ? { label: 'Newest release', value: maker.newest.name, note: day(maker.newest.date) }
+        : { label: 'Newest release', value: null, note: 'No release date listed' },
+    ],
+    credit(index ? ['epoch'] : []),
+  );
+  await write(`makers/${maker.slug}.png`, png);
+}
+await write(
+  'makers.png',
+  await makersCard(
+    makers.length,
+    makers
+      .filter((maker) => maker.best)
+      .slice(0, 5)
+      .map((maker) => ({
+        name: maker.name,
+        makerId: maker.id,
+        value: indexValue(maker.best.index),
+      })),
+    credit(['epoch']),
+  ),
+);
+
+// Tests: the skill area, the publisher, what it measures and the top five.
+const colors = Object.fromEntries(
+  [
+    ...(await readFile(resolve(root, 'src/domain-colors.css'), 'utf8')).matchAll(
+      /--domain-([a-z]+):\s*(#[0-9a-f]{6})/g,
+    ),
+  ].map(([, domain, color]) => [domain, color]),
+);
+const { tests } = await read('test-pages.json');
+const pages = new Map();
+for (const summary of tests) {
+  const test = await read(`test-pages/${summary.id}.json`);
+  pages.set(test.id, test);
+  const png = await testCard(
+    {
+      label: test.label,
+      area: DOMAIN_LABELS[test.domain],
+      color: colors[test.domain] ?? '#c9ccd4',
+      line: `Published by ${test.sourceInfo.name}, ${plural(test.models, 'model', 'models')}`,
+      text: test.description.match(/^[^.]*\./)?.[0] ?? test.description,
+    },
+    test.rows.slice(0, 5).map((row) => ({
+      name: row.name,
+      makerId: row.makerId,
+      value: score(row.score, test.unit),
+    })),
+    `Data: ${test.sourceInfo.name} (${test.sourceInfo.license}).`,
+  );
+  await write(`tests/${test.id}.png`, png);
+}
+// The lists' card shows the top score on each skill area's main test.
+const leads = Object.values(PRIMARY)
+  .map((ids) => ids.map((id) => pages.get(id)).find(Boolean))
+  .filter(Boolean)
+  .slice(0, 5)
+  .map((test) => ({
+    name: test.label,
+    makerId: test.rows[0].makerId,
+    value: score(test.rows[0].score, test.unit),
+  }));
+// Only the tests shown are credited: their scores are all the card carries.
+const shownSources = [
+  ...new Map(
+    Object.values(PRIMARY)
+      .map((ids) => ids.map((id) => pages.get(id)).find(Boolean))
+      .filter(Boolean)
+      .slice(0, 5)
+      .map((test) => [
+        test.sourceInfo.name,
+        `${test.sourceInfo.name} (${test.sourceInfo.license})`,
+      ]),
+  ).values(),
+];
+await write('tests.png', await testsCard(tests.length, leads, `Data: ${shownSources.join(', ')}.`));
+
 console.log(
-  `Link previews: the default card, the comparison card, ${comparisons} comparisons and ${models} models.`,
+  `Link previews: the default card, the comparison card, ${comparisons} comparisons, ${models} models, ${makers.length} makers, ${tests.length} tests and the makers and tests lists.`,
 );

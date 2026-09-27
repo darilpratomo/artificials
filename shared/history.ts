@@ -20,6 +20,19 @@ export interface Leader {
   name: string;
   makerId: string;
   score: number;
+  /** The range the publisher gives for the top score, where it gives one (Arena, Epoch's index). */
+  ciLow?: number;
+  ciHigh?: number;
+  /** The best score of any other model on the test. */
+  next?: number;
+}
+
+/**
+ * Whether the next model's score falls inside the range the publisher gives for
+ * the top score: the order could change as more votes or results come in.
+ */
+export function withinMargin(leader: Pick<Leader, 'ciLow' | 'next'>) {
+  return leader.ciLow !== undefined && leader.next !== undefined && leader.next >= leader.ciLow;
 }
 
 export interface LeaderChange extends Leader {
@@ -76,9 +89,21 @@ export function historyState(
     if (!top) continue;
     const slug = links[`${category.id}:${top.id}`];
     const profile = slug ? bySlug.get(slug) : undefined;
-    leaders[category.id] = profile
-      ? { slug: profile.slug, name: profile.name, makerId: profile.makerId, score: top.score }
-      : { name: top.model, makerId: top.providerId, score: top.score };
+    // The next model is the best row of any other model; another setting of the
+    // leader, such as its "high" and plain versions, is the same model.
+    const model = (row: (typeof category.rows)[number]) =>
+      links[`${category.id}:${row.id}`] ?? row.model;
+    const others = category.rows.filter((row) => model(row) !== model(top)).map((row) => row.score);
+    leaders[category.id] = {
+      ...(profile
+        ? { slug: profile.slug, name: profile.name, makerId: profile.makerId }
+        : { name: top.model, makerId: top.providerId }),
+      score: top.score,
+      ...(top.ciLow !== undefined && top.ciHigh !== undefined
+        ? { ciLow: top.ciLow, ciHigh: top.ciHigh }
+        : {}),
+      ...(others.length ? { next: Math.max(...others) } : {}),
+    };
   }
   return { prices, index, leaders };
 }

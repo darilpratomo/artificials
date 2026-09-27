@@ -384,7 +384,15 @@ the day the refresh saw it, which can be a few hours after the source changed:
 - The capability index: models newly in Epoch AI's index. More than 20 at once means a source or
   matching change, which sets a new baseline without listing them.
 - Leaders: the top row of each test. The same result under a better-matched name, or a tie
-  changing places, is not a new leader: a new leader has a different score.
+  changing places, is not a new leader: a new leader has a different score. Each leader also
+  keeps the range its publisher gives for its score, where it gives one (Arena's tests and
+  Epoch AI's capability index), and the best score of any other model (another setting of the
+  same model does not count).
+
+A new leader is marked "Within margin" on `/changes`, in its feed and on its test page when the
+next model's score falls inside the range published for the new leader's score: the order could
+change as more votes or results come in. Only ranges the publisher gives are used; none is
+derived from other figures.
 
 `node scripts/sync-history.mjs --backfill` rebuilds the file from every catalog and benchmark
 snapshot in git history. Nothing before the first snapshot is known, and the site says so
@@ -425,7 +433,8 @@ unknown maker gets the 404 page. Model pages and the market's maker list link to
 (`shared/test-pages.ts`): what it measures and how it is scored, in its publisher's words, who
 publishes it and under what licence, the top score, the median, what random guessing would score
 where the publisher gives it, the top 15, the best model from each maker, every model's best
-result, and each new top model since the site began keeping a record (`history.json`). Each model
+result, and each new top model since the site began keeping a record (`history.json`). Where
+the publisher gives ranges, the top score says how many other models fall inside its range. Each model
 appears once, at its best configuration, as in `tests.json`; the capability index reads its own
 list, with Epoch AI's ranges. Models with the same score share a rank. Nothing is recomputed.
 

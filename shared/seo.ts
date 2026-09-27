@@ -5,11 +5,18 @@ import { canonicalComparison, parseComparison } from './compare';
 export const SITE_URL = 'https://artificials.net';
 /**
  * Link previews drawn at build time (scripts/build-og-images.mjs): the site's
- * default card, one per model with test results and one per featured
- * comparison. The rules here pick the same files the build draws.
+ * default card, one per model with test results, per featured comparison, per
+ * maker and per test, and the lists' own cards. The rules here pick the same
+ * files the build draws.
  */
 const DEFAULT_IMAGE = SITE_URL + '/og/default.png';
 const COMPARE_IMAGE = SITE_URL + '/og/compare.png';
+/** Pages with a card of their own. */
+const PAGE_IMAGES: Record<string, string> = {
+  '/compare': COMPARE_IMAGE,
+  '/makers': SITE_URL + '/og/makers.png',
+  '/tests': SITE_URL + '/og/tests.png',
+};
 const pages: Record<string, [string, string]> = {
   '/tools': [
     'Free image, PDF and Word tools',
@@ -205,9 +212,7 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
         : 'engineering';
   const image = article
     ? `${SITE_URL}/editorial/${kind}.webp`
-    : path === '/compare'
-      ? COMPARE_IMAGE
-      : DEFAULT_IMAGE;
+    : (PAGE_IMAGES[path] ?? DEFAULT_IMAGE);
   const structured = article
     ? {
         '@context': 'https://schema.org',
@@ -302,7 +307,7 @@ export function makerMetadata(maker: MakerMetaInput | null, slug = maker?.slug ?
     title: `${maker.name} AI models: benchmarks, prices and releases — Artificials`,
     description: `Every ${maker.name} model on Artificials: ${maker.models} models, ${tested}. Where its best models rank on each test, with prices, context windows and release dates.`,
     canonical,
-    image: DEFAULT_IMAGE,
+    image: `${SITE_URL}/og/makers/${slug}.png`,
     known: true,
     robots: 'index,follow,max-image-preview:large',
     type: 'website' as const,
@@ -338,7 +343,7 @@ export function testMetadata(test: TestMetaInput | null, id = test?.id ?? '') {
     description:
       `${test.models} AI models ranked by their best published ${test.label} score${test.source ? `, from ${test.source}` : ''}. ${measures}`.trim(),
     canonical,
-    image: DEFAULT_IMAGE,
+    image: `${SITE_URL}/og/tests/${id}.png`,
     known: true,
     robots: 'index,follow,max-image-preview:large',
     type: 'website' as const,

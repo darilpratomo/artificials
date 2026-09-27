@@ -42,7 +42,15 @@ const benchmarks = {
 } as unknown as BenchmarkSnapshot;
 const overview = {
   index: [
-    { name: 'Alpha', slug: 'alpha', makerId: 'openai', maker: 'OpenAI', index: 160 },
+    {
+      name: 'Alpha',
+      slug: 'alpha',
+      makerId: 'openai',
+      maker: 'OpenAI',
+      index: 160,
+      ciLow: 149,
+      ciHigh: 171,
+    },
     { name: 'Beta', makerId: 'anthropic', maker: 'Anthropic', index: 150, ciLow: 148, ciHigh: 152 },
   ],
 } as unknown as ModelOverview;
@@ -94,6 +102,9 @@ const history = {
       name: 'Beta',
       makerId: 'anthropic',
       score: 1500,
+      ciLow: 1490,
+      ciHigh: 1510,
+      next: 1495,
       previous: { name: 'Delta', makerId: 'xai', score: 1490 },
     },
   ],
@@ -154,7 +165,16 @@ describe('test pages', () => {
   it('reads the capability index from its own list, with each range', () => {
     const index = pages.find((page) => page.id === 'capability-index')!;
     expect(index.rows).toEqual([
-      { name: 'Alpha', slug: 'alpha', makerId: 'openai', maker: 'OpenAI', score: 160, rank: 1 },
+      {
+        name: 'Alpha',
+        slug: 'alpha',
+        makerId: 'openai',
+        maker: 'OpenAI',
+        score: 160,
+        ciLow: 149,
+        ciHigh: 171,
+        rank: 1,
+      },
       {
         name: 'Beta',
         makerId: 'anthropic',
@@ -172,7 +192,17 @@ describe('test pages', () => {
       ['2026-09-24', 'Gamma'],
       ['2026-09-20', 'Alpha'],
     ]);
-    expect(pages.find((page) => page.id === 'arena-text')!.leaders).toHaveLength(1);
+    expect(pages.find((page) => page.id === 'arena-text')!.leaders).toMatchObject([
+      { name: 'Beta', withinMargin: true },
+    ]);
+    expect(gpqa.leaders.some((change) => change.withinMargin)).toBe(false);
+  });
+
+  it('counts the models inside the top score’s published range', () => {
+    // Beta's 150 is inside Alpha's range, 149 to 171.
+    expect(pages.find((page) => page.id === 'capability-index')!.nearTop).toBe(1);
+    // GPQA Diamond publishes no ranges.
+    expect(gpqa.nearTop).toBeUndefined();
   });
 });
 
@@ -190,7 +220,9 @@ describe('test page addresses', () => {
       title: 'GPQA Diamond leaderboard: every AI model’s score — Artificials',
       canonical: 'https://artificials.net/tests/gpqa-diamond',
       robots: 'index,follow,max-image-preview:large',
+      image: 'https://artificials.net/og/tests/gpqa-diamond.png',
     });
+    expect(pageMetadata('/tests').image).toBe('https://artificials.net/og/tests.png');
     expect(meta.description).toBe(
       '216 AI models ranked by their best published GPQA Diamond score, from Epoch AI. Graduate-level questions in biology, chemistry and physics.',
     );

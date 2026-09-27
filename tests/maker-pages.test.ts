@@ -167,7 +167,10 @@ describe('maker page addresses', () => {
       title: 'Anthropic AI models: benchmarks, prices and releases — Artificials',
       canonical: 'https://artificials.net/makers/anthropic',
       robots: 'index,follow,max-image-preview:large',
+      image: 'https://artificials.net/og/makers/anthropic.png',
     });
+    expect(makerMetadata(null, 'nobody').image).toBe('https://artificials.net/og/default.png');
+    expect(pageMetadata('/makers').image).toBe('https://artificials.net/og/makers.png');
     expect(makerMetadata(null, 'nobody').robots).toBe('noindex,follow');
     expect(pageMetadata('/makers').title).toBe('AI model makers — Artificials');
     expect(pageMetadata('/makers/anthropic').canonical).toBe(

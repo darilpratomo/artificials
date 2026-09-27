@@ -26,6 +26,12 @@ require, and none states a date.
 - `/og/compare/{a}-vs-{b}.png`: one per featured comparison, in canonical order, also used when
   the same models are linked in the other order. `/og/compare.png` serves `/compare` and every
   other comparison.
+- `/og/makers/{slug}.png`: one per maker page, with its best model on the capability index, its
+  open-weights models and its newest release, figures from Epoch AI and models.dev only, so the
+  card credits both in full. `/og/makers.png` serves `/makers`.
+- `/og/tests/{id}.png`: one per test page, with its skill area in the site's skill-area colour,
+  its publisher and what it measures, beside its top five; the card credits the one publisher.
+  `/og/tests.png` serves `/tests`, with the top score on each skill area's main test.
 
 `shared/seo.ts` picks the card by the same rules the build draws them, so no manifest is
 needed. Cards on `/og/` carry `og:image:width`, `og:image:height` and `og:image:type`; every

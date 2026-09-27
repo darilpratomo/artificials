@@ -1,4 +1,4 @@
-import type { History } from './history.ts';
+import { withinMargin, type History } from './history.ts';
 import type { ModelProfile, ProfileBucket } from './model-profiles.ts';
 import type { OverviewTests, Timeline } from './model-overview.ts';
 
@@ -35,6 +35,8 @@ export type ChangeEvent =
       unit: 'percent' | 'index';
       score: number;
       previous: ChangeModel;
+      /** The next model's score is inside the range the publisher gives for this one. */
+      withinMargin?: true;
     }
   | { day: string; kind: 'index'; model: ChangeModel; score: number };
 
@@ -120,6 +122,7 @@ export function buildChanges({
       unit: test.unit,
       score: change.score,
       previous: model(change.previous.slug, change.previous.name, change.previous.makerId),
+      ...(withinMargin(change) ? { withinMargin: true as const } : {}),
     });
   }
 

@@ -63,6 +63,13 @@ test('changes are listed by day, and the filters narrow them', async ({ page }) 
   await expect(entries).toHaveCount(week);
   await expect(page.getByRole('button', { name: `All ${week}`, exact: true })).toBeVisible();
 
+  // New leaders whose lead is inside their published range carry a mark.
+  const margins = data.events.filter(
+    (event) =>
+      event.kind === 'leader' && event.withinMargin && event.day >= firstDay(data.until, 7),
+  ).length;
+  await expect(page.locator('.change-chip', { hasText: 'Within margin' })).toHaveCount(margins);
+
   await expect(page.getByRole('link', { name: 'RSS feed' })).toHaveAttribute(
     'href',
     '/changes.xml',

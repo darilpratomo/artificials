@@ -18,7 +18,7 @@ function changesFeed(changes) {
       event.kind === 'release'
         ? `${name} was released${maker ? ` by ${maker}` : ''}`
         : event.kind === 'leader'
-          ? `${name} took the top spot on ${event.label} at ${score(event.score, event.unit)}, from ${event.previous.name}`
+          ? `${name} took the top spot on ${event.label} at ${score(event.score, event.unit)}, from ${event.previous.name}${event.withinMargin ? ', within the published margin' : ''}`
           : event.kind === 'index'
             ? `${name} joined the capability index at ${score(event.score, 'index')}`
             : `${maker ? `${maker}’s` : 'The'} listed price for ${name} went from ${price(event.from[0])} in and ${price(event.from[1])} out to ${price(event.to[0])} in and ${price(event.to[1])} out per 1M tokens`;

@@ -222,6 +222,13 @@ function TestDetail({ test, others }: { test: TestPage; others: TestDirectory['t
           <small>
             <ModelName row={top} />, {top.maker || 'maker not reported'}
           </small>
+          {test.nearTop !== undefined && (
+            <small className="test-near">
+              {test.nearTop
+                ? `${counted(test.nearTop, 'other model', 'other models')} within its margin`
+                : 'No other model within its margin'}
+            </small>
+          )}
         </div>
         <div className="glance-tile">
           <span>Models tested</span>
@@ -259,6 +266,9 @@ function TestDetail({ test, others }: { test: TestPage; others: TestDirectory['t
             Each model at its best configuration, coloured by maker.
             {test.randomBaseline !== undefined
               ? ' The dashed line marks what random guessing would score.'
+              : ''}
+            {test.nearTop !== undefined
+              ? ' The publisher gives each score a range; a model whose score falls inside the leader’s range is not clearly behind it.'
               : ''}
           </p>
         </div>
@@ -343,6 +353,9 @@ function TestDetail({ test, others }: { test: TestPage; others: TestDirectory['t
             <p>
               Each time a different model took the top spot, since the site began keeping this
               record.
+              {test.leaders.some((change) => change.withinMargin)
+                ? ' “Within margin” means the next model’s score was inside the range the publisher gives for the new leader’s score.'
+                : ''}
             </p>
           </div>
           <ol className="test-leaders">
@@ -350,8 +363,10 @@ function TestDetail({ test, others }: { test: TestPage; others: TestDirectory['t
               <li key={`${change.day}-${change.name}`}>
                 <time dateTime={change.day}>{day(change.day)}</time>
                 <span>
-                  <ModelName row={change} /> took the top spot at {value(change.score)}, from{' '}
-                  <ModelName row={change.previous} /> at {value(change.previous.score)}.
+                  <ModelName row={change} /> took the top spot at {value(change.score)} from{' '}
+                  <ModelName row={change.previous} />, which had led at{' '}
+                  {value(change.previous.score)}.
+                  {change.withinMargin && <b className="test-margin">Within margin</b>}
                 </span>
               </li>
             ))}

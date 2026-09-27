@@ -55,6 +55,7 @@ function sentence(event: ChangeEvent): { text: ReactNode; chip?: string } {
             {score(event.score, event.unit)}, from <Name model={event.previous} />.
           </>
         ),
+        ...(event.withinMargin ? { chip: 'Within margin' } : {}),
       };
     case 'index':
       return {
@@ -216,8 +217,9 @@ export default function Changes({ initial }: { initial?: Changes }) {
             ))}
             . A price change is the maker’s own listing changing, not the middle price across hosts;
             a percentage compares prices blended as three input tokens for every output token.
-            Changes count from when the site began keeping this record, so older ones are not
-            listed.{' '}
+            “Within margin” marks a new leader whose lead is inside the range its publisher gives
+            for its score: the next model could still pass it as more votes come in. Changes count
+            from when the site began keeping this record, so older ones are not listed.{' '}
             <a href="/changes.xml">
               <Rss size={13} aria-hidden="true" /> RSS feed
             </a>

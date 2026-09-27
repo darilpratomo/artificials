@@ -47,6 +47,18 @@ export const BENCHMARK_DOMAINS = [
   'image',
 ] as const;
 export type BenchmarkDomain = (typeof BENCHMARK_DOMAINS)[number] | 'overall';
+/** Each skill area's name, as pages and link previews show it. */
+export const DOMAIN_LABELS: Record<BenchmarkDomain, string> = {
+  overall: 'Overall',
+  coding: 'Coding',
+  math: 'Math',
+  knowledge: 'Knowledge',
+  agentic: 'Agents',
+  language: 'Language',
+  data: 'Data analysis',
+  reasoning: 'Reasoning',
+  image: 'Image generation',
+};
 export interface BenchmarkCategory {
   id: string;
   name: string;

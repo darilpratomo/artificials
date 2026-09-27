@@ -60,6 +60,24 @@ test('a test’s page ranks every model and credits its publisher', async ({ pag
   }
 });
 
+test('a test with published ranges says how many models sit inside the leader’s', async ({
+  page,
+}) => {
+  const test = (await (
+    await page.request.get('/data/models/test-pages/arena-text.json')
+  ).json()) as TestPage;
+  await page.goto('/tests/arena-text');
+  const tile = page.locator('.test-glance .glance-tile').first();
+  await expect(tile.locator('.test-near')).toHaveText(
+    test.nearTop
+      ? `${test.nearTop} ${test.nearTop === 1 ? 'other model' : 'other models'} within its margin`
+      : 'No other model within its margin',
+  );
+  await expect(page.locator('.test-leaders .test-margin')).toHaveCount(
+    test.leaders.filter((change) => change.withinMargin).length,
+  );
+});
+
 test('an unknown test says so', async ({ page }) => {
   await page.goto('/tests/not-a-test-0000');
   await expect(page.getByRole('heading', { name: 'We couldn’t find this test.' })).toBeVisible();
@@ -117,4 +135,14 @@ test('test pages are in the initial HTML', async ({ request }) => {
   expect(html).toContain('<h1 class="test-title">GPQA Diamond</h1>');
   const index = await (await request.get('/tests')).text();
   expect(index).toContain('href="/tests/gpqa-diamond"');
+  // Each test and the list have link previews of their own.
+  for (const [page, image] of [
+    [html, '/og/tests/gpqa-diamond.png'],
+    [index, '/og/tests.png'],
+  ]) {
+    expect(page).toContain(`<meta property="og:image" content="https://artificials.net${image}">`);
+    const card = await request.get(image);
+    expect(card.ok(), image).toBe(true);
+    expect(card.headers()['content-type']).toBe('image/png');
+  }
 });
