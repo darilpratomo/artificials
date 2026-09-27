@@ -156,16 +156,16 @@
   font-weight: 550;
   white-space: nowrap;
 }
-.test-rank {
-  white-space: nowrap;
-}
 .test-range {
   display: block;
   color: var(--profile-muted);
   font-size: 12.5px;
 }
 .test-page .test-results td[data-label='Rank'] {
-  width: 76px;
+  width: 84px;
+}
+.test-page .test-results .rank-chip {
+  min-width: 58px;
 }
 .test-more {
   margin-top: 16px;
@@ -240,7 +240,7 @@
   }
   /* A result in two lines: rank, model and score, then the maker. */
   .test-page .test-results tr {
-    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-columns: 58px minmax(0, 1fr) auto;
     grid-template-areas:
       'rank model score'
       '. maker score';

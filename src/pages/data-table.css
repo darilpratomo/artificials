@@ -35,17 +35,28 @@
   color: var(--profile-ink);
   font-weight: 550;
 }
-/* The top spot, on gold. The pill's padding is taken back by its margins, so the rank keeps
-   exactly the place of the ranks below it; the text stays neutral. */
-.rank-first {
-  margin: 0 -9px;
+/* Every rank is a chip of one shape, so the column stays even; the top spot's chip is gold.
+   The text stays neutral. */
+.rank-chip {
+  display: inline-block;
+  min-width: 48px;
   padding: 3px 9px;
+  border: 1px solid #2a2b33;
   border-radius: 99px;
+  background: #16171c;
+  color: var(--profile-ink-2);
+  font-size: 13.5px;
+  font-weight: 550;
+  line-height: 1.35;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.rank-chip.is-first {
+  border-color: rgb(226 186 86 / 0.6);
   background: linear-gradient(135deg, rgb(232 196 104 / 0.26), rgb(176 132 40 / 0.2));
-  box-shadow: inset 0 0 0 1px rgb(226 186 86 / 0.6);
   color: #fff;
   font-weight: 650;
-  white-space: nowrap;
 }
 @media (max-width: 720px) {
   .data-table thead {

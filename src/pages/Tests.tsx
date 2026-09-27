@@ -472,10 +472,10 @@ function counted(count: number, one: string, many: string) {
   return `${whole(count)} ${count === 1 ? one : many}`;
 }
 
-/** A rank; the top spot sits on gold, its number in line with the ranks below. */
+/** A rank as a chip, all of one shape; the top spot's is gold. */
 function Rank({ rank, total }: { rank: number; total?: number }) {
   return (
-    <span className={rank === 1 ? 'rank-first' : 'test-rank'}>
+    <span className={`rank-chip${rank === 1 ? ' is-first' : ''}`}>
       #{whole(rank)}
       {total ? ` of ${whole(total)}` : ''}
     </span>

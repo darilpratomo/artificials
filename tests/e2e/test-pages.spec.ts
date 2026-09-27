@@ -45,10 +45,18 @@ test('a test’s page ranks every model and credits its publisher', async ({ pag
   await expect(page.locator('.test-source')).toContainText(detail.sourceInfo.license);
   const rows = page.locator('.test-results tbody tr');
   await expect(rows).toHaveCount(Math.min(25, detail.rows.length));
-  // The top spot sits on gold, with no icon, so its number lines up with the ranks below.
+  // Every rank is a chip of one width, the top spot's gold, with no icon: the column stays even.
   const firsts = detail.rows.slice(0, 25).filter((row) => row.rank === 1).length;
-  await expect(page.locator('.test-results .rank-first')).toHaveCount(firsts);
+  await expect(page.locator('.test-results .rank-chip.is-first')).toHaveCount(firsts);
   await expect(page.locator('.test-results td[data-label="Rank"] svg')).toHaveCount(0);
+  const chips = await page.locator('.test-results .rank-chip').evaluateAll((elements) =>
+    elements.slice(0, 12).map((element) => {
+      const box = element.getBoundingClientRect();
+      return [Math.round(box.left), Math.round(box.width)];
+    }),
+  );
+  expect(new Set(chips.map(([left]) => left)).size).toBe(1);
+  expect(new Set(chips.map(([, width]) => width)).size).toBe(1);
   if (detail.rows.length > 25) {
     await page.getByRole('button', { name: `Show all ${detail.models} models` }).click();
     await expect(rows).toHaveCount(detail.rows.length);

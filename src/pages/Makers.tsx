@@ -407,7 +407,7 @@ function MakerDetail({ maker, others }: { maker: MakerPage; others: MakerDirecto
                   </td>
                   <td data-label="Score">{score(result.score, result.unit)}</td>
                   <td data-label="Rank">
-                    <span className={result.rank === 1 ? 'rank-first' : 'maker-rank'}>
+                    <span className={`rank-chip${result.rank === 1 ? ' is-first' : ''}`}>
                       #{whole(result.rank)} of {whole(result.total)}
                     </span>
                   </td>
