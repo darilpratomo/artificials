@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
@@ -26,9 +27,9 @@ test('the journey connects interactive representations, generation, training and
   // several chapters at once. Keep ambient/interactive animation enabled while
   // testing the controls; chapter-link scrolling is covered separately below.
   await page.addStyleTag({ content: 'html { scroll-behavior: auto !important; }' });
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Inside theintelligence.');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Between the question');
   await expect(page.locator('.ai-chapter')).toHaveCount(8);
-  await page.getByRole('link', { name: 'Enter the model' }).click();
+  await page.getByRole('link', { name: 'Explore the hands-on labs' }).click();
   await page.getByRole('button', { name: 'Code', exact: true }).click();
   await expect(page.locator('.ai-input-sentence')).toHaveText('print("Hello, world!")');
   await page.getByRole('button', { name: 'Inspect token 3: Hello', exact: true }).click();
@@ -73,6 +74,7 @@ test('keyboard controls, motion preferences and responsive layout remain usable'
   page,
 }) => {
   await page.goto('/how-ai-works');
+  await page.addStyleTag({ content: 'html { scroll-behavior: auto !important; }' });
   const motion = page.locator('.ai-motion-control');
   await motion.click();
   await expect(page.locator('.ai-story')).toHaveAttribute('data-paused', 'true');
@@ -81,9 +83,11 @@ test('keyboard controls, motion preferences and responsive layout remain usable'
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(motion).toBeDisabled();
   await expect(page.locator('.ai-story')).toHaveAttribute('data-paused', 'true');
-  expect(
-    await page.locator('.ai-core-sphere svg').evaluate((el) => getComputedStyle(el).animationName),
-  ).toBe('none');
+  await expect(page.locator('.sj-track')).toHaveAttribute('data-reduced', 'true');
+  await expect(page.locator('.sj-transcript')).toHaveAttribute('open', '');
+  await page.getByRole('button', { name: 'Stage 4: Attention', exact: true }).click();
+  await expect(page.locator('.sj-track')).toHaveAttribute('data-step', '3');
+  await expect(page.locator('.sj-narrative')).toContainText('Context makes');
   await page.locator('.ai-story-controls a[href="#learning"]').focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/#learning$/);
@@ -102,6 +106,93 @@ test('keyboard controls, motion preferences and responsive layout remain usable'
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
     .analyze();
   expect(results.violations).toEqual([]);
+});
+
+test('scroll advances the actual drawing, holds at rest, and reconstructs the same frame in reverse', async ({
+  page,
+}) => {
+  await page.goto('/how-ai-works');
+  const track = page.locator('.sj-track');
+  await expect(track).toHaveAttribute('data-ready', 'true');
+  const moveTo = async (progress: number) => {
+    const goal = await page.evaluate((p) => {
+      const track = document.querySelector<HTMLElement>('.sj-track')!;
+      const pin = document.querySelector<HTMLElement>('.sj-pin')!;
+      const inset = parseFloat(getComputedStyle(pin).top);
+      const start = track.getBoundingClientRect().top + scrollY - inset;
+      const distance = track.offsetHeight - pin.offsetHeight;
+      window.scrollTo({ top: start + p * distance, behavior: 'instant' });
+      return Math.max(0, Math.min(1, (scrollY - start) / distance));
+    }, progress);
+    await expect
+      .poll(async () => Number(await track.getAttribute('data-progress')))
+      .toBeCloseTo(goal, 4);
+    // Wait for the deterministic final frame, rather than capturing during easing.
+    await expect(track).toHaveAttribute('data-progress', goal.toFixed(5));
+  };
+  const fingerprint = async () =>
+    createHash('sha256')
+      .update(
+        await page
+          .locator('.sj-instrument canvas')
+          .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL()),
+      )
+      .digest('hex');
+  await moveTo(0.23);
+  const original = await fingerprint();
+  await moveTo(0.58);
+  expect(await fingerprint()).not.toBe(original);
+  await expect(page.locator('.sj-narrative')).toContainText('Layer by layer');
+  await moveTo(0.23);
+  expect(await fingerprint()).toBe(original);
+  await page.waitForTimeout(250);
+  expect(await fingerprint()).toBe(original);
+  await moveTo(1);
+  await expect(page.locator('.sj-track')).toHaveAttribute('data-step', '7');
+  await expect(page.locator('.sj-source')).toHaveAttribute(
+    'href',
+    'https://science.nasa.gov/moon/moonlight/',
+  );
+});
+
+test('the pinned experience and its controls fit small portrait and landscape viewports', async ({
+  page,
+}) => {
+  await page.goto('/how-ai-works');
+  await expect(page.locator('.sj-track')).toHaveAttribute('data-ready', 'true');
+  for (const [width, height] of [
+    [320, 568],
+    [390, 844],
+    [768, 1024],
+    [844, 390],
+    [1440, 1000],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await page.evaluate(() => {
+      const track = document.querySelector<HTMLElement>('.sj-track')!;
+      const pin = document.querySelector<HTMLElement>('.sj-pin')!;
+      scrollTo({
+        top:
+          track.getBoundingClientRect().top +
+          scrollY -
+          parseFloat(getComputedStyle(pin).top) +
+          (track.offsetHeight - pin.offsetHeight) * 0.98,
+        behavior: 'instant',
+      });
+    });
+    await expect(page.locator('.sj-track')).toHaveAttribute('data-step', '7');
+    const layout = await page.evaluate(() => ({
+      overflow: document.documentElement.scrollWidth > innerWidth + 1,
+      controls: document.querySelector('.sj-bottomline')!.getBoundingClientRect().bottom,
+      source: document.querySelector('.sj-source')!.getBoundingClientRect().bottom,
+      canvas: document.querySelector('.sj-instrument')!.getBoundingClientRect().height,
+      viewport: innerHeight,
+    }));
+    expect(layout.overflow).toBe(false);
+    expect(layout.controls).toBeLessThanOrEqual(layout.viewport + 1);
+    expect(layout.source).toBeLessThan(layout.controls);
+    expect(layout.canvas).toBeGreaterThan(100);
+  }
 });
 
 test('the complete chapter text and canonical link are available without JavaScript', async ({

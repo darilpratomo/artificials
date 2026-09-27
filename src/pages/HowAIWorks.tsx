@@ -28,6 +28,7 @@ import {
   trainingStep,
 } from '../lib/ai-lab';
 import './how-ai-works.css';
+import { SignalJourney } from '../components/ai-journey/SignalJourney';
 
 const CHAPTERS = [
   ['tokens', 'Tokens'],
@@ -157,55 +158,6 @@ function useStoryMotion(paused: boolean) {
     };
   }, [paused]);
   return { root, active, reduced };
-}
-
-function NeuralCore() {
-  return (
-    <div className="ai-core" aria-hidden="true">
-      <div className="ai-core-grid" />
-      <div className="ai-orbit ai-orbit-one">
-        <i />
-      </div>
-      <div className="ai-orbit ai-orbit-two">
-        <i />
-      </div>
-      <div className="ai-orbit ai-orbit-three">
-        <i />
-      </div>
-      <div className="ai-core-sphere">
-        <svg viewBox="0 0 360 360">
-          {Array.from({ length: 12 }, (_, i) => (
-            <ellipse
-              key={i}
-              cx="180"
-              cy="180"
-              rx={24 + i * 12}
-              ry="157"
-              transform={`rotate(${i * 15} 180 180)`}
-            />
-          ))}
-          {Array.from({ length: 28 }, (_, i) => {
-            const angle = i * 2.39996;
-            const radius = 36 + ((i * 31) % 120);
-            return (
-              <circle
-                key={i}
-                className="ai-core-node"
-                cx={180 + Math.cos(angle) * radius}
-                cy={180 + Math.sin(angle) * radius}
-                r={i % 4 === 0 ? 3 : 1.5}
-                style={variable({ '--delay': `${i * -0.19}s` })}
-              />
-            );
-          })}
-        </svg>
-        <div className="ai-core-glow" />
-      </div>
-      <span className="ai-orbit-label ai-orbit-label-one">PATTERNS</span>
-      <span className="ai-orbit-label ai-orbit-label-two">CONTEXT</span>
-      <span className="ai-orbit-label ai-orbit-label-three">PROBABILITIES</span>
-    </div>
-  );
 }
 
 const TOKEN_EXAMPLES = [
@@ -762,40 +714,11 @@ export default function HowAIWorks() {
       <div className="ai-reading-progress" aria-hidden="true">
         <i />
       </div>
-      <section className="ai-intro ai-scene" aria-labelledby="ai-story-title">
-        <div className="ai-intro-noise" aria-hidden="true" />
-        <div className="ai-intro-copy">
-          <span className="ai-kicker">
-            <span className="ai-signal" /> ARTIFICIALS / AN INTERACTIVE FIELD GUIDE
-          </span>
-          <h1 id="ai-story-title">
-            Inside the
-            <br />
-            <span>intelligence.</span>
-          </h1>
-          <p>
-            From a few words to a world of possibilities.
-            <br className="ai-desktop-break" /> Follow the signal. See how AI works.
-          </p>
-          <a className="ai-button ai-start" href="#tokens">
-            Enter the model <ArrowDown size={17} />
-          </a>
-          <div className="ai-intro-facts">
-            <span>08 chapters</span>
-            <span>07 hands-on experiments</span>
-            <span>No account. Just curiosity.</span>
-          </div>
-        </div>
-        <NeuralCore />
-        <div className="ai-intro-bottom">
-          <span>
-            INPUT <i /> REPRESENTATION <i /> OUTPUT
-          </span>
-          <span>
-            SCROLL TO EXPLORE <ArrowDown size={13} />
-          </span>
-        </div>
-      </section>
+      <SignalJourney
+        paused={paused}
+        reduced={reduced}
+        onPause={() => setPaused((value) => !value)}
+      />
 
       <div className="ai-story-controls">
         <nav aria-label="AI journey chapters">

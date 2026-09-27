@@ -117,7 +117,7 @@ const pages: Record<string, [string, string]> = {
   ],
   '/how-ai-works': [
     'How AI works — An interactive visual guide',
-    'Follow the signal through AI: tokens, attention, prediction, training, retrieval, and beyond. Explore eight animated chapters and seven hands-on experiments.',
+    'Scroll forward and backward through an AI answer: tokens, attention, layers, and prediction. Then explore eight in-depth chapters and seven hands-on experiments.',
   ],
   '/about': [
     'About Artificials',
