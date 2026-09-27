@@ -11,6 +11,7 @@ import type { SearchIndex } from '../../shared/search';
 import type { MakerDirectory, MakerPage } from '../../shared/maker-pages';
 import type { TestDirectory, TestPage } from '../../shared/test-pages';
 import type { WeekDirectory, WeekPage } from '../../shared/weekly';
+import type { Costs } from '../../shared/costs';
 
 export type {
   Explorer,
@@ -61,6 +62,7 @@ export type {
   WeekRelease,
   WeekSummary,
 } from '../../shared/weekly';
+export type { Costs, CostRow } from '../../shared/costs';
 export type { Board, BoardCategory, BoardEntry, BoardModel } from '../../shared/arena';
 
 const requests = new Map<string, Promise<unknown>>();
@@ -85,6 +87,7 @@ const isTestList = (value: TestDirectory) => value?.version === 1 && Array.isArr
 const isTestPage = (value: TestPage) => value?.version === 1 && Array.isArray(value.rows);
 const isWeeks = (value: WeekDirectory) => value?.version === 1 && Array.isArray(value.weeks);
 const isWeek = (value: WeekPage) => value?.version === 1 && Array.isArray(value.releases);
+const isCosts = (value: Costs) => value?.version === 1 && Array.isArray(value.rows);
 
 /**
  * Prerendered pages carry their data inline, so the first view needs no extra
@@ -276,4 +279,10 @@ export function useWeek(week: string, enabled: boolean, attempt = 0, initial?: W
     attempt,
     initial?.week === week ? initial : undefined,
   );
+}
+
+/** Every priced model's input and output price, for the cost calculator. */
+export function useCosts(attempt = 0, initial?: Costs) {
+  embedded('costs.json', 'costs-data', isCosts);
+  return useFile<Costs>('costs.json', isCosts, true, attempt, initial);
 }

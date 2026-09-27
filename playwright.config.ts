@@ -35,6 +35,7 @@ export default defineConfig({
         'makers.spec.ts',
         'test-pages.spec.ts',
         'weekly.spec.ts',
+        'cost.spec.ts',
       ],
       use: { ...devices['iPhone 13'], defaultBrowserType: 'webkit' },
     },

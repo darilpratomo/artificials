@@ -5333,7 +5333,7 @@ input[type='radio'] {
 /* A long menu grows across as well as down: each section is a column, and a menu of one
    section lays its pages out in two. The [hidden] guard keeps a closed menu hidden. */
 .nav-group-panel.is-sectioned {
-  width: min(800px, calc(100vw - 48px));
+  width: min(calc(var(--sections) * 262px + 16px), calc(100vw - 48px));
 }
 .nav-group-panel.is-sectioned:not([hidden]) {
   display: grid;

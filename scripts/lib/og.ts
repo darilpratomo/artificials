@@ -528,3 +528,21 @@ export function weekCard(
     credit,
   );
 }
+
+/** The cost calculator's card: the headline and a month of chat replies on the top models. */
+export function costCard(
+  workload: string,
+  rows: { name: string; makerId: string; value: string }[],
+  credit: string,
+) {
+  return headlineCard(
+    'AI model cost calculator',
+    ['What it costs.', 'Model by model.'],
+    'Describe a typical request and how many you send: every model’s monthly cost, next to its capability index.',
+    {
+      title: workload,
+      rows: rows.map(({ name, makerId, value }) => ({ makerIds: [makerId], name, value })),
+    },
+    credit,
+  );
+}

@@ -2,6 +2,7 @@ import {
   Activity,
   BookOpen,
   Building,
+  Calculator,
   CalendarDays,
   ChartColumn,
   ChartPie,
@@ -160,6 +161,7 @@ export const NAV_GROUPS: NavGroupItem[] = [
     label: 'Resources',
     sections: [
       {
+        label: 'Choose a model',
         items: [
           {
             to: '/model-finder',
@@ -167,6 +169,17 @@ export const NAV_GROUPS: NavGroupItem[] = [
             description: 'The best model for your task and budget',
             icon: Target,
           },
+          {
+            to: '/cost-calculator',
+            label: 'Cost calculator',
+            description: 'What your workload costs on each model',
+            icon: Calculator,
+          },
+        ],
+      },
+      {
+        label: 'Learn and tools',
+        items: [
           {
             to: '/news',
             label: 'Insights and guides',

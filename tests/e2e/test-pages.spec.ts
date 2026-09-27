@@ -114,9 +114,10 @@ test('the rankings, maker pages and search lead to tests', async ({ page }) => {
   await page.getByRole('button', { name: 'Search', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Search Artificials' });
   await dialog.getByRole('combobox').fill('gpqa');
+  // The search loads its lists when it first opens, which takes longer under a full test run.
   await expect(
     dialog.getByRole('group', { name: 'Tests' }).getByRole('option').first(),
-  ).toContainText('GPQA Diamond');
+  ).toContainText('GPQA Diamond', { timeout: 15_000 });
 });
 
 test('test pages are accessible', async ({ page }) => {

@@ -455,6 +455,19 @@ search) and `test-pages/<id>.json`. Pages are prerendered with their data inline
 page, maker pages and the "What changed" page link to them. A chart's reference line, such as
 random guessing, is drawn only inside the chart's axis and is named in a key above the plot.
 
+## Cost calculator
+
+`/cost-calculator` multiplies a workload by every priced model's reference price
+(`shared/costs.ts`, `costs.json`): tokens sent and written per request, requests per day and
+the share of input served from cache, for a month of 30 days. The prices are each model's
+maker's own paid listing, or else the middle paid listing across hosts; cached input uses a
+model's cached price where it lists one and its full price where it does not. The list covers
+models from known makers that the maker sells, several hosts list or a test covers, with a paid
+price, and shows those on the capability index unless every priced model is asked for. The
+figures are calculated by Artificials and say so; batch discounts, free tiers, taxes and minimum
+fees are not included. The workload lives in the address (`?in=1500&out=500&day=100&cache=0`),
+so a calculation can be shared, and a model's own calculator links to it with its numbers.
+
 ## Weekly recap
 
 `/weekly/{monday}` is one week, Monday to Sunday (UTC), from the same events as `/changes` and

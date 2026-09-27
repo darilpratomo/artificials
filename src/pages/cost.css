@@ -1,0 +1,143 @@
+/* The cost calculator: a workload, then every model's cost for it, on the model page's cards. */
+.cost-page > section,
+.cost-page > .dash-state {
+  margin-bottom: 20px;
+}
+.cost-page .cost-fields {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+/* Fields keep their inputs level when one note runs to two lines. */
+.cost-page .cost-fields label {
+  align-content: start;
+}
+.cost-fields small {
+  color: var(--profile-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.cost-glance {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.cost-glance a {
+  color: var(--profile-ink);
+  font-weight: 550;
+}
+.cost-glance a:hover,
+.cost-table a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.cost-note {
+  margin: 0 0 20px;
+  padding: 18px 20px;
+  border: 1px dashed var(--profile-line);
+  border-radius: 14px;
+  color: var(--profile-ink-2);
+  font-size: 14.5px;
+}
+.cost-table-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px 24px;
+}
+.cost-search {
+  flex: 0 1 320px;
+}
+.cost-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 16px;
+}
+.cost-model {
+  display: inline-grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+.cost-model img {
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  border-radius: 7px;
+}
+.cost-model > span {
+  display: grid;
+  min-width: 0;
+}
+.cost-model small {
+  color: var(--profile-muted);
+  font-size: 12.5px;
+  font-weight: 400;
+}
+.cost-table b {
+  color: var(--profile-ink);
+  font-weight: 650;
+}
+.cost-none {
+  color: var(--profile-muted);
+}
+.cost-more {
+  margin-top: 16px;
+}
+
+@media (max-width: 1100px) {
+  .cost-page .cost-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .cost-glance {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cost-search {
+    flex-basis: 100%;
+  }
+  .cost-controls .dash-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+  /* A model in two lines: its name and monthly cost, then its index, prices and cost per request. */
+  .cost-page .cost-table tr {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.3fr) minmax(0, 0.9fr);
+    grid-template-areas:
+      'name name month'
+      'index price request';
+  }
+  .cost-page .cost-table td {
+    white-space: nowrap;
+  }
+  .cost-page .cost-table tbody th {
+    grid-area: name;
+  }
+  .cost-page .cost-table td[data-label='Per month'] {
+    grid-area: month;
+    text-align: right;
+  }
+  .cost-page .cost-table td[data-label='Per month']::before {
+    content: none;
+  }
+  .cost-page .cost-table td[data-label='Capability index'] {
+    grid-area: index;
+  }
+  .cost-page .cost-table td[data-label='Capability index']::before {
+    content: 'Index';
+  }
+  .cost-page .cost-table td[data-label='Price per 1M'] {
+    grid-area: price;
+  }
+  .cost-page .cost-table td[data-label='Per request'] {
+    grid-area: request;
+  }
+}
+@media (max-width: 560px) {
+  .cost-page .cost-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

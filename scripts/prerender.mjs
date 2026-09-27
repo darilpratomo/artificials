@@ -78,6 +78,7 @@ try {
     makers: 'Makers',
     tests: 'Tests',
     weekly: 'Weekly',
+    'cost-calculator': 'Cost',
     compare: 'Compare',
     news: 'Learn',
     tools: 'Tools',
@@ -156,6 +157,11 @@ try {
   const makersInline = `<script type="application/json" id="makers-data">${makersText
     .trim()
     .replace(/</g, '\\u003c')}</script>`;
+  const costsText = await readFile('dist/data/models/costs.json', 'utf8');
+  const costs = JSON.parse(costsText);
+  const costsInline = `<script type="application/json" id="costs-data">${costsText
+    .trim()
+    .replace(/</g, '\\u003c')}</script>`;
   const weeksText = await readFile('dist/data/models/weekly.json', 'utf8');
   const weekList = JSON.parse(weeksText);
   const weeksInline = `<script type="application/json" id="weekly-data">${weeksText
@@ -195,6 +201,7 @@ try {
     const withChanges = path === '/changes';
     const withMakers = path === '/makers';
     const withTests = path === '/tests';
+    const withCosts = path === '/cost-calculator';
     // /weekly is the latest week, which its dated address names for search engines.
     const latestWeek = path === '/weekly' ? JSON.parse(weekFiles.get(weekList.latest)) : undefined;
     const html = template
@@ -221,13 +228,16 @@ try {
           testList: withTests ? testList : undefined,
           weekList: latestWeek ? weekList : undefined,
           week: latestWeek,
+          costs: withCosts ? costs : undefined,
         })}</div>${withData ? inline : ''}${withCoding ? codingInline : ''}${
           withTrends ? trendsInline : ''
         }${withImages ? imagesInline : ''}${withVideos ? videosInline : ''}${
           withFinder ? finderInline : ''
         }${withComparisons ? comparisonsInline : ''}${withChanges ? changesInline : ''}${
           withMakers ? makersInline : ''
-        }${withTests ? testsInline : ''}${latestWeek ? weeksInline + weekInline(weekList.latest) : ''}`,
+        }${withTests ? testsInline : ''}${latestWeek ? weeksInline + weekInline(weekList.latest) : ''}${
+          withCosts ? costsInline : ''
+        }`,
       );
     const destination = path === '/' ? 'dist/index.html' : `dist${path}.html`;
     await mkdir(dirname(destination), { recursive: true });

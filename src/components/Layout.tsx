@@ -368,6 +368,7 @@ export function Layout() {
               <Link to="/news">Insights & guides</Link>
               <Link to="/learn">Learn AI</Link>
               <Link to="/tools">Free file tools</Link>
+              <Link to="/cost-calculator">Cost calculator</Link>
               <Link to="/about">About Artificials</Link>
             </div>
           </div>

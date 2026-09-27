@@ -1020,6 +1020,15 @@
   outline: 2px solid #7fb2ff;
   outline-offset: 2px;
 }
+.calc-compare {
+  gap: 7px;
+  margin-top: 14px;
+  color: var(--profile-ink);
+}
+.calc-compare:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .calc-fields {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

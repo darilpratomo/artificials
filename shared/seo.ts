@@ -17,6 +17,7 @@ const PAGE_IMAGES: Record<string, string> = {
   '/compare': COMPARE_IMAGE,
   '/makers': SITE_URL + '/og/makers.png',
   '/tests': SITE_URL + '/og/tests.png',
+  '/cost-calculator': SITE_URL + '/og/cost-calculator.png',
 };
 const pages: Record<string, [string, string]> = {
   '/tools': [
@@ -83,6 +84,10 @@ const pages: Record<string, [string, string]> = {
   '/changes': [
     'What changed in AI models',
     'New AI model releases, listed price changes, new leaders on each benchmark and models joining the capability index over the last 30 days, newest first.',
+  ],
+  '/cost-calculator': [
+    'AI model cost calculator',
+    'Describe a typical request and how many you send, and see what it costs each month on every AI model, next to its capability index.',
   ],
   '/weekly': [
     'The week in AI models',

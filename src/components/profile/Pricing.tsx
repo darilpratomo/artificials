@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { Select } from '../Select';
 import {
   blendedPrice,
@@ -9,19 +11,7 @@ import {
 } from '../../lib/profiles';
 import { approxWords, cost, day, money, tokens, whole } from './format';
 import { Explainer, Sources } from './parts';
-
-const PRESETS = [
-  { id: 'chat', label: 'Chat reply', input: 1500, output: 500 },
-  { id: 'report', label: 'Summarize a long report', input: 30000, output: 1000 },
-  { id: 'code', label: 'Coding task', input: 8000, output: 2000 },
-  { id: 'custom', label: 'Custom', input: 0, output: 0 },
-] as const;
-const LIMIT = 10_000_000;
-
-function clampInteger(value: string, maximum = LIMIT) {
-  const number = Math.floor(Number(value));
-  return Number.isFinite(number) ? Math.min(maximum, Math.max(0, number)) : 0;
-}
+import { LIMIT, PRESETS, clampInteger } from '../../lib/workload';
 
 export default function Pricing({
   profile,
@@ -276,6 +266,12 @@ export default function Pricing({
           {profile.reasoning &&
             ' Models that think before answering can use extra output tokens for their reasoning.'}
         </p>
+        <Link
+          className="text-link calc-compare"
+          to={`/cost-calculator?in=${input}&out=${output}&day=${perDay}`}
+        >
+          Compare this workload across every model <ArrowRight size={15} aria-hidden="true" />
+        </Link>
       </section>
 
       {chart.length > 1 && samePrice && (

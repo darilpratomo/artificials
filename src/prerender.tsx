@@ -19,6 +19,7 @@ import Changes from './pages/Changes';
 import Makers from './pages/Makers';
 import Tests from './pages/Tests';
 import Weekly from './pages/Weekly';
+import Cost from './pages/Cost';
 import Learn from './pages/Learn';
 import Tools from './pages/Tools';
 import Academy from './pages/Academy';
@@ -39,6 +40,7 @@ import type {
   TestPage,
   WeekDirectory,
   WeekPage,
+  Costs,
 } from './lib/overview';
 import type { ComparisonData, Comparisons } from './lib/compare';
 
@@ -60,6 +62,7 @@ export interface PageData {
   test?: TestPage;
   weekList?: WeekDirectory;
   week?: WeekPage;
+  costs?: Costs;
 }
 
 export function renderPage(
@@ -81,6 +84,7 @@ export function renderPage(
     test,
     weekList,
     week,
+    costs,
   }: PageData = {},
 ) {
   return renderToString(
@@ -107,6 +111,7 @@ export function renderPage(
             <Route path="tests/:id" element={<Tests directory={testList} test={test} />} />
             <Route path="weekly" element={<Weekly directory={weekList} week={week} />} />
             <Route path="weekly/:week" element={<Weekly directory={weekList} week={week} />} />
+            <Route path="cost-calculator" element={<Cost initial={costs} />} />
             <Route path="compare" element={<Compare featured={comparisons} />} />
             <Route path="compare/:pair" element={<Compare initial={comparison} />} />
             <Route path="news" element={<Learn />} />

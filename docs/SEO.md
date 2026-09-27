@@ -29,6 +29,8 @@ require, and none states a date.
 - `/og/makers/{slug}.png`: one per maker page, with its best model on the capability index, its
   open-weights models and its newest release, figures from Epoch AI and models.dev only, so the
   card credits both in full. `/og/makers.png` serves `/makers`.
+- `/og/cost-calculator.png`: the calculator's card, with a month of chat replies on the top of
+  the capability index.
 - `/og/weekly/{monday}.png`: one per week, with its dates, figures and top new releases,
   crediting the catalog and the tests behind its events; `/weekly` uses the latest week's.
 - `/og/tests/{id}.png`: one per test page, with its skill area in the site's skill-area colour,

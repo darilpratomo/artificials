@@ -22,7 +22,10 @@ import {
   testCard,
   testsCard,
   weekCard,
+  costCard,
 } from './lib/og.ts';
+import { workloadCost } from '../shared/costs.ts';
+import { PRESETS } from '../src/lib/workload.ts';
 import { weekRange, weekSentence } from '../shared/week-label.ts';
 import { DOMAIN_LABELS } from '../shared/benchmarks.ts';
 import { comparisonPath } from '../shared/compare.ts';
@@ -297,6 +300,25 @@ for (const summary of weeks) {
   );
   await write(`weekly/${week.week}.png`, png);
 }
+
+// The cost calculator: the default workload, a chat reply 100 times a day, on the top models.
+const costs = await read('costs.json');
+const chat = PRESETS.find((preset) => preset.id === 'chat');
+await write(
+  'cost-calculator.png',
+  await costCard(
+    `${chat.label}, 100 a day, per month`,
+    costs.rows
+      .filter((row) => row[7] !== null)
+      .slice(0, 5)
+      .map((row) => ({
+        name: row[1],
+        makerId: row[2],
+        value: price(workloadCost(row, chat.input, chat.output) * 100 * 30),
+      })),
+    credit(['epoch']),
+  ),
+);
 
 console.log(
   `Link previews: the default card, the comparison card, ${comparisons} comparisons, ${models} models, ${makers.length} makers, ${tests.length} tests, ${weeks.length} weeks and the makers and tests lists.`,

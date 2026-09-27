@@ -21,6 +21,7 @@ import { buildChanges } from '../shared/changes.ts';
 import { buildMakers } from '../shared/maker-pages.ts';
 import { buildTests } from '../shared/test-pages.ts';
 import { buildWeeks } from '../shared/weekly.ts';
+import { buildCosts } from '../shared/costs.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
@@ -183,6 +184,11 @@ const changes = buildChanges({
   until: updatedAt.slice(0, 10),
 });
 await writeFile(resolve(staging, 'changes.json'), JSON.stringify(changes) + '\n');
+// Every priced model for the cost calculator.
+await writeFile(
+  resolve(staging, 'costs.json'),
+  JSON.stringify(buildCosts(profiles, overview)) + '\n',
+);
 // The week in AI models: one page per week since the record began.
 const weeks = buildWeeks({
   history,
