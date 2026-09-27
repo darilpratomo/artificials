@@ -288,7 +288,9 @@ test('rankings distinguish context capacity, price, and missing data', async ({ 
 
 test('editorial search, primary sources and privacy preferences', async ({ page }) => {
   await page.goto('/news');
-  await page.getByRole('textbox', { name: 'Search articles', exact: true }).fill('benchmark');
+  await page
+    .getByRole('textbox', { name: 'Search articles', exact: true })
+    .fill('benchmark is a signal');
   await expect(page.locator('.learn-card')).toHaveCount(1);
   await page.locator('.learn-card').click();
   await expect(
