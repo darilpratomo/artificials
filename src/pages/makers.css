@@ -116,14 +116,7 @@
   background: var(--domain);
 }
 .maker-rank {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   white-space: nowrap;
-}
-.maker-rank.is-first {
-  color: var(--profile-ink);
-  font-weight: 600;
 }
 .maker-none {
   color: var(--profile-muted);

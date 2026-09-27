@@ -1,7 +1,7 @@
-import { useEffect, useId, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
-import type { NavGroupItem } from './navigation';
+import { navItems, type NavGroupItem } from './navigation';
 
 /**
  * A header menu of related pages: a button that shows or hides a list of
@@ -17,7 +17,7 @@ export function NavGroup({ group }: { group: NavGroupItem }) {
   // When the mouse has just opened the menu, the click that follows keeps it open.
   const hovered = useRef(0);
   const id = useId();
-  const current = group.items.some(
+  const current = navItems(group).some(
     (item) => pathname === item.to || pathname.startsWith(`${item.to}/`),
   );
   useEffect(() => setOpen(false), [pathname]);
@@ -75,17 +75,41 @@ export function NavGroup({ group }: { group: NavGroupItem }) {
         {group.label}
         <ChevronDown size={14} aria-hidden="true" />
       </button>
-      <div id={id} className="nav-group-panel" hidden={!open}>
-        <ul>
-          {group.items.map((item) => (
-            <li key={item.to}>
-              <NavLink to={item.to} onClick={() => setOpen(false)}>
-                <span>{item.label}</span>
-                <small>{item.description}</small>
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+      {/* Sections sit side by side, so a long menu grows across as well as down. */}
+      <div
+        id={id}
+        className={`nav-group-panel${group.sections.length > 1 ? ' is-sectioned' : ' is-paired'}`}
+        style={{ '--sections': group.sections.length } as CSSProperties}
+        hidden={!open}
+      >
+        {group.sections.map((section) => (
+          <div
+            key={section.label ?? group.label}
+            role="group"
+            aria-label={section.label ?? group.label}
+          >
+            {section.label && (
+              <p className="nav-group-section" aria-hidden="true">
+                {section.label}
+              </p>
+            )}
+            <ul>
+              {section.items.map((item) => (
+                <li key={item.to}>
+                  <NavLink to={item.to} onClick={() => setOpen(false)}>
+                    <span className="nav-group-icon" aria-hidden="true">
+                      <item.icon size={16} />
+                    </span>
+                    <span className="nav-group-text">
+                      <span>{item.label}</span>
+                      <small>{item.description}</small>
+                    </span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </div>
   );

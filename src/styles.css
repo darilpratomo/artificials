@@ -5330,6 +5330,26 @@ input[type='radio'] {
   height: 14px;
   content: '';
 }
+/* A long menu grows across as well as down: each section is a column, and a menu of one
+   section lays its pages out in two. The [hidden] guard keeps a closed menu hidden. */
+.nav-group-panel.is-sectioned {
+  width: min(800px, calc(100vw - 48px));
+}
+.nav-group-panel.is-sectioned:not([hidden]) {
+  display: grid;
+  grid-template-columns: repeat(var(--sections), minmax(0, 1fr));
+  gap: 0 6px;
+}
+.nav-group-panel.is-paired {
+  width: min(580px, calc(100vw - 48px));
+}
+.nav-group-section {
+  margin: 0;
+  padding: 10px 12px 6px;
+  color: #8e909b;
+  font-size: 12px;
+  font-weight: 550;
+}
 .nav-group-panel ul {
   display: grid;
   gap: 2px;
@@ -5337,14 +5357,37 @@ input[type='radio'] {
   padding: 0;
   list-style: none;
 }
+.nav-group-panel.is-paired ul {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .site-header .nav-group-panel a {
   display: grid;
-  gap: 2px;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
   padding: 10px 12px;
   border-radius: 10px;
   white-space: normal;
 }
-.nav-group-panel a span {
+.nav-group-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #25262e;
+  border-radius: 9px;
+  background: #15161b;
+  color: #c3c6cf;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+.nav-group-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.nav-group-text > span {
   color: #f0f0f3;
   font-size: 14px;
   font-weight: 550;
@@ -5359,6 +5402,12 @@ input[type='radio'] {
 .nav-group-panel a.active {
   background: #1c1d24;
 }
+.nav-group-panel a:hover .nav-group-icon,
+.nav-group-panel a:focus-visible .nav-group-icon,
+.nav-group-panel a.active .nav-group-icon {
+  border-color: #3a3c46;
+  color: #fff;
+}
 @keyframes nav-group-in {
   from {
     opacity: 0;
@@ -5369,7 +5418,8 @@ input[type='radio'] {
   .nav-group-panel {
     animation: none;
   }
-  .nav-group-button svg {
+  .nav-group-button svg,
+  .nav-group-icon {
     transition: none;
   }
 }
@@ -5549,11 +5599,14 @@ input[type='radio'] {
 .mobile-menu-links a:hover {
   border-color: #bccfec70;
 }
-.menu-link-number {
-  font:
-    12px ui-monospace,
-    monospace;
+/* Each page's icon, in place of a number. */
+.menu-link-icon {
+  width: 17px;
+  height: 17px;
   color: #9cabc0;
+}
+.mobile-menu-links a.active .menu-link-icon {
+  color: #e6ecf5;
 }
 .mobile-menu-bottom {
   display: flex;
@@ -5683,6 +5736,10 @@ input[type='radio'] {
     font-size: 14px;
     gap: 5px;
     grid-template-columns: 16px minmax(0, 1fr) 13px;
+  }
+  .menu-link-icon {
+    width: 16px;
+    height: 16px;
   }
   .mobile-menu-bottom {
     padding: 20px 18px;

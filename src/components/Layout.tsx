@@ -13,7 +13,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { ArrowUpRight, ArrowRight, Globe2, Command, Search } from 'lucide-react';
 import { Brand } from './Brand';
 import { NavGroup } from './NavGroup';
-import { NAV_GROUPS, TOP_LINKS } from './navigation';
+import { COMPARE_LINK, NAV_GROUPS, TOP_LINKS } from './navigation';
 
 /** The footer's Intelligence links: the model pages, then the analysis pages, in two columns. */
 const INTELLIGENCE: [to: string, label: string][] = [
@@ -181,13 +181,15 @@ export function Layout() {
     setOpen(false);
     trigger.current?.focus();
   };
-  // The phone menu lists every page, grouped like the header.
+  // The phone menu lists every page, one group for each section of the header's menus.
   const mobileGroups = [
-    {
-      label: 'Explore',
-      items: [...TOP_LINKS, { to: '/compare', label: 'Compare models', description: '' }],
-    },
-    ...NAV_GROUPS,
+    { label: 'Explore', items: [...TOP_LINKS, COMPARE_LINK] },
+    ...NAV_GROUPS.flatMap((group) =>
+      group.sections.map((section) => ({
+        label: section.label ?? group.label,
+        items: section.items,
+      })),
+    ),
   ];
   return (
     <>
@@ -286,9 +288,7 @@ export function Layout() {
                           }
                           onClick={() => setOpen(false)}
                         >
-                          <span className="menu-link-number" aria-hidden="true">
-                            {String(before + index + 1).padStart(2, '0')}
-                          </span>
+                          <item.icon className="menu-link-icon" size={17} aria-hidden="true" />
                           <span>{item.label}</span>
                           <ArrowUpRight size={16} />
                         </NavLink>

@@ -379,10 +379,14 @@ test('main pages are accessible and fit desktop and mobile', async ({ page }, te
   });
   if (testInfo.project.name === 'mobile') {
     await page.getByRole('button', { name: 'Open menu', exact: true }).click();
-    await page
-      .getByRole('navigation', { name: 'Mobile navigation' })
-      .getByRole('link', { name: 'Compare models', exact: true })
-      .click();
+    // Each page in the phone menu has an icon, not a number.
+    const menu = page.getByRole('navigation', { name: 'Mobile navigation' });
+    const links = menu.locator('.mobile-menu-links a');
+    await expect(menu.locator('.mobile-menu-links a svg.menu-link-icon')).toHaveCount(
+      await links.count(),
+    );
+    expect(await links.allInnerTexts()).not.toContainEqual(expect.stringMatching(/^\d{2}/));
+    await menu.getByRole('link', { name: 'Compare models', exact: true }).click();
     await expect(page).toHaveURL(/\/compare$/);
     await expect(page.getByRole('button', { name: 'Open menu', exact: true })).toHaveAttribute(
       'aria-expanded',
@@ -401,6 +405,15 @@ test('header menus group the analysis and resource pages', async ({ page }, test
   await expect(analysis).toHaveAttribute('aria-expanded', 'true');
   const rankings = header.getByRole('link', { name: /^Model rankings/ });
   await expect(rankings).toBeVisible();
+  // The menu grows across in sections, not down in one long column.
+  const sections = header.locator('.nav-group.is-open .nav-group-panel [role="group"]');
+  await expect(sections).toHaveCount(3);
+  const [first, second] = [
+    (await sections.nth(0).boundingBox())!,
+    (await sections.nth(1).boundingBox())!,
+  ];
+  expect(second.x).toBeGreaterThan(first.x + first.width - 1);
+  expect(Math.abs(second.y - first.y)).toBeLessThan(2);
   // Escape closes the menu and returns focus to its button.
   await page.keyboard.press('Escape');
   await expect(analysis).toHaveAttribute('aria-expanded', 'false');

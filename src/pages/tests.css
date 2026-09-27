@@ -157,14 +157,7 @@
   white-space: nowrap;
 }
 .test-rank {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   white-space: nowrap;
-}
-.test-rank.is-first {
-  color: var(--profile-ink);
-  font-weight: 600;
 }
 .test-range {
   display: block;

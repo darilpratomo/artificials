@@ -2,7 +2,7 @@ import academy from './academy-index.json';
 import { ARTICLES } from './content';
 import { staticPages } from './seo';
 import { UTILITIES } from './utilities';
-import { NAV_GROUPS, TOP_LINKS } from '../src/components/navigation';
+import { COMPARE_LINK, NAV_GROUPS, TOP_LINKS, navItems } from '../src/components/navigation';
 import type { MakerSummary } from './maker-pages';
 import type { TestSummary } from './test-pages';
 
@@ -32,7 +32,6 @@ export interface SearchIndex {
 /** Pages the menus do not name, called what a visitor would call them. */
 const NAMES: Record<string, [title: string, description?: string]> = {
   '/': ['Home', 'Leaders, prices and new releases at a glance'],
-  '/compare': ['Compare models', 'Two or three models side by side, with a link to share'],
   '/about': ['About Artificials'],
   '/contact': ['Contact'],
   '/privacy': ['Privacy policy'],
@@ -41,7 +40,7 @@ const NAMES: Record<string, [title: string, description?: string]> = {
 
 export function searchIndex(makers: MakerSummary[] = [], tests: TestSummary[] = []): SearchIndex {
   const menu = new Map(
-    [...TOP_LINKS, ...NAV_GROUPS.flatMap((group) => group.items)].map((item) => [item.to, item]),
+    [...TOP_LINKS, COMPARE_LINK, ...NAV_GROUPS.flatMap(navItems)].map((item) => [item.to, item]),
   );
   const pages: SearchEntry[] = staticPages()
     .filter(({ path }) => !path.startsWith('/tools/'))

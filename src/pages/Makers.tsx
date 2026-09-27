@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { makerColor, makerLogo } from '../../shared/makers';
 import { makerMetadata } from '../../shared/seo';
 import { applyPageMetadata } from '../components/Metadata';
@@ -407,9 +407,8 @@ function MakerDetail({ maker, others }: { maker: MakerPage; others: MakerDirecto
                   </td>
                   <td data-label="Score">{score(result.score, result.unit)}</td>
                   <td data-label="Rank">
-                    <span className={`maker-rank${result.rank === 1 ? ' is-first' : ''}`}>
-                      {result.rank === 1 && <Trophy size={13} aria-hidden="true" />}#
-                      {whole(result.rank)} of {whole(result.total)}
+                    <span className={result.rank === 1 ? 'rank-first' : 'maker-rank'}>
+                      #{whole(result.rank)} of {whole(result.total)}
                     </span>
                   </td>
                 </tr>

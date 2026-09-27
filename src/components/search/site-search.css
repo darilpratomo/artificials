@@ -89,8 +89,10 @@ html:has(.site-search[open]) {
   color: #fff;
 }
 
+/* The results take their own height, and shrink and scroll only when the panel reaches its
+   limit. A zero basis (flex: 1) lets Safari 26 fold them away to nothing. */
 .site-search-body {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
   padding: 6px 8px 8px;
   overflow-y: auto;

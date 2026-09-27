@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { BENCHMARK_DOMAINS, type BenchmarkDomain } from '../../shared/benchmarks';
 import { makerLogo } from '../../shared/makers';
 import { testMetadata } from '../../shared/seo';
@@ -472,10 +472,11 @@ function counted(count: number, one: string, many: string) {
   return `${whole(count)} ${count === 1 ? one : many}`;
 }
 
+/** A rank; the top spot sits on gold, its number in line with the ranks below. */
 function Rank({ rank, total }: { rank: number; total?: number }) {
   return (
-    <span className={`test-rank${rank === 1 ? ' is-first' : ''}`}>
-      {rank === 1 && <Trophy size={13} aria-hidden="true" />}#{whole(rank)}
+    <span className={rank === 1 ? 'rank-first' : 'test-rank'}>
+      #{whole(rank)}
       {total ? ` of ${whole(total)}` : ''}
     </span>
   );

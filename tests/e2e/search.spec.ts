@@ -102,6 +102,10 @@ test('the search fits every screen and is accessible', async ({ page }) => {
   await page.getByRole('button', { name: 'Search', exact: true }).click();
   await field(page).fill(name.split(' ')[0]);
   await expect(dialog(page).getByRole('option').first()).toBeVisible();
+  // The results keep their height: a zero flex basis once folded them to a sliver in Safari.
+  const body = (await page.locator('.site-search-body').boundingBox())!;
+  const list = (await page.locator('.site-search-list').boundingBox())!;
+  expect(body.height).toBeGreaterThanOrEqual(Math.min(list.height, 300));
   const results = await new AxeBuilder({ page })
     .include('.site-search')
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
