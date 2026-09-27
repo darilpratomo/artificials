@@ -626,10 +626,9 @@ export default function Following() {
             {models.length > 0 &&
               'A price is blended as three input tokens for every output token, from the maker’s own paid listing or else the middle paid listing across hosts. '}
             News comes from <Link to="/changes">What changed</Link>, which keeps the last 30 days.
-            {models.length > 0 &&
-              ' Each model’s page also links to an RSS feed of its changes.'}{' '}
-            What you follow is saved in this browser only and never sent to Artificials; clearing
-            site data removes it.
+            Each model’s, maker’s and test’s page also links to an RSS feed of its changes. What you
+            follow is saved in this browser only and never sent to Artificials; clearing site data
+            removes it.
           </p>
         </>
       )}

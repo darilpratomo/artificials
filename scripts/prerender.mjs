@@ -1,7 +1,14 @@
 import { createServer } from 'vite';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { SITE_CHANNEL, WEEKLY_CHANNEL, changesFeed, xml } from '../shared/feeds.ts';
+import {
+  SITE_CHANNEL,
+  WEEKLY_CHANNEL,
+  changesFeed,
+  makerChannel,
+  testChannel,
+  xml,
+} from '../shared/feeds.ts';
 
 /** One RSS item per finished week, newest first. */
 function weeklyFeed(weeks, weekRange, weekSentence) {
@@ -28,6 +35,7 @@ try {
   const { weekRange, weekSentence } = await server.ssrLoadModule('/shared/week-label.ts');
   const { comparisonPath } = await server.ssrLoadModule('/shared/compare.ts');
   const { profileBucket } = await server.ssrLoadModule('/shared/model-profiles.ts');
+  const { aboutMaker, aboutTest } = await server.ssrLoadModule('/shared/changes.ts');
   const template = (await readFile('dist/index.html', 'utf8'))
     .replace(/<title>.*?<\/title>/s, '')
     .replace(/<meta name="description"[^>]*>/, '');
@@ -277,6 +285,15 @@ try {
       );
     await mkdir(dirname(`dist${path}.html`), { recursive: true });
     await writeFile(`dist${path}.html`, html);
+    // Its RSS feed, from the same events as "What changed".
+    await mkdir(`dist${path}`, { recursive: true });
+    await writeFile(
+      `dist${path}/changes.xml`,
+      changesFeed(
+        changes.events.filter((event) => aboutMaker(event, maker.id)),
+        makerChannel(slug, maker.name),
+      ),
+    );
   }
   // Each test's page, with its own results and the list of tests inline.
   for (const { id } of testList.tests) {
@@ -296,6 +313,15 @@ try {
       );
     await mkdir(dirname(`dist${path}.html`), { recursive: true });
     await writeFile(`dist${path}.html`, html);
+    // Its RSS feed, from the same events as "What changed".
+    await mkdir(`dist${path}`, { recursive: true });
+    await writeFile(
+      `dist${path}/changes.xml`,
+      changesFeed(
+        changes.events.filter((event) => aboutTest(event, id)),
+        testChannel(id, test.label),
+      ),
+    );
   }
   // Each week's recap at its own address.
   for (const { week } of weekList.weeks) {

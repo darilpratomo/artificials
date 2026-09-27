@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Rss } from 'lucide-react';
 import { BENCHMARK_DOMAINS, type BenchmarkDomain } from '../../shared/benchmarks';
 import { makerLogo } from '../../shared/makers';
 import { testMetadata } from '../../shared/seo';
@@ -220,6 +220,10 @@ function TestDetail({ test, others }: { test: TestPage; others: TestDirectory['t
             kind="tests"
             entry={{ slug: test.id, name: test.label, seen: testFiguresOf(test) }}
           />
+          <a className="text-link profile-feed" href={`/tests/${test.id}/changes.xml`}>
+            <Rss size={14} aria-hidden="true" />
+            RSS feed
+          </a>
         </div>
       </header>
 

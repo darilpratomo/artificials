@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Rss } from 'lucide-react';
 import { makerColor, makerLogo } from '../../shared/makers';
 import { makerMetadata } from '../../shared/seo';
 import { applyPageMetadata } from '../components/Metadata';
@@ -243,6 +243,10 @@ function MakerDetail({ maker, others }: { maker: MakerPage; others: MakerDirecto
               ),
             }}
           />
+          <a className="text-link profile-feed" href={`/makers/${maker.slug}/changes.xml`}>
+            <Rss size={14} aria-hidden="true" />
+            RSS feed
+          </a>
         </div>
       </header>
 

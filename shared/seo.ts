@@ -3,7 +3,7 @@ import academy from './academy-index.json';
 import { UTILITIES } from './utilities';
 import { canonicalComparison, parseComparison } from './compare';
 import { weekRange, weekSentence, type WeekCounts } from './week-label';
-import { WEEKLY_CHANNEL, modelChannel, type FeedChannel } from './feeds';
+import { WEEKLY_CHANNEL, makerChannel, modelChannel, testChannel, type FeedChannel } from './feeds';
 export const SITE_URL = 'https://artificials.net';
 /**
  * Link previews drawn at build time (scripts/build-og-images.mjs): the site's
@@ -345,6 +345,7 @@ export function makerMetadata(maker: MakerMetaInput | null, slug = maker?.slug ?
     ? `${maker.tested} with published test results`
     : 'none with published test results yet';
   return {
+    feed: feedLink(makerChannel(slug, maker.name)),
     title: `${maker.name} AI models: benchmarks, prices and releases — Artificials`,
     description: `Every ${maker.name} model on Artificials: ${maker.models} models, ${tested}. Where its best models rank on each test, with prices, context windows and release dates.`,
     canonical,
@@ -410,6 +411,7 @@ export function testMetadata(test: TestMetaInput | null, id = test?.id ?? '') {
   // The test's own first sentence says what it measures.
   const measures = test.description.match(/^[^.]*\./)?.[0] ?? test.description;
   return {
+    feed: feedLink(testChannel(id, test.label)),
     title: `${test.label} leaderboard: every AI model’s score — Artificials`,
     description:
       `${test.models} AI models ranked by their best published ${test.label} score${test.source ? `, from ${test.source}` : ''}. ${measures}`.trim(),

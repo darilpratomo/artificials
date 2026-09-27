@@ -168,6 +168,31 @@ test('a model page links to its RSS feed and names it for feed readers', async (
   await expect(feeds).toHaveAttribute('href', '/changes.xml');
 });
 
+test('maker and test pages link to RSS feeds of their own', async ({ page, request }) => {
+  for (const [path, name] of [
+    ['/makers/anthropic', 'Anthropic'],
+    ['/tests/arena-text', 'Arena text'],
+  ]) {
+    await page.goto(path);
+    await expect(page.getByRole('link', { name: 'RSS feed' })).toHaveAttribute(
+      'href',
+      `${path}/changes.xml`,
+    );
+    await expect(page.locator('head #page-feed')).toHaveAttribute(
+      'href',
+      `https://artificials.net${path}/changes.xml`,
+    );
+    if (process.env.E2E_PRODUCTION !== '1') continue;
+    // The feeds are written with the prerendered pages.
+    const feed = await (await request.get(`${path}/changes.xml`)).text();
+    expect(feed).toMatch(/^<\?xml version="1.0" encoding="UTF-8"\?><rss version="2.0"/);
+    expect(feed).toContain(`<title>${name}: what changed — Artificials</title>`);
+    expect(feed).toContain(
+      `<atom:link href="https://artificials.net${path}/changes.xml" rel="self" type="application/rss+xml"/>`,
+    );
+  }
+});
+
 test('the privacy page clears everything followed', async ({ page }) => {
   await page.goto('/models/claude-opus-5');
   await page.getByRole('button', { name: 'Follow', exact: true }).click();

@@ -81,7 +81,8 @@ test('the search, the menus and the market lead to makers', async ({ page }, inf
   const dialog = page.getByRole('dialog', { name: 'Search Artificials' });
   await dialog.getByRole('combobox').fill(first.name);
   const option = dialog.getByRole('group', { name: 'Makers' }).getByRole('option').first();
-  await expect(option).toContainText(first.name);
+  // The search loads its lists when it first opens, which takes longer under a full test run.
+  await expect(option).toContainText(first.name, { timeout: 15_000 });
   await dialog.getByRole('combobox').press('Enter');
   await expect(page).toHaveURL(new RegExp(`/makers/${first.slug}$`));
 

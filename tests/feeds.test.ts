@@ -1,7 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import type { ChangeEvent, Changes } from '../shared/changes';
-import { SITE_CHANNEL, changeTitle, changesFeed, modelChannel } from '../shared/feeds';
-import { metadataHtml, modelMetadata, pageMetadata, weekMetadata } from '../shared/seo';
+import { aboutMaker, aboutTest } from '../shared/changes';
+import {
+  SITE_CHANNEL,
+  changeTitle,
+  changesFeed,
+  makerChannel,
+  modelChannel,
+  testChannel,
+} from '../shared/feeds';
+import {
+  makerMetadata,
+  metadataHtml,
+  modelMetadata,
+  pageMetadata,
+  testMetadata,
+  weekMetadata,
+} from '../shared/seo';
 import { app } from '../worker/index';
 import type { Env } from '../worker/types';
 
@@ -64,12 +79,54 @@ describe('change feeds', () => {
     expect(feed).not.toMatch(/lastBuildDate/);
   });
 
-  it('gives each model a feed of its own', () => {
+  it('gives each model, maker and test a feed of its own', () => {
     expect(modelChannel('claude-test-1', 'Claude Test 1')).toMatchObject({
       title: 'Claude Test 1: what changed — Artificials',
       path: '/models/claude-test-1',
       feed: '/models/claude-test-1/changes.xml',
     });
+    expect(makerChannel('anthropic', 'Anthropic')).toMatchObject({
+      title: 'Anthropic: what changed — Artificials',
+      path: '/makers/anthropic',
+      feed: '/makers/anthropic/changes.xml',
+    });
+    expect(testChannel('arena-text', 'Arena text')).toMatchObject({
+      title: 'Arena text: what changed — Artificials',
+      path: '/tests/arena-text',
+      feed: '/tests/arena-text/changes.xml',
+      description: 'Each new leader on Arena text.',
+    });
+    expect(testChannel('capability-index', 'Capability index').description).toBe(
+      'Each new leader on the capability index, and each model that joins it.',
+    );
+  });
+
+  it('keeps each feed to its own changes, linking a model without a page to the feed’s page', () => {
+    const unlinked: ChangeEvent = {
+      day: '2026-09-25',
+      kind: 'leader',
+      model: { name: 'Mystery Model', maker: '', makerId: 'unknown' },
+      previous: model('rival-1', 'Rival 1', 'OpenAI', 'openai'),
+      test: 'arena-text',
+      label: 'Arena text',
+      unit: 'index',
+      score: 1512,
+    };
+    const all = [unlinked, ...events];
+    const maker = changesFeed(
+      all.filter((event) => aboutMaker(event, 'openai')),
+      makerChannel('openai', 'OpenAI'),
+    );
+    // OpenAI's model took one top spot and lost another.
+    expect(maker.match(/<item>/g)).toHaveLength(2);
+    expect(maker).toContain('<link>https://artificials.net/makers/openai</link><guid');
+    const test = changesFeed(
+      all.filter((event) => aboutTest(event, 'arena-text')),
+      testChannel('arena-text', 'Arena text'),
+    );
+    expect(test.match(/<item>/g)).toHaveLength(2);
+    expect(test).toContain('<link>https://artificials.net/tests/arena-text</link><guid');
+    expect(test).toContain('<link>https://artificials.net/models/rival-1</link>');
   });
 });
 
@@ -137,6 +194,27 @@ describe('each model’s feed from the Worker', () => {
 });
 
 describe('feeds named in page heads', () => {
+  it('names a maker’s and a test’s feed on their pages', () => {
+    expect(
+      metadataHtml(makerMetadata({ slug: 'anthropic', name: 'Anthropic', models: 3, tested: 1 })),
+    ).toContain(
+      '<link id="page-feed" rel="alternate" type="application/rss+xml" title="Anthropic: what changed — Artificials" href="https://artificials.net/makers/anthropic/changes.xml">',
+    );
+    expect(
+      metadataHtml(
+        testMetadata({
+          id: 'arena-text',
+          label: 'Arena text',
+          models: 300,
+          source: 'Arena',
+          description: 'People vote.',
+        }),
+      ),
+    ).toContain('href="https://artificials.net/tests/arena-text/changes.xml"');
+    expect(metadataHtml(makerMetadata(null, 'missing'))).not.toContain('application/rss+xml');
+    expect(metadataHtml(testMetadata(null, 'missing'))).not.toContain('application/rss+xml');
+  });
+
   it('names a model’s feed on its page, and none for an unknown model', () => {
     const meta = modelMetadata({
       slug: 'claude-test-1',

@@ -416,8 +416,12 @@ own day, with the notable releases from the timeline. `/changes` shows them by d
 kind and by the last 7 or 30 days, prerendered with the data inline. `/changes.xml` is an RSS 2.0
 feed of the same events, up to 100, newest first. Each model has its own feed at
 `/models/{slug}/changes.xml`: the Worker filters the same events to the model's own and the top
-spots other models took from it (`shared/feeds.ts` writes both feeds the same way), answers 404
-for unknown models and lets readers cache it for 30 minutes. A model's Pricing tab lists its own listed-price
+spots other models took from it (`shared/feeds.ts` writes every feed the same way), answers 404
+for unknown models and lets readers cache it for 30 minutes. Each maker with a page and each test
+has one too, written as a file with its prerendered page: `/makers/{slug}/changes.xml` (its
+models' changes, and the top spots other makers took from them) and `/tests/{id}/changes.xml`
+(its new leaders, and for the capability index its new entries). An item links to its model's
+page, or to the feed's own page for a model without one. A model's Pricing tab lists its own listed-price
 changes. Scores and prices read as their sources give them; the percentage on a price change
 compares prices blended as three input tokens for each output token.
 

@@ -2,8 +2,8 @@ import type { ChangeEvent } from './changes.ts';
 import { price, score } from './format.ts';
 
 /**
- * RSS feeds of changes: the site's "What changed" feed and each model's own.
- * Items read the way the pages write them, newest first.
+ * RSS feeds of changes: the site's "What changed" feed, and each model's,
+ * maker's and test's own. Items read the way the pages write them, newest first.
  */
 
 const SITE = 'https://artificials.net';
@@ -64,11 +64,37 @@ export function modelChannel(slug: string, name: string): FeedChannel {
   };
 }
 
-/** Up to a hundred changes, one item each, newest first. */
+/** A maker's feed: its models' changes, and the top spots other makers took from them. */
+export function makerChannel(slug: string, name: string): FeedChannel {
+  return {
+    title: `${name}: what changed — Artificials`,
+    path: `/makers/${slug}`,
+    feed: `/makers/${slug}/changes.xml`,
+    description: `What changed for ${name}’s models: new releases, changes to listed prices, top spots taken or lost on tests and entries on the capability index.`,
+  };
+}
+
+/** A test's feed: its new leaders, and on the capability index its new entries too. */
+export function testChannel(id: string, label: string): FeedChannel {
+  return {
+    title: `${label}: what changed — Artificials`,
+    path: `/tests/${id}`,
+    feed: `/tests/${id}/changes.xml`,
+    description:
+      id === 'capability-index'
+        ? 'Each new leader on the capability index, and each model that joins it.'
+        : `Each new leader on ${label}.`,
+  };
+}
+
+/**
+ * Up to a hundred changes, one item each, newest first. An item links to its
+ * model's page, or to the feed's own page for a model without one.
+ */
 export function changesFeed(events: ChangeEvent[], channel: FeedChannel) {
   const items = events.slice(0, 100).map((event) => {
     const { name, slug } = event.model;
-    const link = SITE + (slug ? `/models/${slug}` : '/changes');
+    const link = SITE + (slug ? `/models/${slug}` : channel.path);
     const guid = `${event.kind}:${event.day}:${slug ?? name}${event.kind === 'leader' ? `:${event.test}` : ''}`;
     return `<item><title>${xml(changeTitle(event))}</title><link>${xml(link)}</link><guid isPermaLink="false">${xml(guid)}</guid><pubDate>${new Date(`${event.day}T00:00:00Z`).toUTCString()}</pubDate></item>`;
   });
