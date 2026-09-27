@@ -40,8 +40,10 @@ try {
     .replace(/<title>.*?<\/title>/s, '')
     .replace(/<meta name="description"[^>]*>/, '');
   const manifest = JSON.parse(await readFile('dist/.vite/manifest.json', 'utf8'));
+  // The immersive guide's visual effects are loaded only on its own route.
+  const storyStyles = new Set(manifest['src/pages/HowAIWorks.tsx']?.css || []);
   const styles = [...new Set(Object.values(manifest).flatMap((entry) => entry.css || []))]
-    .filter((file) => !template.includes(file))
+    .filter((file) => !template.includes(file) && !storyStyles.has(file))
     .map((file) => `<link rel="stylesheet" href="/${file}">`)
     .join('');
   await writeFile('dist/app-shell.html', template);
@@ -65,6 +67,7 @@ try {
     'cost-calculator': 'Cost',
     compare: 'Compare',
     news: 'Learn',
+    'how-ai-works': 'HowAIWorks',
     tools: 'Tools',
     about: 'Info',
     privacy: 'Info',
@@ -93,10 +96,17 @@ try {
       (chunk.imports || []).forEach(visit);
     };
     if (name) visit(`src/pages/${name}.tsx`);
-    return [...files]
-      .filter((file) => !template.includes(file))
-      .map((file) => `<link rel="modulepreload" crossorigin href="/${file}">`)
-      .join('');
+    const routeStyles =
+      name === 'HowAIWorks'
+        ? [...storyStyles].map((file) => `<link rel="stylesheet" href="/${file}">`).join('')
+        : '';
+    return (
+      routeStyles +
+      [...files]
+        .filter((file) => !template.includes(file))
+        .map((file) => `<link rel="modulepreload" crossorigin href="/${file}">`)
+        .join('')
+    );
   };
   // The home and models pages render their leaders and releases into the HTML and
   // carry the same data inline, so the browser shows it without another request.

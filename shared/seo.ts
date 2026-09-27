@@ -115,6 +115,10 @@ const pages: Record<string, [string, string]> = {
     'Learn AI with Python — Artificials Academy',
     'Learn AI through 36 original lessons: foundations, Python, machine learning, neural networks, language models, and four practical projects.',
   ],
+  '/how-ai-works': [
+    'How AI works — An interactive visual guide',
+    'Follow the signal through AI: tokens, attention, prediction, training, retrieval, and beyond. Explore eight animated chapters and seven hands-on experiments.',
+  ],
   '/about': [
     'About Artificials',
     'Artificials is a free, non-commercial guide to AI models, published benchmark evidence and practical AI education.',

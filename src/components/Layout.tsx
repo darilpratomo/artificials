@@ -369,6 +369,7 @@ export function Layout() {
             <div className="footer-links">
               <Link to="/news">Insights & guides</Link>
               <Link to="/learn">Learn AI</Link>
+              <Link to="/how-ai-works">How AI works</Link>
               <Link to="/tools">Free file tools</Link>
               <Link to="/cost-calculator">Cost calculator</Link>
               <Link to="/about">About Artificials</Link>

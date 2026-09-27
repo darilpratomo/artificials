@@ -23,6 +23,7 @@ import Cost from './pages/Cost';
 import Learn from './pages/Learn';
 import Tools from './pages/Tools';
 import Academy from './pages/Academy';
+import HowAIWorks from './pages/HowAIWorks';
 import { LessonReader } from './pages/AcademyLesson';
 import Info from './pages/Info';
 import type { Lesson } from './lib/academy';
@@ -119,6 +120,7 @@ export function renderPage(
             <Route path="tools" element={<Tools />} />
             <Route path="tools/:toolId" element={<Tools />} />
             <Route path="learn" element={<Academy />} />
+            <Route path="how-ai-works" element={<HowAIWorks />} />
             {lesson && <Route path="learn/:slug" element={<LessonReader lesson={lesson} />} />}
             {['about', 'contact', 'privacy', 'terms'].map((path) => (
               <Route key={path} path={path} element={<Info />} />

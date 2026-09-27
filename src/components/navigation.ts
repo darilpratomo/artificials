@@ -18,6 +18,7 @@ import {
   SquareTerminal,
   Target,
   TrendingUp,
+  Waypoints,
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
@@ -191,6 +192,12 @@ export const NAV_GROUPS: NavGroupItem[] = [
             label: 'Learn AI',
             description: 'A free course with Python projects',
             icon: GraduationCap,
+          },
+          {
+            to: '/how-ai-works',
+            label: 'How AI works',
+            description: 'An animated journey inside AI',
+            icon: Waypoints,
           },
           {
             to: '/tools',
