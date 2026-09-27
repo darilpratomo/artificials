@@ -191,6 +191,18 @@ effort setting (Epoch AI's `name_max` identifiers); otherwise it is kept ("Qwen3
 "Qwen3"). A row never attaches when its evaluator's attribution contradicts the model's maker. The exact configuration name is
 always shown next to each score. Unmatched rows still appear in rankings, unlinked.
 
+After the exact forms, a row may also match without details of how it was served, never
+without a snapshot: Arena's effort with a thinking budget (`-high-32k`) and its non-thinking
+modes (`-instant`, `-no-thinking`), a number format (`-nvfp4`, `-fp8`, `-bf16`), an
+"Org/Model" prefix, a leading maker name (`nvidia-`, `amazon-`, `meta-`), a first release's
+`-v1.0`, and a "p" written for a decimal point (`kimi-k2p5`). A dated or numbered snapshot
+(`magistral-medium-2506`, `gemini-1.5-pro-002`) and a preview stay apart from their family.
+
+A model with no page shows a readable form of its publisher's identifier (`shared/model-names.ts`):
+only the spelling changes, as in `claude-3-5-sonnet-20240620` read as "Claude 3.5 Sonnet
+(2024-06-20)" or `gpt-5.5-pre-release_xhigh` as "GPT-5.5 Pre-release (xhigh)". Names a
+publisher already writes with spaces are kept.
+
 Calculated by Artificials, and labelled as such: standing among tested models, ranks per test
 (never combined across tests), blended price (three input tokens per output token), cost
 estimates, token-to-word conversions (0.75 words per token, 500 words per page, English), and
@@ -442,6 +454,17 @@ The profile build writes `test-pages.json` (the list, also used by the sitemap a
 search) and `test-pages/<id>.json`. Pages are prerendered with their data inline. The rankings
 page, maker pages and the "What changed" page link to them. A chart's reference line, such as
 random guessing, is drawn only inside the chart's axis and is named in a key above the plot.
+
+## Weekly recap
+
+`/weekly/{monday}` is one week, Monday to Sunday (UTC), from the same events as `/changes` and
+the release timeline (`shared/weekly.ts`): its counts, highlights counted from its events (the
+top new release, the maker with the most releases, the model with the most new top spots and
+the biggest listed price change), its notable releases, new leaders with their margin marks,
+price changes and models joining the index. Weeks start with the week the record began. A week
+in progress says "so far" without naming the data's day. `/weekly` shows the latest week, with
+the dated address as its canonical one; `/weekly.xml` has one item per finished week. The
+profile build writes `weekly.json` and `weekly/{monday}.json`.
 
 ## Site search
 

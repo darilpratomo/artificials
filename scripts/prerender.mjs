@@ -27,6 +27,16 @@ function changesFeed(changes) {
   return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>What changed in AI models — Artificials</title><link>${site}/changes</link><atom:link href="${site}/changes.xml" rel="self" type="application/rss+xml"/><description>New AI model releases, listed price changes, new leaders on each benchmark and models joining the capability index.</description><language>en</language>${items.join('')}</channel></rss>\n`;
 }
 
+/** One RSS item per finished week, newest first. */
+function weeklyFeed(weeks, weekRange, weekSentence) {
+  const site = 'https://artificials.net';
+  const items = weeks.map((week) => {
+    const range = weekRange(week.week, week.end);
+    return `<item><title>${xml(`The week in AI models: ${range}`)}</title><link>${site}/weekly/${week.week}</link><guid isPermaLink="false">weekly:${week.week}</guid><pubDate>${new Date(`${week.end}T00:00:00Z`).toUTCString()}</pubDate><description>${xml(`${weekSentence(week.counts)}.`)}</description></item>`;
+  });
+  return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>The week in AI models — Artificials</title><link>${site}/weekly</link><atom:link href="${site}/weekly.xml" rel="self" type="application/rss+xml"/><description>Each week’s new AI model releases, new leaders on benchmark tests and listed price changes.</description><language>en</language>${items.join('')}</channel></rss>\n`;
+}
+
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
 try {
   const { renderPage } = await server.ssrLoadModule('/src/prerender.tsx');
@@ -37,7 +47,9 @@ try {
     comparisonMetadata,
     makerMetadata,
     testMetadata,
+    weekMetadata,
   } = await server.ssrLoadModule('/shared/seo.ts');
+  const { weekRange, weekSentence } = await server.ssrLoadModule('/shared/week-label.ts');
   const { comparisonPath } = await server.ssrLoadModule('/shared/compare.ts');
   const { profileBucket } = await server.ssrLoadModule('/shared/model-profiles.ts');
   const template = (await readFile('dist/index.html', 'utf8'))
@@ -65,6 +77,7 @@ try {
     changes: 'Changes',
     makers: 'Makers',
     tests: 'Tests',
+    weekly: 'Weekly',
     compare: 'Compare',
     news: 'Learn',
     tools: 'Tools',
@@ -143,6 +156,19 @@ try {
   const makersInline = `<script type="application/json" id="makers-data">${makersText
     .trim()
     .replace(/</g, '\\u003c')}</script>`;
+  const weeksText = await readFile('dist/data/models/weekly.json', 'utf8');
+  const weekList = JSON.parse(weeksText);
+  const weeksInline = `<script type="application/json" id="weekly-data">${weeksText
+    .trim()
+    .replace(/</g, '\\u003c')}</script>`;
+  const weekFiles = new Map();
+  for (const { week } of weekList.weeks)
+    weekFiles.set(week, await readFile(`dist/data/models/weekly/${week}.json`, 'utf8'));
+  const weekInline = (week) =>
+    `<script type="application/json" id="week-data">${weekFiles
+      .get(week)
+      .trim()
+      .replace(/</g, '\\u003c')}</script>`;
   const testsText = await readFile('dist/data/models/test-pages.json', 'utf8');
   const testList = JSON.parse(testsText);
   const testsInline = `<script type="application/json" id="tests-data">${testsText
@@ -169,10 +195,15 @@ try {
     const withChanges = path === '/changes';
     const withMakers = path === '/makers';
     const withTests = path === '/tests';
+    // /weekly is the latest week, which its dated address names for search engines.
+    const latestWeek = path === '/weekly' ? JSON.parse(weekFiles.get(weekList.latest)) : undefined;
     const html = template
       .replace(
         '</head>',
-        metadataHtml(pageMetadata(path)) + styles + pagePreloads(path) + '</head>',
+        metadataHtml(latestWeek ? weekMetadata(latestWeek) : pageMetadata(path)) +
+          styles +
+          pagePreloads(path) +
+          '</head>',
       )
       .replace(
         '<div id="root"></div>',
@@ -188,13 +219,15 @@ try {
           changes: withChanges ? changes : undefined,
           makers: withMakers ? makers : undefined,
           testList: withTests ? testList : undefined,
+          weekList: latestWeek ? weekList : undefined,
+          week: latestWeek,
         })}</div>${withData ? inline : ''}${withCoding ? codingInline : ''}${
           withTrends ? trendsInline : ''
         }${withImages ? imagesInline : ''}${withVideos ? videosInline : ''}${
           withFinder ? finderInline : ''
         }${withComparisons ? comparisonsInline : ''}${withChanges ? changesInline : ''}${
           withMakers ? makersInline : ''
-        }${withTests ? testsInline : ''}`,
+        }${withTests ? testsInline : ''}${latestWeek ? weeksInline + weekInline(weekList.latest) : ''}`,
       );
     const destination = path === '/' ? 'dist/index.html' : `dist${path}.html`;
     await mkdir(dirname(destination), { recursive: true });
@@ -278,6 +311,31 @@ try {
     await mkdir(dirname(`dist${path}.html`), { recursive: true });
     await writeFile(`dist${path}.html`, html);
   }
+  // Each week's recap at its own address.
+  for (const { week } of weekList.weeks) {
+    const path = `/weekly/${week}`;
+    const page = JSON.parse(weekFiles.get(week));
+    const html = template
+      .replace(
+        '</head>',
+        metadataHtml(weekMetadata(page)) + styles + pagePreloads(path) + '</head>',
+      )
+      .replace(
+        '<div id="root"></div>',
+        `<div id="root">${renderPage(path, { weekList, week: page })}</div>${weeksInline}${weekInline(week)}`,
+      );
+    await mkdir(dirname(`dist${path}.html`), { recursive: true });
+    await writeFile(`dist${path}.html`, html);
+  }
+  // The weekly feed: one item per finished week.
+  await writeFile(
+    'dist/weekly.xml',
+    weeklyFeed(
+      weekList.weeks.filter((week) => week.complete),
+      weekRange,
+      weekSentence,
+    ),
+  );
   // The "What changed" feed, from the same events as the page.
   await writeFile('dist/changes.xml', changesFeed(changes));
   for (const route of ['login', 'dashboard', '404'])
@@ -286,7 +344,7 @@ try {
       template.replace('</head>', metadataHtml(pageMetadata('/' + route)) + '</head>'),
     );
   console.log(
-    `Prerendered ${publicPages().length} public pages, ${comparisons.featured.length} featured comparisons, ${makers.makers.length} maker pages and ${testList.tests.length} test pages with unique metadata and crawlable HTML.`,
+    `Prerendered ${publicPages().length} public pages, ${comparisons.featured.length} featured comparisons, ${makers.makers.length} maker pages, ${testList.tests.length} test pages and ${weekList.weeks.length} weeks with unique metadata and crawlable HTML.`,
   );
 } finally {
   await server.close();

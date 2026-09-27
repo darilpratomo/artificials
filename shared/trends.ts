@@ -1,4 +1,5 @@
 import type { BenchmarkSnapshot, ModelFacts } from './benchmarks.ts';
+import { readableName } from './model-names.ts';
 import type { ModelProfile, ProfileBucket } from './model-profiles.ts';
 import { referencePrice, type Timeline } from './model-overview.ts';
 
@@ -152,7 +153,7 @@ export function buildTrends({
     const price = profile ? referencePrice(profile) : undefined;
     return [
       {
-        name: row.model,
+        name: readableName(row.model),
         ...(slug ? { slug } : {}),
         makerId: known ? profile.makerId : row.providerId,
         maker: known ? profile.maker : row.provider,

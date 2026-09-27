@@ -39,6 +39,7 @@ const Compare = page(() => import('./pages/Compare'));
 const Changes = page(() => import('./pages/Changes'));
 const Makers = page(() => import('./pages/Makers'));
 const Tests = page(() => import('./pages/Tests'));
+const Weekly = page(() => import('./pages/Weekly'));
 const Leaderboard = page(() => import('./pages/Leaderboard'));
 const Leaders = page(() => import('./pages/Leaders'));
 const ScorePriceTime = page(() => import('./pages/ScorePriceTime'));
@@ -72,6 +73,7 @@ function pageAt(path: string) {
     ['changes', Changes],
     ['makers', Makers],
     ['tests', Tests],
+    ['weekly', Weekly],
     ['compare', Compare],
     ['news', Learn],
     ['tools', Tools],
@@ -131,6 +133,8 @@ const app = (
               <Route path="makers/:slug" element={<Makers />} />
               <Route path="tests" element={<Tests />} />
               <Route path="tests/:id" element={<Tests />} />
+              <Route path="weekly" element={<Weekly />} />
+              <Route path="weekly/:week" element={<Weekly />} />
               <Route path="compare" element={<Compare />} />
               <Route path="compare/:pair" element={<Compare />} />
               <Route path="learn" element={<Academy />} />

@@ -54,6 +54,34 @@ describe('model identity', () => {
     );
   });
 
+  it('looks past serving details and maker prefixes, never past a snapshot', () => {
+    // Arena's effort with a thinking budget, its modes and a model's number format.
+    expect(benchmarkCandidates('claude-opus-4-5-20251101-high-32k')).toContain(
+      'claude-opus-4-5-20251101',
+    );
+    expect(benchmarkCandidates('kimi-k2.5-instant')).toContain('kimi-k2-5');
+    expect(benchmarkCandidates('qwen3-235b-a22b-no-thinking')).toContain('qwen3-235b-a22b');
+    expect(benchmarkCandidates('nvidia-nemotron-3-ultra-550b-a55b-nvfp4')).toContain(
+      'nvidia-nemotron-3-ultra-550b-a55b',
+    );
+    // A maker's name before the model's, an "Org/Model" name and a first "v1.0" release.
+    expect(benchmarkCandidates('nvidia-llama-3.3-nemotron-super-49b-v1.5')).toContain(
+      'llama-3-3-nemotron-super-49b-v1-5',
+    );
+    expect(benchmarkCandidates('meta-llama/Meta-Llama-3-70B-Instruct')).toContain(
+      'llama-3-70b-instruct',
+    );
+    expect(benchmarkCandidates('amazon-nova-pro-v1.0')).toContain('amazon-nova-pro');
+    expect(benchmarkCandidates('kimi-k2p5_high')).toContain('kimi-k2-5');
+    // Snapshots stay distinct: a dated or numbered release is not its family.
+    expect(benchmarkCandidates('magistral-medium-2506')).not.toContain('magistral-medium');
+    expect(benchmarkCandidates('gemini-1.5-pro-002')).not.toContain('gemini-1-5-pro');
+    expect(benchmarkCandidates('minimax-m2.1-preview')).not.toContain('minimax-m2-1');
+    // Looser forms come after the exact ones.
+    const candidates = benchmarkCandidates('nvidia-nemotron-3-ultra-550b-a55b-nvfp4');
+    expect(candidates[0]).toBe('nvidia-nemotron-3-ultra-550b-a55b-nvfp4');
+  });
+
   it('attributes makers only when the name is unambiguous', () => {
     expect(makerOf('claude-sonnet-5')).toEqual({ maker: 'Anthropic', makerId: 'anthropic' });
     expect(makerOf('gpt-oss-120b').makerId).toBe('openai');

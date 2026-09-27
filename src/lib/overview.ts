@@ -10,6 +10,7 @@ import type { Changes } from '../../shared/changes';
 import type { SearchIndex } from '../../shared/search';
 import type { MakerDirectory, MakerPage } from '../../shared/maker-pages';
 import type { TestDirectory, TestPage } from '../../shared/test-pages';
+import type { WeekDirectory, WeekPage } from '../../shared/weekly';
 
 export type {
   Explorer,
@@ -52,6 +53,14 @@ export type {
   TestPageRow,
   TestSummary,
 } from '../../shared/test-pages';
+export type {
+  WeekCounts,
+  WeekDirectory,
+  WeekHighlight,
+  WeekPage,
+  WeekRelease,
+  WeekSummary,
+} from '../../shared/weekly';
 export type { Board, BoardCategory, BoardEntry, BoardModel } from '../../shared/arena';
 
 const requests = new Map<string, Promise<unknown>>();
@@ -74,6 +83,8 @@ const isMakers = (value: MakerDirectory) => value?.version === 1 && Array.isArra
 const isMaker = (value: MakerPage) => value?.version === 1 && Array.isArray(value.lineup);
 const isTestList = (value: TestDirectory) => value?.version === 1 && Array.isArray(value.tests);
 const isTestPage = (value: TestPage) => value?.version === 1 && Array.isArray(value.rows);
+const isWeeks = (value: WeekDirectory) => value?.version === 1 && Array.isArray(value.weeks);
+const isWeek = (value: WeekPage) => value?.version === 1 && Array.isArray(value.releases);
 
 /**
  * Prerendered pages carry their data inline, so the first view needs no extra
@@ -245,5 +256,24 @@ export function useTestPage(id: string, enabled: boolean, attempt = 0, initial?:
     enabled,
     attempt,
     initial?.id === id ? initial : undefined,
+  );
+}
+
+/** Every week since the record began, newest first. */
+export function useWeeks(attempt = 0, initial?: WeekDirectory) {
+  embedded('weekly.json', 'weekly-data', isWeeks);
+  return useFile<WeekDirectory>('weekly.json', isWeeks, true, attempt, initial);
+}
+
+/** One week's recap. A prerendered page carries its own week inline, and only that one. */
+export function useWeek(week: string, enabled: boolean, attempt = 0, initial?: WeekPage) {
+  const file = `weekly/${week}.json`;
+  embedded(file, 'week-data', (value: WeekPage) => isWeek(value) && value.week === week);
+  return useFile<WeekPage>(
+    file,
+    isWeek,
+    enabled,
+    attempt,
+    initial?.week === week ? initial : undefined,
   );
 }

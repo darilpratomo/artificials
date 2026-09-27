@@ -13,6 +13,7 @@ import { DOMAINS, indexValue } from '../components/profile/format';
 import { makerLogo } from '../../shared/makers';
 import { ShareButton } from '../components/charts/ShareButton';
 import { loadProfileLinks, testLabel, type ProfileLinks } from '../lib/profiles';
+import { readableName } from '../../shared/model-names';
 import '../domain-colors.css';
 
 const domainOf = (category: BenchmarkCategory): BenchmarkDomain => category.domain ?? 'overall';
@@ -84,7 +85,7 @@ export default function BenchmarkRankings() {
   };
   const rows =
     selected?.rows.filter((r) =>
-      `${r.model} ${r.provider} ${nameOf(r.id)?.name ?? ''}`
+      `${r.model} ${readableName(r.model)} ${r.provider} ${nameOf(r.id)?.name ?? ''}`
         .toLowerCase()
         .includes(query.toLowerCase()),
     ) || [];
@@ -159,7 +160,7 @@ export default function BenchmarkRankings() {
                 {top && (
                   <div className="benchmark-leader">
                     <span>Top score</span>
-                    <strong>{nameOf(top.id)?.name ?? top.model}</strong>
+                    <strong>{nameOf(top.id)?.name ?? readableName(top.model)}</strong>
                     <div>
                       <b>{formatScore(top.score, selected)}</b>
                       <span>
@@ -210,7 +211,7 @@ export default function BenchmarkRankings() {
                             : 'published results',
                         },
                         rows.slice(0, 25).map((row) => ({
-                          name: nameOf(row.id)?.name ?? row.model,
+                          name: nameOf(row.id)?.name ?? readableName(row.model),
                           makerId: row.providerId,
                           value: row.score,
                         })),
@@ -251,7 +252,7 @@ export default function BenchmarkRankings() {
                             {profile ? (
                               <Link to={`/models/${profile.slug}`}>{profile.name}</Link>
                             ) : (
-                              row.model
+                              readableName(row.model)
                             )}
                           </h3>
                           <span>

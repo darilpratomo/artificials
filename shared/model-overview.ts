@@ -1,4 +1,5 @@
 import type { CatalogSnapshot } from './catalog.ts';
+import { readableName } from './model-names.ts';
 import type { BenchmarkDomain, BenchmarkSnapshot, TaskUsage } from './benchmarks.ts';
 import type { Explore } from './explore.ts';
 import {
@@ -290,7 +291,7 @@ export function buildOverview(
     const releasedAt = row.releasedAt ?? profile?.releaseDate ?? undefined;
     const openWeights = row.openWeights ?? profile?.openWeights;
     return {
-      name: row.model,
+      name: readableName(row.model),
       ...(profile ? { slug: profile.slug } : {}),
       ...makerOf(profile, row.providerId, row.provider),
       index: row.score,
@@ -317,7 +318,7 @@ export function buildOverview(
         best.set(key, {
           name: profile
             ? `${profile.name}${configuration ? ` (${configuration})` : ''}`
-            : row.model,
+            : readableName(row.model),
           configuration: row.model,
           ...(profile ? { slug: profile.slug } : {}),
           ...makerOf(profile, row.providerId, row.provider),

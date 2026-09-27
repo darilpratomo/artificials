@@ -1,3 +1,4 @@
+import { readableName } from './model-names.ts';
 import type {
   AgentSnapshot,
   AgentSource,
@@ -210,7 +211,7 @@ export function buildCoding({
           return {
             name: profile
               ? `${profile.name}${configuration ? ` (${configuration})` : ''}`
-              : row.model,
+              : readableName(row.model),
             configuration: row.model,
             ...(slug ? { slug } : {}),
             makerId: known ? profile.makerId : row.providerId,

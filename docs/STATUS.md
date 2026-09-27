@@ -33,6 +33,8 @@ Verified locally in this implementation:
 - HTTP now redirects to HTTPS with status 301, preserving path and query parameters. Keep the zone's Always Use HTTPS setting enabled.
 - Header menus: the Analysis menu shows its pages in three labelled columns (Rankings, Market, Trends and media) and Resources in two; every page carries an icon, which the phone menu also uses in place of numbers. A rank of #1 in the maker and test tables sits on a gold pill that keeps its number in line with the ranks below.
 - The header search (Ctrl+K, ⌘K or /) finds models, makers, tests, pages, guides, lessons and free tools from anywhere, loading only when first opened.
+- The weekly recap (`/weekly`, one page and card per week, and the `/weekly.xml` feed) sums up each week's releases, new leaders and price changes.
+- Test rows match more models (serving details, maker prefixes and "Org/Model" names), and rows with no model page show readable names instead of raw identifiers.
 - Test pages (`/tests`, `/tests/:id`) give each published test its own indexable page: what it measures, its publisher and licence, every model's best result and its new leaders.
 - Maker pages (`/makers`, `/makers/:slug`) gather each maker's models, its rank on each test and its capability index standing; model pages and the market list link to them.
 - Each refresh records what changed (the makers' listed prices, models joining the capability index and new leaders on each test) in `public/data/history.json`; `/changes` and its RSS feed show the last 30 days, and each model's Pricing tab shows its price changes.

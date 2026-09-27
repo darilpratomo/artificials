@@ -20,6 +20,7 @@ import { buildComparisons } from '../shared/compare.ts';
 import { buildChanges } from '../shared/changes.ts';
 import { buildMakers } from '../shared/maker-pages.ts';
 import { buildTests } from '../shared/test-pages.ts';
+import { buildWeeks } from '../shared/weekly.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
@@ -182,6 +183,19 @@ const changes = buildChanges({
   until: updatedAt.slice(0, 10),
 });
 await writeFile(resolve(staging, 'changes.json'), JSON.stringify(changes) + '\n');
+// The week in AI models: one page per week since the record began.
+const weeks = buildWeeks({
+  history,
+  profiles,
+  timeline,
+  tests,
+  sources,
+  until: updatedAt.slice(0, 10),
+});
+await mkdir(resolve(staging, 'weekly'), { recursive: true });
+await writeFile(resolve(staging, 'weekly.json'), JSON.stringify(weeks.directory) + '\n');
+for (const page of weeks.pages)
+  await writeFile(resolve(staging, 'weekly', `${page.week}.json`), JSON.stringify(page) + '\n');
 // The list of makers for /makers, the sitemap and search, and each maker's page.
 await mkdir(resolve(staging, 'makers'), { recursive: true });
 await writeFile(resolve(staging, 'makers.json'), JSON.stringify(makers.directory) + '\n');
@@ -212,5 +226,5 @@ const matched = benchmarks.categories
   })
   .join(', ');
 console.log(
-  `Model profiles: ${profiles.length} models, ${withResults} with benchmark results, ${withFacts} with research records, ${PROFILE_BUCKETS} files, ${makers.pages.length} maker pages, ${testPages.pages.length} test pages.\nMatched rows: ${matched}.`,
+  `Model profiles: ${profiles.length} models, ${withResults} with benchmark results, ${withFacts} with research records, ${PROFILE_BUCKETS} files, ${makers.pages.length} maker pages, ${testPages.pages.length} test pages, ${weeks.pages.length} weeks.\nMatched rows: ${matched}.`,
 );

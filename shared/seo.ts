@@ -2,6 +2,7 @@ import { ARTICLES, type Article } from './content';
 import academy from './academy-index.json';
 import { UTILITIES } from './utilities';
 import { canonicalComparison, parseComparison } from './compare';
+import { weekRange, weekSentence, type WeekCounts } from './week-label';
 export const SITE_URL = 'https://artificials.net';
 /**
  * Link previews drawn at build time (scripts/build-og-images.mjs): the site's
@@ -83,6 +84,10 @@ const pages: Record<string, [string, string]> = {
     'What changed in AI models',
     'New AI model releases, listed price changes, new leaders on each benchmark and models joining the capability index over the last 30 days, newest first.',
   ],
+  '/weekly': [
+    'The week in AI models',
+    'Each week’s new AI model releases, new leaders on benchmark tests and listed price changes, on one page.',
+  ],
   '/tests': [
     'AI benchmark tests',
     'Every AI benchmark test on Artificials: what each measures, who publishes it, how many models it covers and which model scores highest.',
@@ -151,6 +156,16 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
       title: 'AI model comparison — Artificials',
       description:
         'Published test results, prices, context windows and features of AI models, side by side.',
+    };
+  const week = /^\/weekly\/(\d{4}-\d{2}-\d{2})$/.exec(path);
+  // The page names the week once it loads; the prerenderer does it first.
+  if (week)
+    return {
+      ...weekMetadata(null, week[1]),
+      title: 'The week in AI models — Artificials',
+      description: 'A week of new AI model releases, new leaders on tests and price changes.',
+      known: true,
+      robots: 'index,follow,max-image-preview:large',
     };
   const test = /^\/tests\/([a-z0-9][a-z0-9-]{0,99})$/.exec(path);
   // The page names the test once it loads; the prerenderer does it first.
@@ -308,6 +323,35 @@ export function makerMetadata(maker: MakerMetaInput | null, slug = maker?.slug ?
     description: `Every ${maker.name} model on Artificials: ${maker.models} models, ${tested}. Where its best models rank on each test, with prices, context windows and release dates.`,
     canonical,
     image: `${SITE_URL}/og/makers/${slug}.png`,
+    known: true,
+    robots: 'index,follow,max-image-preview:large',
+    type: 'website' as const,
+    structured: null,
+  };
+}
+/** Title, description and address of a week's recap; `null` when there is no such week. */
+export function weekMetadata(
+  week: { week: string; end: string; complete: boolean; counts: WeekCounts } | null,
+  id = week?.week ?? '',
+) {
+  const canonical = SITE_URL + '/weekly/' + id;
+  if (!week)
+    return {
+      title: 'Week not found — Artificials',
+      description: 'There is no recap for this week. See the latest week in AI models.',
+      canonical,
+      image: DEFAULT_IMAGE,
+      known: false,
+      robots: 'noindex,follow',
+      type: 'website' as const,
+      structured: null,
+    };
+  const range = weekRange(week.week, week.end);
+  return {
+    title: `The week in AI models: ${range} — Artificials`,
+    description: `${weekSentence(week.counts)}${week.complete ? '' : ' so far'}, ${range}. Each release, new leader and price change, with its source.`,
+    canonical,
+    image: `${SITE_URL}/og/weekly/${week.week}.png`,
     known: true,
     robots: 'index,follow,max-image-preview:large',
     type: 'website' as const,

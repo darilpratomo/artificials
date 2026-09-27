@@ -121,7 +121,7 @@ describe('what changed', () => {
     ]);
   });
 
-  it('keeps each change’s detail, and names models without a profile as their test did', () => {
+  it('keeps each change’s detail, and names models without a profile readably', () => {
     expect(changes.events.find((event) => event.kind === 'price')).toMatchObject({
       model: { slug: 'alpha', maker: 'OpenAI' },
       from: [10, 40],
@@ -135,7 +135,8 @@ describe('what changed', () => {
       unit: 'percent',
       score: 81.5,
       model: { slug: 'beta', name: 'Beta', maker: 'DeepSeek' },
-      previous: { name: 'alpha-max', maker: '', makerId: 'openai' },
+      // The test's own identifier, alpha-max, written as a name.
+      previous: { name: 'Alpha Max', maker: '', makerId: 'openai' },
     });
   });
 

@@ -6,9 +6,9 @@ The build prerenders 91 current public pages (12 main pages, the Tools directory
 
 `shared/seo.ts` is the public route/metadata registry. `scripts/prerender.mjs` writes flat HTML files into `dist` after Vite builds; Cloudflare resolves extensionless URLs to these files. Changes to repository content are published by the normal main-branch build. Rendered pages are ordinary static assets: no browser install, Python runtime or per-request React render is needed in Cloudflare Builds/Workers. The React client mounts the interactive application over this initial HTML.
 
-`/changes.xml` is an RSS 2.0 feed of the "What changed" page, announced to feed readers by a `rel="alternate"` link in every page's head. Each item is dated by the day the change was seen; the feed carries no build or retrieval time.
+`/weekly.xml` is an RSS 2.0 feed with one item per finished week, and `/changes.xml` is an RSS 2.0 feed of the "What changed" page, announced to feed readers by a `rel="alternate"` link in every page's head. Each item is dated by the day the change was seen; the feed carries no build or retrieval time.
 
-The sitemap includes every maker page (`/makers/:slug`) and test page (`/tests/:id`), the featured model comparisons (`/compare/a-vs-b`, canonical in alphabetical order), contact, editorial pages, Academy lessons, `/tools` and each utility page defined in `shared/utilities.ts`. Article/lesson lastmod values come from editorial update dates, never the current deployment time. Account, checkout and private CMS URLs are omitted and carry noindex where served. Account routes remain crawlable so crawlers can read noindex; robots.txt is not access control. Unknown URLs return a real HTTP 404 through Cloudflare's custom 404 handling, with a noindex page. Canonicals discard UI filter/query parameters, avoiding a separate search listing for every combination of filters.
+The sitemap includes every maker page (`/makers/:slug`), test page (`/tests/:id`) and week (`/weekly/{monday}`; `/weekly` names the latest week's address as canonical), the featured model comparisons (`/compare/a-vs-b`, canonical in alphabetical order), contact, editorial pages, Academy lessons, `/tools` and each utility page defined in `shared/utilities.ts`. Article/lesson lastmod values come from editorial update dates, never the current deployment time. Account, checkout and private CMS URLs are omitted and carry noindex where served. Account routes remain crawlable so crawlers can read noindex; robots.txt is not access control. Unknown URLs return a real HTTP 404 through Cloudflare's custom 404 handling, with a noindex page. Canonicals discard UI filter/query parameters, avoiding a separate search listing for every combination of filters.
 
 When Supabase CMS is configured, the published article query controls the news index, article HTML and sitemap; unpublished/deleted articles return 404. This currently follows the same latest-100-articles scope as the public articles API. Increase/paginate both together before exceeding that editorial volume. A database failure returns an error instead of silently publishing stale drafts. HTML and JSON-LD escape CMS text. The CMS stays behind its path token, authentication, MFA and authorization controls.
 
@@ -29,6 +29,8 @@ require, and none states a date.
 - `/og/makers/{slug}.png`: one per maker page, with its best model on the capability index, its
   open-weights models and its newest release, figures from Epoch AI and models.dev only, so the
   card credits both in full. `/og/makers.png` serves `/makers`.
+- `/og/weekly/{monday}.png`: one per week, with its dates, figures and top new releases,
+  crediting the catalog and the tests behind its events; `/weekly` uses the latest week's.
 - `/og/tests/{id}.png`: one per test page, with its skill area in the site's skill-area colour,
   its publisher and what it measures, beside its top five; the card credits the one publisher.
   `/og/tests.png` serves `/tests`, with the top score on each skill area's main test.

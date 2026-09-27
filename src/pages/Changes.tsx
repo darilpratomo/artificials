@@ -1,20 +1,14 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChartColumn, Rss, Sparkles, Tag, Trophy, type LucideIcon } from 'lucide-react';
-import { makerLogo } from '../../shared/makers';
+import { Rss } from 'lucide-react';
 import { PageHeading } from '../components/Layout';
-import { day, price, score } from '../components/profile/format';
-import { useChanges, type ChangeEvent, type ChangeModel, type Changes } from '../lib/overview';
+import { ChangeEntry } from '../components/changes/ChangeEntry';
+import { day } from '../components/profile/format';
+import { useChanges, type ChangeEvent, type Changes } from '../lib/overview';
 import '../components/home/dashboard.css';
 import './changes.css';
 
 type Kind = ChangeEvent['kind'];
-const KINDS: [kind: Kind, label: string, icon: LucideIcon][] = [
-  ['release', 'New release', Sparkles],
-  ['leader', 'New leader', Trophy],
-  ['index', 'Joined the index', ChartColumn],
-  ['price', 'Price change', Tag],
-];
 const TABS: [Kind | 'all', string][] = [
   ['all', 'All'],
   ['release', 'Releases'],
@@ -22,67 +16,6 @@ const TABS: [Kind | 'all', string][] = [
   ['index', 'Index'],
   ['price', 'Prices'],
 ];
-
-/** A model's name, linked to its profile when it has one. */
-function Name({ model }: { model: ChangeModel }) {
-  return model.slug ? (
-    <Link to={`/models/${model.slug}`}>{model.name}</Link>
-  ) : (
-    <strong>{model.name}</strong>
-  );
-}
-
-/** Blended three input tokens to one output token, as the site's reference price. */
-const blend = ([input, output]: [number, number]) => (input * 3 + output) / 4;
-
-function sentence(event: ChangeEvent): { text: ReactNode; chip?: string } {
-  switch (event.kind) {
-    case 'release':
-      return {
-        text: (
-          <>
-            <Name model={event.model} /> was released
-            {event.model.maker ? ` by ${event.model.maker}` : ''}.
-          </>
-        ),
-      };
-    case 'leader':
-      return {
-        text: (
-          <>
-            <Name model={event.model} /> took the top spot on{' '}
-            <Link to={`/tests/${event.test}`}>{event.label}</Link> at{' '}
-            {score(event.score, event.unit)}, from <Name model={event.previous} />.
-          </>
-        ),
-        ...(event.withinMargin ? { chip: 'Within margin' } : {}),
-      };
-    case 'index':
-      return {
-        text: (
-          <>
-            <Name model={event.model} /> joined the{' '}
-            <Link to="/tests/capability-index">capability index</Link> at{' '}
-            {score(event.score, 'index')}.
-          </>
-        ),
-      };
-    case 'price': {
-      const change = blend(event.to) / blend(event.from) - 1;
-      return {
-        text: (
-          <>
-            {event.model.maker ? `${event.model.maker}’s` : 'The'} listed price for{' '}
-            <Name model={event.model} /> went from {price(event.from[0])} in and{' '}
-            {price(event.from[1])} out to {price(event.to[0])} in and {price(event.to[1])} out per
-            1M tokens.
-          </>
-        ),
-        chip: `${change > 0 ? '+' : '−'}${Math.abs(Math.round(change * 100))}%`,
-      };
-    }
-  }
-}
 
 /** What changed over the last 30 days, grouped by day, newest first. */
 export default function Changes({ initial }: { initial?: Changes }) {
@@ -163,32 +96,12 @@ export default function Changes({ initial }: { initial?: Changes }) {
                     <time dateTime={date}>{day(date)}</time>
                   </h2>
                   <ul className="timeline-entries">
-                    {events.map((event, index) => {
-                      const [, label, Icon] = KINDS.find(([id]) => id === event.kind)!;
-                      const { text, chip } = sentence(event);
-                      return (
-                        <li
-                          key={`${event.kind}-${event.model.name}-${index}`}
-                          className="change-entry"
-                        >
-                          <img
-                            src={makerLogo(event.model.makerId)}
-                            alt=""
-                            width="36"
-                            height="36"
-                            loading="lazy"
-                          />
-                          <div>
-                            <span className={`change-kind is-${event.kind}`}>
-                              <Icon size={13} aria-hidden="true" />
-                              {label}
-                            </span>
-                            <p>{text}</p>
-                          </div>
-                          {chip && <span className="change-chip">{chip}</span>}
-                        </li>
-                      );
-                    })}
+                    {events.map((event, index) => (
+                      <ChangeEntry
+                        key={`${event.kind}-${event.model.name}-${index}`}
+                        event={event}
+                      />
+                    ))}
                   </ul>
                 </li>
               ))}
@@ -220,6 +133,7 @@ export default function Changes({ initial }: { initial?: Changes }) {
             “Within margin” marks a new leader whose lead is inside the range its publisher gives
             for its score: the next model could still pass it as more votes come in. Changes count
             from when the site began keeping this record, so older ones are not listed.{' '}
+            <Link to="/weekly">Each week on one page</Link>.{' '}
             <a href="/changes.xml">
               <Rss size={13} aria-hidden="true" /> RSS feed
             </a>

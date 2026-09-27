@@ -1,5 +1,6 @@
 import type { BenchmarkDomain, BenchmarkSnapshot } from './benchmarks.ts';
 import { withinMargin, type History } from './history.ts';
+import { readableName } from './model-names.ts';
 import { testLabel } from './model-profiles.ts';
 import type { ModelOverview, OverviewTests } from './model-overview.ts';
 
@@ -168,12 +169,12 @@ export function buildTests({
         .filter((change) => change.test === category.id)
         .map((change) => ({
           day: change.day,
-          name: change.name,
+          name: change.slug ? change.name : readableName(change.name),
           ...(change.slug ? { slug: change.slug } : {}),
           makerId: change.makerId,
           score: change.score,
           previous: {
-            name: change.previous.name,
+            name: change.previous.slug ? change.previous.name : readableName(change.previous.name),
             ...(change.previous.slug ? { slug: change.previous.slug } : {}),
             makerId: change.previous.makerId,
             score: change.previous.score,

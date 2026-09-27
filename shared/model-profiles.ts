@@ -190,8 +190,15 @@ export function modelSlug(modelId: string): string {
 
 const EXPLICIT_EFFORT = /-(?:minimal|none|low|medium|high|xhigh|max|default)-effort$/;
 const PLAIN_EFFORT = /-(?:minimal|low|medium|high|xhigh)$/;
-const THINKING = /-(?:thinking|nothinking|non-thinking)(?:-(?:\d+k|auto))?$/;
+/** An effort with a thinking budget, as Arena writes it: "-high-32k". */
+const EFFORT_BUDGET = /-(?:minimal|low|medium|high|xhigh|max)-\d+k$/;
+/** A thinking mode; "instant" is Arena's name for a model's non-thinking mode. */
+const THINKING = /-(?:thinking|nothinking|non-thinking|no-thinking|instant)(?:-(?:\d+k|auto))?$/;
 const DATE = /-(?:\d{4}-\d{2}-\d{2}|\d{8})$/;
+/** The number format a host serves the weights in, which does not make another model. */
+const PRECISION = /-(?:nvfp4|fp4|fp8|fp16|bf16|int4|int8|awq|gptq)$/;
+/** A maker's name before the model's, where the catalog may list the model without it. */
+const MAKER_PREFIX = /^(?:nvidia|amazon|meta|microsoft|ibm|mistralai)-/;
 
 /**
  * Catalog slugs a benchmark row may refer to, most specific first. Only
@@ -205,13 +212,18 @@ export function benchmarkCandidates(name: string, maxEffort?: Set<string>): stri
   const add = (value: string) => {
     if (value && !out.includes(value)) out.push(value);
   };
-  const underscore = name.lastIndexOf('_');
-  let value = tidy(underscore > 0 ? name.slice(0, underscore) : name);
+  // A Hugging Face style "Org/Model" names the model after the slash.
+  const own = name.split('/').pop() ?? name;
+  const underscore = own.lastIndexOf('_');
+  let value = tidy(underscore > 0 ? own.slice(0, underscore) : own);
   add(tidy(name));
+  add(tidy(own));
   add(value);
   for (let step = 0; step < 4; step += 1) {
     const next = value
+      .replace(PRECISION, '')
       .replace(EXPLICIT_EFFORT, '')
+      .replace(EFFORT_BUDGET, '')
       .replace(THINKING, '')
       .replace(PLAIN_EFFORT, '')
       .replace(/-thinking$/, '');
@@ -221,8 +233,14 @@ export function benchmarkCandidates(name: string, maxEffort?: Set<string>): stri
   }
   const undated = value.replace(DATE, '');
   if (undated !== value) add(undated);
+  // "v1.0" is the first release itself.
+  if (value.endsWith('-v1-0')) add(value.slice(0, -5));
   const bare = tidy(name).replace(/-max$/, '');
   if (maxEffort?.has(bare) && bare !== tidy(name)) add(bare);
+  // Last, each form with a "p" for a decimal point written as one (kimi-k2p5 is
+  // Kimi K2.5, as some hosts write it), then without a leading maker name.
+  for (const candidate of [...out]) add(candidate.replace(/(\d)p(\d)/g, '$1-$2'));
+  for (const candidate of [...out]) add(candidate.replace(MAKER_PREFIX, ''));
   return out;
 }
 

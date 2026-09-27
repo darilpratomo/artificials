@@ -509,3 +509,22 @@ export async function testCard(
   footer(ctx, credit);
   return canvas.toBuffer('image/png');
 }
+
+/** A week's card: its dates and figures, beside its top new releases. */
+export function weekCard(
+  range: string,
+  summary: string,
+  releases: { name: string; makerId: string; value?: string }[],
+  credit: string,
+) {
+  return headlineCard(
+    'Weekly recap',
+    ['The week in', 'AI models.'],
+    `${range}: ${summary}.`,
+    {
+      title: releases.length ? 'New this week' : 'No notable releases',
+      rows: releases.map(({ name, makerId, value }) => ({ makerIds: [makerId], name, value })),
+    },
+    credit,
+  );
+}

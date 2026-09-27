@@ -1,0 +1,170 @@
+/* The week in AI models: the week's figures, its highlights and each change, on the model page's cards. */
+.weekly-page > section,
+.weekly-page > nav {
+  margin-bottom: 20px;
+}
+.weekly-missing {
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+.weekly-steps {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.weekly-glance {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+/* Up to four highlights fill one row; fewer share it evenly. */
+.weekly-highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.weekly-highlights li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--profile-line);
+  border-radius: 14px;
+  background: var(--profile-raised);
+}
+.weekly-highlights img {
+  width: 36px;
+  height: 36px;
+}
+.weekly-highlights li > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.weekly-highlights small {
+  color: var(--profile-muted);
+  font-size: 13px;
+}
+.weekly-highlights b {
+  overflow: hidden;
+  color: var(--profile-ink);
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.weekly-highlights a:hover,
+.weekly-releases a:hover,
+.weekly-archive a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.weekly-model {
+  display: inline-grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+.weekly-model img {
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  border-radius: 7px;
+}
+.weekly-model > span {
+  display: grid;
+  min-width: 0;
+}
+.weekly-model small {
+  color: var(--profile-muted);
+  font-size: 12.5px;
+  font-weight: 400;
+}
+.weekly-none {
+  color: var(--profile-muted);
+}
+.weekly-empty {
+  margin: 0;
+  color: var(--profile-muted);
+  font-size: 14.5px;
+}
+.weekly-events {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.weekly-archive h2 {
+  margin: 12px 0 14px;
+  font-size: 17.5px;
+  letter-spacing: -0.015em;
+}
+.weekly-archive ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.weekly-archive a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 6px 16px;
+  border: 1px solid var(--profile-line);
+  border-radius: 99px;
+  color: var(--profile-ink-2);
+  font-size: 14px;
+}
+.weekly-archive a[aria-current='page'] {
+  border-color: #c9ccd4;
+  color: var(--profile-ink);
+  font-weight: 600;
+}
+.weekly-page .data-footnote a {
+  gap: 5px;
+}
+
+@media (max-width: 1100px) {
+  .weekly-glance {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  /* A release in two lines: the model and its price, then its date, index and context. */
+  .weekly-page .weekly-releases tr {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.75fr);
+    grid-template-areas:
+      'name name price'
+      'released index context';
+  }
+  .weekly-page .weekly-releases td {
+    white-space: nowrap;
+  }
+  .weekly-page .weekly-releases tbody th {
+    grid-area: name;
+  }
+  .weekly-page .weekly-releases td[data-label='Price'] {
+    grid-area: price;
+    text-align: right;
+  }
+  .weekly-page .weekly-releases td[data-label='Price']::before {
+    content: none;
+  }
+  .weekly-page .weekly-releases td[data-label='Released'] {
+    grid-area: released;
+  }
+  .weekly-page .weekly-releases td[data-label='Capability index'] {
+    grid-area: index;
+  }
+  .weekly-page .weekly-releases td[data-label='Capability index']::before {
+    content: 'Index';
+  }
+  .weekly-page .weekly-releases td[data-label='Context'] {
+    grid-area: context;
+  }
+}

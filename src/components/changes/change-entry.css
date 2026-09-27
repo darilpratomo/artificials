@@ -1,0 +1,68 @@
+/* A change as a sentence beside its maker's logo, on What changed and the weekly recap. */
+.change-entry {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #1f2027;
+  border-radius: 14px;
+  background: #101115;
+}
+.change-entry > img {
+  width: 36px;
+  height: 36px;
+  padding: 5px;
+  border-radius: 9px;
+}
+.change-entry > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.change-entry p {
+  margin: 0;
+  color: #c3c6cf;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+.change-entry p a,
+.change-entry p strong {
+  color: #f3f4f7;
+  font-weight: 600;
+}
+.change-entry p a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.change-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #8e909b;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.change-chip {
+  padding: 4px 10px;
+  border: 1px solid #2a2b33;
+  border-radius: 99px;
+  color: #f3f4f7;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 640px) {
+  .change-entry {
+    grid-template-columns: 32px minmax(0, 1fr);
+    padding: 12px;
+  }
+  .change-entry > img {
+    width: 32px;
+    height: 32px;
+  }
+  .change-chip {
+    grid-column: 2;
+    justify-self: start;
+  }
+}

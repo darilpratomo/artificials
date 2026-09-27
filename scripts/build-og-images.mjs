@@ -21,7 +21,9 @@ import {
   setup,
   testCard,
   testsCard,
+  weekCard,
 } from './lib/og.ts';
+import { weekRange, weekSentence } from '../shared/week-label.ts';
 import { DOMAIN_LABELS } from '../shared/benchmarks.ts';
 import { comparisonPath } from '../shared/compare.ts';
 import { indexValue, price, score, tokens } from '../shared/format.ts';
@@ -275,6 +277,27 @@ const shownSources = [
 ];
 await write('tests.png', await testsCard(tests.length, leads, `Data: ${shownSources.join(', ')}.`));
 
+// Weeks: the dates and figures, and the top new releases.
+const { weeks } = await read('weekly.json');
+for (const summary of weeks) {
+  const week = await read(`weekly/${summary.week}.json`);
+  const png = await weekCard(
+    weekRange(week.week, week.end),
+    `${weekSentence(week.counts)}${week.complete ? '' : ' so far'}`,
+    week.releases.slice(0, 5).map((release) => ({
+      name: release.name,
+      makerId: release.makerId,
+      ...(release.index !== undefined ? { value: indexValue(release.index) } : {}),
+    })),
+    // The week's figures rest on the catalog and on the tests behind its events.
+    credit([
+      ...week.sources.map((source) => source.id),
+      ...(week.releases.some((release) => release.index !== undefined) ? ['epoch'] : []),
+    ]),
+  );
+  await write(`weekly/${week.week}.png`, png);
+}
+
 console.log(
-  `Link previews: the default card, the comparison card, ${comparisons} comparisons, ${models} models, ${makers.length} makers, ${tests.length} tests and the makers and tests lists.`,
+  `Link previews: the default card, the comparison card, ${comparisons} comparisons, ${models} models, ${makers.length} makers, ${tests.length} tests, ${weeks.length} weeks and the makers and tests lists.`,
 );

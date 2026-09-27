@@ -16,6 +16,7 @@ import {
 import type { DirectoryEntry, ProfileDirectory } from '../shared/model-profiles';
 import type { MakerDirectory } from '../shared/maker-pages';
 import type { TestDirectory } from '../shared/test-pages';
+import type { WeekDirectory } from '../shared/weekly';
 import type { Article } from '../shared/content';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
@@ -303,6 +304,17 @@ app.get('/sitemap.xml', async (c) => {
         pages.push({ path: '/tests/' + id });
   } catch {
     // Nor a missing list of tests.
+  }
+  try {
+    // Every week's recap, at its dated address.
+    const response = await c.env.ASSETS.fetch(
+      new Request(new URL('/data/models/weekly.json', c.req.url)),
+    );
+    if (response.ok)
+      for (const { week } of ((await response.json()) as WeekDirectory).weeks)
+        pages.push({ path: '/weekly/' + week });
+  } catch {
+    // Nor a missing list of weeks.
   }
   return c.body(
     '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +

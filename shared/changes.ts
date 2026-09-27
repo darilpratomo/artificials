@@ -1,4 +1,5 @@
 import { withinMargin, type History } from './history.ts';
+import { readableName } from './model-names.ts';
 import type { ModelProfile, ProfileBucket } from './model-profiles.ts';
 import type { OverviewTests, Timeline } from './model-overview.ts';
 
@@ -63,6 +64,7 @@ export function buildChanges({
   tests,
   sources,
   until,
+  since: from,
 }: {
   history?: History;
   profiles: ModelProfile[];
@@ -71,17 +73,19 @@ export function buildChanges({
   sources: (Source & { checkedAt?: string })[];
   /** The data's own day, from the catalog snapshot. */
   until: string;
+  /** The window's first day; the last 30 days when left out. */
+  since?: string;
 }): Changes {
   const start = new Date(`${until}T00:00:00Z`);
   start.setUTCDate(start.getUTCDate() - (CHANGE_DAYS - 1));
-  const since = start.toISOString().slice(0, 10);
+  const since = from ?? start.toISOString().slice(0, 10);
   const inWindow = (day: string) => day >= since && day <= until;
   const bySlug = new Map(profiles.map((profile) => [profile.slug, profile]));
   const model = (slug: string | undefined, name: string, makerId: string): ChangeModel => {
     const profile = slug ? bySlug.get(slug) : undefined;
     return profile
       ? { slug: profile.slug, name: profile.name, maker: profile.maker, makerId: profile.makerId }
-      : { name, maker: '', makerId };
+      : { name: readableName(name), maker: '', makerId };
   };
   const events: ChangeEvent[] = [];
 

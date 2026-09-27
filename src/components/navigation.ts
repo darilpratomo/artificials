@@ -13,6 +13,7 @@ import {
   Image,
   ListOrdered,
   Medal,
+  Newspaper,
   SquareTerminal,
   Target,
   TrendingUp,
@@ -127,6 +128,12 @@ export const NAV_GROUPS: NavGroupItem[] = [
       {
         label: 'Trends and media',
         items: [
+          {
+            to: '/weekly',
+            label: 'This week',
+            description: 'The week in AI models, on one page',
+            icon: Newspaper,
+          },
           {
             to: '/trends',
             label: 'AI trends',
