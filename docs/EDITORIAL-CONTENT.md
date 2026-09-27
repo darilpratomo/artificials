@@ -12,6 +12,32 @@ Apply `supabase/004_editorial_deep_dives.sql` when using the database-backed CMS
 
 ## Publishing and maintaining
 
+### Systems collection, 27 September 2026
+
+`shared/editorial-systems.ts` adds 20 original English explainers (693–794 words each,
+14,615 words in total), bringing the static collection to 47 articles. Subjects include
+MoE routing, KV-cache capacity, speculative decoding, LoRA, preference data, multilingual
+tokenization, vision inputs, image consistency, video evaluation, transcription, SQL,
+permission-aware retrieval, memory, idempotency, MCP connections, contamination,
+ranking uncertainty, energy measurement, browser inference, and agent traces.
+
+These are educational insights, not announcements of new products. Research claims are
+attributed to the linked primary papers or official documentation. Proposed experiments,
+decision checklists, and fictional scenarios are original editorial analysis; numerical
+examples do not claim observed benchmark results. No source article was copied or
+mechanically rewritten. Older research is presented as background, not current rankings.
+
+Each new article has a distinct AI-generated cover, a 640px responsive derivative,
+descriptive alt text, and matching social/structured-data image metadata. See
+[the artwork prompt record](EDITORIAL-SYSTEMS-ASSETS.md). The existing visual layout,
+search/filter behavior, navigation, and old article content are unchanged. The only
+rendering integration selects the per-article asset in place of a category fallback.
+
+`supabase/006_editorial_systems.sql` contains the same 20 records for a database-backed
+CMS. It inserts missing slugs only, preserving existing editorial changes. Applying it
+twice is safe. As before, a static deployment does not write to a configured CMS database;
+check the live `/api/articles` and sitemap after publishing.
+
 - `shared/content.ts` includes the collection in the static public API, sitemap, metadata, homepage cards, and prerendered article pages.
 - When enabling Supabase CMS, apply `supabase/003_editorial_collection.sql` after the existing schema and seed. It inserts only missing slugs and preserves existing CMS edits. After CMS activation, database publication state becomes authoritative; deployment alone does not insert articles into Supabase.
 - Each article has a unique title, description, canonical URL, Article structured data, reading-time estimate, linked section navigation, and related reading. The full text is present in static HTML.

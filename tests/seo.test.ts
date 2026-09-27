@@ -40,7 +40,9 @@ describe('public search metadata', () => {
     expect(pageMetadata('/').image).toBe('https://artificials.net/og/default.png');
     expect(pageMetadata('/trends').image).toBe('https://artificials.net/og/default.png');
     expect(pageMetadata('/compare').image).toBe('https://artificials.net/og/compare.png');
-    expect(pageMetadata('/news/' + ARTICLES[0].slug).image).toMatch(/\/editorial\/\w+\.webp$/);
+    expect(pageMetadata('/news/' + ARTICLES[0].slug).image).toMatch(
+      /\/editorial\/[a-z0-9-]+\.webp$/,
+    );
     const tested = { slug: 'x', name: 'X', maker: 'Maker', offerings: 3, hasResults: true };
     expect(modelMetadata(tested).image).toBe('https://artificials.net/og/models/x.png');
     expect(modelMetadata({ ...tested, hasResults: false }).image).toBe(

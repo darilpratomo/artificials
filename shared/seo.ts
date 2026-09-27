@@ -1,4 +1,5 @@
 import { ARTICLES, type Article } from './content';
+import { articleCover } from './editorial-covers';
 import academy from './academy-index.json';
 import { UTILITIES } from './utilities';
 import { canonicalComparison, parseComparison } from './compare';
@@ -241,14 +242,8 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
       ? 'The AI models, makers and tests you follow on Artificials, and what changed for each since you last looked.'
       : 'Return to Artificials to explore AI models, rankings, guides, and lessons.');
   const canonical = SITE_URL + path;
-  const kind =
-    article?.category === 'Research'
-      ? 'benchmarks'
-      : article?.category === 'AI models'
-        ? 'context'
-        : 'engineering';
   const image = article
-    ? `${SITE_URL}/editorial/${kind}.webp`
+    ? `${SITE_URL}/editorial/${articleCover(article).file}.webp`
     : (PAGE_IMAGES[path] ?? DEFAULT_IMAGE);
   const structured = article
     ? {

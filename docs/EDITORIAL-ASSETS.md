@@ -1,5 +1,9 @@
 # Editorial artwork
 
+The 27 September 2026 collection adds 20 separately generated article covers and responsive
+derivatives. See [Systems collection artwork](EDITORIAL-SYSTEMS-ASSETS.md) for the final
+prompt set, file locations, and integration details. The earlier assets below are preserved.
+
 Created with the built-in image_gen tool on 17 September 2026, then resized and encoded as WebP with cwebp. No OpenAI API key or production generation endpoint was used. These are original AI-generated concept illustrations, not photographs of real events.
 
 Project assets: `public/editorial/{benchmarks,context,engineering}.webp` (1200px) and matching `-small.webp` variants (640px). Cards use responsive srcset, fixed aspect ratios and lazy loading. The owner requested removal of the visible article captions; provenance remains recorded here.

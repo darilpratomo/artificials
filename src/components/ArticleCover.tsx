@@ -1,28 +1,16 @@
 import type { Article } from '../../shared/content';
+import { articleCover } from '../../shared/editorial-covers';
 
 export function ArticleCover({
   article,
   priority = false,
   decorative = false,
 }: {
-  article: Pick<Article, 'category'>;
+  article: Pick<Article, 'slug' | 'category'>;
   priority?: boolean;
   decorative?: boolean;
 }) {
-  const kind =
-    article.category === 'Research'
-      ? 'benchmarks'
-      : article.category === 'AI models'
-        ? 'context'
-        : 'engineering';
-  const descriptions = {
-    benchmarks:
-      'Silver towers connected by fine light threads, illustrating AI benchmark comparisons.',
-    context:
-      'Layers of translucent glass surrounding a silver orb, illustrating model memory and context.',
-    engineering:
-      'Floating metal and glass layers connected to a central core, illustrating application architecture.',
-  };
+  const { file: kind, alt } = articleCover(article);
   return (
     <img
       className="article-cover"
@@ -35,7 +23,7 @@ export function ArticleCover({
       }
       width="1200"
       height="800"
-      alt={decorative ? '' : descriptions[kind]}
+      alt={decorative ? '' : alt}
       loading={priority ? 'eager' : 'lazy'}
       decoding="async"
     />
