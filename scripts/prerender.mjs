@@ -348,7 +348,8 @@ try {
   );
   // The "What changed" feed, from the same events as the page.
   await writeFile('dist/changes.xml', changesFeed(changes));
-  for (const route of ['login', 'dashboard', '404'])
+  // Pages that belong to a visitor, not to search: the app draws them in the browser.
+  for (const route of ['login', 'dashboard', 'following', '404'])
     await writeFile(
       `dist/${route}.html`,
       template.replace('</head>', metadataHtml(pageMetadata('/' + route)) + '</head>'),

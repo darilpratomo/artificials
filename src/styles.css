@@ -1768,6 +1768,11 @@ button {
 .legal-page .prose p {
   font-size: 14.5px;
 }
+.privacy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 .contact-page {
   max-width: 800px;
 }
@@ -5471,6 +5476,41 @@ input[type='radio'] {
     500 11px/1 'Inter Variable',
     sans-serif;
 }
+/* The models a visitor follows: a star with their number, shown once they follow one. */
+.site-header .following-link {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  border: 1px solid #ffffff20;
+  border-radius: 50%;
+  color: #aeb0ba;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+.site-header .following-link:hover,
+.site-header .following-link.active {
+  border-color: #ffffff3d;
+  color: #fff;
+}
+.following-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: #eceef2;
+  color: #0b0c0f;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
 /* The prerendered page does not know the device yet: the hint keeps its room until it does. */
 .search-trigger kbd:empty {
   visibility: hidden;
@@ -5483,19 +5523,26 @@ input[type='radio'] {
     padding: 0;
     border-radius: 50%;
   }
+  .site-header .following-link {
+    width: 42px;
+    height: 42px;
+  }
   .search-trigger-label,
   .search-trigger kbd {
     display: none;
   }
 }
+/* On phones the three round actions match the menu button's 40px touch target. */
 @media (max-width: 639px) {
-  .site-header .search-trigger {
-    width: 38px;
-    height: 38px;
+  .site-header .search-trigger,
+  .site-header .following-link {
+    width: 40px;
+    height: 40px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .site-header .search-trigger {
+  .site-header .search-trigger,
+  .site-header .following-link {
     transition: none;
   }
 }
@@ -5744,6 +5791,23 @@ input[type='radio'] {
   .mobile-menu-bottom {
     padding: 20px 18px;
     flex-wrap: wrap;
+  }
+}
+
+/* The smallest phones: the brand and the three round actions share one line inside both
+   gutters, even as the header becomes an island. */
+@media (max-width: 359px) {
+  .site-header .site-nav,
+  .site-header .site-actions {
+    gap: 6px;
+  }
+  .site-header .search-trigger,
+  .site-header .following-link,
+  .site-header .menu-trigger {
+    width: 36px;
+    min-width: 0;
+    height: 36px;
+    min-height: 0;
   }
 }
 

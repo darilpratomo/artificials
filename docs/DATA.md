@@ -468,6 +468,18 @@ figures are calculated by Artificials and say so; batch discounts, free tiers, t
 fees are not included. The workload lives in the address (`?in=1500&out=500&day=100&cache=0`),
 so a calculation can be shared, and a model's own calculator links to it with its numbers.
 
+## Followed models
+
+Following a model saves it in the visitor's browser only (`localStorage`,
+`artificials-following-v1`, up to 50 models; `src/lib/following.ts`); nothing is sent to the
+server, and there is no account. Each entry keeps the figures the model page showed when it was
+followed or last marked as seen: the blended reference price, the capability index and the
+number of hosts, which are the same figures `explorer.json` gives. `/following` compares them
+with `explorer.json` and lists the model's events from `changes.json` dated after that day: its
+own, and new leaders that took a top spot from it. "Mark as seen" takes the figures as they are
+now. A model no longer in the catalog says so and can only be unfollowed. `/following` is a
+noindex page drawn in the browser, left out of the sitemap and the site search.
+
 ## Weekly recap
 
 `/weekly/{monday}` is one week, Monday to Sunday (UTC), from the same events as `/changes` and

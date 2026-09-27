@@ -20,6 +20,8 @@ import { EmptyState } from '../components/Layout';
 import { applyPageMetadata } from '../components/Metadata';
 import { modelMetadata } from '../../shared/seo';
 import { useComparison } from '../lib/catalog';
+import { FollowButton } from '../components/Follow';
+import { referencePrice } from '../../shared/model-overview';
 import { comparisonRecord } from '../lib/compare';
 import { makerLogo } from '../../shared/makers';
 import { useModelProfile, type ModelProfile as Profile } from '../lib/profiles';
@@ -186,6 +188,18 @@ export default function ModelProfile() {
               Open comparison
             </Link>
           )}
+          <FollowButton
+            slug={profile.slug}
+            name={profile.name}
+            makerId={profile.makerId}
+            figures={{
+              price: referencePrice(profile)?.blended ?? null,
+              index:
+                profile.results.find((result) => result.category === 'capability-index')?.score ??
+                null,
+              hosts: profile.offerings.length,
+            }}
+          />
         </div>
       </header>
 

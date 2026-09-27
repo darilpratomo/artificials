@@ -211,6 +211,7 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
   const accountTitles: Record<string, string> = {
     '/login': 'Editor sign-in',
     '/dashboard': 'Editor account',
+    '/following': 'Models you follow',
   };
   const title =
     (article?.title ||
@@ -222,7 +223,9 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
     article?.excerpt ||
     lesson?.summary ||
     pages[path]?.[1] ||
-    'Return to Artificials to explore AI models, rankings, guides, and lessons.';
+    (path === '/following'
+      ? 'The AI models you follow on Artificials, and what changed for each since you last looked.'
+      : 'Return to Artificials to explore AI models, rankings, guides, and lessons.');
   const canonical = SITE_URL + path;
   const kind =
     article?.category === 'Research'

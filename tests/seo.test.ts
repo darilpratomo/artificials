@@ -14,7 +14,7 @@ describe('public search metadata', () => {
       expect(xml).toContain('https://artificials.net' + path + '</loc>');
     expect(xml).toContain('/contact</loc>');
     expect(xml).toContain('<lastmod>');
-    expect(xml).not.toMatch(/dashboard|_private|checkout|login/);
+    expect(xml).not.toMatch(/dashboard|_private|checkout|login|following/);
   });
   it('uses unique titles, canonical URLs and private/unknown noindex', () => {
     const pages = publicPages().map(({ path }) => pageMetadata(path));
@@ -23,12 +23,14 @@ describe('public search metadata', () => {
     for (const path of [
       '/login',
       '/dashboard',
+      '/following',
       '/checkout',
       '/_private/secret',
       '/unknown-page',
       '/news/missing',
     ])
       expect(pageMetadata(path).robots).toContain('noindex');
+    expect(pageMetadata('/following').title).toBe('Models you follow — Artificials');
     expect(pageMetadata('/news/' + ARTICLES[0].slug).structured).toMatchObject({
       '@type': 'Article',
       headline: ARTICLES[0].title,

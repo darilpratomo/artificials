@@ -214,9 +214,9 @@ export function useComparisons(enabled = true, attempt = 0, initial?: Comparison
 }
 
 /** The last 30 days of releases, price changes, new leaders and index entries. */
-export function useChanges(attempt = 0, initial?: Changes) {
+export function useChanges(attempt = 0, initial?: Changes, enabled = true) {
   embedded('changes.json', 'changes-data', isChanges);
-  return useFile<Changes>('changes.json', isChanges, true, attempt, initial);
+  return useFile<Changes>('changes.json', isChanges, enabled, attempt, initial);
 }
 
 /** Pages, guides, lessons and tools for the site search. Loaded when the search opens. */

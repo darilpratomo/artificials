@@ -1,0 +1,229 @@
+/* The models a visitor follows: a card each, with its figures and its news since they last looked. */
+.following-page .following-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  min-height: 38px;
+  margin-bottom: 16px;
+}
+.following-toolbar p {
+  margin: 0;
+  color: var(--profile-ink-2);
+  font-size: 15px;
+}
+.following-list,
+.following-events {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.following-events {
+  gap: 8px;
+}
+.following-card {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--profile-line);
+  border-radius: 18px;
+  background: var(--profile-surface);
+}
+.following-head {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+.following-head > img {
+  width: 40px;
+  height: 40px;
+  padding: 6px;
+  border-radius: 10px;
+}
+.following-head > div {
+  min-width: 0;
+}
+.following-page .following-head h2 {
+  margin: 0;
+  color: var(--profile-ink);
+  font-size: 18px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.following-head h2 a {
+  color: inherit;
+}
+.following-head h2 a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.following-page .following-head p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 3px 0 0;
+  color: var(--profile-muted);
+  font-size: 13.5px;
+}
+.following-count-chip {
+  padding: 2px 9px;
+  border: 1px solid #3a3c46;
+  border-radius: 99px;
+  color: var(--profile-ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.following-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.following-figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.following-figure {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid #1f2027;
+  border-radius: 14px;
+  background: #0c0d10;
+}
+.following-figure > span {
+  color: var(--profile-muted);
+  font-size: 13px;
+}
+.following-figure strong {
+  color: var(--profile-ink);
+  font-family: 'Plus Jakarta Sans Variable', sans-serif;
+  font-size: 1.2rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.following-figure small {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--profile-muted);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+.following-figure.is-changed {
+  border-color: #4a4d57;
+  background: #16171c;
+}
+.following-figure.is-changed small {
+  color: var(--profile-ink);
+  font-weight: 600;
+}
+.following-page .following-more {
+  justify-self: start;
+  margin-top: -6px;
+}
+.following-page .following-gone {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px dashed var(--profile-line);
+  border-radius: 14px;
+  color: var(--profile-ink-2);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.following-empty {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 52px 24px;
+  border: 1px dashed var(--profile-line);
+  border-radius: 18px;
+  text-align: center;
+}
+.following-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--profile-line);
+  border-radius: 50%;
+  color: #d7d9e0;
+}
+.following-page .following-empty h2 {
+  margin: 0;
+  color: var(--profile-ink);
+  font-size: 20px;
+}
+.following-page .following-empty p {
+  max-width: 46ch;
+  margin: 0 0 6px;
+  color: var(--profile-ink-2);
+  line-height: 1.6;
+}
+/* Focus moves here after a change the visitor made, so it only shows when it helps. */
+.following-page [tabindex='-1']:focus:not(:focus-visible) {
+  outline: none;
+}
+
+@media (max-width: 720px) {
+  .following-card {
+    padding: 16px;
+  }
+  .following-head {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .following-head > img {
+    width: 36px;
+    height: 36px;
+    padding: 5px;
+  }
+  /* The actions share one row, the same width each. */
+  .following-actions {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+  }
+  .following-actions .btn {
+    justify-content: center;
+  }
+  .following-figures {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  /* A figure as a row: its name, then its value with how it moved beneath. */
+  .following-figure {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'label value'
+      'label change';
+    align-items: center;
+    column-gap: 12px;
+    padding: 12px 14px;
+  }
+  .following-figure > span {
+    grid-area: label;
+  }
+  .following-figure strong {
+    grid-area: value;
+    font-size: 1.05rem;
+    text-align: right;
+  }
+  .following-figure small {
+    grid-area: change;
+    justify-self: end;
+  }
+}

@@ -66,3 +66,16 @@
     flex-basis: 27px;
   }
 }
+@media (max-width: 359px) {
+  .site-header .brand-lockup {
+    gap: 5px;
+  }
+  .site-header .brand-name {
+    font-size: 12px;
+  }
+  .site-header .brand-mark {
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
+  }
+}

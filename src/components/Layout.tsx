@@ -12,6 +12,7 @@ import {
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { ArrowUpRight, ArrowRight, Globe2, Command, Search } from 'lucide-react';
 import { Brand } from './Brand';
+import { FollowingLink } from './Follow';
 import { NavGroup } from './NavGroup';
 import { COMPARE_LINK, NAV_GROUPS, TOP_LINKS } from './navigation';
 
@@ -230,6 +231,7 @@ export function Layout() {
               ))}
             </nav>
             <div className="site-actions">
+              <FollowingLink onClick={() => setOpen(false)} />
               <button
                 type="button"
                 className="search-trigger"

@@ -2,6 +2,7 @@ import { AnalyticsPreferencesButton } from '../components/Analytics';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowUpRight, Globe2, BookOpen, HeartHandshake, Mail } from 'lucide-react';
 import { removeLocal } from '../lib/storage';
+import { clearFollowing } from '../lib/following';
 import { useState } from 'react';
 import { PageHeading } from '../components/Layout';
 import { useApp } from '../lib/context';
@@ -9,6 +10,7 @@ export default function Info() {
   const { pathname } = useLocation();
   const { config } = useApp();
   const [cleared, setCleared] = useState(false);
+  const [unfollowed, setUnfollowed] = useState(false);
   if (pathname === '/about')
     return (
       <div className="container page about-page">
@@ -204,16 +206,18 @@ export default function Info() {
             </p>
             <h2>5. Cookies and device storage</h2>
             <p>
-              Essential HTTP-only cookies keep an editor signed in. Your selected model comparisons
-              and Academy lesson completion are saved in your browser’s local storage so they remain
-              available as you navigate. Academy progress stays on this device and is not
-              synchronized to an account. Sign-in and security providers may use their own essential
-              storage. With your permission, Google Analytics uses first-party cookies to measure
-              visits to public pages, including device/browser information and approximate location.
-              Google processes this information under its own privacy policy. Google Analytics is
-              optional and stays off until you accept; advertising features are disabled. We do not
-              include email addresses, query strings, account pages or private editor URLs in our
-              page-view events. Your analytics choice is saved on this device.
+              Essential HTTP-only cookies keep an editor signed in. Your selected model comparisons,
+              the models you follow (with the figures each had when you last looked) and Academy
+              lesson completion are saved in your browser’s local storage so they remain available
+              as you navigate. The list of models you follow is not sent to Artificials. Academy
+              progress stays on this device and is not synchronized to an account. Sign-in and
+              security providers may use their own essential storage. With your permission, Google
+              Analytics uses first-party cookies to measure visits to public pages, including
+              device/browser information and approximate location. Google processes this information
+              under its own privacy policy. Google Analytics is optional and stays off until you
+              accept; advertising features are disabled. We do not include email addresses, query
+              strings, account pages or private editor URLs in our page-view events. Your analytics
+              choice is saved on this device.
             </p>
             <p>
               <a
@@ -232,19 +236,30 @@ export default function Info() {
             </p>
             <AnalyticsPreferencesButton />
             <p>
-              You can clear the model comparison saved on this device below. You can also clear site
-              storage through your browser settings.
+              You can clear the model comparison and the models you follow, saved on this device,
+              below. You can also clear site storage through your browser settings.
             </p>
-            <button
-              className="btn btn-outline"
-              onClick={() => {
-                removeLocal('artificials-compare');
-                window.dispatchEvent(new Event('artificials-compare-change'));
-                setCleared(true);
-              }}
-            >
-              {cleared ? 'Saved comparison cleared' : 'Clear saved comparison'}
-            </button>
+            <div className="privacy-actions">
+              <button
+                className="btn btn-outline"
+                onClick={() => {
+                  removeLocal('artificials-compare');
+                  window.dispatchEvent(new Event('artificials-compare-change'));
+                  setCleared(true);
+                }}
+              >
+                {cleared ? 'Saved comparison cleared' : 'Clear saved comparison'}
+              </button>
+              <button
+                className="btn btn-outline"
+                onClick={() => {
+                  clearFollowing();
+                  setUnfollowed(true);
+                }}
+              >
+                {unfollowed ? 'Followed models cleared' : 'Clear followed models'}
+              </button>
+            </div>
             <h2>7. Retention and deletion</h2>
             <p>
               Editor accounts are kept while the editor helps with the site. Database backup copies
