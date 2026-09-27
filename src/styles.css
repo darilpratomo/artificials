@@ -5511,6 +5511,10 @@ input[type='radio'] {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+/* A prerendered Follow button keeps its room, unseen, until the app knows what this browser follows. */
+.follow-button.is-pending {
+  visibility: hidden;
+}
 /* The prerendered page does not know the device yet: the hint keeps its room until it does. */
 .search-trigger kbd:empty {
   visibility: hidden;
