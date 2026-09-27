@@ -196,6 +196,12 @@ export const NAV_GROUPS: NavGroupItem[] = [
           {
             to: '/how-ai-works',
             label: 'How AI works',
+            description: 'An animated journey down to the silicon',
+            icon: Waypoints,
+          },
+          {
+            to: '/how-ai-works-2',
+            label: 'How AI works 2',
             description: 'An animated journey inside AI',
             icon: Waypoints,
           },

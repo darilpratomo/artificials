@@ -22,7 +22,7 @@ test('the journey connects interactive representations, generation, training and
 }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('/how-ai-works');
+  await page.goto('/how-ai-works-2');
   // WebKit's native smooth auto-scroll can outlast a locator click when moving
   // several chapters at once. Keep ambient/interactive animation enabled while
   // testing the controls; chapter-link scrolling is covered separately below.
@@ -73,7 +73,7 @@ test('the journey connects interactive representations, generation, training and
 test('keyboard controls, motion preferences and responsive layout remain usable', async ({
   page,
 }) => {
-  await page.goto('/how-ai-works');
+  await page.goto('/how-ai-works-2');
   await page.addStyleTag({ content: 'html { scroll-behavior: auto !important; }' });
   const motion = page.locator('.ai-motion-control');
   await motion.click();
@@ -111,7 +111,7 @@ test('keyboard controls, motion preferences and responsive layout remain usable'
 test('scroll advances the actual drawing, holds at rest, and reconstructs the same frame in reverse', async ({
   page,
 }) => {
-  await page.goto('/how-ai-works');
+  await page.goto('/how-ai-works-2');
   const track = page.locator('.sj-track');
   await expect(track).toHaveAttribute('data-ready', 'true');
   const moveTo = async (progress: number) => {
@@ -158,7 +158,7 @@ test('scroll advances the actual drawing, holds at rest, and reconstructs the sa
 test('the pinned experience and its controls fit small portrait and landscape viewports', async ({
   page,
 }) => {
-  await page.goto('/how-ai-works');
+  await page.goto('/how-ai-works-2');
   await expect(page.locator('.sj-track')).toHaveAttribute('data-ready', 'true');
   for (const [width, height] of [
     [320, 568],
@@ -204,11 +204,13 @@ test('the complete chapter text and canonical link are available without JavaScr
   );
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto('/how-ai-works');
+  await page.goto('/how-ai-works-2');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     'href',
-    'https://artificials.net/how-ai-works',
+    'https://artificials.net/how-ai-works-2',
   );
+  // A second telling kept for comparison: served, but not for search engines.
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
   await expect(page.locator('.ai-chapter')).toHaveCount(8);
   await expect(page.getByRole('heading', { name: /Human judgment/ })).toBeVisible();
   await context.close();

@@ -25,6 +25,7 @@ try {
   const { renderPage } = await server.ssrLoadModule('/src/prerender.tsx');
   const {
     publicPages,
+    unlistedPages,
     pageMetadata,
     metadataHtml,
     comparisonMetadata,
@@ -40,10 +41,13 @@ try {
     .replace(/<title>.*?<\/title>/s, '')
     .replace(/<meta name="description"[^>]*>/, '');
   const manifest = JSON.parse(await readFile('dist/.vite/manifest.json', 'utf8'));
-  // The immersive guide's visual effects are loaded only on its own route.
-  const storyStyles = new Set(manifest['src/pages/HowAIWorks.tsx']?.css || []);
+  // The animated guides' visual effects are loaded only on their own routes.
+  const routeStyles = new Map(
+    ['HowAIWorks', 'Descent'].map((name) => [name, manifest[`src/pages/${name}.tsx`]?.css || []]),
+  );
+  const ownStyles = new Set([...routeStyles.values()].flat());
   const styles = [...new Set(Object.values(manifest).flatMap((entry) => entry.css || []))]
-    .filter((file) => !template.includes(file) && !storyStyles.has(file))
+    .filter((file) => !template.includes(file) && !ownStyles.has(file))
     .map((file) => `<link rel="stylesheet" href="/${file}">`)
     .join('');
   await writeFile('dist/app-shell.html', template);
@@ -67,7 +71,8 @@ try {
     'cost-calculator': 'Cost',
     compare: 'Compare',
     news: 'Learn',
-    'how-ai-works': 'HowAIWorks',
+    'how-ai-works': 'Descent',
+    'how-ai-works-2': 'HowAIWorks',
     tools: 'Tools',
     about: 'Info',
     privacy: 'Info',
@@ -96,12 +101,11 @@ try {
       (chunk.imports || []).forEach(visit);
     };
     if (name) visit(`src/pages/${name}.tsx`);
-    const routeStyles =
-      name === 'HowAIWorks'
-        ? [...storyStyles].map((file) => `<link rel="stylesheet" href="/${file}">`).join('')
-        : '';
+    const own = (routeStyles.get(name) || [])
+      .map((file) => `<link rel="stylesheet" href="/${file}">`)
+      .join('');
     return (
-      routeStyles +
+      own +
       [...files]
         .filter((file) => !template.includes(file))
         .map((file) => `<link rel="modulepreload" crossorigin href="/${file}">`)
@@ -179,7 +183,8 @@ try {
   const comparisonsInline = `<script type="application/json" id="comparisons-data">${comparisonsText
     .trim()
     .replace(/</g, '\\u003c')}</script>`;
-  for (const { path } of publicPages()) {
+  // Public pages, and unlisted ones that are served but kept out of search.
+  for (const { path } of [...publicPages(), ...unlistedPages()]) {
     const lesson = path.startsWith('/learn/')
       ? JSON.parse(
           await readFile(`src/content/academy/lessons/${path.split('/').pop()}.json`, 'utf8'),

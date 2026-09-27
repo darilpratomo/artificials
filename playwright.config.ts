@@ -17,6 +17,7 @@ export default defineConfig({
         'responsive.spec.ts',
         'academy.spec.ts',
         'how-ai-works.spec.ts',
+        'descent.spec.ts',
         'analytics.spec.ts',
         'tools.spec.ts',
         'word-tools.spec.ts',
