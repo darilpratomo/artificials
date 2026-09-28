@@ -271,7 +271,8 @@ async function audit(
   await page.route('**/api/config', (route) => route.fulfill({ json: { auth: false } }));
   await page.route('**/api/session', (route) => route.fulfill({ json: { user: null } }));
   await page.goto(path);
-  await page.waitForSelector('.dsc-outro');
+  // Measure once the app has taken over the prerendered page.
+  await page.waitForSelector('.dsc-page.dsc-live');
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
   const chapters = await page
     .locator('.dsc-scene')
