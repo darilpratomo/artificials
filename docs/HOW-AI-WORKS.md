@@ -27,8 +27,10 @@ Every chapter is a canvas picture that stays in place while its text scrolls bes
 
 ## Implementation
 
-- `src/pages/Descent.tsx`: the page, chapter rail, pause control, finale and sources.
-- `src/pages/descent.css`: every rule scoped to `.dsc-page`. Loaded only on this route during prerendering.
+- `src/pages/Descent.tsx`: the page's opening, close and sources.
+- `src/components/descent/Story.tsx`: the page shell shared with The AI race and How AI benchmarks work (see [STORIES.md](STORIES.md)): the director, the chapter rail, the pause control, the opening, chapters, pauses and close.
+- `src/components/descent/story.css`: every rule scoped to `.dsc-page`. Loaded only on the pages of moving pictures during prerendering, which collects each page's stylesheets through its imports.
+- `src/components/descent/charts.ts`: chart pieces shared by the data pages: backdrop, caption, key and rows of scores with their ranges.
 - `src/components/descent/engine.ts`: one `requestAnimationFrame` loop for every canvas. Each picture is drawn from two numbers: eased progress through its steps (each step's picture is complete when that step reaches the reading line) and a looping clock. Nothing accumulates between frames, so scrolling back redraws exactly what was there. Pictures near the screen are kept sized and drawn so they arrive ready; only those on screen keep their looping motion running, and the loop stops when everything has settled. Canvas density is capped at 2× (1.5× for full-screen light). One failing picture does not stop the others.
 - `src/components/descent/Scene.tsx`: the chapter, interlude, opening and finale sections.
 - `src/components/descent/chapters.tsx`: the text, controls and sources, in reading order.
@@ -58,6 +60,6 @@ Run `npm run check`, then `E2E_PRODUCTION=1 npx playwright test tests/e2e/descen
 - the Resources menu leads to the page;
 - the prerendered HTML carries the canonical address, indexing and every chapter with JavaScript disabled.
 
-`tests/e2e/descent-layout.spec.ts` checks what the canvases draw, which the browser cannot see as text. It records every piece of text and every box each picture draws and fails if any text runs off its picture, lands on other text, straddles a box's edge or hides under the controls. It checks every step of every chapter at eight sizes (360×640, 375×548, 390×664, 430×740, 768×1024, 1024×768, 1280×720 and 1440×900), and the midpoints between steps, with the pictures moving, at 390×664.
+`tests/e2e/descent-layout.spec.ts` checks what the canvases draw, which the browser cannot see as text, on this page and on the two others built on it. It records every piece of text and every box each picture draws and fails if any text runs off its picture, lands on other text, straddles a box's edge or hides under the controls, or if a picture slips under the site header. It checks every step of every chapter at eight sizes (360×640, 375×548, 390×664, 430×740, 768×1024, 1024×768, 1280×720 and 1440×900), and the midpoints between steps, with the pictures moving, at 390×664.
 
 The three projects cover desktop Chromium, mobile Chromium, and mobile WebKit. These are browser-emulation checks, not a claim of physical-device testing.

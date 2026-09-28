@@ -63,6 +63,14 @@ const pages: Record<string, [string, string]> = {
     'AI trends',
     'How AI is changing: the capability frontier by maker and country, open weights against closed models, the falling cost of capability, context windows, training compute and the pace of releases.',
   ],
+  '/race': [
+    'The AI race — Every record on the capability index, year by year',
+    'Every model on Epoch AI’s capability index by release date: who set each record, how each maker climbed, how close open-weights models are, and how fast the price of a score falls.',
+  ],
+  '/how-benchmarks-work': [
+    'How AI benchmarks work — From one question to a ranking',
+    'How a benchmark turns answers into a score: one question, hundreds of questions, error bars, human votes, leaked tests, and many tests on one scale. Animated, with real results.',
+  ],
   '/leaderboard': [
     'AI model rankings and benchmarks',
     'Compare published AI benchmarks for coding, reasoning, mathematics, language, and image generation, with source and update information.',

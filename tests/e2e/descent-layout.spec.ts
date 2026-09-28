@@ -243,12 +243,22 @@ function problems(marks: Mark[], width: number, height: number, controls: Mark |
   return [...new Set(found)];
 }
 
+/** The pages of moving pictures. */
+const PAGES = ['/how-ai-works', '/how-benchmarks-work', '/race'];
+
 /**
  * Visits every chapter's steps with motion reduced, or, with `between`, the
  * midpoints between its steps with the pictures moving, where one part of a
- * picture gives way to the next.
+ * picture gives way to the next. It also checks that no picture slips under
+ * the site's header.
  */
-async function audit(browser: Browser, width: number, height: number, between = false) {
+async function audit(
+  browser: Browser,
+  path: string,
+  width: number,
+  height: number,
+  between = false,
+) {
   const context = await browser.newContext({
     viewport: { width, height },
     reducedMotion: between ? 'no-preference' : 'reduce',
@@ -260,8 +270,8 @@ async function audit(browser: Browser, width: number, height: number, between = 
   await page.addInitScript(instrument);
   await page.route('**/api/config', (route) => route.fulfill({ json: { auth: false } }));
   await page.route('**/api/session', (route) => route.fulfill({ json: { user: null } }));
-  await page.goto('/how-ai-works');
-  await page.waitForSelector('#judgment .dsc-step');
+  await page.goto(path);
+  await page.waitForSelector('.dsc-outro');
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
   const chapters = await page
     .locator('.dsc-scene')
@@ -300,7 +310,9 @@ async function audit(browser: Browser, width: number, height: number, between = 
         await frame();
         const picture = canvas.getBoundingClientRect();
         const controls = section.querySelector('.dsc-controls > *')?.getBoundingClientRect();
+        const header = document.querySelector('header.site-header')?.getBoundingClientRect();
         return {
+          covered: header && header.bottom > 0 ? Math.round(header.bottom - picture.top) : 0,
           marks: draws.get(canvas) ?? [],
           width: picture.width,
           height: picture.height,
@@ -316,13 +328,17 @@ async function audit(browser: Browser, width: number, height: number, between = 
             : null,
         };
       }, place);
+      if (result.covered > 1)
+        report.push(
+          `${path} ${width}×${height} ${id} step ${place + 1}: the header covers the picture’s top by ${result.covered}px`,
+        );
       for (const problem of problems(
         result.marks as Mark[],
         result.width,
         result.height,
         result.controls as Mark | null,
       ))
-        report.push(`${width}×${height} ${id} step ${place + 1}: ${problem}`);
+        report.push(`${path} ${width}×${height} ${id} step ${place + 1}: ${problem}`);
     }
   }
   await context.close();
@@ -341,16 +357,20 @@ for (const [width, height] of [
 ]) {
   test(`every picture keeps its words clear at ${width}×${height}`, async ({ browser }, info) => {
     test.skip(info.project.name !== 'desktop', 'Each size is set here; one project is enough');
-    const report = await audit(browser, width, height);
+    test.setTimeout(120_000);
+    const report = (
+      await Promise.all(PAGES.map((path) => audit(browser, path, width, height)))
+    ).flat();
     expect(report, report.join('\n')).toEqual([]);
   });
 }
 
-test('the pictures stay clear between their steps, while they move, on a phone', async ({
-  browser,
-}, info) => {
-  test.skip(info.project.name !== 'desktop', 'The size is set here; one project is enough');
-  test.setTimeout(180_000);
-  const report = await audit(browser, 390, 664, true);
-  expect(report, report.join('\n')).toEqual([]);
-});
+for (const path of PAGES)
+  test(`${path}: the pictures stay clear between their steps, while they move, on a phone`, async ({
+    browser,
+  }, info) => {
+    test.skip(info.project.name !== 'desktop', 'The size is set here; one project is enough');
+    test.setTimeout(180_000);
+    const report = await audit(browser, path, 390, 664, true);
+    expect(report, report.join('\n')).toEqual([]);
+  });

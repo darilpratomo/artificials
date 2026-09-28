@@ -636,6 +636,31 @@ calculated by Artificials from published data:
 Sources: Epoch AI (capability index and model records, CC BY 4.0) and models.dev (prices,
 context windows and release dates, MIT), credited beside each chart and in "Sources and method".
 
+## The AI race and How AI benchmarks work
+
+Two animated pages tell a story with the site's own data. Both are built on the How AI works
+engine (see [HOW-AI-WORKS.md](HOW-AI-WORKS.md)) and prerendered with their data inline.
+
+`/race` reads `public/data/models/race.json`, built by `buildRace` (`shared/race.ts`) from the
+capability index points in `overview.json`: every model with a release date, the records for the
+whole field (a model that beat every model released before it), each of the six strongest
+makers' own records, records among open-weights and among closed models, and, for index levels
+120 to 150, the cheapest price to date at or above the level. The figures its words state are
+worked out in the same place (`facts`): how many records and makers; the best open-weights model
+and the first closed model that reached its score, months apart; and, at the highest level with
+a price record spanning a year or more, how far the cheapest price fell. Prices are today's
+models.dev list prices placed at each model's release date, not launch prices.
+
+`/how-benchmarks-work` reads `public/data/models/scoring.json`, built by `buildScoring`
+(`shared/scoring.ts`) from `tests.json` and `overview.json`: the eight GPQA Diamond leaders with
+Epoch AI's standard errors and the random-guessing score, the eight Arena text leaders with
+Arena's 95% intervals, and the eight capability index leaders with Epoch AI's intervals. Its
+example question, illustrative model, reruns and leaked scores are written for the page and
+labelled where they appear.
+
+Neither file carries a check or update time. Sources: Epoch AI (CC BY 4.0), Arena (CC BY 4.0)
+and models.dev (MIT), credited on each page.
+
 ## Image and video models pages
 
 `/image-models` ranks image generators and image editors, and `/video-models` ranks video

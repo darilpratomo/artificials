@@ -1,6 +1,7 @@
 /*
- * How AI works: a page of moving pictures. Every rule is scoped to .dsc-page,
- * because prerendered pages load stylesheets in build order.
+ * Pages of moving pictures (How AI works, How AI benchmarks work, The AI
+ * race). Every rule is scoped to .dsc-page, because prerendered pages load
+ * stylesheets in build order.
  */
 .dsc-page {
   --void: #05060a;
@@ -160,10 +161,15 @@
   padding-top: var(--header);
   overflow: hidden;
 }
+/*
+ * Room after the last step, so the picture stays pinned under the header
+ * while that step is read at the middle of the screen: the last step is
+ * 92svh, and its middle at 50svh leaves the picture 4svh short.
+ */
 .dsc-page .dsc-copy {
   grid-column: 1;
   grid-row: 1;
-  padding: 0 40px 0 max(64px, calc((100vw - 1500px) / 2 + 120px));
+  padding: 0 40px 8svh max(64px, calc((100vw - 1500px) / 2 + 120px));
 }
 .dsc-page .dsc-step {
   display: flex;
@@ -242,8 +248,21 @@
   font-size: 0.95rem;
   line-height: 1.55;
 }
+/* A short numbered list in a step, such as the leaders of a chart. */
+.dsc-page .dsc-list {
+  max-width: 46ch;
+  margin: 0;
+  padding-left: 1.4em;
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+.dsc-page .dsc-list li::marker {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
 .dsc-page .dsc-fact a,
-.dsc-page .dsc-body a {
+.dsc-page .dsc-body a,
+.dsc-page .dsc-outro p a {
   color: var(--ink-2);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -492,6 +511,33 @@
   font-size: clamp(1.1rem, 2vw, 1.35rem);
   font-weight: 600;
 }
+/* A checklist in the close. */
+.dsc-page .dsc-checks {
+  display: grid;
+  gap: 8px;
+  max-width: 46ch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink);
+  font-size: 1.02rem;
+  line-height: 1.5;
+}
+.dsc-page .dsc-checks li {
+  position: relative;
+  padding-left: 26px;
+}
+.dsc-page .dsc-checks li::before {
+  content: '';
+  position: absolute;
+  top: 0.45em;
+  left: 4px;
+  width: 10px;
+  height: 6px;
+  border-bottom: 2px solid #3fcf9a;
+  border-left: 2px solid #3fcf9a;
+  transform: rotate(-45deg);
+}
 .dsc-page .dsc-finale-note {
   max-width: 50ch;
   margin: 0;
@@ -567,8 +613,9 @@
 }
 /* Narrow screens: the picture stays at the top, the words scroll beneath it. */
 @media (max-width: 1023px) {
+  /* The site header's height at these widths, so the picture sits just under it. */
   .dsc-page {
-    --header: 66px;
+    --header: 70px;
   }
   .dsc-page .dsc-scene {
     display: block;
@@ -618,6 +665,11 @@
   }
   .dsc-page .dsc-links {
     margin-top: 4px;
+  }
+}
+@media (max-width: 639px) {
+  .dsc-page {
+    --header: 66px;
   }
 }
 /* On the shortest screens the close keeps the answer and drops its recap. */

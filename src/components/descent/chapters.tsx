@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { LLAMA_405B_GPU_HOURS, duration, trainingDays } from '../../lib/descent-math';
 import type { Draw } from './engine';
 import { HUE } from './kit';
-import type { Step } from './Scene';
+import type { Chapter, Pause } from './Story';
 import { createAgents } from './scenes/agents';
 import { createAssistant } from './scenes/assistant';
 import { createAttention } from './scenes/attention';
@@ -94,30 +94,6 @@ export const REFERENCES: [href: string, text: string][] = [
   [SOURCES.ddpm, 'Ho, Jain and Abbeel, 2020: Denoising Diffusion Probabilistic Models'],
   [SOURCES.sky, 'NASA Space Place: Why Is the Sky Blue?'],
 ];
-
-export interface Chapter {
-  kind: 'chapter';
-  id: string;
-  /** The name on the rail. */
-  short: string;
-  title: string;
-  lede: string;
-  label: string;
-  steps: Step[];
-  draw: Draw;
-  ambient?: boolean;
-  controls?: (set: (key: string, value: number) => void) => ReactNode;
-}
-export interface Pause {
-  kind: 'interlude';
-  id: string;
-  kicker: string;
-  question: string;
-  label: string;
-  draw: Draw;
-  from: string;
-  to: string;
-}
 
 function Temperature({ set }: { set: (key: string, value: number) => void }) {
   const [value, setValue] = useState(1);

@@ -31,6 +31,8 @@ function page(load: Parameters<typeof lazy>[0]) {
 const Models = page(() => import('./pages/Models'));
 const CodingAgents = page(() => import('./pages/CodingAgents'));
 const Trends = page(() => import('./pages/Trends'));
+const Race = page(() => import('./pages/Race'));
+const HowBenchmarksWork = page(() => import('./pages/HowBenchmarksWork'));
 const ImageModels = page(() => import('./pages/ImageModels'));
 const VideoModels = page(() => import('./pages/VideoModels'));
 const ModelFinder = page(() => import('./pages/ModelFinder'));
@@ -65,6 +67,8 @@ function pageAt(path: string) {
   return new Map([
     ['coding-agents', CodingAgents],
     ['trends', Trends],
+    ['race', Race],
+    ['how-benchmarks-work', HowBenchmarksWork],
     ['image-models', ImageModels],
     ['video-models', VideoModels],
     ['model-finder', ModelFinder],
@@ -126,6 +130,8 @@ const app = (
               <Route path="models/:slug" element={<ModelProfile />} />
               <Route path="coding-agents" element={<CodingAgents />} />
               <Route path="trends" element={<Trends />} />
+              <Route path="race" element={<Race />} />
+              <Route path="how-benchmarks-work" element={<HowBenchmarksWork />} />
               <Route path="image-models" element={<ImageModels />} />
               <Route path="video-models" element={<VideoModels />} />
               <Route path="model-finder" element={<ModelFinder />} />

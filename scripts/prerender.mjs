@@ -40,9 +40,30 @@ try {
     .replace(/<title>.*?<\/title>/s, '')
     .replace(/<meta name="description"[^>]*>/, '');
   const manifest = JSON.parse(await readFile('dist/.vite/manifest.json', 'utf8'));
-  // The animated guide's visual effects are loaded only on its own route.
+  // The pages of moving pictures load their visual effects only on their own
+  // routes: every stylesheet they reach that no other page does.
+  const stories = ['Descent', 'HowBenchmarksWork', 'Race'];
+  const cssOf = (key, seen = new Set()) => {
+    const chunk = manifest[key];
+    if (!chunk || seen.has(key)) return [];
+    seen.add(key);
+    return [...(chunk.css || []), ...(chunk.imports || []).flatMap((next) => cssOf(next, seen))];
+  };
+  const elsewhere = new Set(
+    Object.keys(manifest)
+      .filter(
+        (key) =>
+          manifest[key].isDynamicEntry && !stories.some((name) => key === `src/pages/${name}.tsx`),
+      )
+      .flatMap((key) => cssOf(key)),
+  );
   const routeStyles = new Map(
-    ['Descent'].map((name) => [name, manifest[`src/pages/${name}.tsx`]?.css || []]),
+    stories.map((name) => [
+      name,
+      [...new Set(cssOf(`src/pages/${name}.tsx`))].filter(
+        (file) => !elsewhere.has(file) && !template.includes(file),
+      ),
+    ]),
   );
   const ownStyles = new Set([...routeStyles.values()].flat());
   const styles = [...new Set(Object.values(manifest).flatMap((entry) => entry.css || []))]
@@ -55,6 +76,8 @@ try {
   const pageFiles = {
     'coding-agents': 'CodingAgents',
     trends: 'Trends',
+    race: 'Race',
+    'how-benchmarks-work': 'HowBenchmarksWork',
     'image-models': 'ImageModels',
     'video-models': 'VideoModels',
     'model-finder': 'ModelFinder',
@@ -128,6 +151,17 @@ try {
   const trendsInline = `<script type="application/json" id="trends-data">${trendsText
     .trim()
     .replace(/</g, '\\u003c')}</script>`;
+  // The AI race and how benchmarks work carry their own small files inline.
+  const raceText = await readFile('dist/data/models/race.json', 'utf8');
+  const race = JSON.parse(raceText);
+  const raceInline = `<script type="application/json" id="race-data">${raceText
+    .trim()
+    .replace(/</g, '\\u003c')}</script>`;
+  const scoringText = await readFile('dist/data/models/scoring.json', 'utf8');
+  const scoring = JSON.parse(scoringText);
+  const scoringInline = `<script type="application/json" id="scoring-data">${scoringText
+    .trim()
+    .replace(/</g, '\\u003c')}</script>`;
   const imagesText = await readFile('dist/data/models/images.json', 'utf8');
   const images = JSON.parse(imagesText);
   const imagesInline = `<script type="application/json" id="images-data">${imagesText
@@ -190,6 +224,8 @@ try {
     const withData = path === '/' || path === '/models';
     const withCoding = path === '/coding-agents';
     const withTrends = path === '/trends';
+    const withRace = path === '/race';
+    const withScoring = path === '/how-benchmarks-work';
     const withImages = path === '/image-models';
     const withVideos = path === '/video-models';
     const withFinder = path === '/model-finder';
@@ -215,6 +251,8 @@ try {
           overview: withData ? overview : undefined,
           coding: withCoding ? coding : undefined,
           trends: withTrends ? trends : undefined,
+          race: withRace ? race : undefined,
+          scoring: withScoring ? scoring : undefined,
           images: withImages ? images : undefined,
           videos: withVideos ? videos : undefined,
           finder: withFinder ? finder : undefined,
@@ -227,7 +265,7 @@ try {
           costs: withCosts ? costs : undefined,
         })}</div>${withData ? inline : ''}${withCoding ? codingInline : ''}${
           withTrends ? trendsInline : ''
-        }${withImages ? imagesInline : ''}${withVideos ? videosInline : ''}${
+        }${withRace ? raceInline : ''}${withScoring ? scoringInline : ''}${withImages ? imagesInline : ''}${withVideos ? videosInline : ''}${
           withFinder ? finderInline : ''
         }${withComparisons ? comparisonsInline : ''}${withChanges ? changesInline : ''}${
           withMakers ? makersInline : ''

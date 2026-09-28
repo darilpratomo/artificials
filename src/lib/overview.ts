@@ -12,6 +12,8 @@ import type { MakerDirectory, MakerPage } from '../../shared/maker-pages';
 import type { TestDirectory, TestPage } from '../../shared/test-pages';
 import type { WeekDirectory, WeekPage } from '../../shared/weekly';
 import type { Costs } from '../../shared/costs';
+import type { Race } from '../../shared/race';
+import type { Scoring } from '../../shared/scoring';
 
 export type {
   Explorer,
@@ -75,6 +77,8 @@ const isExplorer = (value: Explorer) => value?.version === 1 && Array.isArray(va
 const isTimeline = (value: Timeline) => value?.version === 1 && Array.isArray(value.entries);
 const isCoding = (value: Coding) => value?.version === 2 && Array.isArray(value.tests);
 const isTrends = (value: Trends) => value?.version === 1 && Array.isArray(value.frontier);
+const isRace = (value: Race) => value?.version === 1 && Array.isArray(value.models);
+const isScoring = (value: Scoring) => value?.version === 1 && Array.isArray(value.gpqa?.rows);
 const isImages = (value: Images) => value?.version === 1 && Array.isArray(value.boards);
 const isVideos = (value: Videos) => value?.version === 1 && Array.isArray(value.boards);
 const isFinder = (value: Finder) => value?.version === 1 && Array.isArray(value.tasks);
@@ -187,6 +191,18 @@ export function useCoding(attempt = 0, initial?: Coding) {
 export function useTrends(attempt = 0, initial?: Trends) {
   embedded('trends.json', 'trends-data', isTrends);
   return useFile<Trends>('trends.json', isTrends, true, attempt, initial);
+}
+
+/** Every model on the capability index by release date, for the AI race page. */
+export function useRace(attempt = 0, initial?: Race) {
+  embedded('race.json', 'race-data', isRace);
+  return useFile<Race>('race.json', isRace, true, attempt, initial);
+}
+
+/** Real test results with their uncertainty, for the page on how AI benchmarks work. */
+export function useScoring(attempt = 0, initial?: Scoring) {
+  embedded('scoring.json', 'scoring-data', isScoring);
+  return useFile<Scoring>('scoring.json', isScoring, true, attempt, initial);
 }
 
 /** Arena's image boards and the automated image test, for the image models page. */

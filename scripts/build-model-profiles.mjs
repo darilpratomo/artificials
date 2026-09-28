@@ -22,6 +22,8 @@ import { buildMakers } from '../shared/maker-pages.ts';
 import { buildTests } from '../shared/test-pages.ts';
 import { buildWeeks } from '../shared/weekly.ts';
 import { buildCosts } from '../shared/costs.ts';
+import { buildRace } from '../shared/race.ts';
+import { buildScoring } from '../shared/scoring.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const data = resolve(root, 'public/data');
@@ -168,6 +170,12 @@ await writeFile(resolve(staging, 'videos.json'), JSON.stringify(videos) + '\n');
 // The home page carries one current result from each of those pages.
 overview.explore = buildExplore({ overview, tests, finder, coding, trends, images, videos });
 await writeFile(resolve(staging, 'overview.json'), JSON.stringify(overview) + '\n');
+// The AI race and how benchmarks work: small files for their pages.
+await writeFile(resolve(staging, 'race.json'), JSON.stringify(buildRace(overview)) + '\n');
+await writeFile(
+  resolve(staging, 'scoring.json'),
+  JSON.stringify(buildScoring({ tests, overview })) + '\n',
+);
 // Featured model comparisons, prerendered and listed in the sitemap.
 const comparisons = buildComparisons(
   overview,

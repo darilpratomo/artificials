@@ -9,9 +9,11 @@ import {
   ChartScatter,
   Cpu,
   Film,
+  Flag,
   GitCompareArrows,
   GraduationCap,
   Image,
+  ListChecks,
   ListOrdered,
   Medal,
   Newspaper,
@@ -143,6 +145,12 @@ export const NAV_GROUPS: NavGroupItem[] = [
             icon: TrendingUp,
           },
           {
+            to: '/race',
+            label: 'The AI race',
+            description: 'Every record on the capability index, year by year',
+            icon: Flag,
+          },
+          {
             to: '/image-models',
             label: 'Image models',
             description: 'Text to image and image editing, ranked by votes',
@@ -198,6 +206,12 @@ export const NAV_GROUPS: NavGroupItem[] = [
             label: 'How AI works',
             description: 'An animated journey down to the silicon',
             icon: Waypoints,
+          },
+          {
+            to: '/how-benchmarks-work',
+            label: 'How AI benchmarks work',
+            description: 'From one question to a ranking',
+            icon: ListChecks,
           },
           {
             to: '/tools',

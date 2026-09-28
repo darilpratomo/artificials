@@ -6,6 +6,8 @@ import Home from './pages/Home';
 import Models from './pages/Models';
 import CodingAgents from './pages/CodingAgents';
 import Trends from './pages/Trends';
+import Race from './pages/Race';
+import HowBenchmarksWork from './pages/HowBenchmarksWork';
 import ImageModels from './pages/ImageModels';
 import VideoModels from './pages/VideoModels';
 import ModelFinder from './pages/ModelFinder';
@@ -44,6 +46,8 @@ import type {
   Costs,
 } from './lib/overview';
 import type { ComparisonData, Comparisons } from './lib/compare';
+import type { Race as RaceData } from '../shared/race';
+import type { Scoring } from '../shared/scoring';
 
 /** The data a page renders from, written into its HTML as well. */
 export interface PageData {
@@ -51,6 +55,8 @@ export interface PageData {
   overview?: ModelOverview;
   coding?: Coding;
   trends?: TrendsData;
+  race?: RaceData;
+  scoring?: Scoring;
   images?: ImagesData;
   videos?: VideosData;
   finder?: FinderData;
@@ -73,6 +79,8 @@ export function renderPage(
     overview,
     coding,
     trends,
+    race,
+    scoring,
     images,
     videos,
     finder,
@@ -97,6 +105,8 @@ export function renderPage(
             <Route path="models" element={<Models initial={overview} />} />
             <Route path="coding-agents" element={<CodingAgents initial={coding} />} />
             <Route path="trends" element={<Trends initial={trends} />} />
+            <Route path="race" element={<Race initial={race} />} />
+            <Route path="how-benchmarks-work" element={<HowBenchmarksWork initial={scoring} />} />
             <Route path="image-models" element={<ImageModels initial={images} />} />
             <Route path="video-models" element={<VideoModels initial={videos} />} />
             <Route path="model-finder" element={<ModelFinder initial={finder} />} />
