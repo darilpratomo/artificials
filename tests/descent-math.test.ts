@@ -23,6 +23,16 @@ import { NEURON, gelu, neuronSum } from '../src/components/descent/scenes/neuron
 import { ANSWER, CANDIDATES, DRAW } from '../src/components/descent/scenes/predict';
 import { MEMORY_EXAMPLE, readMilliseconds } from '../src/components/descent/scenes/memory';
 import { GPU_WATTS } from '../src/components/descent/scenes/bill';
+import {
+  BLUE_SCORES,
+  CHOSEN,
+  EXPERTS,
+  EXPERT_MODELS,
+  ROUTES,
+  topTwo,
+} from '../src/components/descent/scenes/experts';
+import { PIECES } from '../src/components/descent/scenes/tokens';
+import { CHOICES } from '../src/components/descent/scenes/assistant';
 
 describe('probabilities', () => {
   const scores = CANDIDATES.map(([, score]) => score);
@@ -142,5 +152,36 @@ describe('smaller numbers', () => {
     expect(FORMATS.map((format) => format.sign + format.exponent + format.mantissa)).toEqual([
       32, 16, 8, 0,
     ]);
+  });
+});
+
+describe('experts', () => {
+  it('sends " blue" to the two experts its route names, blended by a softmax over their scores', () => {
+    expect(BLUE_SCORES).toHaveLength(EXPERTS);
+    const [[first, share], [second, rest]] = topTwo(BLUE_SCORES);
+    expect([first, second]).toEqual(ROUTES[4]);
+    expect(share + rest).toBeCloseTo(1, 12);
+    expect(Math.round(share * 100)).toBe(60);
+  });
+
+  it('gives every token of the question its own pair of different experts', () => {
+    expect(ROUTES).toHaveLength(PIECES.length);
+    for (const route of ROUTES) {
+      expect(route).toHaveLength(CHOSEN);
+      expect(new Set(route).size).toBe(CHOSEN);
+      for (const expert of route) expect(expert).toBeGreaterThanOrEqual(0);
+      for (const expert of route) expect(expert).toBeLessThan(EXPERTS);
+    }
+  });
+
+  it('keeps the published parameter counts', () => {
+    expect(EXPERT_MODELS).toEqual([
+      { name: 'Mixtral 8x7B', total: 47, active: 13 },
+      { name: 'DeepSeek-V3', total: 671, active: 37 },
+    ]);
+  });
+
+  it('lets the reward model prefer the answer people picked', () => {
+    expect(CHOICES[0][1]).toBeGreaterThan(CHOICES[1][1]);
   });
 });

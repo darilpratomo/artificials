@@ -52,7 +52,10 @@ interface Scene extends Required<Omit<SceneOptions, 'onStep' | 'anchor' | 'maxDp
   w: number;
   h: number;
   dpr: number;
+  /** Near the screen: kept sized and drawn, ready to arrive. */
   visible: boolean;
+  /** On the screen: only then does its looping motion run. */
+  onScreen: boolean;
   shown: number;
   step: number;
   dirty: boolean;
@@ -183,7 +186,7 @@ export function createDirector(): Director {
         scene.step = step;
         scene.onStep?.(step);
       }
-      const animated = scene.ambient && !reduced && !paused;
+      const animated = scene.ambient && !reduced && !paused && scene.onScreen;
       if (scene.dirty || moved || animated) {
         scene.dirty = false;
         paint(scene, t);
@@ -212,6 +215,16 @@ export function createDirector(): Director {
       request();
     },
     { rootMargin: '25% 0px 25% 0px' },
+  );
+  // A section that only touches the screen's edge shows nothing, so it does not count.
+  const screen = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries)
+        for (const scene of scenes)
+          if (scene.section === entry.target) scene.onScreen = entry.isIntersecting;
+      request();
+    },
+    { rootMargin: '-2px 0px -2px 0px' },
   );
   // A section that grows moves every section below it, so any change of size
   // measures every scene again.
@@ -267,6 +280,7 @@ export function createDirector(): Director {
         h: 0,
         dpr: 1,
         visible: false,
+        onScreen: false,
         shown: 0,
         step: -1,
         dirty: true,
@@ -280,6 +294,7 @@ export function createDirector(): Director {
       scene.shown = progress(scene);
       const cover = scene.cover?.();
       visibility.observe(scene.section);
+      screen.observe(scene.section);
       resized.observe(scene.canvas);
       resized.observe(scene.section);
       if (cover) resized.observe(cover);
@@ -287,6 +302,7 @@ export function createDirector(): Director {
       return () => {
         scenes.delete(scene);
         visibility.unobserve(scene.section);
+        screen.unobserve(scene.section);
         resized.unobserve(scene.canvas);
         resized.unobserve(scene.section);
         if (cover) resized.unobserve(cover);
@@ -317,6 +333,7 @@ export function createDirector(): Director {
       if (raf) cancelAnimationFrame(raf);
       raf = 0;
       visibility.disconnect();
+      screen.disconnect();
       resized.disconnect();
       removeEventListener('scroll', onScroll);
       removeEventListener('resize', onResize);

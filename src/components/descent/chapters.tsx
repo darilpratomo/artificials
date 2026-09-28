@@ -4,11 +4,13 @@ import type { Draw } from './engine';
 import { HUE } from './kit';
 import type { Step } from './Scene';
 import { createAgents } from './scenes/agents';
+import { createAssistant } from './scenes/assistant';
 import { createAttention } from './scenes/attention';
 import { createBeyond } from './scenes/beyond';
 import { createBill } from './scenes/bill';
 import { createCluster } from './scenes/cluster';
 import { createDatacenter } from './scenes/datacenter';
+import { EXPERT_MODELS, createExperts } from './scenes/experts';
 import { createGpu } from './scenes/gpu';
 import { createInference } from './scenes/inference';
 import { createInterlude } from './scenes/interlude';
@@ -49,6 +51,10 @@ export const SOURCES = {
   vit: 'https://arxiv.org/abs/2010.11929',
   ddpm: 'https://arxiv.org/abs/2006.11239',
   sky: 'https://spaceplace.nasa.gov/blue-sky/en/',
+  instructgpt: 'https://arxiv.org/abs/2203.02155',
+  dpo: 'https://arxiv.org/abs/2305.18290',
+  mixtral: 'https://arxiv.org/abs/2401.04088',
+  deepseekV3: 'https://arxiv.org/abs/2412.19437',
 };
 
 /** Every source the page cites, for the list at its end. */
@@ -64,6 +70,14 @@ export const REFERENCES: [href: string, text: string][] = [
     SOURCES.backprop,
     'Rumelhart, Hinton and Williams, 1986: Learning representations by back-propagating errors',
   ],
+  [
+    SOURCES.instructgpt,
+    'Ouyang et al., 2022: Training language models to follow instructions with human feedback',
+  ],
+  [
+    SOURCES.dpo,
+    'Rafailov et al., 2023: Direct Preference Optimization: Your Language Model is Secretly a Reward Model',
+  ],
   [SOURCES.scaling, 'Kaplan et al., 2020: Scaling Laws for Neural Language Models'],
   [
     SOURCES.zero,
@@ -72,6 +86,8 @@ export const REFERENCES: [href: string, text: string][] = [
   [SOURCES.llama3, 'Meta, 2024: The Llama 3 Herd of Models'],
   [SOURCES.llamaCard, 'Meta: Llama 3.1 model card'],
   [SOURCES.llamaBlog, 'Meta, 2024: Introducing Meta Llama 3'],
+  [SOURCES.mixtral, 'Jiang et al., 2024: Mixtral of Experts'],
+  [SOURCES.deepseekV3, 'DeepSeek-AI, 2024: DeepSeek-V3 Technical Report'],
   [SOURCES.h100, 'NVIDIA: H100 Tensor Core GPU specifications'],
   [SOURCES.hopper, 'NVIDIA: Hopper architecture whitepaper'],
   [SOURCES.vit, 'Dosovitskiy et al., 2020: An Image is Worth 16x16 Words'],
@@ -662,6 +678,63 @@ export function sequence(): (Chapter | Pause)[] {
       ],
     },
     {
+      kind: 'chapter',
+      id: 'assistant',
+      short: 'Assistant',
+      title: 'From predictor to assistant',
+      lede: 'Training on web text makes a model that continues text. A second stage teaches it to answer.',
+      label:
+        'A base model carries the question on with more questions; people’s example answers flow into the model; a person picks the better of two answers while a reward model scores them; the tuned model then answers the question.',
+      draw: createAssistant(),
+      ambient: true,
+      steps: [
+        {
+          body: (
+            <p>
+              A model trained only to predict the next token of web text is a base model. Asked a
+              question, it may simply carry on the page: more questions, a list, a heading.
+            </p>
+          ),
+        },
+        {
+          heading: 'Shown good answers',
+          body: (
+            <p>
+              People write example answers to many prompts, and the model is trained on them the
+              same way as before, one token at a time. This is supervised fine-tuning.
+            </p>
+          ),
+        },
+        {
+          heading: 'Asked which is better',
+          body: (
+            <p>
+              The model writes several answers and people rank them. A second model, the reward
+              model, learns to predict which answers people prefer.
+            </p>
+          ),
+        },
+        {
+          heading: 'Nudged towards preferred answers',
+          body: (
+            <p>
+              Reinforcement learning then adjusts the model to earn higher scores from the reward
+              model. Newer methods, such as direct preference optimisation, learn from the rankings
+              without a separate reward model.
+            </p>
+          ),
+          fact: (
+            <>
+              People preferred answers from a 1.3-billion-parameter tuned model to those of the
+              175-billion-parameter GPT-3:{' '}
+              <Source href={SOURCES.instructgpt}>Ouyang et al., 2022</Source>. Direct preference
+              optimisation: <Source href={SOURCES.dpo}>Rafailov et al., 2023</Source>
+            </>
+          ),
+        },
+      ],
+    },
+    {
       kind: 'interlude',
       id: 'part-hardware',
       kicker: 'Part three: hardware',
@@ -950,6 +1023,72 @@ export function sequence(): (Chapter | Pause)[] {
           fact: (
             <>
               H100 (SXM): up to 700 W. <Source href={SOURCES.h100}>NVIDIA</Source>
+            </>
+          ),
+        },
+      ],
+    },
+    {
+      kind: 'chapter',
+      id: 'experts',
+      short: 'Experts',
+      title: 'A team of experts',
+      lede: 'Some of the largest models use only a small part of themselves for each token.',
+      label:
+        'A token passes through one large block; the block splits into eight experts behind a router that sends each token to two of them; each word of the question takes its own pair; then bars compare all parameters with those used for each token in Mixtral 8x7B and DeepSeek-V3.',
+      draw: createExperts(),
+      ambient: true,
+      steps: [
+        {
+          body: (
+            <p>
+              In the transformer, every token passes through every weight of each feed-forward
+              block. A bigger block means more arithmetic for every token.
+            </p>
+          ),
+        },
+        {
+          heading: 'A router picks',
+          body: (
+            <p>
+              A mixture-of-experts layer splits that block into several smaller ones, the experts,
+              and adds a small router. For each token the router scores the experts and sends the
+              token to the best few, blending their answers. Mixtral uses eight experts in each
+              layer and picks two.
+            </p>
+          ),
+          fact: (
+            <>
+              Mixtral: <Source href={SOURCES.mixtral}>Jiang et al., 2024</Source>
+            </>
+          ),
+        },
+        {
+          heading: 'Each token, its own pair',
+          body: (
+            <p>
+              Different tokens take different experts; the router learns its choices during
+              training. They are not tidy subjects: in Mixtral, experts did not split by topic, and
+              the patterns found were closer to grammar.
+            </p>
+          ),
+        },
+        {
+          heading: 'All in memory, a few at work',
+          body: (
+            <p>
+              Every expert must still sit in GPU memory, but each token only does the arithmetic of
+              the ones it visits. A model can hold far more than it uses on any one token.
+            </p>
+          ),
+          fact: (
+            <>
+              {EXPERT_MODELS.map(
+                ({ name, total, active }) =>
+                  `${name}: ${total}B parameters, ${active}B used for each token`,
+              ).join('. ')}
+              . <Source href={SOURCES.mixtral}>Mixtral</Source>,{' '}
+              <Source href={SOURCES.deepseekV3}>DeepSeek-V3</Source>
             </>
           ),
         },

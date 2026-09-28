@@ -117,7 +117,7 @@ const pages: Record<string, [string, string]> = {
   ],
   '/how-ai-works': [
     'How AI works — An animated journey from your question to the silicon',
-    'Follow one question down through an AI system and back: tokens, meaning, neurons, attention, training, GPUs, memory, whole data centres, and the answer. Twenty animated chapters.',
+    'Follow one question down through an AI system and back: tokens, meaning, neurons, attention, training, GPUs, memory, whole data centres, and the answer. Twenty-two animated chapters.',
   ],
   '/about': [
     'About Artificials',

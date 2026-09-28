@@ -91,9 +91,9 @@ test('the journey opens with its question and every picture draws', async ({ pag
   const pauses = await page
     .locator('.dsc-interlude')
     .evaluateAll((sections) => sections.map((section) => section.id));
-  expect(chapters).toHaveLength(20);
+  expect(chapters).toHaveLength(22);
   expect(pauses).toHaveLength(4);
-  await expect(page.locator('.dsc-count').first()).toHaveText('Chapter 1 of 20');
+  await expect(page.locator('.dsc-count').first()).toHaveText('Chapter 1 of 22');
   for (const id of chapters) {
     await read(page, id, 1);
     await expect
@@ -107,7 +107,7 @@ test('the journey opens with its question and every picture draws', async ({ pag
       .toBeGreaterThan(12);
   }
   await expect(page.getByRole('heading', { name: 'That is how AI works.' })).toBeVisible();
-  await expect(page.locator('.dsc-references li')).toHaveCount(15);
+  await expect(page.locator('.dsc-references li')).toHaveCount(19);
   expect(errors).toEqual([]);
 });
 
@@ -189,7 +189,7 @@ test('the motion can be paused and resumed, and the rail follows the reader', as
 
   test.skip(info.project.name !== 'desktop', 'The rail shows on wide screens');
   const rail = page.getByRole('navigation', { name: 'Chapters' });
-  await expect(rail.getByRole('link')).toHaveCount(20);
+  await expect(rail.getByRole('link')).toHaveCount(22);
   await expect(rail.getByRole('link', { name: 'Layers' })).toHaveAttribute('aria-current', 'step');
   await rail.getByRole('link', { name: 'Memory' }).click();
   await expect(page).toHaveURL(/#memory$/);
@@ -258,7 +258,7 @@ test('the journey is prerendered, readable before any script runs', async ({ bro
   );
   await expect(page).toHaveTitle(/^How AI works — An animated journey/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('How AI works');
-  await expect(page.locator('.dsc-scene')).toHaveCount(20);
+  await expect(page.locator('.dsc-scene')).toHaveCount(22);
   for (const title of ['Words become pieces', 'The real bottleneck', 'Inside the data centre'])
     await expect(page.getByRole('heading', { name: title })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Sources' })).toBeVisible();
