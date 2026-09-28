@@ -3,6 +3,62 @@ import type { Article } from './content';
 // Content assets only: keep legacy covers and every existing layout unchanged.
 export const EDITORIAL_COVERS = new Map<string, { file: string; alt: string }>([
   [
+    'flashattention-gpu-memory-movement',
+    {
+      file: 'fieldnotes-flashattention',
+      alt: 'Silver ribbon paths loop through a raised glass chamber on a chip resting on dark stone.',
+    },
+  ],
+  [
+    'neural-network-pruning-sparse-inference',
+    {
+      file: 'fieldnotes-pruning',
+      alt: 'An open silver lattice arch stands beside detached metal columns.',
+    },
+  ],
+  [
+    'promptable-image-segmentation-masks',
+    {
+      file: 'fieldnotes-segmentation',
+      alt: 'A silver silhouette surrounds a glass pear and its leaf on dark fabric.',
+    },
+  ],
+  [
+    'tabular-ai-trees-neural-networks',
+    {
+      file: 'fieldnotes-tabular',
+      alt: 'A branching silver tree and woven metal mesh rise from an ordered grid of graphite blocks.',
+    },
+  ],
+  [
+    'differential-privacy-model-training',
+    {
+      file: 'fieldnotes-privacy',
+      alt: 'A frosted glass panel obscures individual silver beads inside a clear circular vessel.',
+    },
+  ],
+  [
+    'approximate-nearest-neighbor-vector-search',
+    {
+      file: 'fieldnotes-vector-search',
+      alt: 'A bright path descends through a layered network of silver spheres toward a small cluster.',
+    },
+  ],
+  [
+    'test-time-adaptation-distribution-shift',
+    {
+      file: 'fieldnotes-adaptation',
+      alt: 'A silver camera lens on a gimbal faces a curtain of frosted glass droplets.',
+    },
+  ],
+  [
+    'multi-task-learning-negative-transfer',
+    {
+      file: 'fieldnotes-multitask',
+      alt: 'Three metal forms share a woven silver trunk with tension cables extending to separate anchors.',
+    },
+  ],
+  [
     'self-supervised-audio-representations',
     {
       file: 'horizon-audio-features',

@@ -135,6 +135,7 @@ describe('search index', () => {
   });
 
   it('carries no guide text, only titles and summaries', () => {
-    expect(JSON.stringify(searchIndex()).length).toBeLessThan(40_000);
+    // Allow metadata for the 99-guide collection; article bodies must stay out of the index.
+    expect(JSON.stringify(searchIndex()).length).toBeLessThan(42_000);
   });
 });

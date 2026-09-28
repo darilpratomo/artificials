@@ -1,5 +1,9 @@
 # Editorial artwork
 
+The Fieldnotes collection adds eight original long-form articles and eight individually
+generated covers. See [Fieldnotes collection record](EDITORIAL-FIELDNOTES.md) for article
+word counts, source licences, responsive assets, and all final image prompts.
+
 The Horizons collection adds another 28 original long-form articles and 28 individually
 generated covers. See [Horizons collection record](EDITORIAL-HORIZONS.md) for article
 word counts, responsive assets, primary-source policy, and all final image prompts.
