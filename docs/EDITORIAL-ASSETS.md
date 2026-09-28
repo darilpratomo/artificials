@@ -1,5 +1,9 @@
 # Editorial artwork
 
+The Horizons collection adds another 28 original long-form articles and 28 individually
+generated covers. See [Horizons collection record](EDITORIAL-HORIZONS.md) for article
+word counts, responsive assets, primary-source policy, and all final image prompts.
+
 The 28 September 2026 collection adds 16 original long-form guides and 16 individually
 generated covers. See [Frontiers collection record](EDITORIAL-FRONTIERS.md) for article
 word counts, responsive asset paths, sources policy, and final image prompts.

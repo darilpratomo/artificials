@@ -3,6 +3,202 @@ import type { Article } from './content';
 // Content assets only: keep legacy covers and every existing layout unchanged.
 export const EDITORIAL_COVERS = new Map<string, { file: string; alt: string }>([
   [
+    'self-supervised-audio-representations',
+    {
+      file: 'horizon-audio-features',
+      alt: 'A waveform of silver reeds passes through a glass ear and becomes suspended crystalline blocks.',
+    },
+  ],
+  [
+    'neural-image-compression-rate-distortion',
+    {
+      file: 'horizon-neural-codecs',
+      alt: 'A silver mountain relief curls into a glass capsule on a dark museum table.',
+    },
+  ],
+  [
+    'causal-machine-learning-interventions',
+    {
+      file: 'horizon-causality',
+      alt: 'Two silver pendulums hang from one beam while a mechanical arm touches one sphere.',
+    },
+  ],
+  [
+    'model-confidence-calibration-decisions',
+    {
+      file: 'horizon-calibration',
+      alt: 'Glass vessels hold different quantities of silver beads beside an unmarked balance scale.',
+    },
+  ],
+  [
+    'video-understanding-temporal-evidence',
+    {
+      file: 'horizon-video-understanding',
+      alt: 'Glass frames show a silver sphere moving behind a dark arch, with a gap in the sequence.',
+    },
+  ],
+  [
+    'data-augmentation-label-preserving-transformations',
+    {
+      file: 'horizon-augmentation',
+      alt: 'A silver leaf appears through angled glass panes with differing reflections and perspectives.',
+    },
+  ],
+  [
+    'neuro-symbolic-ai-constraints-and-solvers',
+    {
+      file: 'horizon-symbolic',
+      alt: 'A flowing silver ribbon joins a precisely fitted puzzle of stone and glass blocks.',
+    },
+  ],
+  [
+    'neural-network-optimizers-learning-rates',
+    {
+      file: 'horizon-optimizers',
+      alt: 'Silver tracks cross dark sculpted terrain toward a shallow illuminated basin.',
+    },
+  ],
+  [
+    'transformer-attention-contextual-representations',
+    {
+      file: 'horizon-attention',
+      alt: 'Silver threads pass through a glass prism and suspended panes before forming a woven knot.',
+    },
+  ],
+  [
+    'encoder-decoder-masked-causal-language-models',
+    {
+      file: 'horizon-encoders',
+      alt: 'A circular silver frame holds a translucent landscape scroll beside a metal pen and flowing ribbon.',
+    },
+  ],
+  [
+    'contrastive-learning-positive-negative-pairs',
+    {
+      file: 'horizon-contrastive',
+      alt: 'Paired faceted stones connect with silver filaments, with a separate pair beyond a glass divider.',
+    },
+  ],
+  [
+    'diffusion-language-models-parallel-generation',
+    {
+      file: 'horizon-text-diffusion',
+      alt: 'Floating frosted tiles transform into sharply folded silver forms across a dark mosaic.',
+    },
+  ],
+  [
+    'verifiable-rewards-reasoning-model-training',
+    {
+      file: 'horizon-verifiable-rewards',
+      alt: 'A polished metal marble approaches a clear glass gate inside a curved silver maze.',
+    },
+  ],
+  [
+    'reward-hacking-ai-objectives',
+    {
+      file: 'horizon-reward-hacking',
+      alt: 'A small mechanical climber scales the outside of a silver maze toward a luminous sphere.',
+    },
+  ],
+  [
+    'computer-use-agents-screens-actions-recovery',
+    {
+      file: 'horizon-computer-agents',
+      alt: 'An articulated metal pointer faces a blank glass panel on a curved mechanical rail.',
+    },
+  ],
+  [
+    'ai-search-citations-evidence-trails',
+    {
+      file: 'horizon-citations',
+      alt: 'Fine silver threads connect dark stone books through a magnifying lens to a clear page.',
+    },
+  ],
+  [
+    'ocr-document-ai-reading-order',
+    {
+      file: 'horizon-ocr',
+      alt: 'A translucent sheet passes through a silver scanning arch and separates into ordered strips.',
+    },
+  ],
+  [
+    'vision-language-action-robotics',
+    {
+      file: 'horizon-robotics',
+      alt: 'A brushed-metal robotic gripper holds a clear cube above a fitted dark tray.',
+    },
+  ],
+  [
+    'world-models-simulation-planning',
+    {
+      file: 'horizon-world-models',
+      alt: 'A miniature mountain landscape sits inside a glass sphere beside a fragmented mirror reflection.',
+    },
+  ],
+  [
+    'protein-ai-structure-function-evidence',
+    {
+      file: 'horizon-proteins',
+      alt: 'A folded silver ribbon with pearl joints and a frosted loop floats above a laboratory plinth.',
+    },
+  ],
+  [
+    'ai-weather-models-forecast-evaluation',
+    {
+      file: 'horizon-weather',
+      alt: 'A dark globe with silver cloud formations and transparent atmospheric rings floats above a rippled sea.',
+    },
+  ],
+  [
+    'compute-optimal-training-data-budgets',
+    {
+      file: 'horizon-scaling',
+      alt: 'Three connected silver platforms support a cube, stacked glass sheets, and a coiled spring.',
+    },
+  ],
+  [
+    'sparse-autoencoders-model-interpretability',
+    {
+      file: 'horizon-interpretability',
+      alt: 'A dense woven cable separates through a glass prism into fibers with scattered illuminated ends.',
+    },
+  ],
+  [
+    'ai-text-watermarks-detection-limits',
+    {
+      file: 'horizon-watermarks',
+      alt: 'A magnifying lens reveals a fine ripple pattern on a blank silver sheet.',
+    },
+  ],
+  [
+    'ai-translation-terminology-review',
+    {
+      file: 'horizon-translation',
+      alt: 'Two silver origami birds share a pearl above a transparent bridge between dark rocks.',
+    },
+  ],
+  [
+    'active-learning-labeling-budget',
+    {
+      file: 'horizon-active-learning',
+      alt: 'Silver tweezers select a faceted clear stone from a field of smooth graphite pebbles.',
+    },
+  ],
+  [
+    'ai-anomaly-detection-alert-quality',
+    {
+      file: 'horizon-anomalies',
+      alt: 'A silver tuning fork stands beside glass discs bearing circular and asymmetric ripples.',
+    },
+  ],
+  [
+    'continual-learning-catastrophic-forgetting',
+    {
+      file: 'horizon-continual',
+      alt: 'A silver bonsai with supported metal branches grows a luminous translucent branch.',
+    },
+  ],
+  [
     'diffusion-and-flow-matching-image-models',
     {
       file: 'frontier-diffusion-flow',
