@@ -127,6 +127,7 @@ export function createNeuron(): Draw {
         alpha: span(zoom, 0.7, 1),
       });
     }
+    // Everything here, words included, shrinks with the zoom as it fades.
     const alpha = 1 - span(zoom, 0.55, 1);
     if (alpha <= 0.01) return;
     ctx.save();
@@ -165,7 +166,7 @@ export function createNeuron(): Draw {
           glow(ctx, sx(x), sy(y), 14 * scale, color, 0.9 * Math.sin(phase * Math.PI)),
         );
         label(ctx, format(input.value * input.weight), sx(x), sy(y) - 16, {
-          size: 12,
+          size: 12 * scale,
           face: 'mono',
           color: INK.white,
           align: 'center',
@@ -173,10 +174,11 @@ export function createNeuron(): Draw {
         });
       }
       if (weigh > 0.3 && !narrow) {
-        const mx = lerp(input.x + radius, bodyX - bodyR, 0.52);
-        const my = lerp(input.y, bodyY, 0.52);
+        // Near its input, clear of the sum written under the neuron.
+        const mx = lerp(input.x + radius, bodyX - bodyR, 0.3);
+        const my = lerp(input.y, bodyY, 0.3);
         label(ctx, `×${format(input.weight)}`, sx(mx), sy(my) - 12, {
-          size: 12,
+          size: 12 * scale,
           face: 'mono',
           color: INK.silver,
           align: 'center',
@@ -201,14 +203,14 @@ export function createNeuron(): Draw {
       ctx.lineWidth = 1.4;
       ctx.stroke();
       label(ctx, format(input.value), sx(input.x), sy(input.y), {
-        size: Math.round(radius * 0.52),
+        size: Math.round(radius * 0.52) * scale,
         face: 'mono',
         color: INK.white,
         align: 'center',
       });
       if (!narrow)
         label(ctx, `input ${index + 1}`, sx(input.x - radius - 10), sy(input.y), {
-          size: 11.5,
+          size: 11.5 * scale,
           color: INK.muted,
           align: 'right',
         });
@@ -227,7 +229,7 @@ export function createNeuron(): Draw {
     ctx.lineWidth = 1.6;
     ctx.stroke();
     label(ctx, sum > 0.5 ? format(total) : 'Σ', sx(bodyX), sy(bodyY), {
-      size: Math.round(bodyR * (sum > 0.5 ? 0.42 : 0.7)),
+      size: Math.round(bodyR * (sum > 0.5 ? 0.42 : 0.7)) * scale,
       face: sum > 0.5 ? 'mono' : 'display',
       weight: 600,
       color: INK.white,
@@ -242,10 +244,11 @@ export function createNeuron(): Draw {
         sx(bodyX),
         sy(bodyY + bodyR + 22),
         {
-          size: 12,
+          size: 12 * scale,
           color: INK.silver,
           align: 'center',
           alpha: sum,
+          backing: INK.void,
         },
       );
 
@@ -284,7 +287,7 @@ export function createNeuron(): Draw {
       }
       ctx.stroke();
       label(ctx, 'activation (GELU)', sx(plotX + 12), sy(plotY + 16), {
-        size: 11.5,
+        size: 11.5 * scale,
         color: INK.muted,
       });
       // The sum slides along the curve to become the output.
@@ -310,7 +313,7 @@ export function createNeuron(): Draw {
       const x = narrow ? sx(plotX + plotW / 2) : sx(plotX + plotW + 26);
       const y = narrow ? sy(plotY + plotH + 24) : sy(bodyY);
       label(ctx, format(gelu(total)), x, y, {
-        size: narrow ? 15 : 20,
+        size: (narrow ? 15 : 20) * scale,
         weight: 650,
         face: 'mono',
         color: INK.white,
@@ -318,7 +321,7 @@ export function createNeuron(): Draw {
         alpha: out * alpha,
       });
       label(ctx, 'output', x, y + 20, {
-        size: 11.5,
+        size: 11.5 * scale,
         color: INK.muted,
         align: narrow ? 'center' : 'left',
         alpha: out * alpha,

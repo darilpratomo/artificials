@@ -16,7 +16,6 @@ export default defineConfig({
       testMatch: [
         'responsive.spec.ts',
         'academy.spec.ts',
-        'how-ai-works.spec.ts',
         'descent.spec.ts',
         'analytics.spec.ts',
         'tools.spec.ts',

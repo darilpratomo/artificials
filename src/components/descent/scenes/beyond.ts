@@ -146,7 +146,11 @@ export function createBeyond(): Draw {
       const tokenSize = Math.min((w * 0.9) / (COLS * ROWS * 0.5), 22);
       const perRow = Math.floor((w * 0.9) / (tokenSize + 4));
       const rowsOfTokens = Math.ceil((COLS * ROWS) / perRow);
-      const tokenTop = h * 0.78 - (rowsOfTokens - 1) * (tokenSize + 4) * 0.5;
+      // Near the bottom, but ending clear of the note under them.
+      const tokenTop = Math.min(
+        h * 0.78 - (rowsOfTokens - 1) * (tokenSize + 4) * 0.5,
+        h - 44 - rowsOfTokens * (tokenSize + 4),
+      );
       const tokensLeft = w / 2 - (Math.min(perRow, COLS * ROWS) * (tokenSize + 4)) / 2;
       for (let r = 0; r < ROWS; r++)
         for (let c = 0; c < COLS; c++) {
@@ -189,7 +193,7 @@ export function createBeyond(): Draw {
             ctx.stroke();
           }
         }
-      label(ctx, `${COLS * ROWS} patches, each read like a token`, w / 2, h - 26, {
+      label(ctx, `${COLS * ROWS} patches, each read like a token`, w / 2, h - 22, {
         size: 13,
         color: INK.white,
         align: 'center',

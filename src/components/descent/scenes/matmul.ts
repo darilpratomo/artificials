@@ -9,6 +9,7 @@ import {
   glow,
   label,
   lerp,
+  lines,
   random,
   rgba,
   roundRect,
@@ -47,11 +48,14 @@ export function createMatmul(): Draw {
     const parallel = easeInOut(span(p, 0.54, 0.66));
     const grow = easeInOut(span(p, 0.74, 0.96));
 
-    const s = Math.min(w / 12.5, h / 12.5, 56);
-    const gap = s * 0.6;
+    // Cells as large as the picture allows, with room between the matrices for
+    // their names and above them for the weights' name.
+    const cellFor = (gap: number) => Math.min((w - 24 - gap) / 10, (h - 30 - gap) / 10, 56);
+    const gap = Math.max(26, cellFor(26) * 0.6);
+    const s = cellFor(gap);
     const total = 10 * s + gap;
     const x0 = w / 2 - total / 2;
-    const y0 = h / 2 - total / 2 + s * 0.3;
+    const y0 = (h - total - 18) / 2 + 18;
     const ax = x0;
     const ay = y0 + 6 * s + gap;
     const bx = x0 + 6 * s + gap;
@@ -109,7 +113,7 @@ export function createMatmul(): Draw {
           ctx.lineWidth = 1;
           ctx.stroke();
           label(ctx, String(value), x + c * s + s / 2, y + r * s + s / 2, {
-            size: Math.round(s * 0.36),
+            size: Math.max(8, Math.round(s * 0.36)),
             face: 'mono',
             color: INK.white,
             align: 'center',
@@ -157,7 +161,8 @@ export function createMatmul(): Draw {
         ctx.stroke();
         if (finished > 0.5)
           label(ctx, String(value), x + s / 2, y + s / 2, {
-            size: Math.round(s * (value >= 100 ? 0.3 : 0.36)),
+            size:
+              value >= 100 ? Math.max(7, Math.round(s * 0.3)) : Math.max(8, Math.round(s * 0.36)),
             face: 'mono',
             color: INK.white,
             align: 'center',
@@ -204,21 +209,34 @@ export function createMatmul(): Draw {
           );
         });
       }
+      // The first cell's sum, written down the empty corner as each pair arrives.
       if (cell === 0) {
-        const products = A[0].map((value, k) => `${value}×${B[k][0]}`).join(' + ');
-        label(ctx, `${products} = ${sum}`, w / 2, h - 34, {
-          size: Math.max(11, Math.min(15, w / 60)),
+        const size = Math.max(11, Math.min(15, s * 0.5));
+        const leading = Math.round(size * 1.45);
+        const top = y0 + Math.max(0, (6 * s - 7 * leading) / 2) + leading / 2;
+        A[0].forEach((value, k) => {
+          const reach = easeInOut(span(within, k / (pairs + 1), (k + 1.2) / (pairs + 1)));
+          label(ctx, `${k ? '+ ' : '  '}${value}×${B[k][0]}`, x0, top + k * leading, {
+            size,
+            face: 'mono',
+            color: INK.white,
+            alpha: reach,
+          });
+        });
+        label(ctx, `= ${sum}`, x0, top + pairs * leading, {
+          size,
+          weight: 650,
           face: 'mono',
           color: INK.white,
-          align: 'center',
+          // Only once the last pair has arrived, so the total is always the whole sum.
+          alpha: span(within, 6.2 / (pairs + 1), 0.97),
         });
       }
     }
     if (parallel > 0)
-      label(ctx, 'the other twelve cells, all at once', w / 2, h - 34, {
-        size: 13,
+      lines(ctx, 'the other twelve cells, all at once', x0, y0 + 3 * s, 6 * s - 12, {
+        size: Math.max(12, Math.min(14, s * 0.5)),
         color: INK.silver,
-        align: 'center',
         alpha: parallel,
       });
     ctx.restore();

@@ -25,7 +25,6 @@ try {
   const { renderPage } = await server.ssrLoadModule('/src/prerender.tsx');
   const {
     publicPages,
-    unlistedPages,
     pageMetadata,
     metadataHtml,
     comparisonMetadata,
@@ -41,9 +40,9 @@ try {
     .replace(/<title>.*?<\/title>/s, '')
     .replace(/<meta name="description"[^>]*>/, '');
   const manifest = JSON.parse(await readFile('dist/.vite/manifest.json', 'utf8'));
-  // The animated guides' visual effects are loaded only on their own routes.
+  // The animated guide's visual effects are loaded only on its own route.
   const routeStyles = new Map(
-    ['HowAIWorks', 'Descent'].map((name) => [name, manifest[`src/pages/${name}.tsx`]?.css || []]),
+    ['Descent'].map((name) => [name, manifest[`src/pages/${name}.tsx`]?.css || []]),
   );
   const ownStyles = new Set([...routeStyles.values()].flat());
   const styles = [...new Set(Object.values(manifest).flatMap((entry) => entry.css || []))]
@@ -72,7 +71,6 @@ try {
     compare: 'Compare',
     news: 'Learn',
     'how-ai-works': 'Descent',
-    'how-ai-works-2': 'HowAIWorks',
     tools: 'Tools',
     about: 'Info',
     privacy: 'Info',
@@ -183,8 +181,7 @@ try {
   const comparisonsInline = `<script type="application/json" id="comparisons-data">${comparisonsText
     .trim()
     .replace(/</g, '\\u003c')}</script>`;
-  // Public pages, and unlisted ones that are served but kept out of search.
-  for (const { path } of [...publicPages(), ...unlistedPages()]) {
+  for (const { path } of publicPages()) {
     const lesson = path.startsWith('/learn/')
       ? JSON.parse(
           await readFile(`src/content/academy/lessons/${path.split('/').pop()}.json`, 'utf8'),

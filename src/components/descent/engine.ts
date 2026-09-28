@@ -18,6 +18,8 @@ export interface Frame {
   reduced: boolean;
   /** Values from the scene's controls, such as a slider. */
   input: Record<string, number>;
+  /** How much of the bottom of the canvas the controls cover: draw above it. */
+  reserve: number;
 }
 export type Draw = (ctx: CanvasRenderingContext2D, frame: Frame) => void;
 
@@ -36,12 +38,16 @@ export interface SceneOptions {
   anchor?: number;
   /** The sharpest pixel density to draw at: soft, full-screen light needs less than labels do. */
   maxDpr?: number;
+  /** Controls laid over the canvas, which the picture must keep clear of. */
+  cover?: () => HTMLElement | null;
 }
 
-interface Scene extends Required<Omit<SceneOptions, 'onStep' | 'anchor' | 'maxDpr'>> {
+interface Scene extends Required<Omit<SceneOptions, 'onStep' | 'anchor' | 'maxDpr' | 'cover'>> {
   onStep?: (step: number) => void;
   anchor?: number;
   maxDpr?: number;
+  cover?: () => HTMLElement | null;
+  reserve: number;
   centres: number[];
   w: number;
   h: number;
@@ -114,6 +120,13 @@ export function createDirector(): Director {
     const dpr = Math.min(scene.maxDpr ?? 2, devicePixelRatio || 1);
     const w = Math.max(1, Math.round(box.width));
     const h = Math.max(1, Math.round(box.height));
+    // The controls sit over the bottom of the picture, with a little air above them.
+    const cover = scene.cover?.()?.getBoundingClientRect();
+    const reserve = cover?.height ? Math.max(0, Math.round(box.bottom - cover.top) + 10) : 0;
+    if (reserve !== scene.reserve) {
+      scene.reserve = reserve;
+      scene.dirty = true;
+    }
     if (w === scene.w && h === scene.h && dpr === scene.dpr) return;
     scene.w = w;
     scene.h = h;
@@ -138,6 +151,7 @@ export function createDirector(): Director {
         t,
         reduced,
         input: scene.input,
+        reserve: scene.reserve,
       });
     } catch (error) {
       // One broken picture must not stop the others.
@@ -205,7 +219,7 @@ export function createDirector(): Director {
     let moved = false;
     for (const entry of entries)
       for (const scene of scenes)
-        if (scene.canvas === entry.target) size(scene);
+        if (scene.canvas === entry.target || scene.cover?.() === entry.target) size(scene);
         else if (scene.section === entry.target) moved = true;
     if (moved) for (const scene of scenes) measureScene(scene);
     request();
@@ -235,6 +249,7 @@ export function createDirector(): Director {
   // Labels are drawn in the page's fonts; once they arrive, draw again.
   document.fonts?.ready.then(() => {
     for (const scene of scenes) {
+      size(scene);
       measureScene(scene);
       scene.dirty = true;
     }
@@ -256,21 +271,25 @@ export function createDirector(): Director {
         step: -1,
         dirty: true,
         ctx: null,
+        reserve: 0,
       };
       scenes.add(scene);
       size(scene);
       measureScene(scene);
       // Start where the reader already is, rather than gliding from the top.
       scene.shown = progress(scene);
+      const cover = scene.cover?.();
       visibility.observe(scene.section);
       resized.observe(scene.canvas);
       resized.observe(scene.section);
+      if (cover) resized.observe(cover);
       request();
       return () => {
         scenes.delete(scene);
         visibility.unobserve(scene.section);
         resized.unobserve(scene.canvas);
         resized.unobserve(scene.section);
+        if (cover) resized.unobserve(cover);
       };
     },
     setPaused(value) {

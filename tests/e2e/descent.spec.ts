@@ -228,9 +228,7 @@ test('the page fits every screen and passes an accessibility check', async ({ pa
   }
 });
 
-test('the menu lists this journey first, and the first telling as number 2', async ({
-  page,
-}, info) => {
+test('the menu leads to the journey, the one guide to how AI works', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop', 'The header menus show on wide screens');
   await page.goto('/');
   const header = page.locator('header.site-header');
@@ -239,7 +237,7 @@ test('the menu lists this journey first, and the first telling as number 2', asy
   await expect(menu.locator('a[href="/how-ai-works"]')).toContainText(
     'An animated journey down to the silicon',
   );
-  await expect(menu.locator('a[href="/how-ai-works-2"]')).toContainText('How AI works 2');
+  await expect(menu.getByRole('link', { name: /How AI works/ })).toHaveCount(1);
 });
 
 test('the journey is prerendered, readable before any script runs', async ({ browser }) => {

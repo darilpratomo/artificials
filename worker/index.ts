@@ -503,6 +503,8 @@ app.get('/_private/:token', async (c) => {
 app.all('/admin', (c) => c.text('Not found', 404));
 // Artificials is free and non-commercial; the paid app builder and its plans are gone.
 for (const path of ['/studio', '/pricing', '/checkout']) app.get(path, (c) => c.redirect('/', 301));
+// A second guide to how AI works was kept here for a comparison; it is gone.
+app.get('/how-ai-works-2', (c) => c.redirect('/how-ai-works', 301));
 app.all('/api/*', (c) => c.json({ error: 'Not found.' }, 404));
 app.all('*', (c) => c.env.ASSETS.fetch(c.req.raw));
 app.onError((error, c) => {

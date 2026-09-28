@@ -136,19 +136,6 @@ const pages: Record<string, [string, string]> = {
     'The terms for using Artificials, a free and non-commercial site: model information, rankings, guides, lessons and free tools.',
   ],
 };
-/**
- * Pages that are served and linked but kept out of search engines and the
- * sitemap: a second telling of How AI works, kept for comparison.
- */
-const unlisted: Record<string, [string, string]> = {
-  '/how-ai-works-2': [
-    'How AI works 2 — An interactive visual guide',
-    'Scroll forward and backward through an AI answer: tokens, attention, layers, and prediction. Then explore eight in-depth chapters and seven hands-on experiments.',
-  ],
-};
-export function unlistedPages() {
-  return Object.keys(unlisted).map((path) => ({ path }));
-}
 /** Every fixed page with its title and description, for the site search's index. */
 export function staticPages() {
   return Object.entries(pages).map(([path, [title, description]]) => ({
@@ -249,14 +236,12 @@ export function pageMetadata(pathname: string, articles: Article[] = ARTICLES) {
     (article?.title ||
       lesson?.title ||
       pages[path]?.[0] ||
-      unlisted[path]?.[0] ||
       accountTitles[path] ||
       'Page unavailable') + ' — Artificials';
   const description =
     article?.excerpt ||
     lesson?.summary ||
     pages[path]?.[1] ||
-    unlisted[path]?.[1] ||
     (path === '/following'
       ? 'The AI models, makers and tests you follow on Artificials, and what changed for each since you last looked.'
       : 'Return to Artificials to explore AI models, rankings, guides, and lessons.');

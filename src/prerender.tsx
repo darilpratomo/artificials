@@ -24,7 +24,6 @@ import Learn from './pages/Learn';
 import Tools from './pages/Tools';
 import Academy from './pages/Academy';
 import Descent from './pages/Descent';
-import HowAIWorks from './pages/HowAIWorks';
 import { LessonReader } from './pages/AcademyLesson';
 import Info from './pages/Info';
 import type { Lesson } from './lib/academy';
@@ -122,7 +121,6 @@ export function renderPage(
             <Route path="tools/:toolId" element={<Tools />} />
             <Route path="learn" element={<Academy />} />
             <Route path="how-ai-works" element={<Descent />} />
-            <Route path="how-ai-works-2" element={<HowAIWorks />} />
             {lesson && <Route path="learn/:slug" element={<LessonReader lesson={lesson} />} />}
             {['about', 'contact', 'privacy', 'terms'].map((path) => (
               <Route key={path} path={path} element={<Info />} />

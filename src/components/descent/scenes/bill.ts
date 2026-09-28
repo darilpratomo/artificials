@@ -54,7 +54,7 @@ export function createBill(): Draw {
     phase: sparkle() * 6,
   }));
 
-  return (ctx, { w, h, p, t, input }) => {
+  return (ctx, { w, h, p, t, input, reserve }) => {
     ctx.fillStyle = INK.void;
     ctx.fillRect(0, 0, w, h);
     const heat = easeInOut(span(p, 0.74, 0.92));
@@ -74,10 +74,18 @@ export function createBill(): Draw {
       input.gpus ?? (fill > 0 ? Math.max(1, Math.round(lerp(1, LLAMA_405B_GPUS, fill * fill))) : 1);
     const days = trainingDays(LLAMA_405B_GPU_HOURS, gpus);
 
-    // Below the figures at the top, and above the slider at the bottom.
-    const gy = Math.max(h * 0.3, h * 0.1 + 104);
-    const size = Math.min(w * 0.62, h * 0.52, h - gy - 110);
+    // The figures at the top, the note just above the slider, and the grid as
+    // large as the space between them allows.
+    const compact = h < 520;
+    const titleY = compact ? 24 : h * 0.1;
+    const subtitleY = titleY + (compact ? 25 : 30);
+    const timeY = subtitleY + (compact ? 28 : 34);
+    const noteY = h - reserve - 12;
+    const top = timeY + (compact ? 38 : 52);
+    const room = noteY - 22 - top;
+    const size = Math.max(0, Math.min(w * 0.62, h * 0.52, room));
     const gx = w / 2 - size / 2;
+    const gy = top + (room - size) / 2;
     const { dim, lit } = grid(size);
     ctx.drawImage(dim, gx, gy, size, size);
     // The first `gpus` cells, row by row, are lit.
@@ -105,7 +113,7 @@ export function createBill(): Draw {
       ctx,
       `each dot is one GPU: ${gpus.toLocaleString('en-US')} of ${LLAMA_405B_GPUS.toLocaleString('en-US')}`,
       w / 2,
-      gy + size + 20,
+      noteY,
       {
         size: 12.5,
         color: INK.silver,
@@ -115,20 +123,19 @@ export function createBill(): Draw {
 
     // The published figure, counted up.
     const hours = LLAMA_405B_GPU_HOURS * count;
-    label(ctx, `${(hours / 1e6).toFixed(2)} million GPU hours`, w / 2, h * 0.1, {
+    label(ctx, `${(hours / 1e6).toFixed(2)} million GPU hours`, w / 2, titleY, {
       size: Math.min(34, w / 18),
       weight: 700,
       face: 'display',
       color: INK.white,
       align: 'center',
     });
-    label(ctx, 'to train Llama 3.1 405B, as Meta reports it', w / 2, h * 0.1 + 30, {
+    label(ctx, 'to train Llama 3.1 405B, as Meta reports it', w / 2, subtitleY, {
       size: 13,
       color: INK.silver,
       align: 'center',
       alpha: count,
     });
-    const timeY = h * 0.1 + 64;
     const power = `${gpus.toLocaleString('en-US')} × ${GPU_WATTS} W ≈ ${((gpus * GPU_WATTS) / 1e6).toFixed(1)} MW`;
     label(
       ctx,
@@ -147,7 +154,7 @@ export function createBill(): Draw {
       },
     );
     if (heat > 0.3)
-      label(ctx, 'at full power, for the GPUs alone', w / 2, timeY + 22, {
+      label(ctx, 'at full power, for the GPUs alone', w / 2, timeY + (compact ? 20 : 22), {
         size: 12.5,
         color: INK.silver,
         align: 'center',

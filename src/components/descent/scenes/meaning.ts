@@ -5,6 +5,7 @@ import {
   INK,
   additive,
   arrowHead,
+  crowd,
   dotGrid,
   easeInOut,
   gaussian,
@@ -18,6 +19,7 @@ import {
   rotateY,
   span,
   spectrum,
+  textWidth,
   wash,
   type Vec3,
 } from '../kit';
@@ -67,6 +69,25 @@ export function createMeaning(): Draw {
     queen: add(add(man, royal), gender),
   };
   for (const [text, at] of Object.entries(analogy)) words.push({ text, at });
+  // The neighbours of "sky" and "blue", which the third step joins to them.
+  const distance = (a: Vec3, b: Vec3) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  const neighbours = new Set(
+    ['sky', 'blue'].flatMap((centre) => {
+      const from = words.find((word) => word.text === centre)!;
+      return words
+        .filter((word) => word !== from && distance(word.at, from.at) <= 0.34)
+        .map((word) => word.text);
+    }),
+  );
+  // The question's three small words sit close together. Each keeps a side of
+  // its own, from left to right as the first step shows them, so all three
+  // stay readable and none jumps as the space turns.
+  const trio = ['Why', 'is', 'the'].map((text) => words.find((word) => word.text === text)!);
+  const across = trio.map((word) => rotateX(rotateY(word.at, 0.53), 0.28)[0]);
+  const sides = new Map<Word, 'left' | 'below' | 'right'>();
+  (['left', 'below', 'right'] as const).forEach((side, rank) =>
+    sides.set(trio[[0, 1, 2].sort((a, b) => across[a] - across[b])[rank]], side),
+  );
   // Unlabelled points: the rest of a vocabulary of many thousands.
   const dust = Array.from({ length: 170 }, () => {
     const cluster = clusters[Math.floor(next() * clusters.length)];
@@ -89,12 +110,15 @@ export function createMeaning(): Draw {
     const near = easeInOut(span(p, 0.42, 0.64));
     const arrows = easeInOut(span(p, 0.74, 0.96));
     const cx = w * 0.5;
-    const cy = h * 0.52;
-    const radius = Math.min(w, h) * 0.6;
+    const cy = h * 0.5;
+    // Small enough that the nearest words, enlarged by perspective, stay in the picture.
+    const radius = Math.min(w, h) * 0.42;
     const focal = radius * 3.2;
-    // The space turns slowly, and further as the reader scrolls; at the end it
+    // Type a little smaller on a small picture, never below 11px.
+    const scale = Math.max(0.8, Math.min(1, Math.min(w, h) / 600));
+    // The space sways gently, and turns as the reader scrolls; at the end it
     // settles to face the parallelogram.
-    const turn = t * 0.07 + p * 1.6 - arrows * 0.9;
+    const turn = Math.sin(t * 0.11) * 0.3 * (1 - arrows * 0.7) + p * 1.6 - arrows * 0.9;
     const tilt = 0.28 + arrows * 0.1;
     const place = (point: Vec3) => {
       const rotated = rotateX(rotateY(point, turn), tilt);
@@ -126,8 +150,7 @@ export function createMeaning(): Draw {
         const from = placed.find(({ word }) => word.text === centre)!;
         for (const other of placed) {
           if (other === from || other.word.text === centre) continue;
-          const [a, b] = [from.word.at, other.word.at];
-          if (Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) > 0.34) continue;
+          if (distance(from.word.at, other.word.at) > 0.34) continue;
           ctx.strokeStyle = rgba(centre === 'sky' ? CATEGORIES[0] : CATEGORIES[1], 0.35 * near);
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -138,13 +161,56 @@ export function createMeaning(): Draw {
       }
     }
 
+    // The sum, once written, keeps its place at the bottom.
+    const sumSize = Math.min(18, w / 26);
+    const sumY = h - 34;
+    const room = crowd(w, h);
+    if (arrows > 0) {
+      const half = textWidth(ctx, 'king − man + woman ≈ queen', sumSize, 600, 'display') / 2;
+      room.keep({ x0: w / 2 - half, y0: sumY - sumSize, x1: w / 2 + half, y1: sumY + sumSize });
+    }
+    // At the end, the four words of the analogy come forward and the rest step back.
+    const showing = (word: Word) => {
+      const ours = word.ours !== undefined;
+      const inAnalogy = word.text in analogy;
+      return (
+        (ours ? space : inAnalogy ? Math.max(near * 0.5, arrows) : space * 0.9) *
+        (inAnalogy ? 1 : 1 - arrows * 0.55)
+      );
+    };
+    // Labels find room in order of importance: the analogy at the end, then the
+    // question's words, then the neighbours being joined, nearer words first.
+    const importance = (word: Word) =>
+      (word.text in analogy ? 3 * arrows : 0) +
+      (word.ours !== undefined ? 2 : 0) +
+      (neighbours.has(word.text) ? near : 0);
+    const labels = new Map<
+      Word,
+      { size: number; room: number; x: number; y: number; align: CanvasTextAlign }
+    >();
+    [...placed]
+      .sort((a, b) => importance(b.word) - importance(a.word) || b.at.scale - a.at.scale)
+      .forEach(({ word, at }) => {
+        const show = showing(word);
+        if (show <= 0.01) return;
+        const ours = word.ours !== undefined;
+        const base = ours ? 17 : word.text in analogy ? lerp(13, 16, arrows) : 13;
+        const size = Math.max(11, Math.round(base * Math.min(1.25, at.scale) * scale));
+        const width = textWidth(ctx, word.text, size, ours ? 650 : 500, 'display');
+        const gap = 8 * at.scale;
+        const side = sides.get(word) ?? 'right';
+        const x = side === 'left' ? at.x - gap : side === 'below' ? at.x : at.x + gap;
+        const y = side === 'below' ? at.y + gap + size * 0.76 : at.y - gap;
+        const align = side === 'left' ? 'right' : side === 'below' ? 'center' : 'left';
+        const x0 = align === 'right' ? x - width : align === 'center' ? x - width / 2 : x;
+        const box = { x0, y0: y - size * 0.76, x1: x0 + width, y1: y + size * 0.24 };
+        labels.set(word, { size, room: room.place(box, show), x, y, align });
+      });
+
     for (const { word, at } of placed) {
       const ours = word.ours !== undefined;
       const inAnalogy = word.text in analogy;
-      // At the end, the four words of the analogy come forward and the rest step back.
-      const show =
-        (ours ? space : inAnalogy ? Math.max(near * 0.5, arrows) : space * 0.9) *
-        (inAnalogy ? 1 : 1 - arrows * 0.55);
+      const show = showing(word);
       if (show <= 0.01) continue;
       const color = ours ? spectrum(word.ours! / 6) : inAnalogy ? HUE.amber : INK.silver;
       additive(ctx, () =>
@@ -154,13 +220,13 @@ export function createMeaning(): Draw {
       ctx.beginPath();
       ctx.arc(at.x, at.y, (ours ? 3.2 : 2.2) * at.scale, 0, Math.PI * 2);
       ctx.fill();
-      label(ctx, word.text, at.x + 8 * at.scale, at.y - 8 * at.scale, {
-        size: Math.round(
-          (ours ? 17 : inAnalogy ? lerp(13, 16, arrows) : 13) * Math.min(1.25, at.scale),
-        ),
+      const { size, room: clear, x, y, align } = labels.get(word)!;
+      label(ctx, word.text, x, y, {
+        size,
+        align,
         weight: ours ? 650 : 500,
         color: ours ? INK.white : INK.silver,
-        alpha: show * (ours ? 1 : 0.75) * Math.min(1, at.scale),
+        alpha: show * (ours ? 1 : 0.75) * Math.min(1, at.scale) * clear,
         face: 'display',
         baseline: 'alphabetic',
       });
@@ -190,8 +256,8 @@ export function createMeaning(): Draw {
         ctx.stroke();
         if (grow > 0.9) arrowHead(ctx, x, y, Math.atan2(b.y - a.y, b.x - a.x), 9, color);
       });
-      label(ctx, 'king − man + woman ≈ queen', w / 2, h - 34, {
-        size: Math.min(18, w / 26),
+      label(ctx, 'king − man + woman ≈ queen', w / 2, sumY, {
+        size: sumSize,
         weight: 600,
         face: 'display',
         color: INK.white,

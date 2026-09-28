@@ -60,6 +60,12 @@ describe('request security', () => {
       expect(response.headers.get('location')).toBe('/');
     }
   });
+
+  it('sends the retired second guide to How AI works', async () => {
+    const response = await app.request('/how-ai-works-2', {}, env);
+    expect(response.status).toBe(301);
+    expect(response.headers.get('location')).toBe('/how-ai-works');
+  });
 });
 
 describe('MFA fails closed', () => {

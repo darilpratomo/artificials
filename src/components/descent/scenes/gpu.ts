@@ -9,6 +9,7 @@ import {
   glow,
   label,
   lerp,
+  lines,
   rgba,
   roundRect,
   span,
@@ -36,14 +37,25 @@ export function createGpu(): Draw {
     const burst = span(p, 0.84, 0.98);
 
     const wide = w >= 620;
+    // Under each chip: its progress bar, then what it is and how far it has got.
+    const barGap = wide ? 22 : 12;
+    const textGap = wide ? 20 : 17;
+    // Stacked on a narrow picture: each chip's name above it, its bar below,
+    // and the note at the bottom, with the chips sharing what is left.
+    const room = h - 2 * (26 + barGap + textGap + 8) - 24;
     const chips = wide
       ? {
           cpu: { x: w * 0.06, y: h * 0.2, w: w * 0.36, h: h * 0.54 },
           gpu: { x: w * 0.5, y: h * 0.2, w: w * 0.44, h: h * 0.54 },
         }
       : {
-          cpu: { x: w * 0.08, y: h * 0.08, w: w * 0.84, h: h * 0.22 },
-          gpu: { x: w * 0.08, y: h * 0.5, w: w * 0.84, h: h * 0.26 },
+          cpu: { x: w * 0.06, y: 26, w: w * 0.88, h: room * 0.42 },
+          gpu: {
+            x: w * 0.06,
+            y: 26 + room * 0.42 + barGap + textGap + 8 + 26,
+            w: w * 0.88,
+            h: room * 0.58,
+          },
         };
     const job = 768;
     const panel = (box: { x: number; y: number; w: number; h: number }, color: string) => {
@@ -60,13 +72,13 @@ export function createGpu(): Draw {
       color: string,
       text: string,
     ) => {
-      const y = box.y + box.h + 22;
+      const y = box.y + box.h + barGap;
       ctx.fillStyle = rgba(INK.silver, 0.14);
       ctx.fillRect(box.x, y, box.w, 6);
       ctx.fillStyle = rgba(color, 0.95);
       ctx.fillRect(box.x, y, box.w * done, 6);
-      label(ctx, text, box.x, y + 20, { size: 12.5, color: INK.silver });
-      label(ctx, `${Math.round(done * 100)}% of the job`, box.x + box.w, y + 20, {
+      label(ctx, text, box.x, y + textGap, { size: 12.5, color: INK.silver });
+      label(ctx, `${Math.round(done * 100)}% of the job`, box.x + box.w, y + textGap, {
         size: 12.5,
         face: 'mono',
         color: INK.white,
@@ -83,7 +95,7 @@ export function createGpu(): Draw {
     panel(cpu, HUE.blue);
     const cols = wide ? 2 : 4;
     const rows = wide ? 4 : 2;
-    const pad = 12;
+    const pad = wide ? 12 : 8;
     const cw = (cpu.w - pad * (cols + 1)) / cols;
     const chh = (cpu.h - pad * (rows + 1)) / rows;
     const cpuDone = cpuWork * 0.1;
@@ -156,7 +168,7 @@ export function createGpu(): Draw {
         ? `The same job for both: ${job} independent sums. Illustrative, not to scale.`
         : 'Illustrative, not to scale.',
       w / 2,
-      h - 22,
+      h - (wide ? 22 : 12),
       {
         size: 12,
         color: INK.muted,
@@ -169,9 +181,12 @@ export function createGpu(): Draw {
     if (zoom > 0) {
       ctx.save();
       ctx.globalAlpha = zoom;
-      const unit = Math.min(w, h) * (wide ? 0.085 : 0.11);
+      // The cube is 6.9 units wide and 6 tall; its names sit either side and
+      // above it, and the note below, so it is sized to leave room for them.
+      const note = 46;
+      const unit = Math.min((w / 2 - 70) / 3.46, (h - note - 32) / 6, Math.min(w, h) * 0.085);
       const ox = w * 0.5;
-      const oy = h * 0.5 - unit * 0.6;
+      const oy = (h - note - 6 * unit - 20) / 2 + 20;
       const cos = Math.cos(Math.PI / 6);
       const sin = Math.sin(Math.PI / 6);
       // x runs along the output's columns, y down its rows, z along the shared inner size.
@@ -228,24 +243,20 @@ export function createGpu(): Draw {
       });
       for (let i = 0; i < n; i++)
         for (let j = 0; j < n; j++) cell(j, i, 0, HUE.amber, lerp(0.25, 1, collapse), 'front');
-      label(ctx, 'input', iso(0, n + 0.3, n / 2)[0] - 8, iso(0, n + 0.3, n / 2)[1] + 8, {
+      const side = n * cos * unit;
+      label(ctx, 'weights', ox, oy - 12, { size: 12.5, color: INK.silver, align: 'center' });
+      label(ctx, 'input', ox - side - 10, oy + 4 * unit, {
         size: 12.5,
         color: INK.silver,
         align: 'right',
       });
-      label(ctx, 'weights', iso(n / 2, -0.5, n)[0] + 10, iso(n / 2, -0.5, n)[1] - 10, {
-        size: 12.5,
-        color: INK.silver,
-      });
-      label(ctx, 'output', iso(n + 0.2, n, 0)[0] + 10, iso(n + 0.2, n, 0)[1], {
-        size: 12.5,
-        color: INK.silver,
-      });
-      label(ctx, '64 multiplications and their sums, in a single step', w / 2, h - 30, {
+      label(ctx, 'output', ox + side + 10, oy + 4 * unit, { size: 12.5, color: INK.silver });
+      lines(ctx, '64 multiplications and their sums, in a single step', w / 2, h - 16, w - 32, {
         size: 13,
         color: INK.white,
         align: 'center',
         alpha: span(burst, 0.1, 0.4),
+        from: 'bottom',
       });
       ctx.restore();
     }

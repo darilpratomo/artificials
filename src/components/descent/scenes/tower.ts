@@ -34,14 +34,23 @@ export function createTower(): Draw {
     const out = easeInOut(span(p, 0.86, 0.98));
 
     const narrow = w < 560;
-    const cx = w * (narrow ? 0.5 : 0.46);
-    // One block is shown large in the middle; the stack takes the size that
-    // fits, with room at the top for the scores that come out of it.
+    // One block is shown large; the stack takes the size that fits, with room
+    // at the top for the scores that come out of it.
     const stacked = 1 - single;
-    const unitStack = Math.min(w * (narrow ? 0.26 : 0.17), (h - 150) / 6.9);
-    const unitSingle = Math.min(w * (narrow ? 0.22 : 0.15), h * 0.17);
+    // The stack stands 6.6 units from its top face to its lowest corner, with
+    // its name below it and the scores, 70 pixels of them, above.
+    const unitStack = Math.min(w * (narrow ? 0.26 : 0.17), (h - 112) / 6.6);
+    // Taken apart on a narrow picture, the block moves left so its two names
+    // (118 pixels with their keys) fit beside it, 2.1 units from its centre.
+    const singleX = w * (narrow ? 0.36 : 0.46);
+    const unitSingle = Math.min(
+      w * (narrow ? 0.22 : 0.15),
+      h * 0.17,
+      narrow ? (w - 8 - 118 - singleX) / 2.13 : Infinity,
+    );
     const unit = lerp(unitSingle, unitStack, stacked);
-    const base = lerp(h * 0.6, h - unit * 1.15 - 20, stacked);
+    const cx = lerp(singleX, w * (narrow ? 0.5 : 0.46), stacked);
+    const base = lerp(h * 0.6, h - unit - 34, stacked);
     const cos = Math.cos(Math.PI / 6);
     const sin = Math.sin(Math.PI / 6);
     const slab = unit * 0.16;
@@ -126,7 +135,7 @@ export function createTower(): Draw {
     if (single > 0.02) {
       const [ax, ay] = iso(1, -1, slab / 2);
       const [, fy] = iso(1, -1, slab * 1.5 + gapIn);
-      const labelX = Math.min(w - (narrow ? 150 : 250), ax + unit * 0.4);
+      const labelX = Math.min(w - (narrow ? 126 : 250), ax + unit * 0.4);
       const note = (y: number, color: string, title: string, text: string) => {
         ctx.fillStyle = rgba(color, single);
         ctx.fillRect(labelX, y - 5, 10, 10);
@@ -142,7 +151,8 @@ export function createTower(): Draw {
       };
       note(fy - unit * 0.1, CATEGORIES[1], 'Feed-forward', 'each position is processed on its own');
       note(ay + unit * 0.25, CATEGORIES[0], 'Attention', 'positions exchange information');
-      label(ctx, 'one block', sx, sy + unit * 0.55, {
+      // Below the block's lowest corner, a unit under its centre.
+      label(ctx, 'one block', sx, sy + unit + 16, {
         size: 12,
         color: INK.muted,
         align: 'center',
@@ -150,7 +160,7 @@ export function createTower(): Draw {
       });
     }
     if (count > 1) {
-      label(ctx, `${BLOCKS} blocks shown`, sx, sy + unit * 0.62, {
+      label(ctx, `${BLOCKS} blocks shown`, sx, sy + unit + 16, {
         size: 12,
         color: INK.muted,
         align: 'center',
@@ -160,7 +170,8 @@ export function createTower(): Draw {
 
     // Out of the top: a score for every token in the vocabulary.
     if (out > 0) {
-      const y = streamTop - 12;
+      // Above the top face, whose far corner is a unit over its centre.
+      const y = sy - stackTop - unit - 10;
       const fan = Math.min(w * 0.38, 260) * out;
       for (let i = 0; i < 48; i++) {
         const x = sx - fan / 2 + (i / 47) * fan;
@@ -168,7 +179,7 @@ export function createTower(): Draw {
         ctx.fillStyle = rgba(spectrum(0.35 + (i / 47) * 0.1), 0.35 + (i === 29 ? 0.6 : 0));
         ctx.fillRect(x - 1.5, y - height, 3, height);
       }
-      label(ctx, 'a score for every token', sx, y - 58, {
+      label(ctx, 'a score for every token', sx, y - 50, {
         size: 12.5,
         color: INK.silver,
         align: 'center',

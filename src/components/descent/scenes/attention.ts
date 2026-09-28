@@ -51,14 +51,16 @@ export function createAttention(): Draw {
     const widths = words.map((word) => textWidth(ctx, word, size, 600, 'display') + size * 1.2);
     const gap = Math.max(8, Math.min(26, w * 0.025));
     const rowWidth = widths.reduce((sum, width) => sum + width, 0) + gap * (words.length - 1);
-    const rowY = h * lerp(0.62, 0.9, grid);
+    const chipH = size * 1.9;
+    // At the end the row settles near the bottom, above the note in the corner.
+    const lastRowY = Math.min(h * 0.9, h - 34 - chipH / 2);
+    const rowY = lerp(h * 0.62, lastRowY, grid);
     let x = w / 2 - rowWidth / 2;
     const chips = words.map((word, index) => {
       const chip = { word, x, cx: x + widths[index] / 2, width: widths[index], index };
       x += widths[index] + gap;
       return chip;
     });
-    const chipH = size * 1.9;
     const reach = Math.min(h * 0.4, rowWidth * 0.55);
 
     // Arcs above the row: how much one position draws from each earlier one.
@@ -143,7 +145,13 @@ export function createAttention(): Draw {
     // Every position's row of weights: the attention pattern, with the future masked.
     if (grid > 0) {
       const n = words.length;
-      const cell = Math.min((w * 0.62) / (n + 1.6), (h * 0.62) / (n + 1.4));
+      // The matrix and its caption end above where the row settles.
+      const limit = lastRowY - chipH / 2 - 34;
+      const cell = Math.min(
+        (w * 0.62) / (n + 1.6),
+        (h * 0.62) / (n + 1.4),
+        (limit - h * 0.12) / (n + 0.9),
+      );
       const left = w / 2 - (cell * (n + 1.6)) / 2 + cell * 1.6;
       const top = h * 0.12 + cell * 0.9;
       words.forEach((word, index) => {
@@ -189,7 +197,7 @@ export function createAttention(): Draw {
             });
         }
       });
-      label(ctx, 'each row adds up to 1; the future is masked', w / 2, top + n * cell + 22, {
+      label(ctx, 'each row adds up to 1; the future is masked', w / 2, top + n * cell + 18, {
         size: 12,
         color: INK.muted,
         align: 'center',

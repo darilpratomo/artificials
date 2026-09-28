@@ -183,7 +183,8 @@ export function createTokens(): Draw {
             face: 'mono',
             color: INK.silver,
             align: 'center',
-            alpha: lookup * fade,
+            // Only once the chip has grown to hold it.
+            alpha: span(lookup, 0.6, 1) * fade,
           });
       }
       // The numbers travel into one row: the input the model receives.
@@ -204,8 +205,9 @@ export function createTokens(): Draw {
       }
     }
 
-    if (line > 0.4) {
-      const alpha = span(line, 0.4, 0.8);
+    // The brackets and commas close round the numbers once the last has landed.
+    if (line > 0.8) {
+      const alpha = span(line, 0.8, 0.95);
       const left = w / 2 - rowWidth / 2;
       label(ctx, '[', left, rowY, { size: idSize * 1.25, face: 'mono', color: INK.muted, alpha });
       label(ctx, ']', left + rowWidth, rowY, {

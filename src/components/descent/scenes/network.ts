@@ -10,7 +10,9 @@ import {
   glow,
   label,
   lerp,
+  lines,
   random,
+  textWidth,
   rgba,
   span,
   spectrum,
@@ -41,12 +43,21 @@ function build(seed: number) {
   return { values, edges };
 }
 
-function layout(w: number, h: number, values: number[][], left = 0.12, right = 0.88): Net['nodes'] {
-  const span = Math.min(h * 0.7, 440);
+/** The network, centred in the picture above `below` pixels kept for its names and a note. */
+function layout(
+  w: number,
+  h: number,
+  values: number[][],
+  left: number,
+  right: number,
+  below: number,
+): Net['nodes'] {
+  const span = Math.min(h * 0.7, 440, h - 16 - below);
+  const middle = (h - below) / 2 + 8;
   return SIZES.map((size, layer) =>
     Array.from({ length: size }, (_, index) => ({
       x: w * lerp(left, right, layer / (SIZES.length - 1)),
-      y: h * 0.5 - span / 2 + ((index + 0.5) * span) / size,
+      y: middle - span / 2 + ((index + 0.5) * span) / size,
       value: values[layer][index],
     })),
   );
@@ -74,7 +85,7 @@ export function createForward(): Draw {
     backdrop(ctx, w, h, 0.22);
     const front = easeInOut(span(p, 0.1, 0.7));
     const deep = easeInOut(span(p, 0.74, 1));
-    const nodes = layout(w, h, values, lerp(0.12, 0.2, deep), lerp(0.88, 0.8, deep));
+    const nodes = layout(w, h, values, lerp(0.12, 0.2, deep), lerp(0.88, 0.8, deep), 72);
 
     // Deeper: more slices of the same shape, fading into the distance.
     if (deep > 0) {
@@ -141,27 +152,33 @@ export function createForward(): Draw {
         dot(ctx, node.x, node.y, 4.2 * lit * node.value, '#ffffff', lit);
       }
     });
-    const tag = (text: string, x: number, alpha: number) =>
-      label(ctx, text, x, h * 0.5 + Math.min(h * 0.35, 220) + 24, {
+    // Names under the layers, which give way to the note as the network deepens.
+    const under = nodes[1][SIZES[1] - 1].y + 24;
+    const tag = (text: string, x: number, alpha: number) => {
+      const half = textWidth(ctx, text, 12) / 2;
+      label(ctx, text, Math.min(w - 8 - half, Math.max(8 + half, x)), under, {
         size: 12,
         color: INK.muted,
         align: 'center',
-        alpha: alpha * (1 - deep),
+        alpha: alpha * (1 - span(deep, 0, 0.4)),
       });
+    };
     tag('numbers in', nodes[0][0].x, 1);
     tag('hidden layers', nodes[2][0].x, span(front, 0.2, 0.5));
     tag('scores out', nodes[4][0].x, span(front, 0.8, 1));
-    if (deep > 0.3)
-      label(
+    if (deep > 0.45)
+      lines(
         ctx,
         'Each layer’s output is the next one’s input, dozens of times over.',
         w / 2,
-        h - 30,
+        h - 18,
+        w - 32,
         {
           size: 13,
           color: INK.silver,
           align: 'center',
-          alpha: span(deep, 0.3, 1),
+          alpha: span(deep, 0.45, 1),
+          from: 'bottom',
         },
       );
   };
@@ -177,7 +194,7 @@ export function createBackward(): Draw {
   const target = [0.08, 0.92, 0.12, 0.05];
   return (ctx, { w, h, p, t }) => {
     backdrop(ctx, w, h, 0.5);
-    const nodes = layout(w, h, values, 0.1, 0.78);
+    const nodes = layout(w, h, values, 0.1, 0.78, 52);
     // The comparison is the starting point; the error then flows back and the weights move.
     const compare = 1;
     const back = easeInOut(span(p, 0.08, 0.32));
@@ -266,7 +283,7 @@ export function createBackward(): Draw {
         additive(ctx, () =>
           glow(
             ctx,
-            barX + barW * Math.max(predicted, right) + 8,
+            Math.min(w - 10, barX + barW * Math.max(predicted, right) + 8),
             node.y - 2,
             10,
             CATEGORIES[3],
@@ -274,16 +291,21 @@ export function createBackward(): Draw {
           ),
         );
     });
-    // A key, with the words in plain ink beside each colour.
+    // A key, with the words in plain ink beside each colour: above the bars, or
+    // in the top corner when the bars leave no room beside them.
+    const keyWidth =
+      13 + textWidth(ctx, 'model', 11.5) + 16 + 13 + textWidth(ctx, 'right answer', 11.5);
+    const keyX = barX + keyWidth <= w - 8 ? barX : w - 8 - keyWidth;
+    const keyY = barX + keyWidth <= w - 8 ? out[0].y - 30 : 16;
     const key = (x: number, color: string, text: string) => {
       ctx.fillStyle = rgba(color, compare);
-      ctx.fillRect(x, out[0].y - 34, 8, 8);
-      label(ctx, text, x + 13, out[0].y - 30, { size: 11.5, color: INK.silver, alpha: compare });
+      ctx.fillRect(x, keyY - 4, 8, 8);
+      label(ctx, text, x + 13, keyY, { size: 11.5, color: INK.silver, alpha: compare });
     };
-    key(barX, HUE.cyan, 'model');
-    key(barX + 62, HUE.amber, 'right answer');
+    key(keyX, HUE.cyan, 'model');
+    key(keyX + 13 + textWidth(ctx, 'model', 11.5) + 16, HUE.amber, 'right answer');
     if (nudge > 0 || cycle > 0)
-      label(
+      lines(
         ctx,
         cycle > 0
           ? loopForward
@@ -291,8 +313,15 @@ export function createBackward(): Draw {
             : 'backward: share out the blame'
           : 'every weight moves a little, in the direction that shrinks the error',
         w / 2,
-        h - 30,
-        { size: 13, color: INK.silver, align: 'center', alpha: Math.max(nudge, cycle) },
+        h - 18,
+        w - 32,
+        {
+          size: 13,
+          color: INK.silver,
+          align: 'center',
+          alpha: Math.max(nudge, cycle),
+          from: 'bottom',
+        },
       );
   };
 }

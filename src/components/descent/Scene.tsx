@@ -41,6 +41,7 @@ function useScene(
   const director = useContext(DirectorContext);
   const section = useRef<HTMLElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const controls = useRef<HTMLDivElement>(null);
   const steps = useRef<HTMLElement[]>([]);
   useEffect(() => {
     if (!director || !section.current || !canvas.current) return;
@@ -52,6 +53,7 @@ function useScene(
       onStep,
       anchor,
       maxDpr,
+      cover: () => controls.current,
       steps: () => steps.current.filter(Boolean),
     });
   }, [director, draw, ambient, onStep, anchor, maxDpr]);
@@ -64,7 +66,7 @@ function useScene(
   const stepRef = (index: number) => (element: HTMLElement | null) => {
     if (element) steps.current[index] = element;
   };
-  return { section, canvas, set, stepRef };
+  return { section, canvas, controls, set, stepRef };
 }
 
 /**
@@ -90,7 +92,7 @@ export function Scene({
   controls?: (set: (key: string, value: number) => void) => ReactNode;
 }) {
   const [current, setCurrent] = useState(0);
-  const { section, canvas, set, stepRef } = useScene(common, setCurrent);
+  const { section, canvas, controls: cover, set, stepRef } = useScene(common, setCurrent);
   return (
     <section
       id={id}
@@ -101,7 +103,11 @@ export function Scene({
     >
       <div className="dsc-stage">
         <canvas ref={canvas} role="img" aria-label={common.label} />
-        {controls && <div className="dsc-controls">{controls(set)}</div>}
+        {controls && (
+          <div ref={cover} className="dsc-controls">
+            {controls(set)}
+          </div>
+        )}
       </div>
       <div className="dsc-copy">
         {steps.map((step, index) => (

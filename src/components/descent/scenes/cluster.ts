@@ -10,7 +10,9 @@ import {
   glow,
   label,
   lerp,
+  lines,
   rgba,
+  textWidth,
   roundRect,
   span,
   spectrum,
@@ -25,7 +27,7 @@ const whole = (value: number) => Math.round(value).toLocaleString('en-US');
  * needs several times more, and many copies must keep their learning in step.
  */
 export function createCluster(): Draw {
-  return (ctx, { w, h, p, t, input }) => {
+  return (ctx, { w, h, p, t, input, reserve }) => {
     ctx.fillStyle = INK.void;
     ctx.fillRect(0, 0, w, h);
     dotGrid(ctx, w, h, 30, INK.silver, 0.04);
@@ -44,14 +46,21 @@ export function createCluster(): Draw {
     const train = easeInOut(span(p, 0.5, 0.64));
     const ring = easeInOut(span(p, 0.72, 0.86));
     const wide = w >= 620;
+    // One part leaves before the next arrives, so two never share the picture.
+    const partOne = 1 - span(train, 0, 0.4);
+    const build = span(train, 0.4, 1);
+    const partTwo = span(train, 0.4, 0.6) * (1 - span(ring, 0, 0.4));
+    const partThree = span(ring, 0.4, 1);
+    // A title at the top, a note just above the model buttons, the picture between.
+    const titleY = h < 520 ? 22 : h * 0.12;
+    const noteY = h - reserve - 14;
 
     // Part one: the weights against one GPU's memory, then split across several.
-    const partOne = 1 - train;
     if (partOne > 0.01) {
       ctx.save();
       ctx.globalAlpha = partOne;
-      const floor = Math.min(h * 0.8, h - 100);
-      const room = h * 0.58;
+      const floor = h - reserve - 28;
+      const room = floor - titleY - 26;
       // Heights are to scale: the block is the weights, a box is one GPU.
       const scale = Math.min(room / Math.max(weightsGb, GPU_GB), (room / GPU_GB) * 0.75);
       const boxH = GPU_GB * scale;
@@ -60,6 +69,7 @@ export function createCluster(): Draw {
       const spacing = Math.min((w * 0.84) / shown, boxW + 18);
       const width = shown === 1 ? boxW : Math.min(boxW, spacing - 10);
       const left = w / 2 - (spacing * (shown - 1) + width) / 2;
+      const each = shown === 1 || spacing >= textWidth(ctx, `${GPU_GB} GB`, 11.5) + 8;
       for (let index = 0; index < shown; index++) {
         const appear = index === 0 ? 1 : span(split, 0, 0.4);
         const x = left + index * spacing;
@@ -69,7 +79,8 @@ export function createCluster(): Draw {
         ctx.stroke();
         ctx.fillStyle = rgba(INK.panel, 0.9 * appear);
         ctx.fill();
-        if (index === 0 || appear > 0.5)
+        // Each box's size under it, or once for the row when the boxes are narrow.
+        if ((index === 0 || appear > 0.5) && each)
           label(ctx, `${GPU_GB} GB`, x + width / 2, floor + 16, {
             size: 11.5,
             color: INK.muted,
@@ -77,6 +88,13 @@ export function createCluster(): Draw {
             alpha: appear,
           });
       }
+      if (!each)
+        label(ctx, `${GPU_GB} GB each`, w / 2, floor + 16, {
+          size: 11.5,
+          color: INK.muted,
+          align: 'center',
+          alpha: span(split, 0, 0.4),
+        });
       // The weights: one tall block, then one slice per GPU.
       const blockH = weightsGb * scale;
       const sliceH = blockH / shown;
@@ -121,7 +139,7 @@ export function createCluster(): Draw {
           ? `${whole(weightsGb)} GB of weights across ${holdGpus} GPU${holdGpus === 1 ? '' : 's'}`
           : `${billions} billion parameters at 16 bits: ${whole(weightsGb)} GB`,
         w / 2,
-        h * 0.12,
+        titleY,
         { size: 15, weight: 600, face: 'display', color: INK.white, align: 'center', alpha: drop },
       );
       // Split layer by layer, the GPUs trade results constantly.
@@ -137,9 +155,9 @@ export function createCluster(): Draw {
     }
 
     // Part two: training keeps gradients and optimizer state too, and fills far more GPUs.
-    if (train > 0 && ring < 0.99) {
+    if (partTwo > 0.01) {
       ctx.save();
-      ctx.globalAlpha = train * (1 - ring);
+      ctx.globalAlpha = partTwo;
       const parts: [string, number, string][] = [
         ['weights', 2, INK.silver],
         ['gradients', 2, CATEGORIES[3]],
@@ -147,18 +165,18 @@ export function createCluster(): Draw {
       ];
       const barW = Math.min(w * 0.7, 520);
       const barX = w / 2 - barW / 2;
-      const barY = h * 0.2;
+      const barY = titleY + 18;
       let x = barX;
       parts.forEach(([name, bytes, color], index) => {
         const width =
-          (bytes / 16) * barW * easeInOut(span(train, index * 0.15, 0.55 + index * 0.15));
+          (bytes / 16) * barW * easeInOut(span(build, index * 0.15, 0.55 + index * 0.15));
         roundRect(ctx, x, barY, Math.max(0, width - 3), 22, 5);
         ctx.fillStyle = rgba(color, 0.8);
         ctx.fill();
         ctx.fillStyle = rgba(color, 1);
         // The key: in a row, or stacked where the screen is narrow.
         const kx = wide ? barX + index * (barW / 3) : barX;
-        const ky = wide ? barY + 40 : barY + 36 + index * 18;
+        const ky = wide ? barY + 40 : barY + 34 + index * 17;
         ctx.fillRect(kx, ky, 10, 10);
         label(ctx, `${name}: ${bytes} bytes`, kx + 16, ky + 5, {
           size: 12,
@@ -166,22 +184,33 @@ export function createCluster(): Draw {
         });
         x += width;
       });
-      label(ctx, `training: 16 bytes per parameter = ${whole(trainGb)} GB`, w / 2, barY - 18, {
+      label(ctx, `training: 16 bytes per parameter = ${whole(trainGb)} GB`, w / 2, titleY, {
         size: 15,
         weight: 600,
         face: 'display',
         color: INK.white,
         align: 'center',
       });
-      // The GPUs it takes just to hold that, before anything else.
+      // The GPUs it takes just to hold that, before anything else, between the
+      // key and the note.
+      const note = `at least ${trainGpus} GPUs of ${GPU_GB} GB, before counting activations`;
+      const noteHeight = lines(ctx, note, w / 2, noteY, w - 32, {
+        size: 13,
+        color: INK.silver,
+        align: 'center',
+        alpha: span(build, 0.5, 1),
+        from: 'bottom',
+      });
       const cols = Math.min(trainGpus, wide ? 14 : 9);
       const rows = Math.ceil(trainGpus / cols);
-      const cell = Math.min((w * 0.8) / cols, (h * 0.46) / rows, 46);
+      const top = wide ? barY + 64 : barY + 34 + 3 * 17 + 6;
+      const bottom = noteY - noteHeight + 4;
+      const cell = Math.min((w * 0.8) / cols, (bottom - top) / rows, 46);
       const gx = w / 2 - (cols * cell) / 2;
-      const gy = h * 0.4;
+      const gy = top + (bottom - top - rows * cell) / 2;
       for (let index = 0; index < trainGpus; index++) {
         const appear = span(
-          train,
+          build,
           0.3 + (index / trainGpus) * 0.5,
           0.35 + (index / trainGpus) * 0.5,
         );
@@ -194,27 +223,22 @@ export function createCluster(): Draw {
         ctx.lineWidth = 1;
         ctx.stroke();
       }
-      label(
-        ctx,
-        `at least ${trainGpus} GPUs of ${GPU_GB} GB, before counting activations`,
-        w / 2,
-        gy + rows * cell + 22,
-        {
-          size: 13,
-          color: INK.silver,
-          align: 'center',
-          alpha: span(train, 0.5, 1),
-        },
-      );
       ctx.restore();
     }
 
     // Part three: many copies learn from different data and agree on each step.
-    if (ring > 0) {
+    if (partThree > 0) {
+      const ring = partThree;
       const nodes = 8;
+      // The ring's boxes are 44 by 32; on a narrow picture its words go below it.
+      const floor = wide ? h - reserve - 20 : noteY - 26;
+      const radius = Math.min(
+        Math.min(w, h) * (wide ? 0.3 : 0.25),
+        (floor - 32 - 16) / 2,
+        w / 2 - 34,
+      );
       const cx = w / 2;
-      const cy = h * (wide ? 0.5 : 0.42);
-      const radius = Math.min(w, h) * (wide ? 0.3 : 0.25);
+      const cy = wide ? Math.min(h * 0.5, floor - 16 - radius) : 16 + 16 + radius;
       const position = (index: number) => {
         const angle = -Math.PI / 2 + (index / nodes) * Math.PI * 2;
         return [cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius];
@@ -269,7 +293,7 @@ export function createCluster(): Draw {
             ? 'gradients pass around the ring'
             : 'every copy takes the same step',
         cx,
-        wide ? cy : cy + radius + 40,
+        wide ? cy : noteY,
         { size: 13, color: INK.white, align: 'center', alpha: ring },
       );
     }

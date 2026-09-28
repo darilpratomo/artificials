@@ -9,6 +9,7 @@ import {
   glow,
   label,
   lerp,
+  textWidth,
   rgba,
   roundRect,
   span,
@@ -31,13 +32,19 @@ export function createAgents(): Draw {
     const wide = w >= 620;
     const you = { x: w * (wide ? 0.12 : 0.16), y: h * 0.5 };
     const model = { x: w * 0.45, y: h * 0.5 };
-    const toolX = w * (wide ? 0.82 : 0.8);
+    const modelR = Math.min(52, w * 0.075);
+    // The tools keep to the right edge; the lock sits halfway to them.
+    const toolW = Math.min(120, w * 0.27);
+    const toolX = wide ? w * 0.82 : w - 12 - toolW / 2;
     const tools = ['Search', 'Calculator', 'Code', 'Files'].map((name, index) => ({
       name,
       x: toolX,
       y: h * 0.5 + (index - 1.5) * Math.min(h * 0.17, 90),
     }));
-    const gate = { x: lerp(model.x, toolX, 0.45), y: h * 0.5 };
+    const gate = {
+      x: wide ? lerp(model.x, toolX, 0.45) : (model.x + modelR + toolX - toolW / 2) / 2,
+      y: h * 0.5,
+    };
 
     const ask = easeInOut(span(p, 0, 0.14));
     const call = easeInOut(span(p, 0.16, 0.31));
@@ -52,7 +59,7 @@ export function createAgents(): Draw {
     ctx.lineTo(model.x, model.y);
     for (const tool of tools) {
       ctx.moveTo(gate.x, gate.y);
-      ctx.lineTo(tool.x - 60, tool.y);
+      ctx.lineTo(tool.x - toolW / 2, tool.y);
     }
     ctx.moveTo(model.x, model.y);
     ctx.lineTo(gate.x, gate.y);
@@ -97,7 +104,7 @@ export function createAgents(): Draw {
     node(
       model.x,
       model.y,
-      Math.min(52, w * 0.075),
+      modelR,
       CATEGORIES[1],
       'Model',
       thinking * (0.7 + 0.3 * Math.sin(t * 6)),
@@ -107,7 +114,7 @@ export function createAgents(): Draw {
     tools.forEach((tool, index) => {
       const used =
         index === 0 ? Math.max(Math.sin(call * Math.PI * 0.5), 1 - back) * (call > 0 ? 1 : 0) : 0;
-      roundRect(ctx, tool.x - 60, tool.y - 20, 120, 40, 12);
+      roundRect(ctx, tool.x - toolW / 2, tool.y - 20, toolW, 40, 12);
       ctx.fillStyle = rgba(INK.panel, 1);
       ctx.fill();
       ctx.strokeStyle = rgba(CATEGORIES[0], 0.4 + used * 0.6);
@@ -133,6 +140,7 @@ export function createAgents(): Draw {
       size: 11.5,
       color: INK.silver,
       align: 'center',
+      backing: INK.void,
     });
 
     // The packets: question in, tool call out, result back, answer home.
@@ -153,20 +161,36 @@ export function createAgents(): Draw {
       ctx.beginPath();
       ctx.arc(x, y, 4.5, 0, Math.PI * 2);
       ctx.fill();
-      label(ctx, text, x, y - 22, { size: 12, face: 'mono', color: INK.white, align: 'center' });
+      // The packet's words ride above it, kept inside the picture.
+      const half = textWidth(ctx, text, 12, 500, 'mono') / 2;
+      label(ctx, text, Math.min(w - 8 - half, Math.max(8 + half, x)), y - 22, {
+        size: 12,
+        face: 'mono',
+        color: INK.white,
+        align: 'center',
+        backing: INK.void,
+      });
     };
     const search = tools[0];
     packet(you.x, you.y, model.x, model.y, ask, CATEGORIES[2], 'why is the sky blue?');
     packet(
       model.x,
       model.y,
-      search.x - 60,
+      search.x - toolW / 2,
       search.y,
       call,
       CATEGORIES[1],
       wide ? 'search("sky colour physics")' : 'search(…)',
     );
-    packet(search.x - 60, search.y, model.x, model.y, back, CATEGORIES[0], 'result + source');
+    packet(
+      search.x - toolW / 2,
+      search.y,
+      model.x,
+      model.y,
+      back,
+      CATEGORIES[0],
+      'result + source',
+    );
     packet(model.x, model.y, you.x, you.y, answer, CATEGORIES[1], 'answer, with its source');
 
     // The context: what the model is working with, growing as results arrive.
@@ -175,8 +199,12 @@ export function createAgents(): Draw {
       back >= 1 ? 'search result' : '',
       answer >= 1 ? 'answer' : '',
     ].filter(Boolean);
-    const boxW = Math.min(170, w * 0.26);
-    const boxX = model.x - boxW / 2;
+    // As wide as its longest line, under the model, clear of the tools.
+    const boxW =
+      Math.max(
+        ...['context', 'your question', 'search result'].map((text) => textWidth(ctx, text, 12.5)),
+      ) + 26;
+    const boxX = Math.max(8, Math.min(model.x - boxW / 2, toolX - toolW / 2 - 10 - boxW));
     const boxY = model.y + Math.min(h * 0.16, 90);
     if (lines.length) {
       roundRect(ctx, boxX, boxY, boxW, 26 + lines.length * 20, 10);

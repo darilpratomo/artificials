@@ -13,6 +13,7 @@ import {
   rgba,
   roundRect,
   spectrum,
+  textWidth,
   wash,
 } from '../kit';
 
@@ -40,7 +41,21 @@ export function createQuantize(): Draw {
     const cell = Math.min((w * 0.86) / 32, 26);
     const rowW = cell * 32;
     const x0 = w / 2 - rowW / 2;
-    const y0 = h * 0.24;
+    // Top to bottom: the name, the bits, their key, the number line with the
+    // weight above it and what is stored below, then the model against one GPU.
+    // Each part keeps its height; what is left is shared out between them.
+    const heights = [18, cell * 1.3, 14, 14 + 30, 26 + 26, 16 + 6 + 16 + 24];
+    const gap = Math.max(8, Math.min(40, (h - 24 - heights.reduce((a, b) => a + b)) / 5));
+    let cursor = (h - heights.reduce((a, b) => a + b) - gap * 5) / 2;
+    const titleY = cursor + 9;
+    cursor += heights[0] + gap;
+    const y0 = cursor;
+    cursor += heights[1] + gap;
+    const keyY = cursor + 7;
+    cursor += heights[2] + gap;
+    const lineY = cursor + heights[3];
+    cursor += heights[3] + heights[4] + gap;
+    const barY = cursor + 22;
     const shape = (format: (typeof FORMATS)[number], position: number) =>
       format.exponent === 0
         ? CATEGORIES[3]
@@ -59,7 +74,7 @@ export function createQuantize(): Draw {
       const leaving = inFrom && !inTo ? within : 0;
       const color = inTo && within > 0.5 ? shape(to, position) : shape(from, position);
       const x = x0 + position * cell;
-      const y = y0 + leaving * leaving * h * 0.25;
+      const y = y0 + leaving * leaving * gap * 2;
       const alpha = 1 - leaving;
       roundRect(ctx, x + 2, y, cell - 4, cell * 1.3, 4);
       ctx.fillStyle = rgba(color, 0.3 * alpha);
@@ -77,7 +92,7 @@ export function createQuantize(): Draw {
         alpha: alpha * 0.85,
       });
     }
-    label(ctx, `${current.name}: ${Math.round(bits)} bits`, w / 2, y0 - 22, {
+    label(ctx, `${current.name}: ${Math.round(bits)} bits`, w / 2, titleY, {
       size: 15,
       weight: 600,
       face: 'display',
@@ -93,16 +108,17 @@ export function createQuantize(): Draw {
             [CATEGORIES[0], 'exponent'],
             [CATEGORIES[2], 'fraction'],
           ];
-    let kx = w / 2 - (keys.length > 1 ? 130 : 110);
-    for (const [color, text] of keys) {
+    // Measured, and centred as a row.
+    const keyWidths = keys.map(([, text]) => 15 + textWidth(ctx, text, 12));
+    let kx = w / 2 - (keyWidths.reduce((a, b) => a + b) + 24 * (keys.length - 1)) / 2;
+    keys.forEach(([color, text], index) => {
       ctx.fillStyle = rgba(color, 1);
-      ctx.fillRect(kx, y0 + cell * 1.3 + 18, 9, 9);
-      label(ctx, text, kx + 15, y0 + cell * 1.3 + 23, { size: 12, color: INK.silver });
-      kx += text.length * 7 + 40;
-    }
+      ctx.fillRect(kx, keyY - 5, 9, 9);
+      label(ctx, text, kx + 15, keyY, { size: 12, color: INK.silver });
+      kx += keyWidths[index] + 24;
+    });
 
     // The number line: every value the format can hold near our weight.
-    const lineY = h * 0.55;
     const lo = 0.55;
     const hi = 0.85;
     const lx = w * 0.1;
@@ -180,7 +196,6 @@ export function createQuantize(): Draw {
     );
 
     // What that does to a 70-billion-parameter model, against one GPU's memory.
-    const barY = h * 0.8;
     const gb = weightBytes(70e9, bits) / 1e9;
     const scale = (w * 0.8) / 280;
     ctx.fillStyle = rgba(INK.silver, 0.1);
@@ -190,7 +205,7 @@ export function createQuantize(): Draw {
     ctx.setLineDash([4, 4]);
     ctx.strokeStyle = rgba('#ffffff', 0.7);
     ctx.beginPath();
-    ctx.moveTo(lx + 80 * scale, barY - 10);
+    ctx.moveTo(lx + 80 * scale, barY - 3);
     ctx.lineTo(lx + 80 * scale, barY + 26);
     ctx.stroke();
     ctx.setLineDash([]);

@@ -6,13 +6,14 @@ import {
   additive,
   easeInOut,
   glow,
-  label,
   lerp,
+  lines,
   random,
   rgba,
   span,
   spectrum,
   wash,
+  wrap,
 } from '../kit';
 
 // The floor plan, in rack widths: rows of racks with aisles between them.
@@ -39,6 +40,13 @@ const gpuAt = (column: number, row: number) => ({
   h: 0.2,
 });
 const FOCUS = { row: 2, rack: 7, column: 0, slot: 1 };
+/** What we are looking at, at each distance; the first is the longest. */
+const CAPTIONS = [
+  'one GPU: compute in the middle, memory at its sides',
+  'one server: eight GPUs, joined by fast links',
+  'racks, each tied into the network',
+  'a data hall: power in, cold air in, hot air out',
+];
 
 /**
  * A zoom out, in powers of ten: one GPU, a server of eight, racks on a
@@ -47,10 +55,18 @@ const FOCUS = { row: 2, rack: 7, column: 0, slot: 1 };
 export function createDatacenter(): Draw {
   const next = random(700);
   const twinkle = Array.from({ length: ROWS * PER_ROW * 8 }, () => next() * Math.PI * 2);
-  return (ctx, { w, h, p, t }) => {
+  return (ctx, { w, h: height, p, t }) => {
     ctx.fillStyle = INK.void;
-    ctx.fillRect(0, 0, w, h);
-    wash(ctx, w * 0.5, h * 0.5, Math.max(w, h) * 0.6, spectrum(0.86), 0.12);
+    ctx.fillRect(0, 0, w, height);
+    wash(ctx, w * 0.5, height * 0.5, Math.max(w, height) * 0.6, spectrum(0.86), 0.12);
+    // The zoom fills the picture above a strip kept for its caption, deep
+    // enough for the longest caption at this width.
+    const band = wrap(ctx, CAPTIONS[0], w - 24, 13.5).length > 1 ? 60 : 44;
+    const h = height - band;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, w, h);
+    ctx.clip();
 
     const m = Math.min(w, h);
     const focusRackX = FOCUS.rack * (RACK_W + GAP);
@@ -255,17 +271,29 @@ export function createDatacenter(): Draw {
       ctx.restore();
     }
 
+    // The zoom's lower edge melts into the strip.
+    const fade = ctx.createLinearGradient(0, h - 28, 0, h);
+    fade.addColorStop(0, rgba(INK.void, 0));
+    fade.addColorStop(1, rgba(INK.void, 1));
+    ctx.fillStyle = fade;
+    ctx.fillRect(0, h - 28, w, 28);
+    ctx.restore();
+
     // What we are looking at, at each distance.
-    const captions: [string, number][] = [
-      ['one GPU: compute in the middle, memory at its sides', 1 - span(q, 0.3, 0.7)],
-      [
-        'one server: eight GPUs, joined by fast links',
-        Math.min(span(q, 0.7, 1), 1 - span(q, 1.3, 1.7)),
-      ],
-      ['racks, each tied into the network', Math.min(span(q, 1.7, 2), 1 - span(q, 2.3, 2.7))],
-      ['a data hall: power in, cold air in, hot air out', span(q, 2.7, 3)],
+    const shown = [
+      1 - span(q, 0.3, 0.7),
+      Math.min(span(q, 0.7, 1), 1 - span(q, 1.3, 1.7)),
+      Math.min(span(q, 1.7, 2), 1 - span(q, 2.3, 2.7)),
+      span(q, 2.7, 3),
     ];
-    for (const [text, alpha] of captions)
-      label(ctx, text, w / 2, h - 26, { size: 13.5, color: INK.white, align: 'center', alpha });
+    CAPTIONS.forEach((text, index) =>
+      lines(ctx, text, w / 2, height - (band > 44 ? 14 : 22), w - 24, {
+        size: 13.5,
+        color: INK.white,
+        align: 'center',
+        alpha: shown[index],
+        from: 'bottom',
+      }),
+    );
   };
 }

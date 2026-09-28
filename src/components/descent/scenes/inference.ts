@@ -9,6 +9,7 @@ import {
   glow,
   label,
   lerp,
+  lines,
   rgba,
   roundRect,
   span,
@@ -40,12 +41,19 @@ export function createInference(): Draw {
 
     const left = w * 0.08;
     const right = w * 0.94;
-    const laneY = h * 0.34;
+    // On a narrow picture the parts stack, centred: the tokens and the time
+    // axis, what each phase does, then the cache and its key.
+    const laneY = wide ? h * 0.34 : Math.max(34, (h - 236) / 2 + 14);
+    const prefillY = laneY + 76;
+    const decodeY = wide ? prefillY : prefillY + 19;
+    const cacheY = wide ? h * 0.62 : decodeY + 44;
     const prompt = PIECES.length;
     const answer = ANSWER.length;
     const slot = (right - left) / (prompt + answer + 2);
 
-    const single = 1 - batch;
+    // The single request leaves before the busy GPU arrives.
+    const single = 1 - span(batch, 0, 0.45);
+    const many = span(batch, 0.55, 1);
     if (single > 0.01) {
       ctx.save();
       ctx.globalAlpha = single;
@@ -81,7 +89,7 @@ export function createInference(): Draw {
         additive(ctx, () => glow(ctx, x + width / 2, laneY, width * 0.7, HUE.amber, flash * 0.6));
         ctx.fillStyle = rgba(HUE.amber, 0.15 + 0.4 * flash);
         ctx.fillRect(x, laneY + 30, width * prefill, 10);
-        label(ctx, 'prefill: the whole prompt in one pass', x, laneY + 76, {
+        label(ctx, 'prefill: the whole prompt in one pass', x, prefillY, {
           size: 12.5,
           color: INK.silver,
           alpha: Math.min(1, prefill * 3),
@@ -115,7 +123,7 @@ export function createInference(): Draw {
           ctx,
           'decode: one token per step',
           wide ? left + (prompt + 1) * slot : left,
-          laneY + (wide ? 76 : 96),
+          decodeY,
           {
             size: 12.5,
             color: INK.silver,
@@ -124,7 +132,6 @@ export function createInference(): Draw {
         );
 
       // The KV cache: what each token leaves behind so it is not recomputed.
-      const cacheY = h * (wide ? 0.62 : 0.7);
       const blocks = Math.round(prompt * prefill) + made;
       const blockW = Math.min(slot * 0.9, 44);
       label(ctx, `KV cache: ${blocks} token${blocks === 1 ? '' : 's'} kept`, left, cacheY - 22, {
@@ -157,12 +164,13 @@ export function createInference(): Draw {
     }
 
     // Many people at once: requests interleave on one GPU and join as others finish.
-    if (batch > 0) {
+    if (many > 0) {
+      const batch = many;
       // Room on the left for each request's name.
       const left = w * (wide ? 0.2 : 0.1);
       const rows = 4;
-      const top = h * 0.22;
       const rowH = Math.min(52, h * 0.12);
+      const top = wide ? h * 0.22 : Math.max(20, (h - rows * rowH - 70) / 2);
       const steps = 22;
       const stepW = (right - left) / steps;
       // Each request's start and length, in steps.
@@ -206,11 +214,12 @@ export function createInference(): Draw {
       ctx.moveTo(x, top - 10);
       ctx.lineTo(x, top + rows * rowH + 10);
       ctx.stroke();
-      label(
+      lines(
         ctx,
         'each step moves every active request on by one token',
         w / 2,
-        top + rows * rowH + 40,
+        top + rows * rowH + 34,
+        w - 32,
         {
           size: 13,
           color: INK.white,

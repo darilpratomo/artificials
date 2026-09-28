@@ -338,9 +338,10 @@
     gap: 0;
   }
 }
+/* Bottom left, over the words, so it never covers a picture's own labels. */
 .dsc-page .dsc-motion {
   position: fixed;
-  right: 20px;
+  left: 20px;
   bottom: 20px;
   z-index: 20;
   display: inline-flex;
@@ -421,6 +422,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  max-width: 100%;
   padding: 10px 18px;
   border: 1px solid #ffffff26;
   border-radius: 99px;
@@ -430,12 +432,16 @@
   font-size: 13.5px;
   font-weight: 550;
 }
+/* On a small screen the track gives way, so the value stays on one line. */
 .dsc-page .dsc-slider input {
+  flex: 1 1 auto;
   width: min(220px, 42vw);
+  min-width: 72px;
   accent-color: #8b7cf6;
 }
 .dsc-page .dsc-slider output {
   min-width: 2.6ch;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
@@ -592,8 +598,32 @@
     font-size: 1.05rem;
   }
   .dsc-page .dsc-motion {
+    left: auto;
     right: 14px;
     bottom: 14px;
+  }
+  .dsc-page .dsc-controls {
+    inset: auto 12px 12px;
+  }
+  /* The close fits between the header and the motion button. */
+  .dsc-page .dsc-finale-copy {
+    gap: 10px;
+    padding: calc(var(--header) + 8px) 20px 64px;
+  }
+  .dsc-page .dsc-finale-copy h2 {
+    font-size: clamp(2rem, 9vw, 2.6rem);
+  }
+  .dsc-page .dsc-answer {
+    padding: 12px 16px;
+  }
+  .dsc-page .dsc-links {
+    margin-top: 4px;
+  }
+}
+/* On the shortest screens the close keeps the answer and drops its recap. */
+@media (max-width: 1023px) and (max-height: 600px) {
+  .dsc-page .dsc-finale-note {
+    display: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {

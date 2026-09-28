@@ -49,7 +49,6 @@ const Market = page(() => import('./pages/Market'));
 const Releases = page(() => import('./pages/Releases'));
 const Academy = page(() => import('./pages/Academy'));
 const Descent = page(() => import('./pages/Descent'));
-const HowAIWorks = page(() => import('./pages/HowAIWorks'));
 const AcademyLesson = page(() => import('./pages/AcademyLesson'));
 const Learn = page(() => import('./pages/Learn'));
 const Tools = page(() => import('./pages/Tools'));
@@ -83,7 +82,6 @@ function pageAt(path: string) {
     ['compare', Compare],
     ['news', Learn],
     ['how-ai-works', Descent],
-    ['how-ai-works-2', HowAIWorks],
     ['tools', Tools],
     ['login', Login],
     ['dashboard', Dashboard],
@@ -149,7 +147,6 @@ const app = (
               <Route path="compare/:pair" element={<Compare />} />
               <Route path="learn" element={<Academy />} />
               <Route path="how-ai-works" element={<Descent />} />
-              <Route path="how-ai-works-2" element={<HowAIWorks />} />
               <Route path="learn/:slug" element={<AcademyLesson />} />
               <Route path="news" element={<Learn />} />
               <Route path="news/:slug" element={<Learn />} />

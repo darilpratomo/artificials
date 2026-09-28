@@ -242,6 +242,8 @@ export interface LabelStyle {
   align?: CanvasTextAlign;
   baseline?: CanvasTextBaseline;
   face?: keyof typeof FACES;
+  /** A colour laid behind the text, so the lines of a picture never run through it. */
+  backing?: string;
 }
 export function font(size: number, weight = 500, face: keyof typeof FACES = 'body') {
   return `${weight} ${size}px ${FACES[face]}`;
@@ -259,10 +261,25 @@ export function label(
     align = 'left',
     baseline = 'middle',
     face = 'body',
+    backing,
   }: LabelStyle = {},
 ) {
   if (alpha <= 0.002) return;
   ctx.font = font(size, weight, face);
+  if (backing) {
+    const width = ctx.measureText(text).width;
+    const left =
+      align === 'center' ? x - width / 2 : align === 'right' || align === 'end' ? x - width : x;
+    const top =
+      baseline === 'middle'
+        ? y - size * 0.62
+        : baseline === 'top'
+          ? y - size * 0.1
+          : y - size * 0.9;
+    roundRect(ctx, left - 5, top, width + 10, size * 1.24, 5);
+    ctx.fillStyle = rgba(backing, alpha * 0.92);
+    ctx.fill();
+  }
   ctx.fillStyle = rgba(color, alpha);
   ctx.textAlign = align;
   ctx.textBaseline = baseline;
@@ -278,9 +295,83 @@ export function textWidth(
   ctx.font = font(size, weight, face);
   return ctx.measureText(text).width;
 }
+/** Breaks text into lines no wider than `width`. */
+export function wrap(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  width: number,
+  size: number,
+  weight = 500,
+  face: keyof typeof FACES = 'body',
+) {
+  ctx.font = font(size, weight, face);
+  const lines: string[] = [];
+  let line = '';
+  for (const word of text.split(' ')) {
+    const longer = line ? `${line} ${word}` : word;
+    if (line && ctx.measureText(longer).width > width) {
+      lines.push(line);
+      line = word;
+    } else line = longer;
+  }
+  return line ? [...lines, line] : lines;
+}
+/**
+ * Text wrapped to `width`, its first line at `y`, or its last line when
+ * `from` is 'bottom'. Returns the height the lines take.
+ */
+export function lines(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  width: number,
+  style: LabelStyle & { from?: 'top' | 'bottom' } = {},
+) {
+  const size = style.size ?? 13;
+  const rows = wrap(ctx, text, width, size, style.weight, style.face);
+  const leading = Math.round(size * 1.4);
+  const first = style.from === 'bottom' ? y - (rows.length - 1) * leading : y;
+  rows.forEach((row, index) => label(ctx, row, x, first + index * leading, style));
+  return rows.length * leading;
+}
+
+export interface Box {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+const covers = (a: Box, b: Box) =>
+  Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) *
+  Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
+/**
+ * Room for labels that move. Placed in order of importance, each label fades
+ * as far as it would cover one placed before it or leave the picture, so
+ * words never pile up, and nothing jumps as they drift apart again.
+ */
+export function crowd(w: number, h: number, inset = 4) {
+  const taken: { box: Box; weight: number }[] = [];
+  const frame: Box = { x0: inset, y0: inset, x1: w - inset, y1: h - inset };
+  return {
+    /** Keeps a box clear, such as a caption. */
+    keep(box: Box) {
+      taken.push({ box, weight: 1 });
+    },
+    /** How visible a label in `box` may be, from 0 to 1; it then holds that much of its room. */
+    place(box: Box, presence = 1) {
+      const padded = { x0: box.x0 - 2, y0: box.y0 - 2, x1: box.x1 + 2, y1: box.y1 + 2 };
+      const area = (padded.x1 - padded.x0) * (padded.y1 - padded.y0);
+      let covered = area - covers(padded, frame);
+      for (const other of taken) covered += covers(padded, other.box) * other.weight;
+      const room = 1 - smooth(Math.min(1, covered / (area * 0.08)));
+      taken.push({ box, weight: room * Math.min(1, presence * 1.5) });
+      return room;
+    },
+  };
+}
 
 // Backgrounds.
-/** A faint dot grid, drifting slightly with `offset`. */
 /** A faint dot grid behind a picture. */
 export function dotGrid(
   ctx: CanvasRenderingContext2D,

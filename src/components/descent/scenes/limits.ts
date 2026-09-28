@@ -48,23 +48,42 @@ export function createLimits(): Draw {
     const check = easeInOut(span(p, 0.46, 0.64));
     const you = easeInOut(span(p, 0.76, 0.94));
 
-    const size = Math.max(15, Math.min(28, w / 26));
+    // The sentence on one line where it can: a little smaller rather than wrapped.
+    const maxW = w * 0.88;
+    const base = Math.max(15, Math.min(28, w / 26));
+    const whole = WRONG.reduce(
+      (sum, [text]) => sum + textWidth(ctx, text, base, 600, 'display'),
+      0,
+    );
+    const size = whole > maxW ? Math.max(13, (base * maxW) / whole) : base;
     const shown = Math.floor(write * WRONG.length + 1e-6);
     const widths = WRONG.map(([text]) => textWidth(ctx, text, size, 600, 'display'));
-    // The sentence wraps onto two lines when the screen is narrow.
-    const maxW = w * 0.88;
+    // Otherwise it wraps between words, never before a full stop.
     const lines: number[][] = [[]];
     let lineWidth = 0;
-    WRONG.forEach((_, index) => {
-      if (lineWidth + widths[index] > maxW && lines[lines.length - 1].length) {
+    WRONG.forEach(([text], index) => {
+      const joins = !text.startsWith(' ') && index > 0;
+      if (!joins && lineWidth + widths[index] > maxW && lines[lines.length - 1].length) {
         lines.push([]);
         lineWidth = 0;
       }
       lines[lines.length - 1].push(index);
       lineWidth += widths[index];
     });
-    const top = h * 0.2;
-    const lineH = size * 3.2;
+    // Top to bottom: the doubt, the sentence, the source, the checks. Each keeps
+    // its height; what is left is shared out between them.
+    const compact = h < 520;
+    const lineH = size * (compact ? 2.3 : 3.2);
+    const sentenceH = (lines.length - 1) * lineH + size * 1.4;
+    const cardH = 86;
+    const itemH = compact ? 27 : 30;
+    const fixed = 16 + sentenceH + cardH + 3 * itemH;
+    const gap = Math.max(8, Math.min(compact ? 26 : 56, (h - 16 - fixed) / 4));
+    const start = (h - fixed - gap * 3) / 2;
+    const captionY = start + 8;
+    const top = start + 16 + gap + size / 2;
+    const cardY = start + 16 + gap + sentenceH + gap;
+    const itemsY = cardY + cardH + gap + itemH / 2;
     const positions: { x: number; y: number }[] = [];
     lines.forEach((line, row) => {
       const width = line.reduce((sum, index) => sum + widths[index], 0);
@@ -107,7 +126,7 @@ export function createLimits(): Draw {
           glow(ctx, x + widths[index] / 2, y, widths[index], HUE.red, flagged * 0.18),
         );
     });
-    label(ctx, 'fluent, likely, and wrong', w / 2, top - size * 1.5, {
+    label(ctx, 'fluent, likely, and wrong', w / 2, captionY, {
       size: 13,
       color: INK.silver,
       align: 'center',
@@ -115,11 +134,10 @@ export function createLimits(): Draw {
     });
 
     // A source says otherwise, and the answer is corrected.
-    const cardY = top + lines.length * lineH + 20;
     if (check > 0) {
       const cardW = Math.min(w * 0.84, 520);
       const x = w / 2 - cardW / 2;
-      const y = lerp(cardY + 40, cardY, check);
+      const y = lerp(cardY + 24, cardY, check);
       roundRect(ctx, x, y, cardW, 86, 14);
       ctx.fillStyle = rgba(INK.panel, 0.95 * check);
       ctx.fill();
@@ -145,7 +163,7 @@ export function createLimits(): Draw {
     }
     // The last check is yours.
     if (you > 0) {
-      const y = cardY + 130;
+      const y = itemsY;
       const items = [
         'Where does this claim come from?',
         'Does a source actually say it?',
@@ -156,19 +174,23 @@ export function createLimits(): Draw {
         const x = w / 2 - Math.min(w * 0.4, 220);
         ctx.strokeStyle = rgba(CATEGORIES[2], 0.9 * reveal);
         ctx.lineWidth = 1.5;
-        roundRect(ctx, x, y + index * 30 - 8, 16, 16, 4);
+        roundRect(ctx, x, y + index * itemH - 8, 16, 16, 4);
         ctx.stroke();
         if (reveal > 0.8) {
           ctx.beginPath();
-          ctx.moveTo(x + 4, y + index * 30);
-          ctx.lineTo(x + 7, y + index * 30 + 4);
-          ctx.lineTo(x + 13, y + index * 30 - 4);
+          ctx.moveTo(x + 4, y + index * itemH);
+          ctx.lineTo(x + 7, y + index * itemH + 4);
+          ctx.lineTo(x + 13, y + index * itemH - 4);
           ctx.stroke();
         }
-        label(ctx, text, x + 28, y + index * 30, { size: 13.5, color: INK.white, alpha: reveal });
+        label(ctx, text, x + 28, y + index * itemH, {
+          size: 13.5,
+          color: INK.white,
+          alpha: reveal,
+        });
       });
       additive(ctx, () =>
-        glow(ctx, w / 2, y + 30, 160, CATEGORIES[2], you * (0.12 + 0.04 * Math.sin(t * 2))),
+        glow(ctx, w / 2, y + itemH, 160, CATEGORIES[2], you * (0.12 + 0.04 * Math.sin(t * 2))),
       );
     }
   };

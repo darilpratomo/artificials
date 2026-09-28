@@ -16,6 +16,7 @@ import {
   rotateY,
   span,
   spectrum,
+  textWidth,
   wash,
   type Vec3,
 } from '../kit';
@@ -54,7 +55,8 @@ export function createLandscape(): Draw {
     const scale = Math.min(w, h) * 0.36;
     const cx = w * 0.5;
     const cy = h * 0.56;
-    const yaw = -0.7 + t * 0.035 + p * 0.5;
+    // The view sways around its set angle, rather than turning away over time.
+    const yaw = -0.7 + Math.sin(t * 0.1) * 0.25 + p * 0.5;
     const pitch = 1.02;
     // Surface coordinates: x and y across, loss up.
     const at = (x: number, y: number, z: number) => {
@@ -162,21 +164,34 @@ export function createLandscape(): Draw {
         ctx.lineTo(end.x, end.y);
         ctx.stroke();
         arrowHead(ctx, end.x, end.y, Math.atan2(end.y - ball.y, end.x - ball.x), 11, color);
-        label(ctx, text, end.x + 10, end.y - 10, { size: 12.5, color: INK.white, alpha: arrow });
+        // Beyond the arrow's tip, on its side of the ball, inside the picture.
+        const width = textWidth(ctx, text, 12.5);
+        const rightward = end.x >= ball.x;
+        const x = rightward
+          ? Math.min(w - 10 - width, end.x + 12)
+          : Math.max(10 + width, end.x - 12);
+        label(ctx, text, x, end.y - 12, {
+          size: 12.5,
+          color: INK.white,
+          alpha: arrow,
+          align: rightward ? 'left' : 'right',
+          backing: INK.void,
+        });
       }
     }
 
     // The loss, step by step, in a small chart.
-    const cw = Math.min(w * 0.3, 220);
-    const ch = Math.min(h * 0.18, 110);
+    // The steps' name sits under the panel, where the line cannot reach it.
+    const cw = Math.min(Math.max(w * 0.3, 120), 220);
+    const ch = Math.min(Math.max(h * 0.18, 76), 110);
     const x0 = 22;
-    const y0 = h - ch - 26;
+    const y0 = h - ch - 32;
     ctx.fillStyle = rgba(INK.panel, 0.85);
     ctx.fillRect(x0, y0, cw, ch);
     ctx.strokeStyle = rgba(INK.silver, 0.14);
     ctx.strokeRect(x0, y0, cw, ch);
     label(ctx, 'loss', x0 + 10, y0 + 14, { size: 11.5, color: INK.muted });
-    label(ctx, 'training steps', x0 + cw - 10, y0 + ch - 10, {
+    label(ctx, 'training steps', x0 + cw, y0 + ch + 14, {
       size: 11.5,
       color: INK.muted,
       align: 'right',
@@ -187,7 +202,7 @@ export function createLandscape(): Draw {
     ctx.beginPath();
     for (let step = 0; step <= shown; step++) {
       const px = x0 + 10 + (step / (path.length - 1)) * (cw - 20);
-      const py = y0 + 22 + (1 - (path[step][2] - bottom) / (path[0][2] - bottom + 0.1)) * (ch - 36);
+      const py = y0 + 26 + (1 - (path[step][2] - bottom) / (path[0][2] - bottom + 0.1)) * (ch - 36);
       if (step) ctx.lineTo(px, py);
       else ctx.moveTo(px, py);
     }
@@ -198,12 +213,15 @@ export function createLandscape(): Draw {
       color: INK.white,
       align: 'right',
     });
-    if (settle > 0)
-      label(ctx, 'the lowest point this walk found', ball.x, ball.y - 30, {
-        size: 12.5,
-        color: INK.white,
-        align: 'center',
-        alpha: settle,
-      });
+    if (settle > 0) {
+      const half = textWidth(ctx, 'the lowest point this walk found', 12.5) / 2;
+      label(
+        ctx,
+        'the lowest point this walk found',
+        Math.min(w - 10 - half, Math.max(10 + half, ball.x)),
+        ball.y - 30,
+        { size: 12.5, color: INK.white, align: 'center', alpha: settle, backing: INK.void },
+      );
+    }
   };
 }

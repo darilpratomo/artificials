@@ -11,6 +11,7 @@ import {
   glow,
   label,
   lerp,
+  lines,
   random,
   rgba,
   roundRect,
@@ -53,7 +54,7 @@ export const DRAW = 0.21;
 export function createPredict(): Draw {
   const noise = random(12);
   const spectrumBars = Array.from({ length: 180 }, () => 0.1 + noise() * noise() * 0.9);
-  return (ctx, { w, h, p, t, input }) => {
+  return (ctx, { w, h, p, t, input, reserve }) => {
     ctx.fillStyle = INK.void;
     ctx.fillRect(0, 0, w, h);
     dotGrid(ctx, w, h, 30, INK.silver, 0.04);
@@ -71,33 +72,33 @@ export function createPredict(): Draw {
 
     // The text so far, and the answer growing at the end of it.
     const written = Math.floor(lerp(pick > 0.95 ? 1 : 0, ANSWER.length, write) + 1e-6);
+    const size = Math.max(14, Math.min(24, w / 30));
+    const leading = size * 1.4;
+    const maxW = w * 0.9;
+    // Long answers wrap: the question's words one by one, then token by token.
+    const wrapped = (pieces: string[]) => {
+      const rows: string[] = [];
+      let row = '';
+      for (const piece of pieces.flatMap((word, index) =>
+        index === 0 ? word.split(/(?= )/) : [word],
+      )) {
+        if (row && textWidth(ctx, row + piece, size, 600, 'display') > maxW) {
+          rows.push(row);
+          row = piece.trimStart();
+        } else row += piece;
+      }
+      return [...rows, row];
+    };
     const words = [
       'Why is the sky blue?',
       ...ANSWER.slice(0, written).map((token, index) =>
         index === 0 && pick > 0.95 ? CANDIDATES[chosen][0] : token,
       ),
     ];
-    const text = words.join('');
-    const size = Math.max(14, Math.min(24, w / 30));
-    const textW = textWidth(ctx, text, size, 600, 'display');
-    const maxW = w * 0.9;
-    // Long answers wrap onto a second line.
-    const lines: string[] = [];
-    if (textW <= maxW) lines.push(text);
-    else {
-      let lineText = '';
-      for (const piece of words.flatMap((word, index) =>
-        index === 0 ? word.split(/(?= )/) : [word],
-      )) {
-        if (textWidth(ctx, lineText + piece, size, 600, 'display') > maxW && lineText) {
-          lines.push(lineText);
-          lineText = piece.trimStart();
-        } else lineText += piece;
-      }
-      lines.push(lineText);
-    }
-    lines.forEach((lineText, index) => {
-      label(ctx, lineText, w / 2, h * 0.1 + index * size * 1.4, {
+    const rows = wrapped(words);
+    const textY = h < 520 ? 22 : h * 0.1;
+    rows.forEach((row, index) => {
+      label(ctx, row, w / 2, textY + index * leading, {
         size,
         weight: 600,
         face: 'display',
@@ -105,18 +106,30 @@ export function createPredict(): Draw {
         align: 'center',
       });
     });
-    const caretLine = lines[lines.length - 1];
-    const caretX = w / 2 + textWidth(ctx, caretLine, size, 600, 'display') / 2 + 4;
-    const caretY = h * 0.1 + (lines.length - 1) * size * 1.4;
+    const caretX = w / 2 + textWidth(ctx, rows[rows.length - 1], size, 600, 'display') / 2 + 4;
+    const caretY = textY + (rows.length - 1) * leading;
     if (Math.sin(t * 5) > 0 || write >= 1) {
       ctx.fillStyle = rgba(HUE.violet, 0.9);
       ctx.fillRect(caretX, caretY - size * 0.55, 2, size * 1.1);
     }
 
+    // The chart keeps clear of the whole answer, however many lines it will take,
+    // and stops above the note that sits just over the slider.
+    const answerRows = wrapped(['Why is the sky blue?', ...ANSWER]).length;
+    const chartTop = textY + (answerRows - 1) * leading + size * 0.6 + 16;
+    const noteY = h - reserve - 12;
+    const chartBottom = noteY - 22;
+    const note = (text: string, alpha: number) =>
+      alpha > 0 &&
+      lines(ctx, text, w / 2, noteY, w - 32, {
+        size: 12.5,
+        color: INK.silver,
+        align: 'center',
+        alpha,
+        from: 'bottom',
+      });
+
     // A score for every token in the vocabulary, before zooming in on the best.
-    const chartTop = h * 0.26;
-    // The slider sits over the bottom of the picture; the chart stops above it.
-    const chartBottom = Math.min(h * 0.84, h - 104);
     if (zoomIn < 1) {
       const bw = (w * 0.86) / spectrumBars.length;
       spectrumBars.forEach((value, index) => {
@@ -128,15 +141,14 @@ export function createPredict(): Draw {
         );
         ctx.fillRect(x, chartBottom - height, Math.max(1, bw - 1), height);
       });
-      label(ctx, 'one score for each of the vocabulary’s tokens', w / 2, chartBottom + 22, {
-        size: 12,
-        color: INK.muted,
-        align: 'center',
-        alpha: 1 - zoomIn,
-      });
+      note('one score for each of the vocabulary’s tokens', 1 - span(zoomIn, 0, 0.5));
     }
 
     // The best candidates, as probabilities.
+    // On a short picture, the six likeliest candidates, each with room to read;
+    // the draw still uses them all.
+    const count = (chartBottom - chartTop) / CANDIDATES.length < 17 ? 6 : CANDIDATES.length;
+    const rowH = Math.min(38, (chartBottom - chartTop) / count);
     if (zoomIn > 0) {
       // While the rest of the answer is written, the first choice steps back.
       ctx.save();
@@ -145,13 +157,14 @@ export function createPredict(): Draw {
       const labelW = narrow ? 86 : 118;
       const left = w * (narrow ? 0.06 : 0.12) + labelW;
       const barMax = w * (narrow ? 0.62 : 0.6) - labelW;
-      const rowH = Math.min(38, (chartBottom - chartTop) / CANDIDATES.length);
-      CANDIDATES.forEach(([word], index) => {
+      // Type follows the rows down on a short picture, so lines never touch.
+      const wordSize = Math.min(14, rowH * 0.8);
+      CANDIDATES.slice(0, count).forEach(([word], index) => {
         const y = chartTop + index * rowH + rowH / 2;
         const value = probabilities[index] * easeOut(zoomIn);
         const isChosen = index === chosen && pick > 0;
         label(ctx, word.trim(), left - 14, y, {
-          size: 14,
+          size: wordSize,
           weight: isChosen ? 650 : 500,
           face: 'display',
           color: isChosen ? INK.white : INK.silver,
@@ -189,35 +202,25 @@ export function createPredict(): Draw {
           left + Math.max(3, barMax * value) + 10,
           y,
           {
-            size: 12.5,
+            size: Math.min(12.5, rowH * 0.75),
             face: 'mono',
             color: INK.silver,
             alpha: zoomIn,
           },
         );
       });
-      // The draw: a fixed random number, walked along the probabilities in order.
-      if (pick > 0) {
-        const x = w * 0.5;
-        label(
-          ctx,
-          `random draw ${DRAW.toFixed(2)} lands on “${CANDIDATES[chosen][0].trim()}”`,
-          x,
-          chartBottom + 26,
-          {
-            size: 12.5,
-            color: INK.silver,
-            align: 'center',
-            alpha: pick,
-          },
-        );
-      }
       ctx.restore();
     }
+    // The draw: a fixed random number, walked along the probabilities in order.
+    if (pick > 0)
+      note(
+        `random draw ${DRAW.toFixed(2)} lands on “${CANDIDATES[chosen][0].trim()}”`,
+        pick * (1 - span(write, 0, 0.12)),
+      );
     // The chosen word flies up to join the text.
     if (pick > 0.4 && pick < 1 && written === 0) {
-      const from = CANDIDATES.findIndex((_, index) => index === chosen);
-      const y = lerp(chartTop + from * 38, h * 0.1, easeInOut(span(pick, 0.4, 1)));
+      const y = lerp(chartTop + chosen * rowH + rowH / 2, textY, easeInOut(span(pick, 0.4, 1)));
+      const textW = textWidth(ctx, words.join(''), size, 600, 'display');
       label(ctx, CANDIDATES[chosen][0].trim(), w / 2 + textW / 2 + 30, y, {
         size,
         weight: 650,
@@ -227,19 +230,10 @@ export function createPredict(): Draw {
       });
     }
     // Then again, and again: each new token is added and the loop runs once more.
-    if (write > 0) {
-      label(
-        ctx,
+    if (write > 0)
+      note(
         `token ${Math.min(ANSWER.length, written)} of ${ANSWER.length}: each new token goes back in as input`,
-        w / 2,
-        h - 26,
-        {
-          size: 12.5,
-          color: INK.silver,
-          align: 'center',
-          alpha: span(write, 0, 0.2),
-        },
+        span(write, 0.12, 0.3),
       );
-    }
   };
 }
