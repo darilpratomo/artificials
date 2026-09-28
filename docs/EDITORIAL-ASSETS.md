@@ -1,5 +1,9 @@
 # Editorial artwork
 
+The 28 September 2026 collection adds 16 original long-form guides and 16 individually
+generated covers. See [Frontiers collection record](EDITORIAL-FRONTIERS.md) for article
+word counts, responsive asset paths, sources policy, and final image prompts.
+
 The 27 September 2026 collection adds 20 separately generated article covers and responsive
 derivatives. See [Systems collection artwork](EDITORIAL-SYSTEMS-ASSETS.md) for the final
 prompt set, file locations, and integration details. The earlier assets below are preserved.

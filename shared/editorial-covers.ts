@@ -3,6 +3,118 @@ import type { Article } from './content';
 // Content assets only: keep legacy covers and every existing layout unchanged.
 export const EDITORIAL_COVERS = new Map<string, { file: string; alt: string }>([
   [
+    'diffusion-and-flow-matching-image-models',
+    {
+      file: 'frontier-diffusion-flow',
+      alt: 'A porcelain nautilus shell emerges from a cloud of silver particles on dark stone.',
+    },
+  ],
+  [
+    'state-space-models-mamba-sequence-memory',
+    {
+      file: 'frontier-state-space',
+      alt: 'A silver ribbon passes through a sequence of glass lenses toward a compact luminous point.',
+    },
+  ],
+  [
+    'time-series-foundation-models-forecasting',
+    {
+      file: 'frontier-forecasting',
+      alt: 'A metallic wave splits into translucent arcs after crossing a vertical glass pane.',
+    },
+  ],
+  [
+    'graph-neural-networks-relational-data',
+    {
+      file: 'frontier-graph-learning',
+      alt: 'Three clusters of suspended stone and silver spheres connect through thin metallic rods.',
+    },
+  ],
+  [
+    'recommendation-systems-cold-start-feedback',
+    {
+      file: 'frontier-recommendations',
+      alt: 'A mechanical selector hovers above stacked silver records beside a separate translucent disc.',
+    },
+  ],
+  [
+    'training-data-lineage-deduplication',
+    {
+      file: 'frontier-data-lineage',
+      alt: 'A silver woven fabric separates into fine threads connected to individual spools.',
+    },
+  ],
+  [
+    'ai-code-review-evidence-and-human-judgment',
+    {
+      file: 'frontier-code-review',
+      alt: 'A magnifying lens reveals a gap in the joint of a small metallic bridge.',
+    },
+  ],
+  [
+    'document-chunking-boundaries-retrieval',
+    {
+      file: 'frontier-chunking',
+      alt: 'A silver book separates into curved page sections with interlocking edges.',
+    },
+  ],
+  [
+    'multimodal-embeddings-cross-modal-search',
+    {
+      file: 'frontier-multimodal-search',
+      alt: 'A frosted portrait frame and a silver speech-shaped ribbon cast shadows on a dark surface.',
+    },
+  ],
+  [
+    'ai-summarization-numbers-uncertainty',
+    {
+      file: 'frontier-summarization',
+      alt: 'Stacked glass vessels containing distinct beads channel liquid into a silver bowl.',
+    },
+  ],
+  [
+    'conformal-prediction-uncertainty-ai',
+    {
+      file: 'frontier-conformal',
+      alt: 'A polished sphere sits inside translucent shells, with a small satellite outside.',
+    },
+  ],
+  [
+    'federated-learning-privacy-distributed-data',
+    {
+      file: 'frontier-federated',
+      alt: 'Silver seedlings on four isolated islands connect by light to a suspended glass prism.',
+    },
+  ],
+  [
+    'machine-unlearning-deletion-model-memory',
+    {
+      file: 'frontier-unlearning',
+      alt: 'A silver tree with a removed branch stands above a glass block holding a faint reflection.',
+    },
+  ],
+  [
+    'ai-training-checkpoints-reproducibility',
+    {
+      file: 'frontier-checkpoints',
+      alt: 'Exploded watch components float in aligned layers above a silver case.',
+    },
+  ],
+  [
+    'ai-accessibility-alt-text-context',
+    {
+      file: 'frontier-accessibility',
+      alt: 'A mountain relief projects outward from a dark picture frame into a tactile landscape.',
+    },
+  ],
+  [
+    'batch-ai-pipelines-retries-quality',
+    {
+      file: 'frontier-batch-pipelines',
+      alt: 'Silver parcels move through glass inspection gates, with one diverted to a side lane.',
+    },
+  ],
+  [
     'mixture-of-experts-active-parameters',
     {
       file: 'insight-moe',
