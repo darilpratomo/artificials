@@ -114,3 +114,7 @@ the top models (see "Home dashboard" in `docs/DATA.md`). Since then, link previe
 cards drawn at build time (see "Link previews" in `docs/SEO.md`), so no page uses the planet
 files. They are kept so the scene can return from `scripts/build-hero-logo.py` without
 regenerating it.
+
+The three interactive visual laboratories use distinct `lab-sampling`, `lab-vectors`, and
+`lab-queues` original SVG/WebP covers. See [the laboratory collection](EDITORIAL-VISUAL-LABS.md)
+for content, formula, animation and asset-generation details.

@@ -3,6 +3,27 @@ import type { Article } from './content';
 // Content assets only: keep legacy covers and every existing layout unchanged.
 export const EDITORIAL_COVERS = new Map<string, { file: string; alt: string }>([
   [
+    'visual-lab-temperature-top-p-token-sampling',
+    {
+      file: 'lab-sampling',
+      alt: 'Original schematic of six token probabilities narrowing into eligible choices and a selection interval.',
+    },
+  ],
+  [
+    'visual-lab-vector-similarity-search-geometry',
+    {
+      file: 'lab-vectors',
+      alt: 'Two silver vectors with different directions and lengths on a coordinate plane, with a unit circle.',
+    },
+  ],
+  [
+    'visual-lab-ai-serving-queues-continuous-batching',
+    {
+      file: 'lab-queues',
+      alt: 'Six synthetic jobs drawn on parallel timelines with separate waiting and service segments.',
+    },
+  ],
+  [
     'visual-guide-model-price-capability-frontier',
     {
       file: 'visual-frontier',

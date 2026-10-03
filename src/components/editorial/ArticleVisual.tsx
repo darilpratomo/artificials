@@ -14,6 +14,7 @@ import { readableName } from '../../../shared/model-names';
 import { ScatterChart } from '../charts/ScatterChart';
 import { useProcessMotion } from './useProcessMotion';
 import './article-visuals.css';
+import { VisualLab } from './VisualLabs';
 
 const usd = (value: number) => '$' + value.toFixed(value < 1 ? 3 : 2);
 
@@ -695,6 +696,13 @@ function Evidence() {
 
 export function ArticleVisual({ kind }: { kind: ArticleVisualKind }) {
   switch (kind) {
+    case 'distribution':
+    case 'sample-draw':
+    case 'vector-angle':
+    case 'vector-rank':
+    case 'queue-timeline':
+    case 'queue-replay':
+      return <VisualLab kind={kind} />;
     case 'frontier':
       return <PriceFrontier />;
     case 'workload':

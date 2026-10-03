@@ -135,7 +135,7 @@ describe('search index', () => {
   });
 
   it('carries no guide text, only titles and summaries', () => {
-    // Allow metadata for 103 guides; full article bodies must stay out of the index.
+    // Allow metadata for 106 guides; full article bodies must stay out of the index.
     expect(JSON.stringify(searchIndex()).length).toBeLessThan(43_000);
     for (const article of ARTICLES.filter((entry) => entry.published)) {
       const guide = entries.find((entry) => entry[1] === '/news/' + article.slug);

@@ -1,5 +1,6 @@
 import { EDITORIAL_FIELDNOTES } from './editorial-fieldnotes';
 import { EDITORIAL_VISUAL_STORIES } from './editorial-visual-stories';
+import { EDITORIAL_VISUAL_LABS } from './editorial-visual-labs';
 import { EDITORIAL_COLLECTION } from './editorial-collection';
 import { EDITORIAL_DEEP_DIVES } from './editorial-deep-dives';
 import { EDITORIAL_SYSTEMS } from './editorial-systems';
@@ -27,6 +28,7 @@ export const ARTICLE_CATEGORIES = [
 
 // Original editorial guides. Dates describe editorial updates, never model release dates.
 export const ARTICLES: Article[] = [
+  ...EDITORIAL_VISUAL_LABS,
   ...EDITORIAL_VISUAL_STORIES,
   ...EDITORIAL_FIELDNOTES,
   ...EDITORIAL_HORIZONS,

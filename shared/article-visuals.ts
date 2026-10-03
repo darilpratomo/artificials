@@ -1,7 +1,32 @@
 export type ArticleVisualKind =
-  'frontier' | 'workload' | 'skills' | 'matrix' | 'inference' | 'cache' | 'retrieval' | 'evidence';
+  | 'frontier'
+  | 'workload'
+  | 'skills'
+  | 'matrix'
+  | 'inference'
+  | 'cache'
+  | 'retrieval'
+  | 'evidence'
+  | 'distribution'
+  | 'sample-draw'
+  | 'vector-angle'
+  | 'vector-rank'
+  | 'queue-timeline'
+  | 'queue-replay';
 
 const placements: Record<string, Record<string, ArticleVisualKind>> = {
+  'visual-lab-temperature-top-p-token-sampling': {
+    'Reshape the distribution before choosing a token': 'distribution',
+    'Move the draw through the probability intervals': 'sample-draw',
+  },
+  'visual-lab-vector-similarity-search-geometry': {
+    'Rotate direction without hiding length': 'vector-angle',
+    'Change the metric and inspect the ranking': 'vector-rank',
+  },
+  'visual-lab-ai-serving-queues-continuous-batching': {
+    'Separate waiting from doing the work': 'queue-timeline',
+    'Replay the queue instead of guessing from an average': 'queue-replay',
+  },
   'visual-guide-model-price-capability-frontier': {
     'Move a constraint before picking a winner': 'frontier',
     'Change the workload and watch the price move': 'workload',

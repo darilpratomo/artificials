@@ -1,0 +1,338 @@
+/* All laboratory styles remain inside new article figures. */
+.visual-lab .vl-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.visual-lab .vl-probabilities,
+.visual-lab .vl-intervals {
+  list-style: none;
+  margin: 24px 0;
+  padding: 0;
+}
+.visual-lab .vl-probabilities li {
+  margin: 0 0 22px;
+  padding: 0;
+}
+.visual-lab .vl-row-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: baseline;
+}
+.visual-lab .vl-row-heading strong {
+  font-size: 17px;
+}
+.visual-lab .vl-row-heading span {
+  color: #b3bece;
+  font-size: 12px;
+}
+.visual-lab .vl-row-heading b {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+.visual-lab .vl-probabilities small {
+  color: #b4bdce;
+  font-size: 12px;
+}
+.visual-lab .vl-prob-track {
+  height: 24px;
+  position: relative;
+  background: #202937;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+.visual-lab .vl-prob-track i {
+  display: block;
+  height: 14px;
+  background: linear-gradient(90deg, #7e90ad, #e4edfa);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.visual-lab .vl-prob-track > span {
+  display: block;
+  height: 2px;
+  position: absolute;
+  bottom: 3px;
+  background: #e8eef8;
+  transition: width 0.4s ease;
+}
+.visual-lab .is-excluded .vl-row-heading strong {
+  text-decoration: line-through;
+}
+.visual-lab .vl-ruler {
+  position: relative;
+  display: flex;
+  height: 94px;
+  margin: 38px 0 10px;
+  border: 1px solid #728099;
+  border-radius: 8px;
+}
+.visual-lab .vl-ruler > div {
+  background: hsl(216 20% var(--shade));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-right: 1px solid #0d1118;
+  color: #fff;
+  min-width: 0;
+}
+.visual-lab .vl-ruler > div.selected {
+  outline: 2px solid #fff;
+  outline-offset: -3px;
+}
+.visual-lab .vl-ruler > i {
+  position: absolute;
+  height: 116px;
+  top: -11px;
+  width: 2px;
+  background: #fff;
+  transition: left 0.12s linear;
+}
+.visual-lab .vl-ruler > i::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -5px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 2px solid #1a2535;
+  transform: rotate(45deg);
+}
+.visual-lab .vl-endpoints {
+  display: flex;
+  justify-content: space-between;
+  color: #b3bdcf;
+  font-size: 12px;
+}
+.visual-lab .vl-result {
+  border: 1px solid #65748b;
+  background: #182331;
+  border-radius: 14px;
+  padding: 22px;
+  margin: 24px 0;
+}
+.visual-lab .vl-result > span {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #b5c2d7;
+}
+.visual-lab .vl-result > strong {
+  display: block;
+  font-size: 36px;
+  margin-top: 8px;
+}
+.visual-lab .vl-result p {
+  margin-bottom: 0;
+}
+.visual-lab .vl-intervals li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  justify-content: space-between;
+  border-left: 3px solid #46536a;
+  padding: 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.visual-lab .vl-intervals li.selected {
+  border-color: #edf3fc;
+  background: #1e2939;
+}
+.visual-lab .vl-intervals span {
+  font-variant-numeric: tabular-nums;
+}
+.visual-lab .vl-plane {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 24px 0;
+  background: radial-gradient(ellipse at 50% 70%, #233042, transparent 70%), #0b1018;
+  border: 1px solid #334055;
+  border-radius: 16px;
+}
+.visual-lab .vl-grid path {
+  fill: none;
+  stroke: #50637f;
+  opacity: 0.22;
+}
+.visual-lab .vl-unit-circle {
+  fill: none;
+  stroke: #8191aa;
+  stroke-dasharray: 3 7;
+}
+.visual-lab .vl-axis {
+  fill: none;
+  stroke: #7b8da8;
+}
+.visual-lab .vl-plane text {
+  fill: #d9e3f2;
+  font: 15px sans-serif;
+}
+.visual-lab .vl-arrow {
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.visual-lab .vl-arrow path {
+  stroke: #fff;
+  stroke-width: 3;
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+.visual-lab .vl-arrow.query path {
+  stroke: #99aac5;
+  stroke-width: 3;
+  stroke-dasharray: 6 4;
+}
+.visual-lab .vl-vector-point {
+  transition: transform 0.45s ease;
+}
+.visual-lab .vl-vector-point circle {
+  fill: #eff3fb;
+  stroke: #121a26;
+  stroke-width: 2;
+}
+.visual-lab .vl-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+  gap: 10px;
+  margin: 24px 0;
+}
+.visual-lab .vl-stats > div {
+  border: 1px solid #38465b;
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 0;
+  background: #121c29;
+}
+.visual-lab .vl-stats span {
+  display: block;
+  color: #b3c0d3;
+  font-size: 12px;
+}
+.visual-lab .vl-stats output {
+  display: block;
+  font-size: clamp(23px, 3vw, 30px);
+  margin-top: 8px;
+}
+.visual-lab .vl-timeline {
+  margin-top: 28px;
+}
+.visual-lab .vl-job-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 25px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.visual-lab .vl-job-row > div {
+  height: 28px;
+  position: relative;
+  background: #192230;
+}
+.visual-lab .vl-wait {
+  display: block;
+  position: absolute;
+  top: 13px;
+  border-top: 2px dashed #7e8da3;
+  transition: width 0.4s ease;
+}
+.visual-lab .vl-service {
+  position: absolute;
+  top: 4px;
+  height: 20px;
+  background: linear-gradient(90deg, #788ea9, #dde7f5);
+  border-radius: 3px;
+  transition:
+    left 0.4s ease,
+    width 0.4s ease;
+}
+.visual-lab .vl-job-row small {
+  color: #c6d2e4;
+}
+.visual-lab .vl-job-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+.visual-lab .vl-job-card {
+  border: 1px solid #394355;
+  border-radius: 12px;
+  padding: 16px;
+  transition:
+    background 0.3s,
+    border-color 0.3s;
+}
+.visual-lab .vl-job-card > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+}
+.visual-lab .vl-job-card span {
+  color: #b7c4d8;
+  font-size: 12px;
+}
+.visual-lab .vl-job-card p {
+  font-size: 12px;
+  margin-bottom: 0;
+}
+.visual-lab .vl-job-card.active {
+  background: #233249;
+  border-color: #b9c7dc;
+}
+.visual-lab .vl-job-card.completed {
+  background: #17212f;
+}
+.visual-lab .vl-tokens {
+  display: flex;
+  gap: 4px;
+  margin-top: 20px;
+}
+.visual-lab .vl-tokens i {
+  height: 12px;
+  min-width: 0;
+  flex: 1;
+  border: 1px solid #6c7b91;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+.visual-lab .vl-tokens i.done {
+  background: #dce6f6;
+}
+@media (max-width: 600px) {
+  .visual-lab .vl-controls {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .visual-lab .vl-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .visual-lab .vl-stats > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .visual-lab .vl-stats output {
+    margin: 0;
+    white-space: nowrap;
+  }
+  .visual-lab .vl-job-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .visual-lab .vl-result > strong {
+    font-size: 30px;
+  }
+  .visual-lab .vl-intervals li > span {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .visual-lab *,
+  .visual-lab *::before {
+    transition: none !important;
+    animation: none !important;
+  }
+}

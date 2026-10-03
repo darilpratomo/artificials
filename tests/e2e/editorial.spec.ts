@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { EDITORIAL_VISUAL_LABS } from '../../shared/editorial-visual-labs';
 import { EDITORIAL_VISUAL_STORIES } from '../../shared/editorial-visual-stories';
 
 test.beforeEach(async ({ page }) => {
@@ -11,11 +12,11 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/api/articles', (r) => r.fulfill({ status: 503, json: {} }));
 });
 
-test('all four visual guides retain full content and fit narrow screens', async ({ page }) => {
+test('all seven visual guides retain full content and fit narrow screens', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  for (const article of EDITORIAL_VISUAL_STORIES) {
+  for (const article of [...EDITORIAL_VISUAL_STORIES, ...EDITORIAL_VISUAL_LABS]) {
     await page.goto('/news/' + article.slug);
     await expect(page.locator('h1')).toHaveText(article.title);
     await expect(page.locator('.article-visual')).toHaveCount(2);
@@ -117,4 +118,55 @@ test('scroll motion reverses and pauses when manual control takes over', async (
   await expect(process).toHaveAttribute('data-progress', '50');
   await page.evaluate(() => window.scrollBy({ top: 120, behavior: 'instant' }));
   await expect(process).toHaveAttribute('data-progress', '50');
+});
+
+test('sampling controls change eligibility and the draw is manually inspectable', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/news/visual-lab-temperature-top-p-token-sampling');
+  const threshold = page.getByRole('slider', { name: 'Top-p threshold' });
+  await threshold.focus();
+  await threshold.press('Home');
+  await expect(page.locator('.visual-lab').first()).toContainText('1 of 6 tokens retained');
+  await threshold.press('End');
+  await expect(page.locator('.visual-lab').first()).toContainText('6 of 6 tokens retained');
+  await expect(page.getByRole('button', { name: 'Play replay' })).toBeDisabled();
+  const draw = page.getByRole('slider', { name: 'Draw position' });
+  await draw.focus();
+  await draw.press('End');
+  await expect(page.locator('.vl-result > strong')).toHaveText('book');
+  await draw.press('Home');
+  await expect(page.locator('.vl-result > strong')).toHaveText('door');
+});
+
+test('vector metrics reorder the same candidates and normalization aligns rankings', async ({
+  page,
+}) => {
+  await page.goto('/news/visual-lab-vector-similarity-search-geometry');
+  const figure = page.locator('.visual-lab').nth(1);
+  await expect(figure.locator('.av-status')).toContainText('Nearest candidate: B');
+  await figure.getByRole('button', { name: 'Dot product', exact: true }).click();
+  await expect(figure.locator('.av-status')).toContainText('Nearest candidate: A');
+  await figure.getByRole('button', { name: 'Normalize candidates: off' }).click();
+  await expect(figure.locator('.av-status')).toContainText('Nearest candidate: B');
+  await figure.getByRole('button', { name: 'Euclidean', exact: true }).click();
+  await expect(figure.locator('.av-status')).toContainText('Nearest candidate: B');
+});
+
+test('queue policies change completion and the replay reaches an exact finished state', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/news/visual-lab-ai-serving-queues-continuous-batching');
+  await expect(page.getByLabel('Completion ticks')).toHaveText('14 ticks');
+  await page.getByRole('button', { name: 'Fixed batches', exact: true }).click();
+  await expect(page.getByLabel('Completion ticks')).toHaveText('18 ticks');
+  const tick = page.getByRole('slider', { name: 'Queue tick' });
+  await tick.focus();
+  await tick.press('End');
+  await expect(page.locator('.vl-job-card.completed')).toHaveCount(6);
+  await tick.press('Home');
+  await expect(page.locator('.vl-job-card.active')).toHaveCount(2);
+  await expect(page.locator('.vl-job-card.waiting')).toHaveCount(4);
 });
