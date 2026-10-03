@@ -3,6 +3,34 @@ import type { Article } from './content';
 // Content assets only: keep legacy covers and every existing layout unchanged.
 export const EDITORIAL_COVERS = new Map<string, { file: string; alt: string }>([
   [
+    'visual-guide-model-price-capability-frontier',
+    {
+      file: 'visual-frontier',
+      alt: 'A plot of selected model capability values against reference token prices.',
+    },
+  ],
+  [
+    'visual-guide-benchmark-rankings-by-task',
+    {
+      file: 'visual-skills',
+      alt: 'A matrix of selected LiveBench configuration scores across coding, mathematics, reasoning, and language.',
+    },
+  ],
+  [
+    'visual-guide-prefill-decode-kv-cache',
+    {
+      file: 'visual-inference',
+      alt: 'A schematic connects prompt preparation, prefill, the key-value cache, and a decoding loop.',
+    },
+  ],
+  [
+    'visual-guide-retrieval-evidence-answer',
+    {
+      file: 'visual-evidence',
+      alt: 'Three fictional policy documents pass through an evidence check to a supported twelve-day answer.',
+    },
+  ],
+  [
     'flashattention-gpu-memory-movement',
     {
       file: 'fieldnotes-flashattention',

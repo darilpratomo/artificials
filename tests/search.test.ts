@@ -135,7 +135,17 @@ describe('search index', () => {
   });
 
   it('carries no guide text, only titles and summaries', () => {
-    // Allow metadata for the 99-guide collection; article bodies must stay out of the index.
-    expect(JSON.stringify(searchIndex()).length).toBeLessThan(42_000);
+    // Allow metadata for 103 guides; full article bodies must stay out of the index.
+    expect(JSON.stringify(searchIndex()).length).toBeLessThan(43_000);
+    for (const article of ARTICLES.filter((entry) => entry.published)) {
+      const guide = entries.find((entry) => entry[1] === '/news/' + article.slug);
+      expect(guide).toEqual([
+        'guide',
+        '/news/' + article.slug,
+        article.title,
+        article.excerpt,
+        article.category,
+      ]);
+    }
   });
 });

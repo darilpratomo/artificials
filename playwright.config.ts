@@ -15,6 +15,7 @@ export default defineConfig({
       name: 'mobile-safari',
       testMatch: [
         'responsive.spec.ts',
+        'editorial.spec.ts',
         'academy.spec.ts',
         'descent.spec.ts',
         'stories.spec.ts',

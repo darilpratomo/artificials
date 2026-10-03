@@ -1,5 +1,9 @@
 # Editorial artwork
 
+The visual explainer collection adds four long-form articles, eight interactive figures,
+and four original code-drawn covers. See [Visual editorial collection](EDITORIAL-VISUAL-STORIES.md)
+for the data selection, licences, motion controls, and reproducible artwork files.
+
 The Fieldnotes collection adds eight original long-form articles and eight individually
 generated covers. See [Fieldnotes collection record](EDITORIAL-FIELDNOTES.md) for article
 word counts, source licences, responsive assets, and all final image prompts.

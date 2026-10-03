@@ -1,6 +1,6 @@
 import { applyPageMetadata } from '../components/Metadata';
 import { pageMetadata } from '../../shared/seo';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Search } from 'lucide-react';
 import { ARTICLES, ARTICLE_CATEGORIES, type Article } from '../../shared/content';
@@ -8,6 +8,8 @@ import { withoutPictographs } from '../../shared/catalog';
 import { api } from '../lib/api';
 import { EmptyState, PageHeading } from '../components/Layout';
 import { ArticleCover } from '../components/ArticleCover';
+import { ArticleVisual } from '../components/editorial/ArticleVisual';
+import { articleVisual } from '../../shared/article-visuals';
 export default function Learn() {
   const { slug } = useParams();
   const [articles, setArticles] = useState(ARTICLES);
@@ -83,9 +85,15 @@ export default function Learn() {
         <div className="prose">
           {paragraphs.map((p, i) =>
             p.startsWith('## ') ? (
-              <h2 id={`section-${i}`} key={i}>
-                {p.slice(3)}
-              </h2>
+              <Fragment key={i}>
+                <h2 id={`section-${i}`}>{p.slice(3)}</h2>
+                {articleVisual(article.slug, p.slice(3)) && (
+                  <ArticleVisual
+                    key={article.slug + p}
+                    kind={articleVisual(article.slug, p.slice(3))!}
+                  />
+                )}
+              </Fragment>
             ) : isSourceUrl(p.trim()) ? (
               <p key={i}>
                 <a href={p.trim()} target="_blank" rel="noopener noreferrer">
