@@ -28,6 +28,7 @@ import Academy from './pages/Academy';
 import Descent from './pages/Descent';
 import { LessonReader } from './pages/AcademyLesson';
 import Info from './pages/Info';
+import CozyMood from './pages/CozyMood';
 import type { Lesson } from './lib/academy';
 import type {
   Coding,
@@ -135,6 +136,8 @@ export function renderPage(
             {['about', 'contact', 'privacy', 'terms'].map((path) => (
               <Route key={path} path={path} element={<Info />} />
             ))}
+            <Route path="cozymood" element={<CozyMood />} />
+            <Route path="cozymood/privacy" element={<CozyMood />} />
           </Route>
         </Routes>
       </Provider>

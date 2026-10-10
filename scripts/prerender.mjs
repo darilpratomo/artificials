@@ -99,6 +99,7 @@ try {
     privacy: 'Info',
     terms: 'Info',
     contact: 'Info',
+    cozymood: 'CozyMood',
   };
   const pagePreloads = (path) => {
     const [first = '', second] = path.split('/').slice(1);

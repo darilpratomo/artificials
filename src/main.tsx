@@ -57,6 +57,7 @@ const Tools = page(() => import('./pages/Tools'));
 const Login = page(() => import('./pages/Login'));
 const Dashboard = page(() => import('./pages/Dashboard'));
 const Info = page(() => import('./pages/Info'));
+const CozyMood = page(() => import('./pages/CozyMood'));
 const Cms = page(() => import('./pages/Cms'));
 
 /** The lazily loaded page an address opens, if any. The home page is always bundled. */
@@ -93,6 +94,7 @@ function pageAt(path: string) {
     ['privacy', Info],
     ['terms', Info],
     ['contact', Info],
+    ['cozymood', CozyMood],
     ['_private', Cms],
   ]).get(first);
 }
@@ -163,6 +165,8 @@ const app = (
               {['about', 'privacy', 'terms', 'contact'].map((p) => (
                 <Route key={p} path={p} element={<Info />} />
               ))}
+              <Route path="cozymood" element={<CozyMood />} />
+              <Route path="cozymood/privacy" element={<CozyMood />} />
               <Route path="_private/:token" element={<Cms />} />
               <Route
                 path="*"

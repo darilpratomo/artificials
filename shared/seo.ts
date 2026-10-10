@@ -139,6 +139,14 @@ const pages: Record<string, [string, string]> = {
     'Privacy policy',
     'How Artificials handles analytics, local preferences, editor accounts and privacy requests. Visitors never need an account.',
   ],
+  '/cozymood': [
+    'Cozy Mood — help and contact',
+    'Help for Cozy Mood, the cosy offline pixel-art life sim by Artificials: saves, languages, accessibility and how to reach us. In 15 languages.',
+  ],
+  '/cozymood/privacy': [
+    'Cozy Mood privacy policy',
+    'Cozy Mood collects nothing: no accounts, no ads, no analytics, no tracking, and it works entirely offline. In 15 languages.',
+  ],
   '/terms': [
     'Terms and conditions',
     'The terms for using Artificials, a free and non-commercial site: model information, rankings, guides, lessons and free tools.',

@@ -43,7 +43,8 @@ export function searchIndex(makers: MakerSummary[] = [], tests: TestSummary[] = 
     [...TOP_LINKS, COMPARE_LINK, ...NAV_GROUPS.flatMap(navItems)].map((item) => [item.to, item]),
   );
   const pages: SearchEntry[] = staticPages()
-    .filter(({ path }) => !path.startsWith('/tools/'))
+    // The studio's game has its own pages (help and privacy for its store listings), not part of the guide.
+    .filter(({ path }) => !path.startsWith('/tools/') && !path.startsWith('/cozymood'))
     .map(({ path, title, description }) => {
       const item = menu.get(path);
       const [name, summary] = NAMES[path] ?? [];

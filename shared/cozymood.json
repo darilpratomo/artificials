@@ -1,0 +1,940 @@
+{
+ "updated": "2026-10-10",
+ "email": "support@artificials.net",
+ "languages": [
+  {
+   "code": "en",
+   "name": "English",
+   "lang": "en"
+  },
+  {
+   "code": "id",
+   "name": "Bahasa Indonesia",
+   "lang": "id"
+  },
+  {
+   "code": "es",
+   "name": "Español",
+   "lang": "es"
+  },
+  {
+   "code": "pt_BR",
+   "name": "Português (Brasil)",
+   "lang": "pt-BR"
+  },
+  {
+   "code": "fr",
+   "name": "Français",
+   "lang": "fr"
+  },
+  {
+   "code": "de",
+   "name": "Deutsch",
+   "lang": "de"
+  },
+  {
+   "code": "it",
+   "name": "Italiano",
+   "lang": "it"
+  },
+  {
+   "code": "ru",
+   "name": "Русский",
+   "lang": "ru"
+  },
+  {
+   "code": "tr",
+   "name": "Türkçe",
+   "lang": "tr"
+  },
+  {
+   "code": "pl",
+   "name": "Polski",
+   "lang": "pl"
+  },
+  {
+   "code": "vi",
+   "name": "Tiếng Việt",
+   "lang": "vi"
+  },
+  {
+   "code": "ja",
+   "name": "日本語",
+   "lang": "ja"
+  },
+  {
+   "code": "ko",
+   "name": "한국어",
+   "lang": "ko"
+  },
+  {
+   "code": "zh_CN",
+   "name": "简体中文",
+   "lang": "zh-Hans"
+  },
+  {
+   "code": "zh_TW",
+   "name": "繁體中文",
+   "lang": "zh-Hant"
+  }
+ ],
+ "help": {
+  "en": {
+   "title": "Help",
+   "intro": "Cozy Mood is a cosy pixel-art life sim by Artificials.net, created by Daril Pratomo Sriramdanu.",
+   "write": "Write to us",
+   "faq": [
+    {
+     "q": "Where are my saves?",
+     "a": "On your device, in three slots with a backup of each. The game saves when you sleep, when you leave it and from the pause menu."
+    },
+    {
+     "q": "Does it need the internet?",
+     "a": "No. Cozy Mood works entirely offline."
+    },
+    {
+     "q": "Is there anything to buy?",
+     "a": "No. There are no ads and no in-app purchases."
+    },
+    {
+     "q": "Languages and accessibility",
+     "a": "The game speaks 15 languages (Settings → Language). Settings → Accessibility has colour filters, sound captions, text speed, easier fishing, left-handed controls and more."
+    }
+   ],
+   "privacyLink": "Privacy policy"
+  },
+  "id": {
+   "title": "Bantuan",
+   "intro": "Cozy Mood adalah permainan simulasi kehidupan berseni piksel yang nyaman dari Artificials.net, dibuat oleh Daril Pratomo Sriramdanu.",
+   "write": "Hubungi kami",
+   "faq": [
+    {
+     "q": "Di mana simpananku?",
+     "a": "Di perangkatmu, dalam tiga slot yang masing-masing punya cadangan. Permainan tersimpan saat kamu tidur, saat keluar dari permainan, dan dari menu jeda."
+    },
+    {
+     "q": "Apakah perlu internet?",
+     "a": "Tidak. Cozy Mood sepenuhnya berjalan secara luring."
+    },
+    {
+     "q": "Apakah ada yang harus dibeli?",
+     "a": "Tidak. Tidak ada iklan dan tidak ada pembelian dalam aplikasi."
+    },
+    {
+     "q": "Bahasa dan aksesibilitas",
+     "a": "Permainan tersedia dalam 15 bahasa (Pengaturan → Bahasa). Pengaturan → Aksesibilitas berisi filter warna, keterangan suara, kecepatan teks, memancing lebih mudah, kontrol kidal, dan lainnya."
+    }
+   ],
+   "privacyLink": "Kebijakan privasi"
+  },
+  "es": {
+   "title": "Ayuda",
+   "intro": "Cozy Mood es un acogedor juego de vida en pixel art de Artificials.net, creado por Daril Pratomo Sriramdanu.",
+   "write": "Escríbenos",
+   "faq": [
+    {
+     "q": "¿Dónde están mis partidas?",
+     "a": "En tu dispositivo, en tres ranuras con una copia de seguridad cada una. El juego guarda al dormir, al salir y desde el menú de pausa."
+    },
+    {
+     "q": "¿Necesita internet?",
+     "a": "No. Cozy Mood funciona totalmente sin conexión."
+    },
+    {
+     "q": "¿Hay algo que comprar?",
+     "a": "No. No hay anuncios ni compras en la aplicación."
+    },
+    {
+     "q": "Idiomas y accesibilidad",
+     "a": "El juego está en 15 idiomas (Ajustes → Idioma). En Ajustes → Accesibilidad hay filtros de color, subtítulos de sonidos, velocidad del texto, pesca más fácil, controles para zurdos y más."
+    }
+   ],
+   "privacyLink": "Política de privacidad"
+  },
+  "pt_BR": {
+   "title": "Ajuda",
+   "intro": "Cozy Mood é um jogo aconchegante de vida em pixel art da Artificials.net, criado por Daril Pratomo Sriramdanu.",
+   "write": "Fale conosco",
+   "faq": [
+    {
+     "q": "Onde ficam meus jogos salvos?",
+     "a": "No seu aparelho, em três espaços, cada um com um backup. O jogo salva quando você dorme, quando sai do jogo e pelo menu de pausa."
+    },
+    {
+     "q": "Precisa de internet?",
+     "a": "Não. O Cozy Mood funciona totalmente offline."
+    },
+    {
+     "q": "Tem algo para comprar?",
+     "a": "Não. Não há anúncios nem compras no app."
+    },
+    {
+     "q": "Idiomas e acessibilidade",
+     "a": "O jogo está em 15 idiomas (Configurações → Idioma). Em Configurações → Acessibilidade há filtros de cor, legendas de sons, velocidade do texto, pesca mais fácil, controles para canhotos e mais."
+    }
+   ],
+   "privacyLink": "Política de privacidade"
+  },
+  "fr": {
+   "title": "Aide",
+   "intro": "Cozy Mood est un jeu de vie douillet en pixel art d'Artificials.net, créé par Daril Pratomo Sriramdanu.",
+   "write": "Écrivez-nous",
+   "faq": [
+    {
+     "q": "Où sont mes sauvegardes ?",
+     "a": "Sur votre appareil, dans trois emplacements dotés chacun d'une copie de secours. Le jeu sauvegarde quand vous dormez, quand vous le quittez et depuis le menu pause."
+    },
+    {
+     "q": "Faut-il internet ?",
+     "a": "Non. Cozy Mood fonctionne entièrement hors ligne."
+    },
+    {
+     "q": "Y a-t-il quelque chose à acheter ?",
+     "a": "Non. Ni publicité ni achats intégrés."
+    },
+    {
+     "q": "Langues et accessibilité",
+     "a": "Le jeu parle 15 langues (Réglages → Langue). Réglages → Accessibilité propose des filtres de couleurs, des sous-titres des sons, la vitesse du texte, la pêche facilitée, des commandes pour gauchers et plus encore."
+    }
+   ],
+   "privacyLink": "Politique de confidentialité"
+  },
+  "de": {
+   "title": "Hilfe",
+   "intro": "Cozy Mood ist ein gemütliches Lebenssimulationsspiel in Pixelgrafik von Artificials.net, erstellt von Daril Pratomo Sriramdanu.",
+   "write": "Schreib uns",
+   "faq": [
+    {
+     "q": "Wo sind meine Spielstände?",
+     "a": "Auf deinem Gerät, in drei Speicherplätzen mit je einer Sicherung. Das Spiel speichert, wenn du schläfst, wenn du es verlässt und über das Pausenmenü."
+    },
+    {
+     "q": "Braucht es Internet?",
+     "a": "Nein. Cozy Mood funktioniert vollständig offline."
+    },
+    {
+     "q": "Gibt es etwas zu kaufen?",
+     "a": "Nein. Es gibt keine Werbung und keine In-App-Käufe."
+    },
+    {
+     "q": "Sprachen und Barrierefreiheit",
+     "a": "Das Spiel gibt es in 15 Sprachen (Einstellungen → Sprache). Einstellungen → Barrierefreiheit bietet Farbfilter, Untertitel für Geräusche, Textgeschwindigkeit, leichteres Angeln, Linkshänder-Steuerung und mehr."
+    }
+   ],
+   "privacyLink": "Datenschutzerklärung"
+  },
+  "it": {
+   "title": "Aiuto",
+   "intro": "Cozy Mood è un accogliente gioco di vita in pixel art di Artificials.net, creato da Daril Pratomo Sriramdanu.",
+   "write": "Scrivici",
+   "faq": [
+    {
+     "q": "Dove sono i miei salvataggi?",
+     "a": "Sul tuo dispositivo, in tre slot con una copia di sicurezza ciascuno. Il gioco salva quando dormi, quando esci e dal menu di pausa."
+    },
+    {
+     "q": "Serve internet?",
+     "a": "No. Cozy Mood funziona completamente offline."
+    },
+    {
+     "q": "C'è qualcosa da comprare?",
+     "a": "No. Niente pubblicità né acquisti in-app."
+    },
+    {
+     "q": "Lingue e accessibilità",
+     "a": "Il gioco è in 15 lingue (Impostazioni → Lingua). In Impostazioni → Accessibilità ci sono filtri colore, sottotitoli dei suoni, velocità del testo, pesca più facile, comandi per mancini e altro."
+    }
+   ],
+   "privacyLink": "Informativa sulla privacy"
+  },
+  "ru": {
+   "title": "Помощь",
+   "intro": "Cozy Mood — уютный пиксельный симулятор жизни от Artificials.net, автор — Daril Pratomo Sriramdanu.",
+   "write": "Напишите нам",
+   "faq": [
+    {
+     "q": "Где мои сохранения?",
+     "a": "На вашем устройстве, в трёх ячейках, у каждой есть резервная копия. Игра сохраняется во время сна, при выходе из игры и через меню паузы."
+    },
+    {
+     "q": "Нужен ли интернет?",
+     "a": "Нет. Cozy Mood полностью работает без интернета."
+    },
+    {
+     "q": "Есть ли платный контент?",
+     "a": "Нет. В игре нет рекламы и покупок."
+    },
+    {
+     "q": "Языки и доступность",
+     "a": "В игре 15 языков (Настройки → Язык). В разделе Настройки → Доступность есть цветовые фильтры, подписи к звукам, скорость текста, лёгкая рыбалка, управление для левшей и многое другое."
+    }
+   ],
+   "privacyLink": "Политика конфиденциальности"
+  },
+  "tr": {
+   "title": "Yardım",
+   "intro": "Cozy Mood, Artificials.net'in piksel sanatlı, huzurlu bir yaşam simülasyonu; Daril Pratomo Sriramdanu tarafından yapıldı.",
+   "write": "Bize yaz",
+   "faq": [
+    {
+     "q": "Kayıtlarım nerede?",
+     "a": "Cihazında, her birinin yedeği olan üç yuvada. Oyun, uyuduğunda, oyundan çıktığında ve duraklatma menüsünden kaydedilir."
+    },
+    {
+     "q": "İnternet gerekir mi?",
+     "a": "Hayır. Cozy Mood tamamen çevrimdışı çalışır."
+    },
+    {
+     "q": "Satın alınacak bir şey var mı?",
+     "a": "Hayır. Reklam ve uygulama içi satın alma yoktur."
+    },
+    {
+     "q": "Diller ve erişilebilirlik",
+     "a": "Oyun 15 dilde (Ayarlar → Dil). Ayarlar → Erişilebilirlik'te renk filtreleri, ses altyazıları, metin hızı, kolay balıkçılık, solak kontroller ve daha fazlası var."
+    }
+   ],
+   "privacyLink": "Gizlilik politikası"
+  },
+  "pl": {
+   "title": "Pomoc",
+   "intro": "Cozy Mood to przytulny symulator życia w pixel arcie od Artificials.net, stworzony przez Darila Pratomo Sriramdanu.",
+   "write": "Napisz do nas",
+   "faq": [
+    {
+     "q": "Gdzie są moje zapisy?",
+     "a": "Na twoim urządzeniu, w trzech miejscach, każde z kopią zapasową. Gra zapisuje się, gdy śpisz, gdy z niej wychodzisz i z menu pauzy."
+    },
+    {
+     "q": "Czy potrzebny jest internet?",
+     "a": "Nie. Cozy Mood działa całkowicie offline."
+    },
+    {
+     "q": "Czy coś trzeba kupować?",
+     "a": "Nie. Nie ma reklam ani zakupów w aplikacji."
+    },
+    {
+     "q": "Języki i dostępność",
+     "a": "Gra jest w 15 językach (Ustawienia → Język). W Ustawienia → Dostępność są filtry kolorów, napisy dźwięków, szybkość tekstu, łatwiejsze wędkowanie, sterowanie dla leworęcznych i nie tylko."
+    }
+   ],
+   "privacyLink": "Polityka prywatności"
+  },
+  "vi": {
+   "title": "Trợ giúp",
+   "intro": "Cozy Mood là trò chơi mô phỏng cuộc sống phong cách pixel ấm áp của Artificials.net, do Daril Pratomo Sriramdanu thực hiện.",
+   "write": "Liên hệ với chúng tôi",
+   "faq": [
+    {
+     "q": "Bản lưu của tôi ở đâu?",
+     "a": "Trên thiết bị của bạn, trong ba ô lưu, mỗi ô có một bản sao dự phòng. Trò chơi lưu khi bạn ngủ, khi rời trò chơi và từ menu tạm dừng."
+    },
+    {
+     "q": "Có cần internet không?",
+     "a": "Không. Cozy Mood hoạt động hoàn toàn ngoại tuyến."
+    },
+    {
+     "q": "Có gì phải mua không?",
+     "a": "Không. Không có quảng cáo và không có mua hàng trong ứng dụng."
+    },
+    {
+     "q": "Ngôn ngữ và trợ năng",
+     "a": "Trò chơi có 15 ngôn ngữ (Cài đặt → Ngôn ngữ). Cài đặt → Trợ năng có bộ lọc màu, phụ đề âm thanh, tốc độ chữ, câu cá dễ hơn, điều khiển tay trái và nhiều hơn nữa."
+    }
+   ],
+   "privacyLink": "Chính sách quyền riêng tư"
+  },
+  "ja": {
+   "title": "ヘルプ",
+   "intro": "Cozy Mood は Artificials.net のドット絵のんびり生活シミュレーションです（制作：Daril Pratomo Sriramdanu）。",
+   "write": "お問い合わせ",
+   "faq": [
+    {
+     "q": "セーブデータはどこ？",
+     "a": "端末内の3つのスロットに、それぞれのバックアップと一緒に保存されます。眠ったとき、ゲームを離れたとき、ポーズメニューからセーブされます。"
+    },
+    {
+     "q": "インターネットは必要？",
+     "a": "いいえ。Cozy Mood は完全にオフラインで遊べます。"
+    },
+    {
+     "q": "課金はある？",
+     "a": "いいえ。広告もアプリ内課金もありません。"
+    },
+    {
+     "q": "言語とアクセシビリティ",
+     "a": "15言語に対応しています（設定 → 言語）。設定 → アクセシビリティには色覚フィルター、効果音の字幕、文字の速さ、やさしい釣り、左利き用操作などがあります。"
+    }
+   ],
+   "privacyLink": "プライバシーポリシー"
+  },
+  "ko": {
+   "title": "도움말",
+   "intro": "Cozy Mood는 Artificials.net의 아늑한 도트 생활 시뮬레이션입니다(제작: Daril Pratomo Sriramdanu).",
+   "write": "문의",
+   "faq": [
+    {
+     "q": "저장 데이터는 어디에 있나요?",
+     "a": "기기 안의 슬롯 3개에, 각각 백업과 함께 저장됩니다. 잠잘 때, 게임을 떠날 때, 일시 정지 메뉴에서 저장돼요."
+    },
+    {
+     "q": "인터넷이 필요한가요?",
+     "a": "아니요. Cozy Mood는 완전히 오프라인으로 작동합니다."
+    },
+    {
+     "q": "구매할 것이 있나요?",
+     "a": "아니요. 광고도 인앱 결제도 없습니다."
+    },
+    {
+     "q": "언어와 접근성",
+     "a": "15개 언어를 지원합니다(설정 → 언어). 설정 → 접근성에는 색각 필터, 소리 자막, 글자 속도, 쉬운 낚시, 왼손잡이 조작 등이 있습니다."
+    }
+   ],
+   "privacyLink": "개인정보 처리방침"
+  },
+  "zh_CN": {
+   "title": "帮助",
+   "intro": "Cozy Mood 是 Artificials.net 出品的温馨像素风生活模拟游戏，由 Daril Pratomo Sriramdanu 制作。",
+   "write": "联系我们",
+   "faq": [
+    {
+     "q": "我的存档在哪里？",
+     "a": "在你的设备上，共三个存档位，每个都有备份。睡觉时、离开游戏时以及在暂停菜单中都会存档。"
+    },
+    {
+     "q": "需要联网吗？",
+     "a": "不需要。Cozy Mood 完全离线运行。"
+    },
+    {
+     "q": "需要花钱购买什么吗？",
+     "a": "不需要。没有广告，也没有应用内购买。"
+    },
+    {
+     "q": "语言与无障碍",
+     "a": "游戏支持 15 种语言（设置 → 语言）。设置 → 无障碍中有色彩滤镜、声音字幕、文字速度、简易钓鱼、左手操作等。"
+    }
+   ],
+   "privacyLink": "隐私政策"
+  },
+  "zh_TW": {
+   "title": "說明",
+   "intro": "Cozy Mood 是 Artificials.net 出品的溫馨像素風生活模擬遊戲，由 Daril Pratomo Sriramdanu 製作。",
+   "write": "聯絡我們",
+   "faq": [
+    {
+     "q": "我的存檔在哪裡？",
+     "a": "在你的裝置上，共三個存檔位，每個都有備份。睡覺時、離開遊戲時以及在暫停選單中都會存檔。"
+    },
+    {
+     "q": "需要連網嗎？",
+     "a": "不需要。Cozy Mood 完全離線運作。"
+    },
+    {
+     "q": "需要花錢購買什麼嗎？",
+     "a": "不需要。沒有廣告，也沒有應用程式內購買。"
+    },
+    {
+     "q": "語言與無障礙",
+     "a": "遊戲支援 15 種語言（設定 → 語言）。設定 → 無障礙中有色彩濾鏡、聲音字幕、文字速度、簡易釣魚、左手操作等。"
+    }
+   ],
+   "privacyLink": "隱私權政策"
+  }
+ },
+ "privacy": {
+  "en": {
+   "title": "Privacy policy",
+   "updated": "Last updated",
+   "intro": "Cozy Mood is made by Artificials.net (Daril Pratomo Sriramdanu). This page explains what the game does with information about you.",
+   "short": "In short: Cozy Mood collects nothing. It has no accounts, no ads, no analytics, no tracking and no in-app purchases, and it works entirely offline.",
+   "sections": [
+    {
+     "h": "What stays on your device",
+     "p": "Your saved games (three slots and their backups) and your settings (language, volume, accessibility options) are kept only on your device, in the game's own storage. They are never sent anywhere. Uninstalling the game deletes them."
+    },
+    {
+     "h": "What the game does not do",
+     "p": "It does not connect to the internet. It does not collect, keep or share personal data, device identifiers, location, contacts, photos or usage data. It contains no advertising, analytics or third-party tracking code."
+    },
+    {
+     "h": "Permissions",
+     "p": "On Android the game may use vibration, to signal a fish biting. It asks for no other permission."
+    },
+    {
+     "h": "Children",
+     "p": "The game is suitable for everyone and collects no data from anyone, children included."
+    },
+    {
+     "h": "App stores",
+     "p": "Google Play and the App Store may collect information when you download the game, under their own privacy policies."
+    },
+    {
+     "h": "Changes",
+     "p": "If this policy ever changes, for example because an update adds an optional feature that needs a connection, the new version will appear here with a new date, and the update's notes will say so."
+    }
+   ],
+   "contact": "Questions"
+  },
+  "id": {
+   "title": "Kebijakan privasi",
+   "updated": "Terakhir diperbarui",
+   "intro": "Cozy Mood dibuat oleh Artificials.net (Daril Pratomo Sriramdanu). Halaman ini menjelaskan apa yang dilakukan permainan ini terhadap informasi tentang dirimu.",
+   "short": "Singkatnya: Cozy Mood tidak mengumpulkan apa pun. Tidak ada akun, iklan, analitik, pelacakan, maupun pembelian dalam aplikasi, dan permainan ini sepenuhnya berjalan secara luring.",
+   "sections": [
+    {
+     "h": "Yang tetap di perangkatmu",
+     "p": "Simpanan permainan (tiga slot beserta cadangannya) dan pengaturanmu (bahasa, volume, pilihan aksesibilitas) hanya disimpan di perangkatmu, di penyimpanan milik permainan. Data itu tidak pernah dikirim ke mana pun. Menghapus permainan juga menghapusnya."
+    },
+    {
+     "h": "Yang tidak dilakukan permainan",
+     "p": "Permainan tidak terhubung ke internet. Permainan tidak mengumpulkan, menyimpan, atau membagikan data pribadi, pengenal perangkat, lokasi, kontak, foto, atau data penggunaan. Tidak ada kode iklan, analitik, atau pelacak pihak ketiga."
+    },
+    {
+     "h": "Izin",
+     "p": "Di Android, permainan dapat memakai getaran untuk menandai ikan yang menyambar. Tidak ada izin lain yang diminta."
+    },
+    {
+     "h": "Anak-anak",
+     "p": "Permainan ini cocok untuk semua orang dan tidak mengumpulkan data dari siapa pun, termasuk anak-anak."
+    },
+    {
+     "h": "Toko aplikasi",
+     "p": "Google Play dan App Store dapat mengumpulkan informasi saat kamu mengunduh permainan, sesuai kebijakan privasi masing-masing."
+    },
+    {
+     "h": "Perubahan",
+     "p": "Jika kebijakan ini berubah, misalnya karena pembaruan menambah fitur opsional yang memerlukan koneksi, versi barunya akan muncul di sini dengan tanggal baru, dan catatan pembaruan akan menyebutkannya."
+    }
+   ],
+   "contact": "Pertanyaan"
+  },
+  "es": {
+   "title": "Política de privacidad",
+   "updated": "Última actualización",
+   "intro": "Cozy Mood es obra de Artificials.net (Daril Pratomo Sriramdanu). Esta página explica qué hace el juego con la información sobre ti.",
+   "short": "En resumen: Cozy Mood no recopila nada. No tiene cuentas, anuncios, analíticas, rastreo ni compras en la aplicación, y funciona totalmente sin conexión.",
+   "sections": [
+    {
+     "h": "Lo que se queda en tu dispositivo",
+     "p": "Tus partidas guardadas (tres ranuras y sus copias de seguridad) y tus ajustes (idioma, volumen, opciones de accesibilidad) se guardan solo en tu dispositivo, en el almacenamiento propio del juego. Nunca se envían a ningún sitio. Al desinstalar el juego, se borran."
+    },
+    {
+     "h": "Lo que el juego no hace",
+     "p": "No se conecta a internet. No recopila, guarda ni comparte datos personales, identificadores del dispositivo, ubicación, contactos, fotos ni datos de uso. No contiene publicidad, analíticas ni código de rastreo de terceros."
+    },
+    {
+     "h": "Permisos",
+     "p": "En Android, el juego puede usar la vibración para avisar de que pica un pez. No pide ningún otro permiso."
+    },
+    {
+     "h": "Menores",
+     "p": "El juego es apto para todo el mundo y no recopila datos de nadie, tampoco de menores."
+    },
+    {
+     "h": "Tiendas de aplicaciones",
+     "p": "Google Play y la App Store pueden recopilar información cuando descargas el juego, según sus propias políticas de privacidad."
+    },
+    {
+     "h": "Cambios",
+     "p": "Si esta política cambia alguna vez, por ejemplo porque una actualización añade una función opcional que necesita conexión, la nueva versión aparecerá aquí con una fecha nueva, y las notas de la actualización lo indicarán."
+    }
+   ],
+   "contact": "Preguntas"
+  },
+  "pt_BR": {
+   "title": "Política de privacidade",
+   "updated": "Última atualização",
+   "intro": "Cozy Mood é feito por Artificials.net (Daril Pratomo Sriramdanu). Esta página explica o que o jogo faz com informações sobre você.",
+   "short": "Resumindo: o Cozy Mood não coleta nada. Não tem contas, anúncios, análises, rastreamento nem compras no app, e funciona totalmente offline.",
+   "sections": [
+    {
+     "h": "O que fica no seu aparelho",
+     "p": "Seus jogos salvos (três espaços e seus backups) e suas configurações (idioma, volume, opções de acessibilidade) ficam apenas no seu aparelho, no armazenamento do próprio jogo. Nunca são enviados para lugar nenhum. Desinstalar o jogo apaga tudo."
+    },
+    {
+     "h": "O que o jogo não faz",
+     "p": "Ele não se conecta à internet. Não coleta, guarda nem compartilha dados pessoais, identificadores do aparelho, localização, contatos, fotos ou dados de uso. Não contém publicidade, análises nem código de rastreamento de terceiros."
+    },
+    {
+     "h": "Permissões",
+     "p": "No Android, o jogo pode usar a vibração para avisar que um peixe mordeu. Não pede nenhuma outra permissão."
+    },
+    {
+     "h": "Crianças",
+     "p": "O jogo é adequado para todos e não coleta dados de ninguém, inclusive crianças."
+    },
+    {
+     "h": "Lojas de apps",
+     "p": "O Google Play e a App Store podem coletar informações quando você baixa o jogo, conforme as próprias políticas de privacidade."
+    },
+    {
+     "h": "Alterações",
+     "p": "Se esta política mudar, por exemplo porque uma atualização acrescentou um recurso opcional que precisa de conexão, a nova versão aparecerá aqui com uma nova data, e as notas da atualização vão informar."
+    }
+   ],
+   "contact": "Dúvidas"
+  },
+  "fr": {
+   "title": "Politique de confidentialité",
+   "updated": "Dernière mise à jour",
+   "intro": "Cozy Mood est créé par Artificials.net (Daril Pratomo Sriramdanu). Cette page explique ce que le jeu fait des informations qui vous concernent.",
+   "short": "En bref : Cozy Mood ne collecte rien. Il n'y a ni compte, ni publicité, ni statistiques, ni pistage, ni achats intégrés, et le jeu fonctionne entièrement hors ligne.",
+   "sections": [
+    {
+     "h": "Ce qui reste sur votre appareil",
+     "p": "Vos parties sauvegardées (trois emplacements et leurs copies de secours) et vos réglages (langue, volume, options d'accessibilité) sont conservés uniquement sur votre appareil, dans le stockage du jeu. Ils ne sont jamais envoyés nulle part. Désinstaller le jeu les supprime."
+    },
+    {
+     "h": "Ce que le jeu ne fait pas",
+     "p": "Il ne se connecte pas à internet. Il ne collecte, ne conserve ni ne partage aucune donnée personnelle, aucun identifiant d'appareil, aucune position, aucun contact, aucune photo ni aucune donnée d'utilisation. Il ne contient aucun code de publicité, de statistiques ou de pistage tiers."
+    },
+    {
+     "h": "Autorisations",
+     "p": "Sur Android, le jeu peut utiliser la vibration pour signaler qu'un poisson mord. Il ne demande aucune autre autorisation."
+    },
+    {
+     "h": "Enfants",
+     "p": "Le jeu convient à tout le monde et ne collecte de données auprès de personne, enfants compris."
+    },
+    {
+     "h": "Boutiques d'applications",
+     "p": "Google Play et l'App Store peuvent collecter des informations lors du téléchargement du jeu, selon leurs propres politiques de confidentialité."
+    },
+    {
+     "h": "Modifications",
+     "p": "Si cette politique change un jour, par exemple parce qu'une mise à jour ajoute une fonction facultative qui demande une connexion, la nouvelle version paraîtra ici avec une nouvelle date, et les notes de mise à jour le préciseront."
+    }
+   ],
+   "contact": "Questions"
+  },
+  "de": {
+   "title": "Datenschutzerklärung",
+   "updated": "Zuletzt aktualisiert",
+   "intro": "Cozy Mood wird von Artificials.net (Daril Pratomo Sriramdanu) entwickelt. Diese Seite erklärt, was das Spiel mit Informationen über dich macht.",
+   "short": "Kurz gesagt: Cozy Mood sammelt nichts. Es gibt keine Konten, keine Werbung, keine Analysen, kein Tracking und keine In-App-Käufe, und das Spiel funktioniert vollständig offline.",
+   "sections": [
+    {
+     "h": "Was auf deinem Gerät bleibt",
+     "p": "Deine Spielstände (drei Speicherplätze und ihre Sicherungen) und deine Einstellungen (Sprache, Lautstärke, Optionen zur Barrierefreiheit) werden nur auf deinem Gerät im Speicher des Spiels abgelegt. Sie werden nie irgendwohin gesendet. Beim Deinstallieren des Spiels werden sie gelöscht."
+    },
+    {
+     "h": "Was das Spiel nicht tut",
+     "p": "Es verbindet sich nicht mit dem Internet. Es erfasst, speichert und teilt keine personenbezogenen Daten, Gerätekennungen, Standortdaten, Kontakte, Fotos oder Nutzungsdaten. Es enthält keine Werbung, keine Analysewerkzeuge und keinen Tracking-Code von Dritten."
+    },
+    {
+     "h": "Berechtigungen",
+     "p": "Unter Android kann das Spiel die Vibration nutzen, um einen Anbiss zu melden. Es fragt nach keiner weiteren Berechtigung."
+    },
+    {
+     "h": "Kinder",
+     "p": "Das Spiel ist für alle geeignet und erhebt von niemandem Daten, auch nicht von Kindern."
+    },
+    {
+     "h": "App-Stores",
+     "p": "Google Play und der App Store können beim Herunterladen des Spiels Informationen nach ihren eigenen Datenschutzerklärungen erheben."
+    },
+    {
+     "h": "Änderungen",
+     "p": "Ändert sich diese Erklärung einmal, etwa weil ein Update eine optionale Funktion mit Internetverbindung bringt, erscheint die neue Fassung hier mit neuem Datum, und die Update-Hinweise sagen es."
+    }
+   ],
+   "contact": "Fragen"
+  },
+  "it": {
+   "title": "Informativa sulla privacy",
+   "updated": "Ultimo aggiornamento",
+   "intro": "Cozy Mood è realizzato da Artificials.net (Daril Pratomo Sriramdanu). Questa pagina spiega che cosa fa il gioco con le informazioni che ti riguardano.",
+   "short": "In breve: Cozy Mood non raccoglie nulla. Non ha account, pubblicità, statistiche, tracciamento né acquisti in-app, e funziona completamente offline.",
+   "sections": [
+    {
+     "h": "Ciò che resta sul tuo dispositivo",
+     "p": "I salvataggi (tre slot e le loro copie di sicurezza) e le impostazioni (lingua, volume, opzioni di accessibilità) restano solo sul tuo dispositivo, nella memoria del gioco. Non vengono mai inviati da nessuna parte. Disinstallando il gioco vengono eliminati."
+    },
+    {
+     "h": "Ciò che il gioco non fa",
+     "p": "Non si collega a internet. Non raccoglie, conserva né condivide dati personali, identificativi del dispositivo, posizione, contatti, foto o dati di utilizzo. Non contiene pubblicità, statistiche né codice di tracciamento di terze parti."
+    },
+    {
+     "h": "Autorizzazioni",
+     "p": "Su Android il gioco può usare la vibrazione per segnalare che un pesce abbocca. Non chiede nessun'altra autorizzazione."
+    },
+    {
+     "h": "Minori",
+     "p": "Il gioco è adatto a tutti e non raccoglie dati da nessuno, minori compresi."
+    },
+    {
+     "h": "Store di app",
+     "p": "Google Play e l'App Store possono raccogliere informazioni quando scarichi il gioco, secondo le proprie informative sulla privacy."
+    },
+    {
+     "h": "Modifiche",
+     "p": "Se questa informativa dovesse cambiare, per esempio perché un aggiornamento aggiunge una funzione facoltativa che richiede una connessione, la nuova versione comparirà qui con una nuova data, e le note dell'aggiornamento lo diranno."
+    }
+   ],
+   "contact": "Domande"
+  },
+  "ru": {
+   "title": "Политика конфиденциальности",
+   "updated": "Последнее обновление",
+   "intro": "Cozy Mood создаёт Artificials.net (Daril Pratomo Sriramdanu). Здесь объясняется, что игра делает с информацией о вас.",
+   "short": "Коротко: Cozy Mood ничего не собирает. В игре нет аккаунтов, рекламы, аналитики, отслеживания и встроенных покупок, и она полностью работает без интернета.",
+   "sections": [
+    {
+     "h": "Что остаётся на вашем устройстве",
+     "p": "Сохранения (три ячейки и их резервные копии) и настройки (язык, громкость, параметры доступности) хранятся только на вашем устройстве, в хранилище самой игры. Они никуда не отправляются. При удалении игры они удаляются."
+    },
+    {
+     "h": "Чего игра не делает",
+     "p": "Она не подключается к интернету. Она не собирает, не хранит и не передаёт персональные данные, идентификаторы устройства, местоположение, контакты, фотографии или данные об использовании. В ней нет рекламы, аналитики и стороннего кода отслеживания."
+    },
+    {
+     "h": "Разрешения",
+     "p": "На Android игра может использовать вибрацию, чтобы сообщить о поклёвке. Других разрешений она не запрашивает."
+    },
+    {
+     "h": "Дети",
+     "p": "Игра подходит для всех и ни у кого не собирает данных, в том числе у детей."
+    },
+    {
+     "h": "Магазины приложений",
+     "p": "Google Play и App Store могут собирать сведения при загрузке игры в соответствии со своими политиками конфиденциальности."
+    },
+    {
+     "h": "Изменения",
+     "p": "Если эта политика когда-нибудь изменится, например потому, что обновление добавит необязательную функцию, которой нужно подключение, новая версия появится здесь с новой датой, а в описании обновления об этом будет сказано."
+    }
+   ],
+   "contact": "Вопросы"
+  },
+  "tr": {
+   "title": "Gizlilik politikası",
+   "updated": "Son güncelleme",
+   "intro": "Cozy Mood, Artificials.net (Daril Pratomo Sriramdanu) tarafından yapılmıştır. Bu sayfa, oyunun seninle ilgili bilgilerle ne yaptığını açıklar.",
+   "short": "Kısacası: Cozy Mood hiçbir şey toplamaz. Hesap, reklam, analiz, izleme ya da uygulama içi satın alma yoktur ve oyun tamamen çevrimdışı çalışır.",
+   "sections": [
+    {
+     "h": "Cihazında kalanlar",
+     "p": "Kayıtlı oyunların (üç yuva ve yedekleri) ve ayarların (dil, ses, erişilebilirlik seçenekleri) yalnızca cihazında, oyunun kendi depolama alanında tutulur. Hiçbir yere gönderilmez. Oyunu kaldırmak bunları siler."
+    },
+    {
+     "h": "Oyunun yapmadıkları",
+     "p": "İnternete bağlanmaz. Kişisel veri, cihaz kimliği, konum, kişiler, fotoğraflar ya da kullanım verisi toplamaz, saklamaz ve paylaşmaz. Reklam, analiz ya da üçüncü taraf izleme kodu içermez."
+    },
+    {
+     "h": "İzinler",
+     "p": "Android'de oyun, balık vurduğunu haber vermek için titreşimi kullanabilir. Başka hiçbir izin istemez."
+    },
+    {
+     "h": "Çocuklar",
+     "p": "Oyun herkese uygundur ve çocuklar dahil kimseden veri toplamaz."
+    },
+    {
+     "h": "Uygulama mağazaları",
+     "p": "Google Play ve App Store, oyunu indirdiğinde kendi gizlilik politikalarına göre bilgi toplayabilir."
+    },
+    {
+     "h": "Değişiklikler",
+     "p": "Bu politika bir gün değişirse, örneğin bir güncelleme bağlantı gerektiren isteğe bağlı bir özellik eklerse, yeni sürüm burada yeni bir tarihle yer alır ve güncelleme notlarında belirtilir."
+    }
+   ],
+   "contact": "Sorular"
+  },
+  "pl": {
+   "title": "Polityka prywatności",
+   "updated": "Ostatnia aktualizacja",
+   "intro": "Cozy Mood tworzy Artificials.net (Daril Pratomo Sriramdanu). Ta strona wyjaśnia, co gra robi z informacjami o tobie.",
+   "short": "W skrócie: Cozy Mood niczego nie zbiera. Nie ma kont, reklam, analityki, śledzenia ani zakupów w aplikacji, a gra działa całkowicie offline.",
+   "sections": [
+    {
+     "h": "Co zostaje na twoim urządzeniu",
+     "p": "Zapisy gry (trzy miejsca i ich kopie zapasowe) oraz ustawienia (język, głośność, opcje dostępności) są przechowywane wyłącznie na twoim urządzeniu, w pamięci samej gry. Nigdy nie są nigdzie wysyłane. Odinstalowanie gry je usuwa."
+    },
+    {
+     "h": "Czego gra nie robi",
+     "p": "Nie łączy się z internetem. Nie zbiera, nie przechowuje i nie udostępnia danych osobowych, identyfikatorów urządzenia, lokalizacji, kontaktów, zdjęć ani danych o korzystaniu. Nie zawiera reklam, analityki ani kodu śledzącego firm trzecich."
+    },
+    {
+     "h": "Uprawnienia",
+     "p": "Na Androidzie gra może używać wibracji, by zasygnalizować branie. Nie prosi o żadne inne uprawnienia."
+    },
+    {
+     "h": "Dzieci",
+     "p": "Gra jest odpowiednia dla każdego i nie zbiera danych od nikogo, także od dzieci."
+    },
+    {
+     "h": "Sklepy z aplikacjami",
+     "p": "Google Play i App Store mogą zbierać informacje przy pobieraniu gry, zgodnie z własnymi politykami prywatności."
+    },
+    {
+     "h": "Zmiany",
+     "p": "Jeśli ta polityka kiedyś się zmieni, na przykład dlatego, że aktualizacja doda opcjonalną funkcję wymagającą połączenia, nowa wersja pojawi się tutaj z nową datą, a informacje o aktualizacji o tym powiedzą."
+    }
+   ],
+   "contact": "Pytania"
+  },
+  "vi": {
+   "title": "Chính sách quyền riêng tư",
+   "updated": "Cập nhật lần cuối",
+   "intro": "Cozy Mood do Artificials.net (Daril Pratomo Sriramdanu) thực hiện. Trang này giải thích trò chơi làm gì với thông tin về bạn.",
+   "short": "Tóm lại: Cozy Mood không thu thập gì cả. Không có tài khoản, quảng cáo, phân tích, theo dõi hay mua hàng trong ứng dụng, và trò chơi hoạt động hoàn toàn ngoại tuyến.",
+   "sections": [
+    {
+     "h": "Những gì ở lại trên thiết bị của bạn",
+     "p": "Các bản lưu (ba ô lưu và bản sao dự phòng) và cài đặt của bạn (ngôn ngữ, âm lượng, tùy chọn trợ năng) chỉ được giữ trên thiết bị, trong bộ nhớ riêng của trò chơi. Chúng không bao giờ được gửi đi đâu. Gỡ trò chơi sẽ xóa chúng."
+    },
+    {
+     "h": "Những gì trò chơi không làm",
+     "p": "Trò chơi không kết nối internet. Không thu thập, lưu giữ hay chia sẻ dữ liệu cá nhân, mã định danh thiết bị, vị trí, danh bạ, ảnh hay dữ liệu sử dụng. Không có mã quảng cáo, phân tích hay theo dõi của bên thứ ba."
+    },
+    {
+     "h": "Quyền",
+     "p": "Trên Android, trò chơi có thể dùng chức năng rung để báo cá cắn câu. Trò chơi không xin quyền nào khác."
+    },
+    {
+     "h": "Trẻ em",
+     "p": "Trò chơi phù hợp với mọi người và không thu thập dữ liệu của ai, kể cả trẻ em."
+    },
+    {
+     "h": "Cửa hàng ứng dụng",
+     "p": "Google Play và App Store có thể thu thập thông tin khi bạn tải trò chơi, theo chính sách quyền riêng tư của họ."
+    },
+    {
+     "h": "Thay đổi",
+     "p": "Nếu chính sách này thay đổi, chẳng hạn vì một bản cập nhật thêm tính năng tùy chọn cần kết nối, phiên bản mới sẽ xuất hiện tại đây với ngày mới, và ghi chú cập nhật sẽ nói rõ."
+    }
+   ],
+   "contact": "Câu hỏi"
+  },
+  "ja": {
+   "title": "プライバシーポリシー",
+   "updated": "最終更新日",
+   "intro": "Cozy Mood は Artificials.net (Daril Pratomo Sriramdanu) が制作しています。このページでは、ゲームがあなたに関する情報をどう扱うかを説明します。",
+   "short": "要するに、Cozy Mood は何も収集しません。アカウント、広告、分析、トラッキング、アプリ内課金はなく、完全にオフラインで動作します。",
+   "sections": [
+    {
+     "h": "端末に残るもの",
+     "p": "セーブデータ（3つのスロットとそのバックアップ）と設定（言語、音量、アクセシビリティ設定）は、あなたの端末内のゲーム専用の保存領域にのみ保存されます。どこにも送信されません。ゲームをアンインストールすると削除されます。"
+    },
+    {
+     "h": "ゲームがしないこと",
+     "p": "インターネットに接続しません。個人データ、端末識別子、位置情報、連絡先、写真、利用データを収集・保存・共有しません。広告、分析、第三者のトラッキングコードは含まれていません。"
+    },
+    {
+     "h": "権限",
+     "p": "Android では、魚がかかったことを知らせるために振動を使うことがあります。それ以外の権限は求めません。"
+    },
+    {
+     "h": "お子さま",
+     "p": "このゲームはすべての方に適しており、お子さまを含め誰からもデータを収集しません。"
+    },
+    {
+     "h": "アプリストア",
+     "p": "Google Play と App Store は、ゲームのダウンロード時に各社のプライバシーポリシーに基づいて情報を収集する場合があります。"
+    },
+    {
+     "h": "変更",
+     "p": "このポリシーが変わる場合（たとえばアップデートで接続を必要とする任意の機能が加わる場合）、新しい版を新しい日付でここに掲載し、アップデートの説明にも記載します。"
+    }
+   ],
+   "contact": "お問い合わせ"
+  },
+  "ko": {
+   "title": "개인정보 처리방침",
+   "updated": "최종 업데이트",
+   "intro": "Cozy Mood는 Artificials.net (Daril Pratomo Sriramdanu)가 만듭니다. 이 페이지는 게임이 당신에 관한 정보를 어떻게 다루는지 설명합니다.",
+   "short": "요약하면, Cozy Mood는 아무것도 수집하지 않습니다. 계정, 광고, 분석, 추적, 인앱 결제가 없으며 완전히 오프라인으로 작동합니다.",
+   "sections": [
+    {
+     "h": "기기에 남는 것",
+     "p": "저장 데이터(슬롯 3개와 백업)와 설정(언어, 음량, 접근성 옵션)은 당신의 기기 안, 게임 전용 저장 공간에만 보관됩니다. 어디로도 전송되지 않습니다. 게임을 삭제하면 함께 삭제됩니다."
+    },
+    {
+     "h": "게임이 하지 않는 것",
+     "p": "인터넷에 연결하지 않습니다. 개인 정보, 기기 식별자, 위치, 연락처, 사진, 사용 데이터를 수집·보관·공유하지 않습니다. 광고, 분석, 제3자 추적 코드가 없습니다."
+    },
+    {
+     "h": "권한",
+     "p": "Android에서는 입질을 알리기 위해 진동을 사용할 수 있습니다. 다른 권한은 요청하지 않습니다."
+    },
+    {
+     "h": "어린이",
+     "p": "이 게임은 모든 연령에 적합하며, 어린이를 포함해 누구에게서도 데이터를 수집하지 않습니다."
+    },
+    {
+     "h": "앱 스토어",
+     "p": "Google Play와 App Store는 게임을 내려받을 때 각자의 개인정보 처리방침에 따라 정보를 수집할 수 있습니다."
+    },
+    {
+     "h": "변경",
+     "p": "이 방침이 바뀌는 경우(예: 업데이트로 연결이 필요한 선택 기능이 추가되는 경우) 새 버전을 새 날짜와 함께 이곳에 게시하고, 업데이트 안내에도 적겠습니다."
+    }
+   ],
+   "contact": "문의"
+  },
+  "zh_CN": {
+   "title": "隐私政策",
+   "updated": "最后更新",
+   "intro": "Cozy Mood 由 Artificials.net (Daril Pratomo Sriramdanu) 制作。本页说明游戏如何处理与你有关的信息。",
+   "short": "简而言之：Cozy Mood 不收集任何信息。没有账号、广告、分析、追踪或应用内购买，游戏完全离线运行。",
+   "sections": [
+    {
+     "h": "留在你设备上的内容",
+     "p": "你的存档（三个存档位及其备份）和设置（语言、音量、无障碍选项）只保存在你的设备上、游戏自己的存储空间里，从不发送到任何地方。卸载游戏即会删除。"
+    },
+    {
+     "h": "游戏不会做的事",
+     "p": "游戏不连接互联网，不收集、保存或分享个人数据、设备标识符、位置、通讯录、照片或使用数据，也不包含广告、分析或第三方追踪代码。"
+    },
+    {
+     "h": "权限",
+     "p": "在 Android 上，游戏可能会使用振动来提示鱼上钩，不会申请其他任何权限。"
+    },
+    {
+     "h": "儿童",
+     "p": "本游戏适合所有人，不会从任何人（包括儿童）那里收集数据。"
+    },
+    {
+     "h": "应用商店",
+     "p": "Google Play 和 App Store 可能会在你下载游戏时，按照各自的隐私政策收集信息。"
+    },
+    {
+     "h": "变更",
+     "p": "如果本政策有所变更（例如某次更新加入了需要联网的可选功能），新版本会附上新日期发布在此处，更新说明中也会注明。"
+    }
+   ],
+   "contact": "问题咨询"
+  },
+  "zh_TW": {
+   "title": "隱私權政策",
+   "updated": "最後更新",
+   "intro": "Cozy Mood 由 Artificials.net (Daril Pratomo Sriramdanu) 製作。本頁說明遊戲如何處理與你有關的資訊。",
+   "short": "簡而言之：Cozy Mood 不收集任何資訊。沒有帳號、廣告、分析、追蹤或應用程式內購買，遊戲完全離線運作。",
+   "sections": [
+    {
+     "h": "留在你裝置上的內容",
+     "p": "你的存檔（三個存檔位及其備份）和設定（語言、音量、無障礙選項）只保存在你的裝置上、遊戲自己的儲存空間裡，從不傳送到任何地方。解除安裝遊戲即會刪除。"
+    },
+    {
+     "h": "遊戲不會做的事",
+     "p": "遊戲不連線網際網路，不收集、保存或分享個人資料、裝置識別碼、位置、聯絡人、照片或使用資料，也不包含廣告、分析或第三方追蹤程式碼。"
+    },
+    {
+     "h": "權限",
+     "p": "在 Android 上，遊戲可能會使用震動來提示魚上鉤，不會要求其他任何權限。"
+    },
+    {
+     "h": "兒童",
+     "p": "本遊戲適合所有人，不會從任何人（包括兒童）那裡收集資料。"
+    },
+    {
+     "h": "應用程式商店",
+     "p": "Google Play 和 App Store 可能會在你下載遊戲時，依各自的隱私權政策收集資訊。"
+    },
+    {
+     "h": "變更",
+     "p": "如果本政策有所變更（例如某次更新加入了需要連線的選用功能），新版本會附上新日期發布在此處，更新說明中也會註明。"
+    }
+   ],
+   "contact": "問題洽詢"
+  }
+ }
+}
