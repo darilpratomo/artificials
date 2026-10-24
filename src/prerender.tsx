@@ -29,6 +29,7 @@ import Descent from './pages/Descent';
 import { LessonReader } from './pages/AcademyLesson';
 import Info from './pages/Info';
 import CozyMood from './pages/CozyMood';
+import ArtificialsShare from './pages/ArtificialsShare';
 import type { Lesson } from './lib/academy';
 import type {
   Coding,
@@ -138,6 +139,8 @@ export function renderPage(
             ))}
             <Route path="cozymood" element={<CozyMood />} />
             <Route path="cozymood/privacy" element={<CozyMood />} />
+            <Route path="share" element={<ArtificialsShare />} />
+            <Route path="share/privacy" element={<ArtificialsShare />} />
           </Route>
         </Routes>
       </Provider>

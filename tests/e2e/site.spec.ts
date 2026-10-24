@@ -354,6 +354,8 @@ test('main pages are accessible and fit desktop and mobile', async ({ page }, te
     '/terms',
     '/cozymood',
     '/cozymood/privacy?lang=ja',
+    '/share',
+    '/share/privacy?lang=id',
   ]) {
     await page.goto(route);
     await expect(page.locator('main h1')).toBeVisible();

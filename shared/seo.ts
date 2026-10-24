@@ -143,6 +143,14 @@ const pages: Record<string, [string, string]> = {
     'Cozy Mood — help and contact',
     'Help for Cozy Mood, the cosy offline pixel-art life sim by Artificials: saves, languages, accessibility and how to reach us. In 15 languages.',
   ],
+  '/share': [
+    'Artificials Share — help and contact',
+    'Help for Artificials Share, the private nearby file-sharing app by Artificials for Android and iPhone: how to send, networks, and how to reach us.',
+  ],
+  '/share/privacy': [
+    'Artificials Share privacy policy',
+    'Artificials Share collects nothing: no accounts, no servers, no ads, no analytics, no tracking. Files go directly between devices you approve.',
+  ],
   '/cozymood/privacy': [
     'Cozy Mood privacy policy',
     'Cozy Mood collects nothing: no accounts, no ads, no analytics, no tracking, and it works entirely offline. In 15 languages.',

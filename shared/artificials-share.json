@@ -1,0 +1,150 @@
+{
+  "updated": "2026-10-24",
+  "email": "support@artificials.net",
+  "languages": [
+    {
+      "code": "en",
+      "name": "English",
+      "lang": "en"
+    },
+    {
+      "code": "id",
+      "name": "Bahasa Indonesia",
+      "lang": "id"
+    }
+  ],
+  "help": {
+    "en": {
+      "title": "Help",
+      "intro": "Artificials Share sends photos, videos, files and text directly to nearby devices, between Android and iPhone. It is made by Artificials.net, created by Daril Pratomo Sriramdanu.",
+      "write": "Write to us",
+      "faq": [
+        {
+          "q": "How do I send something?",
+          "a": "On the receiving device tap Receive to show a code. On the sending device tap Send, pick what to send, then scan that code or type the short code shown under it. The receiver sees what is coming and accepts."
+        },
+        {
+          "q": "Do both devices need the same Wi-Fi?",
+          "a": "For Android to iPhone, yes: the same Wi-Fi, or one phone's hotspot joined by the other. No internet is needed. Two Android phones or two iPhones can also use Nearby, without a router."
+        },
+        {
+          "q": "The devices can't find each other",
+          "a": "Check that both are on the same network, pause any VPN, avoid guest networks that keep devices apart, and allow Local Network access on iPhone. If only one phone can reach the other, the sender opens Send and taps My code, and the receiver scans it."
+        },
+        {
+          "q": "Is anything uploaded?",
+          "a": "No. There are no accounts and no servers. Files go straight from one device to the other, encrypted, and are checked when they arrive."
+        },
+        {
+          "q": "Is there anything to buy?",
+          "a": "No. There are no ads and no in-app purchases."
+        }
+      ],
+      "privacyLink": "Privacy policy"
+    },
+    "id": {
+      "title": "Bantuan",
+      "intro": "Artificials Share mengirim foto, video, file, dan teks langsung ke perangkat di dekat Anda, antara Android dan iPhone. Dibuat oleh Artificials.net, oleh Daril Pratomo Sriramdanu.",
+      "write": "Hubungi kami",
+      "faq": [
+        {
+          "q": "Bagaimana cara mengirim?",
+          "a": "Di perangkat penerima, ketuk Terima untuk menampilkan kode. Di perangkat pengirim, ketuk Kirim, pilih yang ingin dikirim, lalu pindai kode itu atau ketik kode pendek di bawahnya. Penerima melihat apa yang masuk lalu menyetujuinya."
+        },
+        {
+          "q": "Apakah kedua perangkat harus di Wi-Fi yang sama?",
+          "a": "Untuk Android ke iPhone, ya: Wi-Fi yang sama, atau hotspot dari salah satu HP. Tidak perlu internet. Sesama Android atau sesama iPhone juga bisa memakai Nearby tanpa router."
+        },
+        {
+          "q": "Perangkat tidak saling menemukan",
+          "a": "Pastikan keduanya di jaringan yang sama, jeda VPN, hindari Wi-Fi tamu yang memisahkan perangkat, dan izinkan akses Jaringan Lokal di iPhone. Jika hanya satu HP yang bisa menjangkau yang lain, pengirim membuka Kirim dan mengetuk Kode saya, lalu penerima memindainya."
+        },
+        {
+          "q": "Apakah ada yang diunggah?",
+          "a": "Tidak. Tidak ada akun dan server. File berpindah langsung dari satu perangkat ke perangkat lain dalam keadaan terenkripsi, dan diperiksa saat tiba."
+        },
+        {
+          "q": "Apakah ada yang harus dibeli?",
+          "a": "Tidak. Tidak ada iklan dan tidak ada pembelian dalam aplikasi."
+        }
+      ],
+      "privacyLink": "Kebijakan privasi"
+    }
+  },
+  "privacy": {
+    "en": {
+      "title": "Privacy policy",
+      "updated": "Last updated",
+      "intro": "Artificials Share is made by Artificials.net (Daril Pratomo Sriramdanu). This page explains what the app does with information about you.",
+      "short": "In short: Artificials Share collects nothing. It has no accounts, no servers, no ads, no analytics and no tracking. Files go directly between devices you approve.",
+      "sections": [
+        {
+          "h": "How sharing works",
+          "p": "Files, photos, videos, text and room content travel directly from one device to another over your local network, a phone hotspot, a direct phone-to-phone link or Bluetooth. Every connection is encrypted (TLS 1.3) and tied to the code you scanned or trusted, and you approve every incoming transfer. Nothing passes through Artificials.net or any third party."
+        },
+        {
+          "h": "What stays on your device",
+          "p": "The device name you choose, the device's encryption key (in the system's secure key storage), trusted devices, transfer history, saved boards, settings and a local diagnostics log stay only on your device. The diagnostics log has addresses, codes, names and file contents removed and leaves the device only if you export it yourself. Uninstalling the app deletes all of this. Files you received stay where you saved them."
+        },
+        {
+          "h": "What the app does not do",
+          "p": "It does not collect, keep or share personal data, device identifiers, location, contacts or usage data. It never reads your contacts, clipboard or whole photo library: it opens only the items you pick. Received files are never opened automatically. It contains no advertising, analytics or third-party tracking code."
+        },
+        {
+          "h": "Permissions",
+          "p": "Local network, nearby devices and Wi-Fi: to find and connect to the devices you choose. Bluetooth: for Bluetooth Lite transfers. Camera: only to scan the other device's pairing code; nothing is recorded. Photos (add only, iPhone): when you tap Save to Photos. Notifications: transfer progress and a note when a transfer finishes. On Android 12 and earlier, Android requires the location permission to search for nearby devices; the app never reads your location. You can deny any permission."
+        },
+        {
+          "h": "Children",
+          "p": "The app is not directed at children under 13 and collects no data from anyone."
+        },
+        {
+          "h": "App stores",
+          "p": "Google Play and the App Store may collect information when you download the app, under their own privacy policies."
+        },
+        {
+          "h": "Changes",
+          "p": "If this policy ever changes, the new version will appear here with a new date, and the update's notes will say so."
+        }
+      ],
+      "contact": "Questions"
+    },
+    "id": {
+      "title": "Kebijakan privasi",
+      "updated": "Terakhir diperbarui",
+      "intro": "Artificials Share dibuat oleh Artificials.net (Daril Pratomo Sriramdanu). Halaman ini menjelaskan apa yang dilakukan aplikasi terhadap informasi tentang Anda.",
+      "short": "Singkatnya: Artificials Share tidak mengumpulkan apa pun. Tanpa akun, tanpa server, tanpa iklan, tanpa analitik, dan tanpa pelacakan. File berpindah langsung antara perangkat yang Anda setujui.",
+      "sections": [
+        {
+          "h": "Cara kerja berbagi",
+          "p": "File, foto, video, teks, dan isi ruang berpindah langsung dari satu perangkat ke perangkat lain lewat jaringan lokal, hotspot HP, koneksi langsung antar-HP, atau Bluetooth. Setiap koneksi dienkripsi (TLS 1.3) dan terikat pada kode yang Anda pindai atau percayai, dan Anda menyetujui setiap transfer yang masuk. Tidak ada yang melewati Artificials.net atau pihak ketiga mana pun."
+        },
+        {
+          "h": "Yang tetap di perangkat Anda",
+          "p": "Nama perangkat pilihan Anda, kunci enkripsi perangkat (di penyimpanan kunci aman sistem), perangkat tepercaya, riwayat transfer, papan tersimpan, pengaturan, dan log diagnostik lokal hanya ada di perangkat Anda. Alamat, kode, nama, dan isi file dihapus dari log diagnostik, dan log hanya keluar dari perangkat jika Anda sendiri yang mengekspornya. Menghapus aplikasi menghapus semuanya. File yang Anda terima tetap di tempat Anda menyimpannya."
+        },
+        {
+          "h": "Yang tidak dilakukan aplikasi",
+          "p": "Aplikasi tidak mengumpulkan, menyimpan, atau membagikan data pribadi, pengenal perangkat, lokasi, kontak, atau data penggunaan. Aplikasi tidak pernah membaca kontak, clipboard, atau seluruh galeri foto Anda, dan hanya membuka item yang Anda pilih. File yang diterima tidak pernah dibuka otomatis. Tidak ada kode iklan, analitik, atau pelacakan pihak ketiga."
+        },
+        {
+          "h": "Izin",
+          "p": "Jaringan lokal, perangkat sekitar, dan Wi-Fi: untuk menemukan dan menghubungkan perangkat yang Anda pilih. Bluetooth: untuk transfer Bluetooth Lite. Kamera: hanya untuk memindai kode pasangan di perangkat lain; tidak ada yang direkam. Foto (hanya menambah, iPhone): saat Anda mengetuk Simpan ke Foto. Notifikasi: progres transfer dan pemberitahuan saat transfer selesai. Di Android 12 ke bawah, Android mewajibkan izin lokasi untuk mencari perangkat sekitar; aplikasi tidak pernah membaca lokasi Anda. Anda boleh menolak izin apa pun."
+        },
+        {
+          "h": "Anak-anak",
+          "p": "Aplikasi tidak ditujukan untuk anak di bawah 13 tahun dan tidak mengumpulkan data dari siapa pun."
+        },
+        {
+          "h": "Toko aplikasi",
+          "p": "Google Play dan App Store dapat mengumpulkan informasi saat Anda mengunduh aplikasi, sesuai kebijakan privasi mereka masing-masing."
+        },
+        {
+          "h": "Perubahan",
+          "p": "Jika kebijakan ini berubah, versi barunya akan muncul di sini dengan tanggal baru, dan catatan pembaruan aplikasi akan menyebutkannya."
+        }
+      ],
+      "contact": "Pertanyaan"
+    }
+  }
+}

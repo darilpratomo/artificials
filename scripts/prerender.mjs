@@ -100,6 +100,7 @@ try {
     terms: 'Info',
     contact: 'Info',
     cozymood: 'CozyMood',
+    share: 'ArtificialsShare',
   };
   const pagePreloads = (path) => {
     const [first = '', second] = path.split('/').slice(1);
