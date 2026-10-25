@@ -1,0 +1,89 @@
+@font-face { font-family: "Sora"; src: url("fonts/Sora-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Sora"; src: url("fonts/Sora-SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Sora"; src: url("fonts/Sora-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+
+:root {
+  --page: #EDF3EF;
+  --surface: #FFFFFF;
+  --line: #DCE6E0;
+  --text: #0F201B;
+  --text-2: #56675F;
+  --text-3: #8B9A93;
+  --primary: #11705F;
+  --primary-soft: #DFF0EA;
+  --header-top: #115A4C;
+  --header-bottom: #0B4239;
+  --accent: #F5C93C;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #08100D;
+    --surface: #121B17;
+    --line: #23302A;
+    --text: #EDF3F0;
+    --text-2: #A0B0A8;
+    --text-3: #6C7B74;
+    --primary: #3FC6A3;
+    --primary-soft: #10291F;
+    --header-top: #0D332B;
+    --header-bottom: #082621;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font: 400 16px/1.65 "Sora", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+a { color: var(--primary); text-underline-offset: 3px; }
+
+.hero {
+  background: linear-gradient(var(--header-top), var(--header-bottom));
+  color: #fff;
+  border-radius: 0 0 34px 34px;
+  padding: 28px 16px 40px;
+}
+.wrap { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+.hero .wrap { padding: 0; }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 36px; }
+.brand { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; font-weight: 600; }
+.brand svg { width: 40px; height: 40px; padding: 8px; border-radius: 12px; background: var(--accent); stroke: #2E2302; }
+.lang { display: flex; gap: 4px; background: rgba(255, 255, 255, 0.12); padding: 4px; border-radius: 999px; }
+.lang button {
+  font: 600 13px "Sora", sans-serif; border: 0; border-radius: 999px; padding: 6px 12px;
+  background: transparent; color: rgba(255, 255, 255, 0.75); cursor: pointer;
+}
+.lang button[aria-pressed="true"] { background: #fff; color: #0F201B; }
+.hero h1 { font-size: clamp(28px, 6vw, 40px); line-height: 1.15; margin: 0 0 10px; letter-spacing: -0.02em; }
+.hero p { margin: 0; color: rgba(255, 255, 255, 0.78); max-width: 560px; }
+
+main { padding: 28px 0 56px; }
+.card { background: var(--surface); border-radius: 22px; padding: 22px; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(18, 58, 46, 0.06); }
+@media (prefers-color-scheme: dark) { .card { box-shadow: none; border: 1px solid var(--line); } }
+h2 { font-size: 19px; line-height: 1.3; margin: 0 0 8px; }
+h3 { font-size: 16px; margin: 18px 0 4px; }
+p { margin: 0 0 12px; }
+ul { margin: 0 0 12px; padding-left: 20px; }
+li { margin-bottom: 6px; }
+.muted { color: var(--text-2); }
+.small { font-size: 14px; color: var(--text-3); }
+.pill { display: inline-block; background: var(--primary-soft); color: var(--primary); border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 600; margin: 0 6px 8px 0; }
+.links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.button { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 15px; padding: 12px 18px; border-radius: 999px; background: #fff; color: #0F201B; }
+.button.ghost { background: rgba(255, 255, 255, 0.12); color: #fff; }
+details { border-top: 1px solid var(--line); padding: 14px 0; }
+details:first-of-type { border-top: 0; padding-top: 0; }
+summary { cursor: pointer; font-weight: 600; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; float: right; color: var(--text-3); font-weight: 400; }
+details[open] summary::after { content: "–"; }
+details p { margin: 10px 0 0; color: var(--text-2); }
+footer { padding: 24px 0 40px; font-size: 14px; color: var(--text-3); }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+
+/* Both languages are in the page; the script shows one. Without the script both stay visible. */
+html.js [lang="en"].copy, html.js [lang="id"].copy { display: none; }
+html.js.show-en [lang="en"].copy, html.js.show-id [lang="id"].copy { display: revert; }
