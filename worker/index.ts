@@ -30,7 +30,13 @@ import { articleSchema } from '../shared/schema';
 import { ARTICLES } from '../shared/content';
 import type { Env } from './types';
 import { registerCatalogRoutes } from './catalog';
+import { proxyRekrutmen } from './rekrutmen';
 export const app = new Hono<{ Bindings: Env }>();
+// The recruitment app is served from its own server (worker/rekrutmen.ts). It is
+// registered before the site-wide headers so its own security headers (it shows
+// documents in same-origin frames) and cache rules pass through unchanged.
+app.all('/rekrutmen', (c) => proxyRekrutmen(c.req.raw, c.env));
+app.all('/rekrutmen/*', (c) => proxyRekrutmen(c.req.raw, c.env));
 app.use('*', async (c, next) => {
   // Private local documentation must never become a public SPA route.
   if (/^\/admin(?:\.md(?:\/|$)|\/|$)/i.test(c.req.path)) return c.text('Not found', 404);

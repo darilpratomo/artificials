@@ -18,3 +18,7 @@ SUPPORT_EMAIL=support@artificials.net
 OPERATOR_NAME=
 OPERATOR_ADDRESS=
 PRIVACY_EMAIL=
+# /rekrutmen is forwarded to its own PHP server (worker/rekrutmen.ts). Production
+# values are Cloudflare Secrets; leave empty locally unless testing against it.
+REKRUTMEN_ORIGIN=
+REKRUTMEN_PROXY_SECRET=

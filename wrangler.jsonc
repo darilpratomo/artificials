@@ -25,6 +25,8 @@
       "/pricing",
       "/checkout",
       "/how-ai-works-2",
+      "/rekrutmen",
+      "/rekrutmen/*",
     ],
   },
   "vars": {

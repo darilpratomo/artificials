@@ -15,5 +15,8 @@ export interface Env {
   OPERATOR_ADDRESS: string;
   SUPPORT_EMAIL: string;
   PRIVACY_EMAIL: string;
+  /** Secrets for /rekrutmen; see worker/rekrutmen.ts. */
+  REKRUTMEN_ORIGIN?: string;
+  REKRUTMEN_PROXY_SECRET?: string;
 }
 export type Ctx = Context<{ Bindings: Env }>;
