@@ -27,3 +27,10 @@
 /undangan/*
   ! Content-Security-Policy
   Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self' https://cloudflareinsights.com; frame-src https://www.google.com https://maps.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+
+# Outsourcing Awards 2026 projector app (static build in public/awards). It plays audio
+# files the operator adds (blob: URLs), removes photo backgrounds in the browser with a
+# WebAssembly model fetched from IMG.LY's CDN, and runs confetti in a blob: worker.
+/awards/*
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self' blob: 'wasm-unsafe-eval' https://static.cloudflareinsights.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' blob: data: https://staticimgly.com https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
