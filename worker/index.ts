@@ -31,6 +31,7 @@ import { ARTICLES } from '../shared/content';
 import type { Env } from './types';
 import { registerCatalogRoutes } from './catalog';
 import { proxyRekrutmen } from './rekrutmen';
+import { registerPesanRoutes, PESAN_ADMIN_PREFIX } from './pesan';
 export const app = new Hono<{ Bindings: Env }>();
 // The recruitment app is served from its own server (worker/rekrutmen.ts). It is
 // registered before the site-wide headers so its own security headers (it shows
@@ -50,6 +51,9 @@ app.use('*', async (c, next) => {
   if (
     c.req.path.startsWith('/api/') &&
     !['GET', 'HEAD', 'OPTIONS'].includes(c.req.method) &&
+    // The event console calls the secret-message operator API from a local page with
+    // a bearer key (no cookies), so cross-origin writes there carry no CSRF risk.
+    !c.req.path.startsWith(PESAN_ADMIN_PREFIX) &&
     !sameOrigin(c.req.header('origin'), c.env.APP_URL) &&
     !(
       c.env.ENVIRONMENT !== 'production' &&
@@ -66,6 +70,7 @@ app.use(
   bodyLimit({ maxSize: 256000, onError: (c) => c.json({ error: 'Request is too large.' }, 413) }),
 );
 registerCatalogRoutes(app);
+registerPesanRoutes(app);
 app.get('/api/config', (c) =>
   c.json({
     auth: configured(c.env),

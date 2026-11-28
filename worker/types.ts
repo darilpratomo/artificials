@@ -18,5 +18,8 @@ export interface Env {
   /** Secrets for /rekrutmen; see worker/rekrutmen.ts. */
   REKRUTMEN_ORIGIN?: string;
   REKRUTMEN_PROXY_SECRET?: string;
+  /** Secrets for /pesan; see worker/pesan.ts. */
+  PESAN_OPERATOR_KEY?: string;
+  PESAN_OPERATOR_ORIGINS?: string;
 }
 export type Ctx = Context<{ Bindings: Env }>;

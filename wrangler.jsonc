@@ -27,6 +27,7 @@
       "/how-ai-works-2",
       "/rekrutmen",
       "/rekrutmen/*",
+      "/pesan",
     ],
   },
   "vars": {
